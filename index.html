@@ -289,7 +289,99 @@
     </table>
 
 </div>
+<!-- =========================================
+     DAILY PRODUCTIVITY TRACKER
+========================================= -->
 
+<div class="card">
+
+    <h2>Daily Productivity Tracker</h2>
+
+    <div class="form-row">
+
+        <div class="field">
+
+            <label for="trackerDate">
+                Date
+            </label>
+
+            <input
+                type="date"
+                id="trackerDate">
+
+        </div>
+
+    </div>
+
+
+    <p style="color:#666;">
+        Shift: <strong>6:00 PM – 3:00 AM</strong>
+        &nbsp; | &nbsp;
+        Break: <strong>60 minutes flexible/split</strong>
+        &nbsp; | &nbsp;
+        Productive Time: <strong>8 hours</strong>
+    </p>
+
+
+    <div style="overflow-x:auto;">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Employee</th>
+
+                    <th>Project</th>
+
+                    <th>Attendance</th>
+
+                    <th>Daily Target</th>
+
+                    <th>6–7 PM</th>
+
+                    <th>7–8 PM</th>
+
+                    <th>8–9 PM</th>
+
+                    <th>9–10 PM</th>
+
+                    <th>10–11 PM</th>
+
+                    <th>11 PM–12 AM</th>
+
+                    <th>12–1 AM</th>
+
+                    <th>1–2 AM</th>
+
+                    <th>2–3 AM</th>
+
+                    <th>Break<br>(Min)</th>
+
+                    <th>Break<br>Status</th>
+
+                    <th>Achieved</th>
+
+                    <th>Remaining</th>
+
+                    <th>Achievement %</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="dailyTrackerTable">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+    
 <script>
 
 /* =========================================
@@ -697,6 +789,630 @@ async function addEmployee() {
         "Employee saved successfully."
     );
 
+    /* =========================================
+   DAILY PRODUCTIVITY TRACKER
+========================================= */
+
+
+function setTodayDate() {
+
+    const dateInput =
+        document.getElementById(
+            "trackerDate"
+        );
+
+
+    if (!dateInput.value) {
+
+        const today =
+            new Date()
+                .toISOString()
+                .split("T")[0];
+
+
+        dateInput.value = today;
+
+    }
+
+}
+
+
+function buildDailyTracker() {
+
+    const table =
+        document.getElementById(
+            "dailyTrackerTable"
+        );
+
+
+    if (!table) {
+
+        return;
+
+    }
+
+
+    table.innerHTML = "";
+
+
+    employees.forEach(
+        function(employee, index) {
+
+            const row =
+                document.createElement("tr");
+
+
+            /* Employee */
+
+            const employeeCell =
+                document.createElement("td");
+
+            employeeCell.textContent =
+                employee.employee_name ||
+                employee.name ||
+                "";
+
+            row.appendChild(
+                employeeCell
+            );
+
+
+            /* Project */
+
+            const projectCell =
+                document.createElement("td");
+
+            projectCell.textContent =
+                employee.project_name ||
+                employee.project ||
+                "";
+
+            row.appendChild(
+                projectCell
+            );
+
+
+            /* Attendance */
+
+            const attendanceCell =
+                document.createElement("td");
+
+
+            const attendance =
+                document.createElement("select");
+
+
+            attendance.id =
+                "attendance_" + index;
+
+
+            attendance.innerHTML = `
+
+                <option value="Present">
+                    Present
+                </option>
+
+                <option value="Half Day">
+                    Half Day
+                </option>
+
+                <option value="Absent">
+                    Absent
+                </option>
+
+            `;
+
+
+            attendance.addEventListener(
+                "change",
+                function() {
+
+                    calculateDailyRow(index);
+
+                }
+            );
+
+
+            attendanceCell.appendChild(
+                attendance
+            );
+
+
+            row.appendChild(
+                attendanceCell
+            );
+
+
+            /* Daily Target */
+
+            const targetCell =
+                document.createElement("td");
+
+
+            targetCell.id =
+                "dailyTarget_" + index;
+
+
+            targetCell.textContent =
+                getDailyTarget(
+                    employee,
+                    "Present"
+                );
+
+
+            row.appendChild(
+                targetCell
+            );
+
+
+            /* Hourly productivity */
+
+            for (
+                let hour = 1;
+                hour <= 9;
+                hour++
+            ) {
+
+                const hourCell =
+                    document.createElement("td");
+
+
+                const input =
+                    document.createElement("input");
+
+
+                input.type = "number";
+
+                input.min = "0";
+
+                input.value = "0";
+
+
+                input.className =
+                    "hour-input";
+
+
+                input.id =
+                    "productivity_" +
+                    index +
+                    "_" +
+                    hour;
+
+
+                input.addEventListener(
+                    "input",
+                    function() {
+
+                        calculateDailyRow(
+                            index
+                        );
+
+                    }
+                );
+
+
+                hourCell.appendChild(
+                    input
+                );
+
+
+                row.appendChild(
+                    hourCell
+                );
+
+            }
+
+
+            /* Break */
+
+            const breakCell =
+                document.createElement("td");
+
+
+            const breakInput =
+                document.createElement("input");
+
+
+            breakInput.type = "number";
+
+            breakInput.min = "0";
+
+            breakInput.max = "60";
+
+            breakInput.value = "0";
+
+
+            breakInput.className =
+                "hour-input";
+
+
+            breakInput.id =
+                "break_" + index;
+
+
+            breakInput.addEventListener(
+                "input",
+                function() {
+
+                    calculateDailyRow(
+                        index
+                    );
+
+                }
+            );
+
+
+            breakCell.appendChild(
+                breakInput
+            );
+
+
+            row.appendChild(
+                breakCell
+            );
+
+
+            /* Break Status */
+
+            const breakStatus =
+                document.createElement("td");
+
+
+            breakStatus.id =
+                "breakStatus_" + index;
+
+
+            breakStatus.textContent =
+                "0 / 60 min";
+
+
+            row.appendChild(
+                breakStatus
+            );
+
+
+            /* Achieved */
+
+            const achievedCell =
+                document.createElement("td");
+
+
+            achievedCell.id =
+                "achieved_" + index;
+
+
+            achievedCell.textContent =
+                "0";
+
+
+            row.appendChild(
+                achievedCell
+            );
+
+
+            /* Remaining */
+
+            const remainingCell =
+                document.createElement("td");
+
+
+            remainingCell.id =
+                "remaining_" + index;
+
+
+            remainingCell.textContent =
+                targetCell.textContent;
+
+
+            row.appendChild(
+                remainingCell
+            );
+
+
+            /* Achievement */
+
+            const percentageCell =
+                document.createElement("td");
+
+
+            percentageCell.id =
+                "percentage_" + index;
+
+
+            percentageCell.textContent =
+                "0%";
+
+
+            row.appendChild(
+                percentageCell
+            );
+
+
+            table.appendChild(row);
+
+
+            calculateDailyRow(index);
+
+        }
+    );
+
+}
+
+
+function getDailyTarget(
+    employee,
+    attendance
+) {
+
+    const projectTarget =
+        Number(
+            employee.daily_target ||
+            employee.target ||
+            0
+        );
+
+
+    if (
+        attendance === "Absent"
+    ) {
+
+        return 0;
+
+    }
+
+
+    if (
+        attendance === "Half Day"
+    ) {
+
+        return Math.ceil(
+            projectTarget / 2
+        );
+
+    }
+
+
+    return projectTarget;
+
+}
+
+
+function calculateDailyRow(index) {
+
+    const employee =
+        employees[index];
+
+
+    if (!employee) {
+
+        return;
+
+    }
+
+
+    const attendance =
+        document.getElementById(
+            "attendance_" + index
+        ).value;
+
+
+    const target =
+        getDailyTarget(
+            employee,
+            attendance
+        );
+
+
+    document.getElementById(
+        "dailyTarget_" + index
+    ).textContent =
+        target;
+
+
+    let achieved = 0;
+
+
+    /* Add all 9 clock-hour slots */
+
+    for (
+        let hour = 1;
+        hour <= 9;
+        hour++
+    ) {
+
+        const input =
+            document.getElementById(
+                "productivity_" +
+                index +
+                "_" +
+                hour
+            );
+
+
+        if (input) {
+
+            achieved +=
+                Number(input.value) || 0;
+
+        }
+
+    }
+
+
+    /* Absent means zero productivity */
+
+    if (
+        attendance === "Absent"
+    ) {
+
+        achieved = 0;
+
+    }
+
+
+    /* Break calculation */
+
+    let breakMinutes =
+        Number(
+            document.getElementById(
+                "break_" + index
+            ).value
+        ) || 0;
+
+
+    if (
+        breakMinutes < 0
+    ) {
+
+        breakMinutes = 0;
+
+    }
+
+
+    if (
+        breakMinutes > 60
+    ) {
+
+        breakMinutes = 60;
+
+        document.getElementById(
+            "break_" + index
+        ).value = 60;
+
+    }
+
+
+    const breakStatus =
+        document.getElementById(
+            "breakStatus_" + index
+        );
+
+
+    breakStatus.textContent =
+        breakMinutes +
+        " / 60 min";
+
+
+    if (
+        breakMinutes === 60
+    ) {
+
+        breakStatus.style.color =
+            "green";
+
+    }
+
+    else if (
+        breakMinutes > 60
+    ) {
+
+        breakStatus.style.color =
+            "red";
+
+    }
+
+    else {
+
+        breakStatus.style.color =
+            "#b58900";
+
+    }
+
+
+    /* Remaining target */
+
+    const remaining =
+        Math.max(
+            target - achieved,
+            0
+        );
+
+
+    /* Achievement percentage */
+
+    const percentage =
+        target > 0
+        ? (
+            achieved /
+            target
+        ) * 100
+        : 0;
+
+
+    document.getElementById(
+        "achieved_" + index
+    ).textContent =
+        achieved;
+
+
+    document.getElementById(
+        "remaining_" + index
+    ).textContent =
+        remaining;
+
+
+    const percentageCell =
+        document.getElementById(
+            "percentage_" + index
+        );
+
+
+    percentageCell.textContent =
+        percentage.toFixed(1) +
+        "%";
+
+
+    if (
+        percentage >= 100
+    ) {
+
+        percentageCell.style.color =
+            "green";
+
+        percentageCell.style.fontWeight =
+            "bold";
+
+    }
+
+    else if (
+        percentage >= 80
+    ) {
+
+        percentageCell.style.color =
+            "#b58900";
+
+        percentageCell.style.fontWeight =
+            "bold";
+
+    }
+
+    else {
+
+        percentageCell.style.color =
+            "red";
+
+        percentageCell.style.fontWeight =
+            "bold";
+
+    }
+
+}
+
+
+/* =========================================
+   DATE CHANGE
+========================================= */
+
+document
+    .getElementById("trackerDate")
+    .addEventListener(
+        "change",
+        function() {
+
+            buildDailyTracker();
+
+        }
+    );
 
     loadEmployees();
 
@@ -837,7 +1553,7 @@ async function loadEmployees() {
         table.appendChild(row);
 
     });
-
+buildDailyTracker();
 }
 
 
