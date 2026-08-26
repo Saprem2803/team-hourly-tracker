@@ -1,1 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Hourly Productivity Tracker</title>
 
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        margin: 0;
+        padding: 20px;
+        color: #222;
+    }
+
+    h1 {
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        color: #666;
+        margin-bottom: 25px;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: auto;
+    }
+
+    .card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+
+    button {
+        padding: 11px 18px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    .add-btn {
+        background: #2563eb;
+        color: white;
+    }
+
+    .summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+    }
+
+    .summary-box {
+        background: #f8fafc;
+        padding: 18px;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .summary-box h2 {
+        margin: 5px 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+    }
+
+    th {
+        background: #f1f5f9;
+    }
+
+    .green {
+        color: green;
+        font-weight: bold;
+    }
+
+    .red {
+        color: red;
+        font-weight: bold;
+    }
+
+    .yellow {
+        color: #b58900;
+        font-weight: bold;
+    }
+
+    .hour-input {
+        width: 70px;
+    }
+
+    .small-btn {
+        padding: 6px 10px;
+        margin: 0;
+        background: #dc2626;
+        color: white;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Team Hourly Productivity Tracker</h1>
+    <div class="subtitle">
+        Daily and hourly productivity monitoring
+    </div>
+
+    <!-- PROJECT SETUP -->
+    <div class="card">
+
+        <h2>Project Setup</h2>
+
+        <div class="form-grid">
+
+            <div>
+                <label>Project Name</label>
+                <input type="text" id="projectName" placeholder="Example: WRMC">
+            </div>
+
+            <div>
+                <label>Daily Target</label>
+                <input type="number" id="projectTarget" placeholder="Example: 125">
+            </div>
+
+        </div>
+
+        <button class="add-btn" onclick="addProject()">
+            Add Project
+        </button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Project</th>
+                    <th>Daily Target</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="projectTable"></tbody>
+        </table>
+
+    </div>
+
+
+    <!-- EMPLOYEE SETUP -->
+    <div class="card">
+
+        <h2>Employee Setup</h2>
+
+        <div class="form-grid">
+
+            <div>
+                <label>Employee Name</label>
+                <input type="text" id="employeeName" placeholder="Employee name">
+            </div>
+
+            <div>
+                <label>Employee ID</label>
+                <input type="text" id="employeeId" placeholder="Employee ID">
+            </div>
+
+            <div>
+                <label>Project</label>
+                <select id="employeeProject">
+                    <option value="">Select Project</option>
+                </select>
+            </div>
+
+        </div>
+
+        <button class="add-btn" onclick="addEmployee()">
+            Add Employee
+        </button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>EMP ID</th>
+                    <th>Project</th>
+                    <th>Daily Target</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="employeeTable"></tbody>
+        </table>
+
+    </div>
+
+
+    <!-- DAILY TRACKER -->
+    <div class="card">
+
+        <h2>Daily Tracker</h2>
+
+        <div class="form-grid">
+
+            <div>
+                <label>Date</label>
+                <input type="date" id="trackerDate">
+            </div>
+
+        </div>
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Employee</th>
+                    <th>Project</th>
+                    <th>Attendance</th>
+                    <th>Daily Target</th>
+                    <th>Hour 1</th>
+                    <th>Hour 2</th>
+                    <th>Hour 3</th>
+                    <th>Hour 4</th>
+                    <th>Hour 5</th>
+                    <th>Hour 6</th>
+                    <th>Hour 7</th>
+                    <th>Hour 8</th>
+                    <th>Achieved</th>
+                    <th>Remaining</th>
+                    <th>Achievement %</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="trackerTable"></tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- TEAM SUMMARY -->
+    <div class="card">
+
+        <h2>Team Summary</h2>
+
+        <div class="summary">
+
+            <div class="summary-box">
+                <div>Total Employees</div>
+                <h2 id="totalEmployees">0</h2>
+            </div>
+
+            <div class="summary-box">
+                <div>Total Target</div>
+                <h2 id="totalTarget">0</h2>
+            </div>
+
+            <div class="summary-box">
+                <div>Total Achieved</div>
+                <h2 id="totalAchieved">0</h2>
+            </div>
+
+            <div class="summary-box">
+                <div>Total Remaining</div>
+                <h2 id="totalRemaining">0</h2>
+            </div>
+
+            <div class="summary-box">
+                <div>Team Achievement</div>
+                <h2 id="teamAchievement">0%</h2>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let projects = [];
+let employees = [];
+
+
+// -----------------------------
+// PROJECT FUNCTIONS
+// -----------------------------
+
+function addProject() {
+
+    const name = document.getElementById("projectName").value.trim();
+    const target = Number(document.getElementById("projectTarget").value);
+
+    if (!name || !target) {
+        alert("Please enter project name and target.");
+        return;
+    }
+
+    projects.push({
+        name: name,
+        target: target
+    });
+
+    document.getElementById("projectName").value = "";
+    document.getElementById("projectTarget").value = "";
+
+    displayProjects();
+    updateProjectDropdown();
+}
+
+
+function displayProjects() {
+
+    const table = document.getElementById("projectTable");
+
+    table.innerHTML = "";
+
+    projects.forEach((project, index) => {
+
+        table.innerHTML += `
+            <tr>
+                <td>${project.name}</td>
+                <td>${project.target}</td>
+                <td>
+                    <button class="small-btn"
+                        onclick="deleteProject(${index})">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+
+    });
+
+}
+
+
+function deleteProject(index) {
+
+    projects.splice(index, 1);
+
+    displayProjects();
+    updateProjectDropdown();
+}
+
+
+// -----------------------------
+// EMPLOYEE FUNCTIONS
+// -----------------------------
+
+function updateProjectDropdown() {
+
+    const dropdown = document.getElementById("employeeProject");
+
+    dropdown.innerHTML =
+        `<option value="">Select Project</option>`;
+
+    projects.forEach(project => {
+
+        dropdown.innerHTML += `
+            <option value="${project.name}">
+                ${project.name}
+            </option>
+        `;
+
+    });
+
+}
+
+
+function addEmployee() {
+
+    const name =
+        document.getElementById("employeeName").value.trim();
+
+    const id =
+        document.getElementById("employeeId").value.trim();
+
+    const project =
+        document.getElementById("employeeProject").value;
+
+    if (!name || !id || !project) {
+
+        alert("Please complete employee information.");
+
+        return;
+    }
+
+    const projectData =
+        projects.find(p => p.name === project);
+
+    employees.push({
+
+        name: name,
+
+        id: id,
+
+        project: project,
+
+        target: projectData.target
+
+    });
+
+    document.getElementById("employeeName").value = "";
+    document.getElementById("employeeId").value = "";
+
+    displayEmployees();
+
+    buildTracker();
+
+}
+
+
+function displayEmployees() {
+
+    const table =
+        document.getElementById("employeeTable");
+
+    table.innerHTML = "";
+
+    employees.forEach((employee, index) => {
+
+        table.innerHTML += `
+
+            <tr>
+
+                <td>${employee.name}</td>
+
+                <td>${employee.id}</td>
+
+                <td>${employee.project}</td>
+
+                <td>${employee.target}</td>
+
+                <td>
+
+                    <button
+                        class="small-btn"
+                        onclick="deleteEmployee(${index})">
+
+                        Delete
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+
+
+function deleteEmployee(index) {
+
+    employees.splice(index, 1);
+
+    displayEmployees();
+
+    buildTracker();
+
+}
+
+
+// -----------------------------
+// TRACKER
+// -----------------------------
+
+function buildTracker() {
+
+    const table =
+        document.getElementById("trackerTable");
+
+    table.innerHTML = "";
+
+    employees.forEach((employee, index) => {
+
+        table.innerHTML += `
+
+            <tr>
+
+                <td>${employee.name}</td>
+
+                <td>${employee.project}</td>
+
+                <td>
+
+                    <select
+                        onchange="calculateRow(${index})"
+                        id="attendance_${index}">
+
+                        <option value="Present">
+                            Present
+                        </option>
+
+                        <option value="Half Day">
+                            Half Day
+                        </option>
+
+                        <option value="Absent">
+                            Absent
+                        </option>
+
+                    </select>
+
+                </td>
+
+                <td id="target_${index}">
+                    ${employee.target}
+                </td>
+
+                ${createHourInputs(index)}
+
+                <td id="achieved_${index}">
+                    0
+                </td>
+
+                <td id="remaining_${index}">
+                    ${employee.target}
+                </td>
+
+                <td id="percentage_${index}">
+                    0%
+                </td>
+
+            </tr>
+
+        `;
+
+    });
+
+    updateSummary();
+
+}
+
+
+function createHourInputs(index) {
+
+    let html = "";
+
+    for (let i = 1; i <= 8; i++) {
+
+        html += `
+
+            <td>
+
+                <input
+                    class="hour-input"
+                    type="number"
+                    min="0"
+                    value="0"
+                    id="hour_${index}_${i}"
+                    onchange="calculateRow(${index})">
+
+            </td>
+
+        `;
+
+    }
+
+    return html;
+
+}
+
+
+// -----------------------------
+// CALCULATE PRODUCTIVITY
+// -----------------------------
+
+function calculateRow(index) {
+
+    const employee = employees[index];
+
+    const attendance =
+        document.getElementById(
+            `attendance_${index}`
+        ).value;
+
+    let dailyTarget = employee.target;
+
+    if (attendance === "Half Day") {
+
+        dailyTarget =
+            Math.ceil(employee.target / 2);
+
+    }
+
+    if (attendance === "Absent") {
+
+        dailyTarget = 0;
+
+    }
+
+    document.getElementById(
+        `target_${index}`
+    ).innerText = dailyTarget;
+
+
+    let achieved = 0;
+
+    for (let i = 1; i <= 8; i++) {
+
+        const value =
+            Number(
+                document.getElementById(
+                    `hour_${index}_${i}`
+                ).value
+            );
+
+        achieved += value;
+
+    }
+
+
+    if (attendance === "Absent") {
+
+        achieved = 0;
+
+        for (let i = 1; i <= 8; i++) {
+
+            document.getElementById(
+                `hour_${index}_${i}`
+            ).value = 0;
+
+        }
+
+    }
+
+
+    const remaining =
+        Math.max(dailyTarget - achieved, 0);
+
+
+    let percentage = 0;
+
+    if (dailyTarget > 0) {
+
+        percentage =
+            (achieved / dailyTarget) * 100;
+
+    }
+
+
+    document.getElementById(
+        `achieved_${index}`
+    ).innerText = achieved;
+
+
+    document.getElementById(
+        `remaining_${index}`
+    ).innerText = remaining;
+
+
+    const percentageElement =
+        document.getElementById(
+            `percentage_${index}`
+        );
+
+    percentageElement.innerText =
+        percentage.toFixed(1) + "%";
+
+
+    percentageElement.className = "";
+
+    if (percentage >= 100) {
+
+        percentageElement.classList.add("green");
+
+    } else if (percentage >= 80) {
+
+        percentageElement.classList.add("yellow");
+
+    } else {
+
+        percentageElement.classList.add("red");
+
+    }
+
+
+    updateSummary();
+
+}
+
+
+// -----------------------------
+// SUMMARY
+// -----------------------------
+
+function updateSummary() {
+
+    let totalTarget = 0;
+    let totalAchieved = 0;
+
+    employees.forEach((employee, index) => {
+
+        const attendanceElement =
+            document.getElementById(
+                `attendance_${index}`
+            );
+
+        if (!attendanceElement) return;
+
+        const attendance =
+            attendanceElement.value;
+
+        let target = employee.target;
+
+        if (attendance === "Half Day") {
+
+            target =
+                Math.ceil(employee.target / 2);
+
+        }
+
+        if (attendance === "Absent") {
+
+            target = 0;
+
+        }
+
+        totalTarget += target;
+
+
+        for (let i = 1; i <= 8; i++) {
+
+            const input =
+                document.getElementById(
+                    `hour_${index}_${i}`
+                );
+
+            if (input) {
+
+                totalAchieved +=
+                    Number(input.value);
+
+            }
+
+        }
+
+    });
+
+
+    let totalRemaining =
+        Math.max(
+            totalTarget - totalAchieved,
+            0
+        );
+
+
+    let achievement =
+        totalTarget > 0
+            ? (totalAchieved / totalTarget) * 100
+            : 0;
+
+
+    document.getElementById(
+        "totalEmployees"
+    ).innerText = employees.length;
+
+
+    document.getElementById(
+        "totalTarget"
+    ).innerText = totalTarget;
+
+
+    document.getElementById(
+        "totalAchieved"
+    ).innerText = totalAchieved;
+
+
+    document.getElementById(
+        "totalRemaining"
+    ).innerText = totalRemaining;
+
+
+    document.getElementById(
+        "teamAchievement"
+    ).innerText =
+        achievement.toFixed(1) + "%";
+
+}
+
+</script>
+
+</body>
+</html>
