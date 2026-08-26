@@ -345,29 +345,77 @@ let employees = [];
 // PROJECT FUNCTIONS
 // -----------------------------
 
-function addProject() {
+async function addProject() {
 
-    const name = document.getElementById("projectName").value.trim();
-    const target = Number(document.getElementById("projectTarget").value);
+    const name =
+        document.getElementById("projectName").value.trim();
+
+    const target =
+        Number(document.getElementById("projectTarget").value);
 
     if (!name || !target) {
         alert("Please enter project name and target.");
         return;
     }
 
-    projects.push({
-        name: name,
-        target: target
-    });
+    const { data, error } = await supabaseClient
+        .from("projects")
+        .insert([
+            {
+                project_name: name,
+                daily_target: target
+            }
+        ])
+        .select();
+
+    if (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to save project: " +
+            error.message
+        );
+
+        return;
+    }
 
     document.getElementById("projectName").value = "";
     document.getElementById("projectTarget").value = "";
 
+    alert("Project saved successfully!");
+
+    loadProjects();
+}
+
+async function loadProjects() {
+
+    const { data, error } = await supabaseClient
+        .from("projects")
+        .select("*")
+        .order("project_name");
+
+    if (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to load projects: " +
+            error.message
+        );
+
+        return;
+    }
+
+    projects = data.map(project => ({
+        id: project.id,
+        name: project.project_name,
+        target: Number(project.daily_target)
+    }));
+
     displayProjects();
     updateProjectDropdown();
 }
-
-
 function displayProjects() {
 
     const table = document.getElementById("projectTable");
@@ -841,6 +889,7 @@ function updateSummary() {
 
 }
 
+    loadProjects();
 </script>
 
 </body>
