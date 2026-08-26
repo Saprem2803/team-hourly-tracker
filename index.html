@@ -1096,7 +1096,7 @@ function displayProjects() {
             deleteButton.onclick =
                 function() {
 
-                   async function deleteProject(id) {
+                  async function deleteProject(id) {
 
     const confirmed = confirm(
         "Are you sure you want to delete this project?"
@@ -1106,7 +1106,11 @@ function displayProjects() {
         return;
     }
 
-    // Check whether employees are assigned to this project
+    showProjectMessage(
+        "Deleting project..."
+    );
+
+    // Check if employees are assigned to this project
     const employeeCheck =
         await supabaseClient
             .from("employees")
@@ -1116,9 +1120,102 @@ function displayProjects() {
     if (employeeCheck.error) {
 
         console.error(
-            "Check employees error:",
+            "Employee check error:",
             employeeCheck.error
         );
+
+        showProjectMessage(
+            "Unable to check project usage: " +
+            employeeCheck.error.message,
+            true
+        );
+
+        return;
+    }
+
+    // Don't allow deletion if employees are assigned
+    if (
+        employeeCheck.data &&
+        employeeCheck.data.length > 0
+    ) {
+
+        const names =
+            employeeCheck.data
+                .map(function(employee) {
+                    return employee.employee_name;
+                })
+                .join(", ");
+
+        showProjectMessage(
+            "Cannot delete this project. Employees assigned: " +
+            names,
+            true
+        );
+
+        return;
+    }
+
+    // Delete project and return the deleted row
+    const result =
+        await supabaseClient
+            .from("projects")
+            .delete()
+            .eq("id", id)
+            .select();
+
+    console.log(
+        "Delete project result:",
+        result
+    );
+
+    if (result.error) {
+
+        console.error(
+            "Delete project error:",
+            result.error
+        );
+
+        showProjectMessage(
+            "Unable to delete project: " +
+            result.error.message,
+            true
+        );
+
+        return;
+    }
+
+    // IMPORTANT:
+    // If no row was returned, Supabase did not delete anything.
+    if (
+        !result.data ||
+        result.data.length === 0
+    ) {
+
+        showProjectMessage(
+            "Project was NOT deleted. Please check the Projects table RLS DELETE policy.",
+            true
+        );
+
+        console.error(
+            "No project was deleted. This is most likely an RLS DELETE policy issue."
+        );
+
+        return;
+    }
+
+    showProjectMessage(
+        "Project deleted successfully."
+    );
+
+    // Refresh project list
+    await loadProjects();
+
+    // Refresh employee project dropdown
+    await loadEmployeeProjects();
+
+    // Refresh employees
+    await loadEmployees();
+}
 
         showProjectMessage(
             "Unable to check project usage: " +
