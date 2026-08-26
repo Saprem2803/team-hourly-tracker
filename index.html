@@ -475,7 +475,7 @@ function updateProjectDropdown() {
 }
 
 
-function addEmployee() {
+async function addEmployee() {
 
     const name =
         document.getElementById("employeeName").value.trim();
@@ -492,6 +492,52 @@ function addEmployee() {
 
         return;
     }
+
+    // Find the selected project
+    const projectData =
+        projects.find(p => p.name === project);
+
+    if (!projectData) {
+
+        alert("Selected project was not found.");
+
+        return;
+    }
+
+    // Save employee to Supabase
+    const { data, error } = await supabaseClient
+        .from("employees")
+        .insert([
+            {
+                employee_name: name,
+                employee_code: id,
+                project_id: projectData.id
+            }
+        ])
+        .select();
+
+    if (error) {
+
+        console.error("Employee save error:", error);
+
+        alert(
+            "Unable to save employee: " +
+            error.message
+        );
+
+        return;
+    }
+
+    alert("Employee saved successfully!");
+
+    // Clear fields
+    document.getElementById("employeeName").value = "";
+    document.getElementById("employeeId").value = "";
+    document.getElementById("employeeProject").value = "";
+
+    // Reload employees
+    loadEmployees();
+}
 
     const projectData =
         projects.find(p => p.name === project);
@@ -517,6 +563,61 @@ function addEmployee() {
 
 }
 
+    async function loadEmployees() {
+
+    const { data, error } = await supabaseClient
+        .from("employees")
+        .select(`
+            id,
+            employee_name,
+            employee_code,
+            project_id,
+            projects (
+                project_name,
+                daily_target
+            )
+        `)
+        .eq("active", true)
+        .order("employee_name");
+
+    if (error) {
+
+        console.error("Employee loading error:", error);
+
+        alert(
+            "Unable to load employees: " +
+            error.message
+        );
+
+        return;
+    }
+
+    employees = data.map(employee => ({
+
+        id: employee.id,
+
+        name: employee.employee_name,
+
+        employeeCode: employee.employee_code,
+
+        project: employee.projects
+            ? employee.projects.project_name
+            : "",
+
+        projectId: employee.project_id,
+
+        target: employee.projects
+            ? Number(employee.projects.daily_target)
+            : 0
+
+    }));
+
+    displayEmployees();
+
+    buildTracker();
+
+    updateSummary();
+}
 
 function displayEmployees() {
 
@@ -533,7 +634,7 @@ function displayEmployees() {
 
                 <td>${employee.name}</td>
 
-                <td>${employee.id}</td>
+                <td>${employee.employeeCode}</td>
 
                 <td>${employee.project}</td>
 
@@ -890,6 +991,7 @@ function updateSummary() {
 }
 
     loadProjects();
+loadEmployees();
 </script>
 
 </body>
