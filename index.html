@@ -1,137 +1,365 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
     <title>Team Hourly Productivity Tracker</title>
 
+
+    <!-- SUPABASE -->
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            margin: 0;
-            padding: 30px;
-        }
 
-        .container {
-            max-width: 1100px;
-            margin: auto;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            margin-bottom: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-
-        h1 {
-            margin-bottom: 5px;
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 25px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .field {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 7px;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+        * {
             box-sizing: border-box;
         }
 
-        button {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 11px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 20px;
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+            background: #f4f6f8;
+
+            margin: 0;
+
+            padding: 25px;
+
+            color: #222;
+
         }
+
+
+        .container {
+
+            max-width: 1600px;
+
+            margin: auto;
+
+        }
+
+
+        h1 {
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .subtitle {
+
+            color: #666;
+
+            margin-bottom: 25px;
+
+        }
+
+
+        .card {
+
+            background: white;
+
+            padding: 25px;
+
+            margin-bottom: 25px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.08);
+
+        }
+
+
+        .form-row {
+
+            display: flex;
+
+            gap: 15px;
+
+            flex-wrap: wrap;
+
+        }
+
+
+        .field {
+
+            flex: 1;
+
+            min-width: 220px;
+
+        }
+
+
+        label {
+
+            display: block;
+
+            font-weight: bold;
+
+            margin-bottom: 7px;
+
+        }
+
+
+        input,
+        select {
+
+            width: 100%;
+
+            padding: 10px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 6px;
+
+            background: white;
+
+        }
+
+
+        button {
+
+            border: none;
+
+            border-radius: 6px;
+
+            padding: 11px 20px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+            margin-top: 20px;
+
+        }
+
+
+        .primary-button {
+
+            background: #2563eb;
+
+            color: white;
+
+        }
+
+
+        .delete-button {
+
+            background: #dc2626;
+
+            color: white;
+
+            padding: 6px 12px;
+
+            margin: 0;
+
+        }
+
 
         button:hover {
+
             opacity: 0.9;
+
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 25px;
+
+        .message {
+
+            margin-top: 15px;
+
+            font-weight: bold;
+
         }
+
+
+        .table-container {
+
+            overflow-x: auto;
+
+            margin-top: 20px;
+
+        }
+
+
+        table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            background: white;
+
+        }
+
 
         th,
         td {
+
             border: 1px solid #ddd;
-            padding: 10px;
+
+            padding: 9px;
+
             text-align: center;
+
+            white-space: nowrap;
+
         }
+
 
         th {
+
             background: #f1f5f9;
+
         }
 
-        .delete-button {
-            background: #dc2626;
-            padding: 6px 12px;
-            margin: 0;
+
+        .hour-input {
+
+            width: 65px;
+
+            padding: 7px;
+
+            text-align: center;
+
         }
 
-        #message {
-            margin-top: 15px;
+
+        .summary-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(180px, 1fr));
+
+            gap: 15px;
+
+        }
+
+
+        .summary-box {
+
+            background: #f8fafc;
+
+            border-radius: 8px;
+
+            padding: 18px;
+
+            text-align: center;
+
+        }
+
+
+        .summary-box h2 {
+
+            margin: 7px 0 0 0;
+
+        }
+
+
+        .green {
+
+            color: green;
+
             font-weight: bold;
+
         }
+
+
+        .yellow {
+
+            color: #b58900;
+
+            font-weight: bold;
+
+        }
+
+
+        .red {
+
+            color: red;
+
+            font-weight: bold;
+
+        }
+
+
+        .info-box {
+
+            background: #f8fafc;
+
+            padding: 12px;
+
+            border-radius: 6px;
+
+            margin-top: 15px;
+
+            color: #555;
+
+        }
+
     </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-    <h1>Team Hourly Productivity Tracker</h1>
+
+    <!-- =====================================
+         HEADER
+    ====================================== -->
+
+
+    <h1>
+        Team Hourly Productivity Tracker
+    </h1>
+
 
     <div class="subtitle">
-        Project and productivity management
+
+        Daily and hourly productivity monitoring
+
     </div>
 
 
-    <!-- PROJECT SETUP -->
+
+    <!-- =====================================
+         PROJECT SETUP
+    ====================================== -->
+
 
     <div class="card">
 
-        <h2>Project Setup</h2>
+
+        <h2>
+            Project Setup
+        </h2>
+
 
         <div class="form-row">
+
 
             <div class="field">
 
                 <label for="projectName">
+
                     Project Name
+
                 </label>
+
 
                 <input
                     type="text"
@@ -141,24 +369,32 @@
             </div>
 
 
+
             <div class="field">
 
                 <label for="projectTarget">
+
                     Daily Target
+
                 </label>
+
 
                 <input
                     type="number"
                     id="projectTarget"
+                    min="1"
                     placeholder="Example: 125">
 
             </div>
 
+
         </div>
+
 
 
         <button
             type="button"
+            class="primary-button"
             id="addProjectButton">
 
             Add Project
@@ -166,230 +402,500 @@
         </button>
 
 
-        <div id="message"></div>
+        <div
+            id="projectMessage"
+            class="message">
+        </div>
 
 
-        <table>
 
-            <thead>
-
-                <tr>
-                    <th>Project</th>
-                    <th>Daily Target</th>
-                    <th>Action</th>
-                </tr>
-
-            </thead>
+        <div class="table-container">
 
 
-            <tbody id="projectTable">
+            <table>
 
-            </tbody>
 
-        </table>
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Project
+                        </th>
+
+                        <th>
+                            Daily Target
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="projectTable">
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
 
     </div>
+
+
+
+    <!-- =====================================
+         EMPLOYEE SETUP
+    ====================================== -->
+
+
+    <div class="card">
+
+
+        <h2>
+            Employee Setup
+        </h2>
+
+
+        <div class="form-row">
+
+
+            <div class="field">
+
+                <label for="employeeName">
+
+                    Employee Name
+
+                </label>
+
+
+                <input
+                    type="text"
+                    id="employeeName"
+                    placeholder="Example: Sarath Nair">
+
+            </div>
+
+
+
+            <div class="field">
+
+                <label for="employeeCode">
+
+                    Employee ID
+
+                </label>
+
+
+                <input
+                    type="text"
+                    id="employeeCode"
+                    placeholder="Example: 7260">
+
+            </div>
+
+
+
+            <div class="field">
+
+                <label for="employeeProject">
+
+                    Project
+
+                </label>
+
+
+                <select id="employeeProject">
+
+                    <option value="">
+
+                        Select Project
+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+        </div>
+
+
+
+        <button
+            type="button"
+            class="primary-button"
+            id="addEmployeeButton">
+
+            Add Employee
+
+        </button>
+
+
+        <div
+            id="employeeMessage"
+            class="message">
+        </div>
+
+
+
+        <div class="table-container">
+
+
+            <table>
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Employee
+                        </th>
+
+                        <th>
+                            EMP ID
+                        </th>
+
+                        <th>
+                            Project
+                        </th>
+
+                        <th>
+                            Daily Target
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="employeeTable">
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================
+         DAILY TRACKER
+    ====================================== -->
+
+
+    <div class="card">
+
+
+        <h2>
+            Daily Productivity Tracker
+        </h2>
+
+
+
+        <div class="form-row">
+
+
+            <div class="field">
+
+                <label for="trackerDate">
+
+                    Date
+
+                </label>
+
+
+                <input
+                    type="date"
+                    id="trackerDate">
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="info-box">
+
+            <strong>
+                Shift:
+            </strong>
+
+            6:00 PM – 3:00 AM
+
+            &nbsp; | &nbsp;
+
+            <strong>
+                Break:
+            </strong>
+
+            60 minutes flexible/split
+
+            &nbsp; | &nbsp;
+
+            <strong>
+                Productive Time:
+            </strong>
+
+            8 hours
+
+        </div>
+
+
+
+        <div class="table-container">
+
+
+            <table>
+
+
+                <thead>
+
+                    <tr>
+
+
+                        <th>
+                            Employee
+                        </th>
+
+
+                        <th>
+                            EMP ID
+                        </th>
+
+
+                        <th>
+                            Project
+                        </th>
+
+
+                        <th>
+                            Attendance
+                        </th>
+
+
+                        <th>
+                            Daily Target
+                        </th>
+
+
+                        <th>
+                            6–7 PM
+                        </th>
+
+
+                        <th>
+                            7–8 PM
+                        </th>
+
+
+                        <th>
+                            8–9 PM
+                        </th>
+
+
+                        <th>
+                            9–10 PM
+                        </th>
+
+
+                        <th>
+                            10–11 PM
+                        </th>
+
+
+                        <th>
+                            11 PM–12 AM
+                        </th>
+
+
+                        <th>
+                            12–1 AM
+                        </th>
+
+
+                        <th>
+                            1–2 AM
+                        </th>
+
+
+                        <th>
+                            2–3 AM
+                        </th>
+
+
+                        <th>
+                            Break
+                            <br>
+                            Min
+                        </th>
+
+
+                        <th>
+                            Break Status
+                        </th>
+
+
+                        <th>
+                            Achieved
+                        </th>
+
+
+                        <th>
+                            Remaining
+                        </th>
+
+
+                        <th>
+                            Achievement %
+                        </th>
+
+
+                    </tr>
+
+                </thead>
+
+
+
+                <tbody id="dailyTrackerTable">
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================
+         TEAM SUMMARY
+    ====================================== -->
+
+
+    <div class="card">
+
+
+        <h2>
+            Team Summary
+        </h2>
+
+
+        <div class="summary-grid">
+
+
+            <div class="summary-box">
+
+                <div>
+                    Employees
+                </div>
+
+                <h2 id="totalEmployees">
+                    0
+                </h2>
+
+            </div>
+
+
+
+            <div class="summary-box">
+
+                <div>
+                    Total Target
+                </div>
+
+                <h2 id="totalTarget">
+                    0
+                </h2>
+
+            </div>
+
+
+
+            <div class="summary-box">
+
+                <div>
+                    Total Achieved
+                </div>
+
+                <h2 id="totalAchieved">
+                    0
+                </h2>
+
+            </div>
+
+
+
+            <div class="summary-box">
+
+                <div>
+                    Remaining
+                </div>
+
+                <h2 id="totalRemaining">
+                    0
+                </h2>
+
+            </div>
+
+
+
+            <div class="summary-box">
+
+                <div>
+                    Team Achievement
+                </div>
+
+                <h2 id="teamAchievement">
+                    0%
+                </h2>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
 
 </div>
 
-    <!-- ============================= -->
-<!-- EMPLOYEE SETUP -->
-<!-- ============================= -->
 
-<div class="card">
 
-    <h2>Employee Setup</h2>
-
-    <div class="form-row">
-
-        <div class="field">
-
-            <label for="employeeName">
-                Employee Name
-            </label>
-
-            <input
-                type="text"
-                id="employeeName"
-                placeholder="Example: Sarath Nair">
-
-        </div>
-
-
-        <div class="field">
-
-            <label for="employeeCode">
-                Employee ID
-            </label>
-
-            <input
-                type="text"
-                id="employeeCode"
-                placeholder="Example: 7260">
-
-        </div>
-
-
-        <div class="field">
-
-            <label for="employeeProject">
-                Project
-            </label>
-
-            <select id="employeeProject">
-
-                <option value="">
-                    Select Project
-                </option>
-
-            </select>
-
-        </div>
-
-    </div>
-
-
-    <button
-        type="button"
-        id="addEmployeeButton">
-
-        Add Employee
-
-    </button>
-
-
-    <div id="employeeMessage"></div>
-
-
-    <table>
-
-        <thead>
-
-            <tr>
-
-                <th>Employee</th>
-
-                <th>EMP ID</th>
-
-                <th>Project</th>
-
-                <th>Daily Target</th>
-
-                <th>Action</th>
-
-            </tr>
-
-        </thead>
-
-
-        <tbody id="employeeTable">
-
-        </tbody>
-
-    </table>
-
-</div>
-<!-- =========================================
-     DAILY PRODUCTIVITY TRACKER
-========================================= -->
-
-<div class="card">
-
-    <h2>Daily Productivity Tracker</h2>
-
-    <div class="form-row">
-
-        <div class="field">
-
-            <label for="trackerDate">
-                Date
-            </label>
-
-            <input
-                type="date"
-                id="trackerDate">
-
-        </div>
-
-    </div>
-
-
-    <p style="color:#666;">
-        Shift: <strong>6:00 PM – 3:00 AM</strong>
-        &nbsp; | &nbsp;
-        Break: <strong>60 minutes flexible/split</strong>
-        &nbsp; | &nbsp;
-        Productive Time: <strong>8 hours</strong>
-    </p>
-
-
-    <div style="overflow-x:auto;">
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>Employee</th>
-
-                    <th>Project</th>
-
-                    <th>Attendance</th>
-
-                    <th>Daily Target</th>
-
-                    <th>6–7 PM</th>
-
-                    <th>7–8 PM</th>
-
-                    <th>8–9 PM</th>
-
-                    <th>9–10 PM</th>
-
-                    <th>10–11 PM</th>
-
-                    <th>11 PM–12 AM</th>
-
-                    <th>12–1 AM</th>
-
-                    <th>1–2 AM</th>
-
-                    <th>2–3 AM</th>
-
-                    <th>Break<br>(Min)</th>
-
-                    <th>Break<br>Status</th>
-
-                    <th>Achieved</th>
-
-                    <th>Remaining</th>
-
-                    <th>Achievement %</th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody id="dailyTrackerTable">
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
-    
 <script>
+
 
 /* =========================================
    SUPABASE CONNECTION
 ========================================= */
 
+
 const SUPABASE_URL =
     "https://yhoblmvujfqnspaxdfav.supabase.co";
+
 
 const SUPABASE_KEY =
     "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
@@ -402,127 +908,108 @@ const supabaseClient =
     );
 
 
+
 /* =========================================
-   LOAD PROJECTS
+   GLOBAL DATA
 ========================================= */
 
-async function loadProjects() {
 
-    const result =
-        await supabaseClient
-            .from("projects")
-            .select("*")
-            .order("project_name");
+let projects = [];
 
+let employees = [];
 
-    if (result.error) {
-
-        console.error(
-            "Load projects error:",
-            result.error
-        );
-
-        showMessage(
-            "Unable to load projects: " +
-            result.error.message,
-            true
-        );
-
-        return;
-    }
-
-
-    displayProjects(result.data);
-}
 
 
 /* =========================================
-   DISPLAY PROJECTS
+   DATE
 ========================================= */
 
-function displayProjects(projectList) {
 
-    const table =
+function setTodayDate() {
+
+    const dateInput =
         document.getElementById(
-            "projectTable"
+            "trackerDate"
         );
 
 
-    table.innerHTML = "";
+    const today =
+        new Date()
+            .toISOString()
+            .split("T")[0];
 
 
-    projectList.forEach(function(project) {
-
-        const row =
-            document.createElement("tr");
-
-
-        const nameCell =
-            document.createElement("td");
-
-        nameCell.textContent =
-            project.project_name;
-
-
-        const targetCell =
-            document.createElement("td");
-
-        targetCell.textContent =
-            project.daily_target;
-
-
-        const actionCell =
-            document.createElement("td");
-
-
-        const deleteButton =
-            document.createElement("button");
-
-
-        deleteButton.textContent =
-            "Delete";
-
-
-        deleteButton.className =
-            "delete-button";
-
-
-        deleteButton.type =
-            "button";
-
-
-        deleteButton.onclick =
-            function() {
-
-                deleteProject(project.id);
-
-            };
-
-
-        actionCell.appendChild(
-            deleteButton
-        );
-
-
-        row.appendChild(nameCell);
-
-        row.appendChild(targetCell);
-
-        row.appendChild(actionCell);
-
-
-        table.appendChild(row);
-
-    });
+    dateInput.value = today;
 
 }
+
+
+
+/* =========================================
+   PROJECT MESSAGE
+========================================= */
+
+
+function showProjectMessage(
+    message,
+    isError = false
+) {
+
+    const element =
+        document.getElementById(
+            "projectMessage"
+        );
+
+
+    element.textContent =
+        message;
+
+
+    element.style.color =
+        isError
+        ? "red"
+        : "green";
+
+}
+
+
+
+/* =========================================
+   EMPLOYEE MESSAGE
+========================================= */
+
+
+function showEmployeeMessage(
+    message,
+    isError = false
+) {
+
+    const element =
+        document.getElementById(
+            "employeeMessage"
+        );
+
+
+    element.textContent =
+        message;
+
+
+    element.style.color =
+        isError
+        ? "red"
+        : "green";
+
+}
+
 
 
 /* =========================================
    ADD PROJECT
 ========================================= */
 
+
 async function addProject() {
+
 
     const name =
         document
@@ -541,27 +1028,32 @@ async function addProject() {
 
     if (name === "") {
 
-        showMessage(
-            "Please enter a project name.",
+        showProjectMessage(
+            "Please enter project name.",
             true
         );
 
         return;
+
     }
 
 
-    if (!target || target <= 0) {
+    if (
+        !target ||
+        target <= 0
+    ) {
 
-        showMessage(
+        showProjectMessage(
             "Please enter a valid daily target.",
             true
         );
 
         return;
+
     }
 
 
-    showMessage(
+    showProjectMessage(
         "Saving project..."
     );
 
@@ -586,14 +1078,22 @@ async function addProject() {
             result.error
         );
 
-        showMessage(
+
+        showProjectMessage(
             "Unable to save project: " +
             result.error.message,
             true
         );
 
+
         return;
+
     }
+
+
+    /*
+       CLEAR INPUTS
+    */
 
 
     document
@@ -606,31 +1106,285 @@ async function addProject() {
         .value = "";
 
 
-    showMessage(
+    showProjectMessage(
         "Project saved successfully."
     );
 
+
+    /*
+       REFRESH PROJECT TABLE
+       AND EMPLOYEE DROPDOWN
+    */
+
+
+    await loadProjects();
+
+    await loadEmployeeProjects();
+
+}
+
+
+
 /* =========================================
-   EMPLOYEE FUNCTIONS
+   LOAD PROJECTS
 ========================================= */
 
-async function loadEmployeeProjects() {
+
+async function loadProjects() {
+
 
     const result =
         await supabaseClient
             .from("projects")
-            .select("*")
-            .order("project_name");
+            .select(
+                "id, project_name, daily_target"
+            )
+            .order(
+                "project_name"
+            );
 
 
     if (result.error) {
 
         console.error(
-            "Load employee projects error:",
+            "Load projects error:",
             result.error
         );
 
+
+        showProjectMessage(
+            "Unable to load projects: " +
+            result.error.message,
+            true
+        );
+
+
         return;
+
+    }
+
+
+    projects =
+        result.data || [];
+
+
+    displayProjects();
+
+
+    await loadEmployeeProjects();
+
+}
+
+
+
+/* =========================================
+   DISPLAY PROJECTS
+========================================= */
+
+
+function displayProjects() {
+
+
+    const table =
+        document.getElementById(
+            "projectTable"
+        );
+
+
+    table.innerHTML = "";
+
+
+    projects.forEach(
+        function(project) {
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const nameCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            nameCell.textContent =
+                project.project_name;
+
+
+            const targetCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            targetCell.textContent =
+                project.daily_target;
+
+
+            const actionCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            const deleteButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            deleteButton.textContent =
+                "Delete";
+
+
+            deleteButton.className =
+                "delete-button";
+
+
+            deleteButton.type =
+                "button";
+
+
+            deleteButton.onclick =
+                function() {
+
+                    deleteProject(
+                        project.id
+                    );
+
+                };
+
+
+            actionCell.appendChild(
+                deleteButton
+            );
+
+
+            row.appendChild(
+                nameCell
+            );
+
+
+            row.appendChild(
+                targetCell
+            );
+
+
+            row.appendChild(
+                actionCell
+            );
+
+
+            table.appendChild(
+                row
+            );
+
+
+        }
+    );
+
+}
+
+
+
+/* =========================================
+   DELETE PROJECT
+========================================= */
+
+
+async function deleteProject(id) {
+
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this project?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    const result =
+        await supabaseClient
+            .from("projects")
+            .delete()
+            .eq(
+                "id",
+                id
+            );
+
+
+    if (result.error) {
+
+        console.error(
+            "Delete project error:",
+            result.error
+        );
+
+
+        showProjectMessage(
+            "Unable to delete project: " +
+            result.error.message,
+            true
+        );
+
+
+        return;
+
+    }
+
+
+    showProjectMessage(
+        "Project deleted."
+    );
+
+
+    await loadProjects();
+
+
+    await loadEmployees();
+
+
+}
+
+
+
+/* =========================================
+   LOAD PROJECTS FOR EMPLOYEE DROPDOWN
+========================================= */
+
+
+async function loadEmployeeProjects() {
+
+
+    const result =
+        await supabaseClient
+            .from("projects")
+            .select(
+                "id, project_name, daily_target"
+            )
+            .order(
+                "project_name"
+            );
+
+
+    if (result.error) {
+
+        console.error(
+            "Employee project dropdown error:",
+            result.error
+        );
+
+
+        return;
+
     }
 
 
@@ -640,42 +1394,89 @@ async function loadEmployeeProjects() {
         );
 
 
-    dropdown.innerHTML = `
-        <option value="">
-            Select Project
-        </option>
-    `;
+    if (!dropdown) {
+
+        return;
+
+    }
 
 
-    result.data.forEach(function(project) {
-
-        const option =
-            document.createElement("option");
-
-
-        option.value =
-            project.id;
+    /*
+       CLEAR OLD OPTIONS
+    */
 
 
-        option.textContent =
-            project.project_name +
-            " (Target: " +
-            project.daily_target +
-            ")";
+    dropdown.innerHTML = "";
 
 
-        dropdown.appendChild(option);
+    /*
+       DEFAULT OPTION
+    */
 
-    });
+
+    const defaultOption =
+        document.createElement(
+            "option"
+        );
+
+
+    defaultOption.value = "";
+
+
+    defaultOption.textContent =
+        "Select Project";
+
+
+    dropdown.appendChild(
+        defaultOption
+    );
+
+
+    /*
+       ADD ALL PROJECTS
+    */
+
+
+    result.data.forEach(
+        function(project) {
+
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                project.id;
+
+
+            option.textContent =
+                project.project_name +
+                " (Target: " +
+                project.daily_target +
+                ")";
+
+
+            dropdown.appendChild(
+                option
+            );
+
+
+        }
+    );
 
 }
+
 
 
 /* =========================================
    ADD EMPLOYEE
 ========================================= */
 
+
 async function addEmployee() {
+
 
     const name =
         document
@@ -707,6 +1508,7 @@ async function addEmployee() {
         );
 
         return;
+
     }
 
 
@@ -718,6 +1520,7 @@ async function addEmployee() {
         );
 
         return;
+
     }
 
 
@@ -729,6 +1532,7 @@ async function addEmployee() {
         );
 
         return;
+
     }
 
 
@@ -766,8 +1570,15 @@ async function addEmployee() {
             true
         );
 
+
         return;
+
     }
+
+
+    /*
+       CLEAR EMPLOYEE INPUTS
+    */
 
 
     document
@@ -789,35 +1600,356 @@ async function addEmployee() {
         "Employee saved successfully."
     );
 
-    /* =========================================
-   DAILY PRODUCTIVITY TRACKER
-========================================= */
 
-
-function setTodayDate() {
-
-    const dateInput =
-        document.getElementById(
-            "trackerDate"
-        );
-
-
-    if (!dateInput.value) {
-
-        const today =
-            new Date()
-                .toISOString()
-                .split("T")[0];
-
-
-        dateInput.value = today;
-
-    }
+    await loadEmployees();
 
 }
 
 
+
+/* =========================================
+   LOAD EMPLOYEES
+========================================= */
+
+
+async function loadEmployees() {
+
+
+    const result =
+        await supabaseClient
+            .from("employees")
+            .select(`
+                id,
+                employee_name,
+                employee_code,
+                project_id,
+                projects (
+                    project_name,
+                    daily_target
+                )
+            `)
+            .order(
+                "employee_name"
+            );
+
+
+    if (result.error) {
+
+        console.error(
+            "Load employees error:",
+            result.error
+        );
+
+
+        showEmployeeMessage(
+            "Unable to load employees: " +
+            result.error.message,
+            true
+        );
+
+
+        return;
+
+    }
+
+
+    employees =
+        result.data || [];
+
+
+    displayEmployees();
+
+
+    buildDailyTracker();
+
+
+    updateSummary();
+
+}
+
+
+
+/* =========================================
+   DISPLAY EMPLOYEES
+========================================= */
+
+
+function displayEmployees() {
+
+
+    const table =
+        document.getElementById(
+            "employeeTable"
+        );
+
+
+    table.innerHTML = "";
+
+
+    employees.forEach(
+        function(employee) {
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const nameCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            nameCell.textContent =
+                employee.employee_name;
+
+
+            const codeCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            codeCell.textContent =
+                employee.employee_code;
+
+
+            const projectCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            projectCell.textContent =
+                employee.projects
+                ? employee.projects.project_name
+                : "";
+
+
+            const targetCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            targetCell.textContent =
+                employee.projects
+                ? employee.projects.daily_target
+                : "0";
+
+
+            const actionCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            const deleteButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            deleteButton.textContent =
+                "Delete";
+
+
+            deleteButton.className =
+                "delete-button";
+
+
+            deleteButton.type =
+                "button";
+
+
+            deleteButton.onclick =
+                function() {
+
+                    deleteEmployee(
+                        employee.id
+                    );
+
+                };
+
+
+            actionCell.appendChild(
+                deleteButton
+            );
+
+
+            row.appendChild(
+                nameCell
+            );
+
+
+            row.appendChild(
+                codeCell
+            );
+
+
+            row.appendChild(
+                projectCell
+            );
+
+
+            row.appendChild(
+                targetCell
+            );
+
+
+            row.appendChild(
+                actionCell
+            );
+
+
+            table.appendChild(
+                row
+            );
+
+
+        }
+    );
+
+}
+
+
+
+/* =========================================
+   DELETE EMPLOYEE
+========================================= */
+
+
+async function deleteEmployee(id) {
+
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this employee?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    const result =
+        await supabaseClient
+            .from("employees")
+            .delete()
+            .eq(
+                "id",
+                id
+            );
+
+
+    if (result.error) {
+
+        console.error(
+            "Delete employee error:",
+            result.error
+        );
+
+
+        showEmployeeMessage(
+            "Unable to delete employee: " +
+            result.error.message,
+            true
+        );
+
+
+        return;
+
+    }
+
+
+    showEmployeeMessage(
+        "Employee deleted."
+    );
+
+
+    await loadEmployees();
+
+}
+
+
+
+/* =========================================
+   GET DAILY TARGET
+========================================= */
+
+
+function getDailyTarget(
+    employee,
+    attendance
+) {
+
+
+    const projectTarget =
+        Number(
+            employee.projects
+            ? employee.projects.daily_target
+            : 0
+        );
+
+
+    /*
+       PRESENT
+       Full project target
+    */
+
+
+    if (
+        attendance === "Present"
+    ) {
+
+        return projectTarget;
+
+    }
+
+
+    /*
+       HALF DAY
+       Half target rounded UP
+
+       125 / 2 = 62.5
+       Therefore = 63
+    */
+
+
+    if (
+        attendance === "Half Day"
+    ) {
+
+        return Math.ceil(
+            projectTarget / 2
+        );
+
+    }
+
+
+    /*
+       ABSENT
+    */
+
+
+    return 0;
+
+}
+
+
+
+/* =========================================
+   BUILD DAILY TRACKER
+========================================= */
+
+
 function buildDailyTracker() {
+
 
     const table =
         document.getElementById(
@@ -838,48 +1970,90 @@ function buildDailyTracker() {
     employees.forEach(
         function(employee, index) {
 
+
             const row =
-                document.createElement("tr");
+                document.createElement(
+                    "tr"
+                );
 
 
-            /* Employee */
+            /*
+               EMPLOYEE
+            */
+
 
             const employeeCell =
-                document.createElement("td");
+                document.createElement(
+                    "td"
+                );
+
 
             employeeCell.textContent =
-                employee.employee_name ||
-                employee.name ||
-                "";
+                employee.employee_name;
+
 
             row.appendChild(
                 employeeCell
             );
 
 
-            /* Project */
+            /*
+               EMP ID
+            */
+
+
+            const codeCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            codeCell.textContent =
+                employee.employee_code;
+
+
+            row.appendChild(
+                codeCell
+            );
+
+
+            /*
+               PROJECT
+            */
+
 
             const projectCell =
-                document.createElement("td");
+                document.createElement(
+                    "td"
+                );
+
 
             projectCell.textContent =
-                employee.project_name ||
-                employee.project ||
-                "";
+                employee.projects
+                ? employee.projects.project_name
+                : "";
+
 
             row.appendChild(
                 projectCell
             );
 
 
-            /* Attendance */
+            /*
+               ATTENDANCE
+            */
+
 
             const attendanceCell =
-                document.createElement("td");
+                document.createElement(
+                    "td"
+                );
 
 
             const attendance =
-                document.createElement("select");
+                document.createElement(
+                    "select"
+                );
 
 
             attendance.id =
@@ -907,7 +2081,9 @@ function buildDailyTracker() {
                 "change",
                 function() {
 
-                    calculateDailyRow(index);
+                    calculateDailyRow(
+                        index
+                    );
 
                 }
             );
@@ -923,10 +2099,15 @@ function buildDailyTracker() {
             );
 
 
-            /* Daily Target */
+            /*
+               DAILY TARGET
+            */
+
 
             const targetCell =
-                document.createElement("td");
+                document.createElement(
+                    "td"
+                );
 
 
             targetCell.id =
@@ -945,7 +2126,20 @@ function buildDailyTracker() {
             );
 
 
-            /* Hourly productivity */
+            /*
+               9 CLOCK HOURS
+
+               6-7 PM
+               7-8 PM
+               8-9 PM
+               9-10 PM
+               10-11 PM
+               11-12 AM
+               12-1 AM
+               1-2 AM
+               2-3 AM
+            */
+
 
             for (
                 let hour = 1;
@@ -953,19 +2147,29 @@ function buildDailyTracker() {
                 hour++
             ) {
 
+
                 const hourCell =
-                    document.createElement("td");
+                    document.createElement(
+                        "td"
+                    );
 
 
                 const input =
-                    document.createElement("input");
+                    document.createElement(
+                        "input"
+                    );
 
 
-                input.type = "number";
+                input.type =
+                    "number";
 
-                input.min = "0";
 
-                input.value = "0";
+                input.min =
+                    "0";
+
+
+                input.value =
+                    "0";
 
 
                 input.className =
@@ -1003,23 +2207,37 @@ function buildDailyTracker() {
             }
 
 
-            /* Break */
+            /*
+               BREAK MINUTES
+            */
+
 
             const breakCell =
-                document.createElement("td");
+                document.createElement(
+                    "td"
+                );
 
 
             const breakInput =
-                document.createElement("input");
+                document.createElement(
+                    "input"
+                );
 
 
-            breakInput.type = "number";
+            breakInput.type =
+                "number";
 
-            breakInput.min = "0";
 
-            breakInput.max = "60";
+            breakInput.min =
+                "0";
 
-            breakInput.value = "0";
+
+            breakInput.max =
+                "60";
+
+
+            breakInput.value =
+                "0";
 
 
             breakInput.className =
@@ -1052,29 +2270,39 @@ function buildDailyTracker() {
             );
 
 
-            /* Break Status */
+            /*
+               BREAK STATUS
+            */
 
-            const breakStatus =
-                document.createElement("td");
+
+            const breakStatusCell =
+                document.createElement(
+                    "td"
+                );
 
 
-            breakStatus.id =
+            breakStatusCell.id =
                 "breakStatus_" + index;
 
 
-            breakStatus.textContent =
+            breakStatusCell.textContent =
                 "0 / 60 min";
 
 
             row.appendChild(
-                breakStatus
+                breakStatusCell
             );
 
 
-            /* Achieved */
+            /*
+               ACHIEVED
+            */
+
 
             const achievedCell =
-                document.createElement("td");
+                document.createElement(
+                    "td"
+                );
 
 
             achievedCell.id =
@@ -1090,10 +2318,15 @@ function buildDailyTracker() {
             );
 
 
-            /* Remaining */
+            /*
+               REMAINING
+            */
+
 
             const remainingCell =
-                document.createElement("td");
+                document.createElement(
+                    "td"
+                );
 
 
             remainingCell.id =
@@ -1101,7 +2334,10 @@ function buildDailyTracker() {
 
 
             remainingCell.textContent =
-                targetCell.textContent;
+                getDailyTarget(
+                    employee,
+                    "Present"
+                );
 
 
             row.appendChild(
@@ -1109,10 +2345,15 @@ function buildDailyTracker() {
             );
 
 
-            /* Achievement */
+            /*
+               ACHIEVEMENT %
+            */
+
 
             const percentageCell =
-                document.createElement("td");
+                document.createElement(
+                    "td"
+                );
 
 
             percentageCell.id =
@@ -1128,56 +2369,33 @@ function buildDailyTracker() {
             );
 
 
-            table.appendChild(row);
+            table.appendChild(
+                row
+            );
 
 
-            calculateDailyRow(index);
+            calculateDailyRow(
+                index
+            );
+
 
         }
     );
 
-}
 
-
-function getDailyTarget(
-    employee,
-    attendance
-) {
-
-    const projectTarget =
-        Number(
-            employee.daily_target ||
-            employee.target ||
-            0
-        );
-
-
-    if (
-        attendance === "Absent"
-    ) {
-
-        return 0;
-
-    }
-
-
-    if (
-        attendance === "Half Day"
-    ) {
-
-        return Math.ceil(
-            projectTarget / 2
-        );
-
-    }
-
-
-    return projectTarget;
+    updateSummary();
 
 }
+
+
+
+/* =========================================
+   CALCULATE DAILY ROW
+========================================= */
 
 
 function calculateDailyRow(index) {
+
 
     const employee =
         employees[index];
@@ -1191,9 +2409,16 @@ function calculateDailyRow(index) {
 
 
     const attendance =
-        document.getElementById(
-            "attendance_" + index
-        ).value;
+        document
+            .getElementById(
+                "attendance_" + index
+            )
+            .value;
+
+
+    /*
+       TARGET
+    */
 
 
     const target =
@@ -1203,22 +2428,28 @@ function calculateDailyRow(index) {
         );
 
 
-    document.getElementById(
-        "dailyTarget_" + index
-    ).textContent =
+    document
+        .getElementById(
+            "dailyTarget_" + index
+        )
+        .textContent =
         target;
+
+
+    /*
+       ACHIEVED
+    */
 
 
     let achieved = 0;
 
-
-    /* Add all 9 clock-hour slots */
 
     for (
         let hour = 1;
         hour <= 9;
         hour++
     ) {
+
 
         const input =
             document.getElementById(
@@ -1232,14 +2463,19 @@ function calculateDailyRow(index) {
         if (input) {
 
             achieved +=
-                Number(input.value) || 0;
+                Number(
+                    input.value
+                ) || 0;
 
         }
 
     }
 
 
-    /* Absent means zero productivity */
+    /*
+       ABSENT = ZERO PRODUCTIVITY
+    */
+
 
     if (
         attendance === "Absent"
@@ -1247,16 +2483,46 @@ function calculateDailyRow(index) {
 
         achieved = 0;
 
+
+        for (
+            let hour = 1;
+            hour <= 9;
+            hour++
+        ) {
+
+
+            const input =
+                document.getElementById(
+                    "productivity_" +
+                    index +
+                    "_" +
+                    hour
+                );
+
+
+            if (input) {
+
+                input.value = 0;
+
+            }
+
+        }
+
     }
 
 
-    /* Break calculation */
+    /*
+       BREAK
+    */
+
 
     let breakMinutes =
         Number(
-            document.getElementById(
-                "break_" + index
-            ).value
+            document
+                .getElementById(
+                    "break_" + index
+                )
+                .value
         ) || 0;
 
 
@@ -1275,9 +2541,12 @@ function calculateDailyRow(index) {
 
         breakMinutes = 60;
 
-        document.getElementById(
-            "break_" + index
-        ).value = 60;
+
+        document
+            .getElementById(
+                "break_" + index
+            )
+            .value = 60;
 
     }
 
@@ -1297,29 +2566,23 @@ function calculateDailyRow(index) {
         breakMinutes === 60
     ) {
 
-        breakStatus.style.color =
+        breakStatus.className =
             "green";
-
-    }
-
-    else if (
-        breakMinutes > 60
-    ) {
-
-        breakStatus.style.color =
-            "red";
 
     }
 
     else {
 
-        breakStatus.style.color =
-            "#b58900";
+        breakStatus.className =
+            "yellow";
 
     }
 
 
-    /* Remaining target */
+    /*
+       REMAINING
+    */
+
 
     const remaining =
         Math.max(
@@ -1328,7 +2591,10 @@ function calculateDailyRow(index) {
         );
 
 
-    /* Achievement percentage */
+    /*
+       ACHIEVEMENT %
+    */
+
 
     const percentage =
         target > 0
@@ -1339,15 +2605,19 @@ function calculateDailyRow(index) {
         : 0;
 
 
-    document.getElementById(
-        "achieved_" + index
-    ).textContent =
+    document
+        .getElementById(
+            "achieved_" + index
+        )
+        .textContent =
         achieved;
 
 
-    document.getElementById(
-        "remaining_" + index
-    ).textContent =
+    document
+        .getElementById(
+            "remaining_" + index
+        )
+        .textContent =
         remaining;
 
 
@@ -1362,15 +2632,17 @@ function calculateDailyRow(index) {
         "%";
 
 
+    /*
+       COLOR
+    */
+
+
     if (
         percentage >= 100
     ) {
 
-        percentageCell.style.color =
+        percentageCell.className =
             "green";
-
-        percentageCell.style.fontWeight =
-            "bold";
 
     }
 
@@ -1378,373 +2650,178 @@ function calculateDailyRow(index) {
         percentage >= 80
     ) {
 
-        percentageCell.style.color =
-            "#b58900";
-
-        percentageCell.style.fontWeight =
-            "bold";
+        percentageCell.className =
+            "yellow";
 
     }
 
     else {
 
-        percentageCell.style.color =
+        percentageCell.className =
             "red";
 
-        percentageCell.style.fontWeight =
-            "bold";
-
     }
+
+
+    updateSummary();
 
 }
 
 
+
 /* =========================================
-   DATE CHANGE
+   TEAM SUMMARY
 ========================================= */
 
-document
-    .getElementById("trackerDate")
-    .addEventListener(
-        "change",
-        function() {
 
-            buildDailyTracker();
+function updateSummary() {
+
+
+    let totalTarget = 0;
+
+    let totalAchieved = 0;
+
+
+    employees.forEach(
+        function(employee, index) {
+
+
+            const attendanceElement =
+                document.getElementById(
+                    "attendance_" + index
+                );
+
+
+            if (!attendanceElement) {
+
+                return;
+
+            }
+
+
+            const attendance =
+                attendanceElement.value;
+
+
+            const target =
+                getDailyTarget(
+                    employee,
+                    attendance
+                );
+
+
+            totalTarget +=
+                target;
+
+
+            for (
+                let hour = 1;
+                hour <= 9;
+                hour++
+            ) {
+
+
+                const input =
+                    document.getElementById(
+                        "productivity_" +
+                        index +
+                        "_" +
+                        hour
+                    );
+
+
+                if (input) {
+
+                    /*
+                       If absent, productivity
+                       should remain zero.
+                    */
+
+
+                    if (
+                        attendance !== "Absent"
+                    ) {
+
+                        totalAchieved +=
+                            Number(
+                                input.value
+                            ) || 0;
+
+                    }
+
+                }
+
+            }
 
         }
     );
 
-    loadEmployees();
+
+    const totalRemaining =
+        Math.max(
+            totalTarget -
+            totalAchieved,
+            0
+        );
+
+
+    const teamAchievement =
+        totalTarget > 0
+        ? (
+            totalAchieved /
+            totalTarget
+        ) * 100
+        : 0;
+
+
+    document
+        .getElementById(
+            "totalEmployees"
+        )
+        .textContent =
+        employees.length;
+
+
+    document
+        .getElementById(
+            "totalTarget"
+        )
+        .textContent =
+        totalTarget;
+
+
+    document
+        .getElementById(
+            "totalAchieved"
+        )
+        .textContent =
+        totalAchieved;
+
+
+    document
+        .getElementById(
+            "totalRemaining"
+        )
+        .textContent =
+        totalRemaining;
+
+
+    document
+        .getElementById(
+            "teamAchievement"
+        )
+        .textContent =
+        teamAchievement.toFixed(1) +
+        "%";
 
 }
 
 
-/* =========================================
-   LOAD EMPLOYEES
-========================================= */
-
-async function loadEmployees() {
-
-    const result =
-        await supabaseClient
-            .from("employees")
-            .select(`
-                id,
-                employee_name,
-                employee_code,
-                project_id,
-                projects (
-                    project_name,
-                    daily_target
-                )
-            `)
-            .eq("active", true)
-            .order("employee_name");
-
-
-    if (result.error) {
-
-        console.error(
-            "Load employees error:",
-            result.error
-        );
-
-        showEmployeeMessage(
-            "Unable to load employees: " +
-            result.error.message,
-            true
-        );
-
-        return;
-    }
-
-
-    const table =
-        document.getElementById(
-            "employeeTable"
-        );
-
-
-    table.innerHTML = "";
-
-
-    result.data.forEach(function(employee) {
-
-        const row =
-            document.createElement("tr");
-
-
-        const nameCell =
-            document.createElement("td");
-
-        nameCell.textContent =
-            employee.employee_name;
-
-
-        const codeCell =
-            document.createElement("td");
-
-        codeCell.textContent =
-            employee.employee_code;
-
-
-        const projectCell =
-            document.createElement("td");
-
-        projectCell.textContent =
-            employee.projects
-            ? employee.projects.project_name
-            : "";
-
-
-        const targetCell =
-            document.createElement("td");
-
-        targetCell.textContent =
-            employee.projects
-            ? employee.projects.daily_target
-            : "";
-
-
-        const actionCell =
-            document.createElement("td");
-
-
-        const deleteButton =
-            document.createElement("button");
-
-
-        deleteButton.textContent =
-            "Delete";
-
-
-        deleteButton.className =
-            "delete-button";
-
-
-        deleteButton.type =
-            "button";
-
-
-        deleteButton.onclick =
-            function() {
-
-                deleteEmployee(employee.id);
-
-            };
-
-
-        actionCell.appendChild(
-            deleteButton
-        );
-
-
-        row.appendChild(nameCell);
-
-        row.appendChild(codeCell);
-
-        row.appendChild(projectCell);
-
-        row.appendChild(targetCell);
-
-        row.appendChild(actionCell);
-
-
-        table.appendChild(row);
-
-    });
-buildDailyTracker();
-}
-
 
 /* =========================================
-   DELETE EMPLOYEE
+   BUTTON EVENTS
 ========================================= */
 
-async function deleteEmployee(id) {
-
-    const confirmed =
-        confirm(
-            "Are you sure you want to delete this employee?"
-        );
-
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
-
-    const result =
-        await supabaseClient
-            .from("employees")
-            .delete()
-            .eq("id", id);
-
-
-    if (result.error) {
-
-        showEmployeeMessage(
-            "Unable to delete employee: " +
-            result.error.message,
-            true
-        );
-
-        return;
-    }
-
-
-    showEmployeeMessage(
-        "Employee deleted."
-    );
-
-
-    loadEmployees();
-
-}
-
-
-/* =========================================
-   EMPLOYEE MESSAGE
-========================================= */
-
-function showEmployeeMessage(
-    text,
-    isError = false
-) {
-
-    const message =
-        document.getElementById(
-            "employeeMessage"
-        );
-
-
-    message.textContent =
-        text;
-
-
-    message.style.marginTop =
-        "15px";
-
-
-    message.style.fontWeight =
-        "bold";
-
-
-    message.style.color =
-        isError
-        ? "red"
-        : "green";
-
-}
-
-
-/* =========================================
-   EMPLOYEE BUTTON
-========================================= */
-
-document
-    .getElementById(
-        "addEmployeeButton"
-    )
-    .addEventListener(
-        "click",
-        addEmployee
-    );
-
-
-loadEmployeeProjects();
-
-loadEmployees();
-    
-    loadProjects();
-
-}
-
-
-/* =========================================
-   DELETE PROJECT
-========================================= */
-
-async function deleteProject(id) {
-
-    const confirmed =
-        confirm(
-            "Are you sure you want to delete this project?"
-        );
-
-
-    if (!confirmed) {
-
-        return;
-    }
-
-
-    const result =
-        await supabaseClient
-            .from("projects")
-            .delete()
-            .eq("id", id);
-
-
-    if (result.error) {
-
-        console.error(
-            "Delete project error:",
-            result.error
-        );
-
-        showMessage(
-            "Unable to delete project: " +
-            result.error.message,
-            true
-        );
-
-        return;
-    }
-
-
-    showMessage(
-        "Project deleted."
-    );
-
-
-    loadProjects();
-
-}
-
-
-/* =========================================
-   MESSAGE
-========================================= */
-
-function showMessage(
-    text,
-    isError = false
-) {
-
-    const message =
-        document.getElementById(
-            "message"
-        );
-
-
-    message.textContent =
-        text;
-
-
-    message.style.color =
-        isError
-        ? "red"
-        : "green";
-
-}
-
-
-/* =========================================
-   BUTTON EVENT
-========================================= */
 
 document
     .getElementById(
@@ -1756,13 +2833,65 @@ document
     );
 
 
+document
+    .getElementById(
+        "addEmployeeButton"
+    )
+    .addEventListener(
+        "click",
+        addEmployee
+    );
+
+
+
 /* =========================================
-   START
+   DATE CHANGE
 ========================================= */
 
-loadProjects();
+
+document
+    .getElementById(
+        "trackerDate"
+    )
+    .addEventListener(
+        "change",
+        function() {
+
+            buildDailyTracker();
+
+        }
+    );
+
+
+
+/* =========================================
+   START APPLICATION
+========================================= */
+
+
+async function startApplication() {
+
+
+    setTodayDate();
+
+
+    await loadProjects();
+
+
+    await loadEmployeeProjects();
+
+
+    await loadEmployees();
+
+}
+
+
+startApplication();
+
 
 </script>
 
+
 </body>
-</html>      
+
+</html>
