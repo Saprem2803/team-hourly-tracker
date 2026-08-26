@@ -1096,37 +1096,92 @@ function displayProjects() {
             deleteButton.onclick =
                 function() {
 
-                    deleteProject(
-                        project.id
-                    );
+                   async function deleteProject(id) {
 
-                };
-
-            actionCell.appendChild(
-                deleteButton
-            );
-
-            row.appendChild(
-                nameCell
-            );
-
-            row.appendChild(
-                targetCell
-            );
-
-            row.appendChild(
-                actionCell
-            );
-
-            table.appendChild(
-                row
-            );
-
-        }
+    const confirmed = confirm(
+        "Are you sure you want to delete this project?"
     );
 
-}
+    if (!confirmed) {
+        return;
+    }
 
+    // Check whether employees are assigned to this project
+    const employeeCheck =
+        await supabaseClient
+            .from("employees")
+            .select("id, employee_name")
+            .eq("project_id", id);
+
+    if (employeeCheck.error) {
+
+        console.error(
+            "Check employees error:",
+            employeeCheck.error
+        );
+
+        showProjectMessage(
+            "Unable to check project usage: " +
+            employeeCheck.error.message,
+            true
+        );
+
+        return;
+    }
+
+    // If employees are using this project, don't delete it
+    if (
+        employeeCheck.data &&
+        employeeCheck.data.length > 0
+    ) {
+
+        const employeeNames =
+            employeeCheck.data
+                .map(function(employee) {
+                    return employee.employee_name;
+                })
+                .join(", ");
+
+        showProjectMessage(
+            "Cannot delete this project. It is assigned to: " +
+            employeeNames +
+            ". Please reassign or delete the employee first.",
+            true
+        );
+
+        return;
+    }
+
+    // Delete project
+    const result =
+        await supabaseClient
+            .from("projects")
+            .delete()
+            .eq("id", id);
+
+    if (result.error) {
+
+        console.error(
+            "Delete project error:",
+            result.error
+        );
+
+        showProjectMessage(
+            "Unable to delete project: " +
+            result.error.message,
+            true
+        );
+
+        return;
+    }
+
+    showProjectMessage(
+        "Project deleted successfully."
+    );
+
+    await loadProjects();
+    await loadEmployees();
+}
 
 /* =========================================
    DELETE PROJECT
