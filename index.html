@@ -398,7 +398,8 @@ th {
 <button
     type="button"
     class="primary-button"
-    id="addProjectButton">
+    id="addProjectButton"
+    onclick="addProject()">
 
     Add Project
 
@@ -3789,34 +3790,17 @@ async function loadDailyTracker() {
    BUTTON EVENTS
 ========================================= */
 
-document
-    .getElementById(
-        "addProjectButton"
-    )
-    .addEventListener(
-        "click",
-        addProject
-    );
+<button
+    type="button"
+    class="primary-button"
+    id="addEmployeeButton"
+    onclick="addEmployee()">
+
+    Add Employee
+
+</button>
 
 
-document
-    .getElementById(
-        "addEmployeeButton"
-    )
-    .addEventListener(
-        "click",
-        addEmployee
-    );
-
-
-document
-    .getElementById(
-        "saveDailyTrackerButton"
-    )
-    .addEventListener(
-        "click",
-        saveDailyTracker
-    );
 
 
 /* =========================================
