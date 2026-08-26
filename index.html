@@ -261,88 +261,134 @@ class="message">
 
 <!-- EMPLOYEE SETUP -->
 
+<!-- =====================================
+     EMPLOYEE SETUP
+====================================== -->
+
 <div class="card">
 
-<h2>Employee Setup</h2>
+    <h2>
+        Employee Setup
+    </h2>
 
-<div class="form-row">
+    <div class="form-row">
 
-<div class="field">
+        <div class="field">
 
-<label>Employee Name</label>
+            <label for="employeeName">
+                Employee Name
+            </label>
 
-<input
-type="text"
-id="employeeName"
-placeholder="Example: Sarath Nair">
+            <input
+                type="text"
+                id="employeeName"
+                placeholder="Example: Sarath Nair">
 
-</div>
+        </div>
 
-<div class="field">
+        <div class="field">
 
-<label>Employee ID</label>
+            <label for="employeeCode">
+                Employee ID
+            </label>
 
-<input
-type="text"
-id="employeeCode"
-placeholder="Example: 7260">
+            <input
+                type="text"
+                id="employeeCode"
+                placeholder="Example: 7260">
 
-</div>
+        </div>
 
-<div class="field">
+    </div>
 
-<label>Project</label>
+    <div class="form-row">
 
-<select id="employeeProject">
+        <div class="field">
 
-<option value="">
-Select Project
-</option>
+            <label for="employeeProject">
+                Project / Task
+            </label>
 
-</select>
+            <select id="employeeProject">
 
-</div>
+                <option value="">
+                    Select Project
+                </option>
 
-</div>
+            </select>
 
-<button
-type="button"
-class="primary-button"
-id="addEmployeeButton"
-onclick="addEmployee()">
+        </div>
 
-Add Employee
+    </div>
 
-</button>
+    <button
+        type="button"
+        class="primary-button"
+        id="addEmployeeButton">
 
-<div
-id="employeeMessage"
-class="message">
-</div>
+        Add Employee / Task
 
-<div class="table-container">
+    </button>
 
-<table>
+    <div
+        id="employeeMessage"
+        class="message">
+    </div>
 
-<thead>
+    <div class="info-box">
 
-<tr>
+        <strong>
+            Multiple Task Support:
+        </strong>
 
-<th>Employee</th>
-<th>EMP ID</th>
-<th>Project</th>
-<th>Daily Target</th>
-<th>Action</th>
+        The same employee can be assigned to
+        multiple projects/tasks.
 
-</tr>
+        Example:
+        Sarath Nair → WRMC Patient Collection +
+        WRMC AR
 
-</thead>
+    </div>
 
-<tbody id="employeeTable"></tbody>
+    <div class="table-container">
 
-</table>
+        <table>
 
-</div>
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Employee
+                    </th>
+
+                    <th>
+                        EMP ID
+                    </th>
+
+                    <th>
+                        Project / Task
+                    </th>
+
+                    <th>
+                        Daily Target
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="employeeTable">
+
+            </tbody>
+
+        </table>
+
+    </div>
 
 </div>
 
