@@ -2868,9 +2868,11 @@ document
     )
     .addEventListener(
         "change",
-        function() {
+        async function() {
 
             buildDailyTracker();
+
+            await loadDailyTracker();
 
         }
     );
@@ -2884,17 +2886,15 @@ document
 
 async function startApplication() {
 
-
     setTodayDate();
-
 
     await loadProjects();
 
-
     await loadEmployeeProjects();
 
-
     await loadEmployees();
+
+    await loadDailyTracker();
 
 }
 
@@ -3155,6 +3155,220 @@ document
         "click",
         saveDailyTracker
     );
+    /* =========================================
+   LOAD DAILY TRACKER
+========================================= */
+
+async function loadDailyTracker() {
+
+    const trackerDate =
+        document.getElementById(
+            "trackerDate"
+        ).value;
+
+
+    if (!trackerDate) {
+
+        return;
+
+    }
+
+
+    const result =
+        await supabaseClient
+            .from(
+                "daily_productivity"
+            )
+            .select("*")
+            .eq(
+                "tracker_date",
+                trackerDate
+            );
+
+
+    if (result.error) {
+
+        console.error(
+            "Load daily tracker error:",
+            result.error
+        );
+
+
+        showTrackerMessage(
+            "Unable to load tracker: " +
+            result.error.message,
+            true
+        );
+
+
+        return;
+
+    }
+
+
+    const records =
+        result.data || [];
+
+
+    /*
+       If no data exists for this date,
+       leave tracker blank.
+    */
+
+
+    if (
+        records.length === 0
+    ) {
+
+        showTrackerMessage(
+            "No saved data found for " +
+            trackerDate
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+       Match each Supabase record
+       to the employee.
+    */
+
+
+    employees.forEach(
+        function(employee, index) {
+
+
+            const record =
+                records.find(
+                    function(item) {
+
+                        return (
+                            item.employee_id ===
+                            employee.id
+                        );
+
+                    }
+                );
+
+
+            if (!record) {
+
+                return;
+
+            }
+
+
+            /*
+               ATTENDANCE
+            */
+
+
+            const attendance =
+                document.getElementById(
+                    "attendance_" +
+                    index
+                );
+
+
+            attendance.value =
+                record.attendance ||
+                "Present";
+
+
+            /*
+               HOURLY VALUES
+            */
+
+
+            const hourlyValues = [
+
+                record.hour_6_7,
+
+                record.hour_7_8,
+
+                record.hour_8_9,
+
+                record.hour_9_10,
+
+                record.hour_10_11,
+
+                record.hour_11_12,
+
+                record.hour_12_1,
+
+                record.hour_1_2,
+
+                record.hour_2_3
+
+            ];
+
+
+            hourlyValues.forEach(
+                function(value, hourIndex) {
+
+
+                    const input =
+                        document.getElementById(
+                            "productivity_" +
+                            index +
+                            "_" +
+                            (
+                                hourIndex + 1
+                            )
+                        );
+
+
+                    if (input) {
+
+                        input.value =
+                            value || 0;
+
+                    }
+
+                }
+            );
+
+
+            /*
+               BREAK
+            */
+
+
+            const breakInput =
+                document.getElementById(
+                    "break_" +
+                    index
+                );
+
+
+            breakInput.value =
+                record.break_minutes ||
+                0;
+
+
+            /*
+               RECALCULATE
+            */
+
+
+            calculateDailyRow(
+                index
+            );
+
+
+        }
+    );
+
+
+    showTrackerMessage(
+        "Saved data loaded for " +
+        trackerDate
+    );
+
+}
 startApplication();
 
 
