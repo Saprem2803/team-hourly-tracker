@@ -625,6 +625,19 @@
                 <input
                     type="date"
                     id="trackerDate">
+                <button
+    type="button"
+    class="primary-button"
+    id="saveDailyTrackerButton">
+
+    Save Daily Tracker
+
+</button>
+
+<div
+    id="trackerMessage"
+    class="message">
+</div>
 
             </div>
 
@@ -2885,7 +2898,263 @@ async function startApplication() {
 
 }
 
+    /* =========================================
+   SAVE DAILY TRACKER
+========================================= */
 
+async function saveDailyTracker() {
+
+    const trackerDate =
+        document.getElementById(
+            "trackerDate"
+        ).value;
+
+
+    if (!trackerDate) {
+
+        showTrackerMessage(
+            "Please select a date.",
+            true
+        );
+
+        return;
+
+    }
+
+
+    if (employees.length === 0) {
+
+        showTrackerMessage(
+            "No employees found.",
+            true
+        );
+
+        return;
+
+    }
+
+
+    showTrackerMessage(
+        "Saving daily tracker..."
+    );
+
+
+    const records = [];
+
+
+    employees.forEach(
+        function(employee, index) {
+
+
+            const attendance =
+                document.getElementById(
+                    "attendance_" + index
+                ).value;
+
+
+            const dailyTarget =
+                getDailyTarget(
+                    employee,
+                    attendance
+                );
+
+
+            const hours = [];
+
+
+            for (
+                let hour = 1;
+                hour <= 9;
+                hour++
+            ) {
+
+                const input =
+                    document.getElementById(
+                        "productivity_" +
+                        index +
+                        "_" +
+                        hour
+                    );
+
+
+                hours.push(
+                    Number(
+                        input.value
+                    ) || 0
+                );
+
+            }
+
+
+            const breakMinutes =
+                Number(
+                    document.getElementById(
+                        "break_" + index
+                    ).value
+                ) || 0;
+
+
+            const achieved =
+                hours.reduce(
+                    function(total, value) {
+
+                        return total + value;
+
+                    },
+                    0
+                );
+
+
+            const remaining =
+                Math.max(
+                    dailyTarget -
+                    achieved,
+                    0
+                );
+
+
+            const achievementPercentage =
+                dailyTarget > 0
+                ? (
+                    achieved /
+                    dailyTarget
+                ) * 100
+                : 0;
+
+
+            records.push({
+
+                tracker_date:
+                    trackerDate,
+
+                employee_id:
+                    employee.id,
+
+                attendance:
+                    attendance,
+
+                daily_target:
+                    dailyTarget,
+
+                hour_6_7:
+                    hours[0],
+
+                hour_7_8:
+                    hours[1],
+
+                hour_8_9:
+                    hours[2],
+
+                hour_9_10:
+                    hours[3],
+
+                hour_10_11:
+                    hours[4],
+
+                hour_11_12:
+                    hours[5],
+
+                hour_12_1:
+                    hours[6],
+
+                hour_1_2:
+                    hours[7],
+
+                hour_2_3:
+                    hours[8],
+
+                break_minutes:
+                    breakMinutes,
+
+                achieved:
+                    achieved,
+
+                remaining:
+                    remaining,
+
+                achievement_percentage:
+                    achievementPercentage
+
+            });
+
+        }
+    );
+
+
+    const result =
+        await supabaseClient
+            .from(
+                "daily_productivity"
+            )
+            .upsert(
+                records,
+                {
+                    onConflict:
+                        "tracker_date,employee_id"
+                }
+            );
+
+
+    if (result.error) {
+
+        console.error(
+            "Save tracker error:",
+            result.error
+        );
+
+
+        showTrackerMessage(
+            "Unable to save tracker: " +
+            result.error.message,
+            true
+        );
+
+
+        return;
+
+    }
+
+
+    showTrackerMessage(
+        "Daily tracker saved successfully."
+    );
+
+}
+
+
+/* =========================================
+   TRACKER MESSAGE
+========================================= */
+
+function showTrackerMessage(
+    message,
+    isError = false
+) {
+
+    const element =
+        document.getElementById(
+            "trackerMessage"
+        );
+
+
+    element.textContent =
+        message;
+
+
+    element.style.color =
+        isError
+        ? "red"
+        : "green";
+
+}
+document
+    .getElementById(
+        "saveDailyTrackerButton"
+    )
+    .addEventListener(
+        "click",
+        saveDailyTracker
+    );
 startApplication();
 
 
