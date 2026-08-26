@@ -3,629 +3,682 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
 
-    <title>Team Hourly Productivity Tracker</title>
+<title>Team Hourly Productivity Tracker</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- SUPABASE -->
+<style>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+* {
+    box-sizing: border-box;
+}
 
+body {
 
-    <style>
+    font-family: Arial, sans-serif;
 
-        * {
-            box-sizing: border-box;
-        }
+    background: #f4f6f8;
 
+    margin: 0;
 
-        body {
+    padding: 25px;
 
-            font-family: Arial, sans-serif;
+    color: #222;
+}
 
-            background: #f4f6f8;
+.container {
 
-            margin: 0;
+    max-width: 1800px;
 
-            padding: 25px;
+    margin: auto;
+}
 
-            color: #222;
+h1 {
 
-        }
+    margin-bottom: 5px;
+}
 
+.subtitle {
 
-        .container {
+    color: #666;
 
-            max-width: 1600px;
+    margin-bottom: 25px;
+}
 
-            margin: auto;
+.card {
 
-        }
+    background: white;
 
+    padding: 25px;
 
-        h1 {
+    margin-bottom: 25px;
 
-            margin-bottom: 5px;
+    border-radius: 10px;
 
-        }
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.08);
+}
 
+.form-row {
 
-        .subtitle {
+    display: flex;
 
-            color: #666;
+    gap: 15px;
 
-            margin-bottom: 25px;
+    flex-wrap: wrap;
+}
 
-        }
+.field {
 
+    flex: 1;
 
-        .card {
+    min-width: 220px;
+}
 
-            background: white;
+label {
 
-            padding: 25px;
+    display: block;
 
-            margin-bottom: 25px;
+    font-weight: bold;
 
-            border-radius: 10px;
+    margin-bottom: 7px;
+}
 
-            box-shadow:
-                0 2px 8px rgba(0,0,0,0.08);
+input,
+select {
 
-        }
+    width: 100%;
 
+    padding: 10px;
 
-        .form-row {
+    border: 1px solid #ccc;
 
-            display: flex;
+    border-radius: 6px;
 
-            gap: 15px;
+    background: white;
+}
 
-            flex-wrap: wrap;
+button {
 
-        }
+    border: none;
 
+    border-radius: 6px;
 
-        .field {
+    padding: 11px 20px;
 
-            flex: 1;
+    cursor: pointer;
 
-            min-width: 220px;
+    font-weight: bold;
 
-        }
+    margin-top: 20px;
+}
 
+.primary-button {
 
-        label {
+    background: #2563eb;
 
-            display: block;
+    color: white;
+}
 
-            font-weight: bold;
+.secondary-button {
 
-            margin-bottom: 7px;
+    background: #64748b;
 
-        }
+    color: white;
 
+    margin-top: 5px;
 
-        input,
-        select {
+    padding: 7px 12px;
+}
 
-            width: 100%;
+.delete-button {
 
-            padding: 10px;
+    background: #dc2626;
 
-            border: 1px solid #ccc;
+    color: white;
 
-            border-radius: 6px;
+    padding: 6px 12px;
 
-            background: white;
+    margin: 0;
+}
 
-        }
+.small-button {
 
+    padding: 6px 10px;
 
-        button {
+    margin: 0;
+}
 
-            border: none;
+button:hover {
 
-            border-radius: 6px;
+    opacity: 0.9;
+}
 
-            padding: 11px 20px;
+.message {
 
-            cursor: pointer;
+    margin-top: 15px;
 
-            font-weight: bold;
+    font-weight: bold;
+}
 
-            margin-top: 20px;
+.table-container {
 
-        }
+    overflow-x: auto;
 
+    margin-top: 20px;
+}
 
-        .primary-button {
+table {
 
-            background: #2563eb;
+    width: 100%;
 
-            color: white;
+    border-collapse: collapse;
 
-        }
+    background: white;
+}
 
+th,
+td {
 
-        .delete-button {
+    border: 1px solid #ddd;
 
-            background: #dc2626;
+    padding: 8px;
 
-            color: white;
+    text-align: center;
 
-            padding: 6px 12px;
+    white-space: nowrap;
+}
 
-            margin: 0;
+th {
 
-        }
+    background: #f1f5f9;
+}
 
+.hour-input {
 
-        button:hover {
+    width: 65px;
 
-            opacity: 0.9;
+    padding: 7px;
 
-        }
+    text-align: center;
+}
 
+.task-hours {
 
-        .message {
+    width: 80px;
 
-            margin-top: 15px;
+    padding: 7px;
 
-            font-weight: bold;
+    text-align: center;
+}
 
-        }
+.task-target {
 
+    font-weight: bold;
+}
 
-        .table-container {
+.employee-name-cell {
 
-            overflow-x: auto;
+    font-weight: bold;
 
-            margin-top: 20px;
+    background: #f8fafc;
+}
 
-        }
+.task-row {
 
+    background: white;
+}
 
-        table {
+.employee-total {
 
-            width: 100%;
+    background: #f8fafc;
 
-            border-collapse: collapse;
+    font-weight: bold;
+}
 
-            background: white;
+.summary-grid {
 
-        }
+    display: grid;
 
+    grid-template-columns:
+        repeat(auto-fit, minmax(180px, 1fr));
 
-        th,
-        td {
+    gap: 15px;
+}
 
-            border: 1px solid #ddd;
+.summary-box {
 
-            padding: 9px;
+    background: #f8fafc;
 
-            text-align: center;
+    border-radius: 8px;
 
-            white-space: nowrap;
+    padding: 18px;
 
-        }
+    text-align: center;
+}
 
+.summary-box h2 {
 
-        th {
+    margin: 7px 0 0 0;
+}
 
-            background: #f1f5f9;
+.green {
 
-        }
+    color: green;
 
+    font-weight: bold;
+}
 
-        .hour-input {
+.yellow {
 
-            width: 65px;
+    color: #b58900;
 
-            padding: 7px;
+    font-weight: bold;
+}
 
-            text-align: center;
+.red {
 
-        }
+    color: red;
 
+    font-weight: bold;
+}
 
-        .summary-grid {
+.info-box {
 
-            display: grid;
+    background: #f8fafc;
 
-            grid-template-columns:
-                repeat(auto-fit, minmax(180px, 1fr));
+    padding: 12px;
 
-            gap: 15px;
+    border-radius: 6px;
 
-        }
+    margin-top: 15px;
 
+    color: #555;
+}
 
-        .summary-box {
+.warning-box {
 
-            background: #f8fafc;
+    background: #fff7ed;
 
-            border-radius: 8px;
+    border: 1px solid #fed7aa;
 
-            padding: 18px;
+    color: #9a3412;
 
-            text-align: center;
+    padding: 12px;
 
-        }
+    border-radius: 6px;
 
+    margin-top: 15px;
 
-        .summary-box h2 {
+}
 
-            margin: 7px 0 0 0;
+.employee-header {
 
-        }
+    background: #e2e8f0;
 
+    font-weight: bold;
 
-        .green {
+}
 
-            color: green;
+.task-action {
 
-            font-weight: bold;
+    display: flex;
 
-        }
+    gap: 5px;
 
+    justify-content: center;
+}
 
-        .yellow {
-
-            color: #b58900;
-
-            font-weight: bold;
-
-        }
-
-
-        .red {
-
-            color: red;
-
-            font-weight: bold;
-
-        }
-
-
-        .info-box {
-
-            background: #f8fafc;
-
-            padding: 12px;
-
-            border-radius: 6px;
-
-            margin-top: 15px;
-
-            color: #555;
-
-        }
-
-    </style>
+</style>
 
 </head>
 
-
 <body>
-
 
 <div class="container">
 
+<h1>
+    Team Hourly Productivity Tracker
+</h1>
 
-    <!-- =====================================
-         HEADER
-    ====================================== -->
+<div class="subtitle">
+    Daily and hourly productivity monitoring
+</div>
 
 
-    <h1>
-        Team Hourly Productivity Tracker
-    </h1>
+<!-- =====================================
+     PROJECT SETUP
+====================================== -->
 
+<div class="card">
 
-    <div class="subtitle">
+<h2>
+    Project Setup
+</h2>
 
-        Daily and hourly productivity monitoring
+<div class="form-row">
 
-    </div>
+<div class="field">
 
+<label for="projectName">
+    Project Name
+</label>
 
+<input
+    type="text"
+    id="projectName"
+    placeholder="Example: WRMC Patient Collection">
 
-    <!-- =====================================
-         PROJECT SETUP
-    ====================================== -->
+</div>
 
 
-    <div class="card">
+<div class="field">
 
+<label for="projectTarget">
+    Daily Target
+</label>
 
-        <h2>
-            Project Setup
-        </h2>
+<input
+    type="number"
+    id="projectTarget"
+    min="1"
+    placeholder="Example: 125">
 
+</div>
 
-        <div class="form-row">
+</div>
 
 
-            <div class="field">
+<button
+    type="button"
+    class="primary-button"
+    id="addProjectButton">
 
-                <label for="projectName">
+    Add Project
 
-                    Project Name
+</button>
 
-                </label>
 
+<div
+    id="projectMessage"
+    class="message">
+</div>
 
-                <input
-                    type="text"
-                    id="projectName"
-                    placeholder="Example: WRMC Patient Collection">
 
-            </div>
+<div class="table-container">
 
+<table>
 
+<thead>
 
-            <div class="field">
+<tr>
 
-                <label for="projectTarget">
+<th>Project</th>
 
-                    Daily Target
+<th>Daily Target</th>
 
-                </label>
+<th>Action</th>
 
+</tr>
 
-                <input
-                    type="number"
-                    id="projectTarget"
-                    min="1"
-                    placeholder="Example: 125">
+</thead>
 
-            </div>
+<tbody id="projectTable">
+</tbody>
 
+</table>
 
-        </div>
+</div>
 
+</div>
 
 
-        <button
-            type="button"
-            class="primary-button"
-            id="addProjectButton">
+<!-- =====================================
+     EMPLOYEE SETUP
+====================================== -->
 
-            Add Project
+<div class="card">
 
-        </button>
+<h2>
+    Employee Setup
+</h2>
 
+<div class="form-row">
 
-        <div
-            id="projectMessage"
-            class="message">
-        </div>
+<div class="field">
 
+<label for="employeeName">
+    Employee Name
+</label>
 
+<input
+    type="text"
+    id="employeeName"
+    placeholder="Example: Sarath Nair">
 
-        <div class="table-container">
+</div>
 
 
-            <table>
+<div class="field">
 
+<label for="employeeCode">
+    Employee ID
+</label>
 
-                <thead>
+<input
+    type="text"
+    id="employeeCode"
+    placeholder="Example: 7260">
 
-                    <tr>
+</div>
 
-                        <th>
-                            Project
-                        </th>
 
-                        <th>
-                            Daily Target
-                        </th>
+<div class="field">
 
-                        <th>
-                            Action
-                        </th>
+<label for="employeeProject">
+    Default Project
+</label>
 
-                    </tr>
+<select id="employeeProject">
 
-                </thead>
+<option value="">
+    Select Project
+</option>
 
+</select>
 
-                <tbody id="projectTable">
+</div>
 
-                </tbody>
+</div>
 
 
-            </table>
+<button
+    type="button"
+    class="primary-button"
+    id="addEmployeeButton">
 
+    Add Employee
 
-        </div>
+</button>
 
 
-    </div>
+<div
+    id="employeeMessage"
+    class="message">
+</div>
 
 
+<div class="table-container">
 
-    <!-- =====================================
-         EMPLOYEE SETUP
-    ====================================== -->
+<table>
 
+<thead>
 
-    <div class="card">
+<tr>
 
+<th>Employee</th>
 
-        <h2>
-            Employee Setup
-        </h2>
+<th>EMP ID</th>
 
+<th>Default Project</th>
 
-        <div class="form-row">
+<th>Daily Target</th>
 
+<th>Action</th>
 
-            <div class="field">
+</tr>
 
-                <label for="employeeName">
+</thead>
 
-                    Employee Name
+<tbody id="employeeTable">
+</tbody>
 
-                </label>
+</table>
 
+</div>
 
-                <input
-                    type="text"
-                    id="employeeName"
-                    placeholder="Example: Sarath Nair">
+</div>
 
-            </div>
 
+<!-- =====================================
+     DAILY PRODUCTIVITY
+====================================== -->
 
+<div class="card">
 
-            <div class="field">
+<h2>
+    Daily Productivity Tracker
+</h2>
 
-                <label for="employeeCode">
 
-                    Employee ID
+<div class="form-row">
 
-                </label>
+<div class="field">
 
+<label for="trackerDate">
+    Date
+</label>
 
-                <input
-                    type="text"
-                    id="employeeCode"
-                    placeholder="Example: 7260">
+<input
+    type="date"
+    id="trackerDate">
 
-            </div>
+</div>
 
+</div>
 
 
-            <div class="field">
+<div class="info-box">
 
-                <label for="employeeProject">
+<strong>Shift:</strong>
+6:00 PM – 3:00 AM
 
-                    Project
+&nbsp; | &nbsp;
 
-                </label>
+<strong>Break:</strong>
+60 minutes flexible/split
 
+&nbsp; | &nbsp;
 
-                <select id="employeeProject">
+<strong>Full Day Productive Time:</strong>
+8 hours
 
-                    <option value="">
+&nbsp; | &nbsp;
 
-                        Select Project
+<strong>Half Day Productive Time:</strong>
+4 hours
 
-                    </option>
+</div>
 
-                </select>
 
-            </div>
+<div class="warning-box">
 
+<strong>Important:</strong>
 
-        </div>
+An employee can work on multiple projects during the same day.
 
+The total allocated productive hours cannot exceed
+<strong>8 hours</strong> for Present and
+<strong>4 hours</strong> for Half Day.
 
+Target is calculated as:
 
-        <button
-            type="button"
-            class="primary-button"
-            id="addEmployeeButton">
+<strong>
+Project Daily Target ÷ 8 × Allocated Productive Hours
+</strong>
 
-            Add Employee
+</div>
 
-        </button>
 
+<div class="table-container">
 
-        <div
-            id="employeeMessage"
-            class="message">
-        </div>
+<table>
 
+<thead>
 
+<tr>
 
-        <div class="table-container">
+<th>Employee</th>
 
+<th>EMP ID</th>
 
-            <table>
+<th>Project / Task</th>
 
+<th>Attendance</th>
 
-                <thead>
+<th>Allocated Hours</th>
 
-                    <tr>
+<th>Task Target</th>
 
-                        <th>
-                            Employee
-                        </th>
+<th>6–7 PM</th>
 
-                        <th>
-                            EMP ID
-                        </th>
+<th>7–8 PM</th>
 
-                        <th>
-                            Project
-                        </th>
+<th>8–9 PM</th>
 
-                        <th>
-                            Daily Target
-                        </th>
+<th>9–10 PM</th>
 
-                        <th>
-                            Action
-                        </th>
+<th>10–11 PM</th>
 
-                    </tr>
+<th>11 PM–12 AM</th>
 
-                </thead>
+<th>12–1 AM</th>
 
+<th>1–2 AM</th>
 
-                <tbody id="employeeTable">
+<th>2–3 AM</th>
 
-                </tbody>
+<th>Break Min</th>
 
+<th>Break Status</th>
 
-            </table>
+<th>Achieved</th>
 
+<th>Remaining</th>
 
-        </div>
+<th>Achievement %</th>
 
+<th>Action</th>
 
-    </div>
+</tr>
 
+</thead>
 
+<tbody id="dailyTrackerTable">
+</tbody>
 
-    <!-- =====================================
-         DAILY TRACKER
-    ====================================== -->
+</table>
 
+</div>
 
-    <div class="card">
 
-
-        <h2>
-            Daily Productivity Tracker
-        </h2>
-
-
-
-        <div class="form-row">
-
-
-            <div class="field">
-
-                <label for="trackerDate">
-
-                    Date
-
-                </label>
-
-
-                <input
-                    type="date"
-                    id="trackerDate">
-                <button
+<button
     type="button"
     class="primary-button"
     id="saveDailyTrackerButton">
@@ -634,285 +687,109 @@
 
 </button>
 
+
 <div
     id="trackerMessage"
     class="message">
 </div>
 
-            </div>
+</div>
 
 
-        </div>
+<!-- =====================================
+     TEAM SUMMARY
+====================================== -->
 
+<div class="card">
 
+<h2>
+    Team Summary
+</h2>
 
-        <div class="info-box">
+<div class="summary-grid">
 
-            <strong>
-                Shift:
-            </strong>
+<div class="summary-box">
 
-            6:00 PM – 3:00 AM
+<div>
+    Employees
+</div>
 
-            &nbsp; | &nbsp;
-
-            <strong>
-                Break:
-            </strong>
-
-            60 minutes flexible/split
-
-            &nbsp; | &nbsp;
-
-            <strong>
-                Productive Time:
-            </strong>
-
-            8 hours
-
-        </div>
-
-
-
-        <div class="table-container">
-
-
-            <table>
-
-
-                <thead>
-
-                    <tr>
-
-
-                        <th>
-                            Employee
-                        </th>
-
-
-                        <th>
-                            EMP ID
-                        </th>
-
-
-                        <th>
-                            Project
-                        </th>
-
-
-                        <th>
-                            Attendance
-                        </th>
-
-
-                        <th>
-                            Daily Target
-                        </th>
-
-
-                        <th>
-                            6–7 PM
-                        </th>
-
-
-                        <th>
-                            7–8 PM
-                        </th>
-
-
-                        <th>
-                            8–9 PM
-                        </th>
-
-
-                        <th>
-                            9–10 PM
-                        </th>
-
-
-                        <th>
-                            10–11 PM
-                        </th>
-
-
-                        <th>
-                            11 PM–12 AM
-                        </th>
-
-
-                        <th>
-                            12–1 AM
-                        </th>
-
-
-                        <th>
-                            1–2 AM
-                        </th>
-
-
-                        <th>
-                            2–3 AM
-                        </th>
-
-
-                        <th>
-                            Break
-                            <br>
-                            Min
-                        </th>
-
-
-                        <th>
-                            Break Status
-                        </th>
-
-
-                        <th>
-                            Achieved
-                        </th>
-
-
-                        <th>
-                            Remaining
-                        </th>
-
-
-                        <th>
-                            Achievement %
-                        </th>
-
-
-                    </tr>
-
-                </thead>
-
-
-
-                <tbody id="dailyTrackerTable">
-
-                </tbody>
-
-
-            </table>
-
-
-        </div>
-
-
-    </div>
-
-
-
-    <!-- =====================================
-         TEAM SUMMARY
-    ====================================== -->
-
-
-    <div class="card">
-
-
-        <h2>
-            Team Summary
-        </h2>
-
-
-        <div class="summary-grid">
-
-
-            <div class="summary-box">
-
-                <div>
-                    Employees
-                </div>
-
-                <h2 id="totalEmployees">
-                    0
-                </h2>
-
-            </div>
-
-
-
-            <div class="summary-box">
-
-                <div>
-                    Total Target
-                </div>
-
-                <h2 id="totalTarget">
-                    0
-                </h2>
-
-            </div>
-
-
-
-            <div class="summary-box">
-
-                <div>
-                    Total Achieved
-                </div>
-
-                <h2 id="totalAchieved">
-                    0
-                </h2>
-
-            </div>
-
-
-
-            <div class="summary-box">
-
-                <div>
-                    Remaining
-                </div>
-
-                <h2 id="totalRemaining">
-                    0
-                </h2>
-
-            </div>
-
-
-
-            <div class="summary-box">
-
-                <div>
-                    Team Achievement
-                </div>
-
-                <h2 id="teamAchievement">
-                    0%
-                </h2>
-
-            </div>
-
-
-        </div>
-
-
-    </div>
-
+<h2 id="totalEmployees">
+    0
+</h2>
 
 </div>
 
 
+<div class="summary-box">
+
+<div>
+    Total Target
+</div>
+
+<h2 id="totalTarget">
+    0
+</h2>
+
+</div>
+
+
+<div class="summary-box">
+
+<div>
+    Total Achieved
+</div>
+
+<h2 id="totalAchieved">
+    0
+</h2>
+
+</div>
+
+
+<div class="summary-box">
+
+<div>
+    Remaining
+</div>
+
+<h2 id="totalRemaining">
+    0
+</h2>
+
+</div>
+
+
+<div class="summary-box">
+
+<div>
+    Team Achievement
+</div>
+
+<h2 id="teamAchievement">
+    0%
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 
 <script>
-
 
 /* =========================================
    SUPABASE CONNECTION
 ========================================= */
 
-
 const SUPABASE_URL =
     "https://yhoblmvujfqnspaxdfav.supabase.co";
 
-
 const SUPABASE_KEY =
     "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
-
 
 const supabaseClient =
     window.supabase.createClient(
@@ -921,22 +798,26 @@ const supabaseClient =
     );
 
 
-
 /* =========================================
    GLOBAL DATA
 ========================================= */
-
 
 let projects = [];
 
 let employees = [];
 
 
+/*
+   Each employee has one or more
+   task rows for the selected date.
+*/
+
+let taskRows = [];
+
 
 /* =========================================
    DATE
 ========================================= */
-
 
 function setTodayDate() {
 
@@ -945,23 +826,19 @@ function setTodayDate() {
             "trackerDate"
         );
 
-
     const today =
         new Date()
             .toISOString()
             .split("T")[0];
-
 
     dateInput.value = today;
 
 }
 
 
-
 /* =========================================
-   PROJECT MESSAGE
+   MESSAGES
 ========================================= */
-
 
 function showProjectMessage(
     message,
@@ -973,10 +850,8 @@ function showProjectMessage(
             "projectMessage"
         );
 
-
     element.textContent =
         message;
-
 
     element.style.color =
         isError
@@ -984,12 +859,6 @@ function showProjectMessage(
         : "green";
 
 }
-
-
-
-/* =========================================
-   EMPLOYEE MESSAGE
-========================================= */
 
 
 function showEmployeeMessage(
@@ -1002,10 +871,8 @@ function showEmployeeMessage(
             "employeeMessage"
         );
 
-
     element.textContent =
         message;
-
 
     element.style.color =
         isError
@@ -1015,21 +882,38 @@ function showEmployeeMessage(
 }
 
 
+function showTrackerMessage(
+    message,
+    isError = false
+) {
+
+    const element =
+        document.getElementById(
+            "trackerMessage"
+        );
+
+    element.textContent =
+        message;
+
+    element.style.color =
+        isError
+        ? "red"
+        : "green";
+
+}
+
 
 /* =========================================
    ADD PROJECT
 ========================================= */
 
-
 async function addProject() {
-
 
     const name =
         document
             .getElementById("projectName")
             .value
             .trim();
-
 
     const target =
         Number(
@@ -1038,8 +922,7 @@ async function addProject() {
                 .value
         );
 
-
-    if (name === "") {
+    if (!name) {
 
         showProjectMessage(
             "Please enter project name.",
@@ -1050,11 +933,7 @@ async function addProject() {
 
     }
 
-
-    if (
-        !target ||
-        target <= 0
-    ) {
+    if (!target || target <= 0) {
 
         showProjectMessage(
             "Please enter a valid daily target.",
@@ -1065,32 +944,29 @@ async function addProject() {
 
     }
 
-
     showProjectMessage(
         "Saving project..."
     );
-
 
     const result =
         await supabaseClient
             .from("projects")
             .insert({
 
-                project_name: name,
+                project_name:
+                    name,
 
-                daily_target: target
+                daily_target:
+                    target
 
             })
             .select();
 
-
     if (result.error) {
 
         console.error(
-            "Add project error:",
             result.error
         );
-
 
         showProjectMessage(
             "Unable to save project: " +
@@ -1098,53 +974,32 @@ async function addProject() {
             true
         );
 
-
         return;
 
     }
-
-
-    /*
-       CLEAR INPUTS
-    */
-
 
     document
         .getElementById("projectName")
         .value = "";
 
-
     document
         .getElementById("projectTarget")
         .value = "";
-
 
     showProjectMessage(
         "Project saved successfully."
     );
 
-
-    /*
-       REFRESH PROJECT TABLE
-       AND EMPLOYEE DROPDOWN
-    */
-
-
     await loadProjects();
 
-    await loadEmployeeProjects();
-
 }
-
 
 
 /* =========================================
    LOAD PROJECTS
 ========================================= */
 
-
 async function loadProjects() {
-
 
     const result =
         await supabaseClient
@@ -1156,14 +1011,11 @@ async function loadProjects() {
                 "project_name"
             );
 
-
     if (result.error) {
 
         console.error(
-            "Load projects error:",
             result.error
         );
-
 
         showProjectMessage(
             "Unable to load projects: " +
@@ -1171,95 +1023,75 @@ async function loadProjects() {
             true
         );
 
-
         return;
 
     }
 
-
     projects =
         result.data || [];
 
-
     displayProjects();
 
-
-    await loadEmployeeProjects();
+    loadEmployeeProjects();
 
 }
-
 
 
 /* =========================================
    DISPLAY PROJECTS
 ========================================= */
 
-
 function displayProjects() {
-
 
     const table =
         document.getElementById(
             "projectTable"
         );
 
-
     table.innerHTML = "";
-
 
     projects.forEach(
         function(project) {
-
 
             const row =
                 document.createElement(
                     "tr"
                 );
 
-
             const nameCell =
                 document.createElement(
                     "td"
                 );
 
-
             nameCell.textContent =
                 project.project_name;
-
 
             const targetCell =
                 document.createElement(
                     "td"
                 );
 
-
             targetCell.textContent =
                 project.daily_target;
-
 
             const actionCell =
                 document.createElement(
                     "td"
                 );
 
-
             const deleteButton =
                 document.createElement(
                     "button"
                 );
 
-
             deleteButton.textContent =
                 "Delete";
-
 
             deleteButton.className =
                 "delete-button";
 
-
             deleteButton.type =
                 "button";
-
 
             deleteButton.onclick =
                 function() {
@@ -1270,31 +1102,25 @@ function displayProjects() {
 
                 };
 
-
             actionCell.appendChild(
                 deleteButton
             );
-
 
             row.appendChild(
                 nameCell
             );
 
-
             row.appendChild(
                 targetCell
             );
-
 
             row.appendChild(
                 actionCell
             );
 
-
             table.appendChild(
                 row
             );
-
 
         }
     );
@@ -1302,20 +1128,16 @@ function displayProjects() {
 }
 
 
-
 /* =========================================
    DELETE PROJECT
 ========================================= */
 
-
 async function deleteProject(id) {
-
 
     const confirmed =
         confirm(
             "Are you sure you want to delete this project?"
         );
-
 
     if (!confirmed) {
 
@@ -1323,6 +1145,46 @@ async function deleteProject(id) {
 
     }
 
+    /*
+       Check whether employees are
+       currently using this project.
+    */
+
+    const employeeCheck =
+        await supabaseClient
+            .from("employees")
+            .select("id")
+            .eq(
+                "project_id",
+                id
+            );
+
+    if (
+        employeeCheck.error
+    ) {
+
+        showProjectMessage(
+            employeeCheck.error.message,
+            true
+        );
+
+        return;
+
+    }
+
+    if (
+        employeeCheck.data &&
+        employeeCheck.data.length > 0
+    ) {
+
+        showProjectMessage(
+            "This project is assigned to an employee. Change the employee's project before deleting it.",
+            true
+        );
+
+        return;
+
+    }
 
     const result =
         await supabaseClient
@@ -1333,14 +1195,7 @@ async function deleteProject(id) {
                 id
             );
 
-
     if (result.error) {
-
-        console.error(
-            "Delete project error:",
-            result.error
-        );
-
 
         showProjectMessage(
             "Unable to delete project: " +
@@ -1348,64 +1203,31 @@ async function deleteProject(id) {
             true
         );
 
-
         return;
 
     }
 
-
     showProjectMessage(
-        "Project deleted."
+        "Project deleted successfully."
     );
-
 
     await loadProjects();
 
-
     await loadEmployees();
-
 
 }
 
 
-
 /* =========================================
-   LOAD PROJECTS FOR EMPLOYEE DROPDOWN
+   EMPLOYEE PROJECT DROPDOWN
 ========================================= */
 
-
-async function loadEmployeeProjects() {
-
-
-    const result =
-        await supabaseClient
-            .from("projects")
-            .select(
-                "id, project_name, daily_target"
-            )
-            .order(
-                "project_name"
-            );
-
-
-    if (result.error) {
-
-        console.error(
-            "Employee project dropdown error:",
-            result.error
-        );
-
-
-        return;
-
-    }
-
+function loadEmployeeProjects() {
 
     const dropdown =
         document.getElementById(
             "employeeProject"
         );
-
 
     if (!dropdown) {
 
@@ -1413,56 +1235,32 @@ async function loadEmployeeProjects() {
 
     }
 
-
-    /*
-       CLEAR OLD OPTIONS
-    */
-
-
     dropdown.innerHTML = "";
-
-
-    /*
-       DEFAULT OPTION
-    */
-
 
     const defaultOption =
         document.createElement(
             "option"
         );
 
-
     defaultOption.value = "";
-
 
     defaultOption.textContent =
         "Select Project";
-
 
     dropdown.appendChild(
         defaultOption
     );
 
-
-    /*
-       ADD ALL PROJECTS
-    */
-
-
-    result.data.forEach(
+    projects.forEach(
         function(project) {
-
 
             const option =
                 document.createElement(
                     "option"
                 );
 
-
             option.value =
                 project.id;
-
 
             option.textContent =
                 project.project_name +
@@ -1470,11 +1268,9 @@ async function loadEmployeeProjects() {
                 project.daily_target +
                 ")";
 
-
             dropdown.appendChild(
                 option
             );
-
 
         }
     );
@@ -1482,14 +1278,11 @@ async function loadEmployeeProjects() {
 }
 
 
-
 /* =========================================
    ADD EMPLOYEE
 ========================================= */
 
-
 async function addEmployee() {
-
 
     const name =
         document
@@ -1497,13 +1290,11 @@ async function addEmployee() {
             .value
             .trim();
 
-
     const employeeCode =
         document
             .getElementById("employeeCode")
             .value
             .trim();
-
 
     const projectId =
         Number(
@@ -1512,8 +1303,7 @@ async function addEmployee() {
                 .value
         );
 
-
-    if (name === "") {
+    if (!name) {
 
         showEmployeeMessage(
             "Please enter employee name.",
@@ -1524,8 +1314,7 @@ async function addEmployee() {
 
     }
 
-
-    if (employeeCode === "") {
+    if (!employeeCode) {
 
         showEmployeeMessage(
             "Please enter employee ID.",
@@ -1535,7 +1324,6 @@ async function addEmployee() {
         return;
 
     }
-
 
     if (!projectId) {
 
@@ -1548,34 +1336,32 @@ async function addEmployee() {
 
     }
 
-
     showEmployeeMessage(
         "Saving employee..."
     );
-
 
     const result =
         await supabaseClient
             .from("employees")
             .insert({
 
-                employee_name: name,
+                employee_name:
+                    name,
 
-                employee_code: employeeCode,
+                employee_code:
+                    employeeCode,
 
-                project_id: projectId
+                project_id:
+                    projectId
 
             })
             .select();
 
-
     if (result.error) {
 
         console.error(
-            "Add employee error:",
             result.error
         );
-
 
         showEmployeeMessage(
             "Unable to save employee: " +
@@ -1583,50 +1369,36 @@ async function addEmployee() {
             true
         );
 
-
         return;
 
     }
-
-
-    /*
-       CLEAR EMPLOYEE INPUTS
-    */
-
 
     document
         .getElementById("employeeName")
         .value = "";
 
-
     document
         .getElementById("employeeCode")
         .value = "";
-
 
     document
         .getElementById("employeeProject")
         .value = "";
 
-
     showEmployeeMessage(
         "Employee saved successfully."
     );
-
 
     await loadEmployees();
 
 }
 
 
-
 /* =========================================
    LOAD EMPLOYEES
 ========================================= */
 
-
 async function loadEmployees() {
-
 
     const result =
         await supabaseClient
@@ -1645,14 +1417,11 @@ async function loadEmployees() {
                 "employee_name"
             );
 
-
     if (result.error) {
 
         console.error(
-            "Load employees error:",
             result.error
         );
-
 
         showEmployeeMessage(
             "Unable to load employees: " +
@@ -1660,122 +1429,97 @@ async function loadEmployees() {
             true
         );
 
-
         return;
 
     }
 
-
     employees =
         result.data || [];
 
-
     displayEmployees();
 
-
     buildDailyTracker();
-
 
     updateSummary();
 
 }
 
 
-
 /* =========================================
    DISPLAY EMPLOYEES
 ========================================= */
 
-
 function displayEmployees() {
-
 
     const table =
         document.getElementById(
             "employeeTable"
         );
 
-
     table.innerHTML = "";
-
 
     employees.forEach(
         function(employee) {
-
 
             const row =
                 document.createElement(
                     "tr"
                 );
 
-
             const nameCell =
                 document.createElement(
                     "td"
                 );
 
-
             nameCell.textContent =
                 employee.employee_name;
-
 
             const codeCell =
                 document.createElement(
                     "td"
                 );
 
-
             codeCell.textContent =
                 employee.employee_code;
-
 
             const projectCell =
                 document.createElement(
                     "td"
                 );
 
-
             projectCell.textContent =
                 employee.projects
                 ? employee.projects.project_name
                 : "";
-
 
             const targetCell =
                 document.createElement(
                     "td"
                 );
 
-
             targetCell.textContent =
                 employee.projects
                 ? employee.projects.daily_target
                 : "0";
-
 
             const actionCell =
                 document.createElement(
                     "td"
                 );
 
-
             const deleteButton =
                 document.createElement(
                     "button"
                 );
 
-
             deleteButton.textContent =
                 "Delete";
-
 
             deleteButton.className =
                 "delete-button";
 
-
             deleteButton.type =
                 "button";
-
 
             deleteButton.onclick =
                 function() {
@@ -1786,41 +1530,33 @@ function displayEmployees() {
 
                 };
 
-
             actionCell.appendChild(
                 deleteButton
             );
-
 
             row.appendChild(
                 nameCell
             );
 
-
             row.appendChild(
                 codeCell
             );
-
 
             row.appendChild(
                 projectCell
             );
 
-
             row.appendChild(
                 targetCell
             );
-
 
             row.appendChild(
                 actionCell
             );
 
-
             table.appendChild(
                 row
             );
-
 
         }
     );
@@ -1828,27 +1564,22 @@ function displayEmployees() {
 }
 
 
-
 /* =========================================
    DELETE EMPLOYEE
 ========================================= */
 
-
 async function deleteEmployee(id) {
-
 
     const confirmed =
         confirm(
             "Are you sure you want to delete this employee?"
         );
 
-
     if (!confirmed) {
 
         return;
 
     }
-
 
     const result =
         await supabaseClient
@@ -1859,14 +1590,7 @@ async function deleteEmployee(id) {
                 id
             );
 
-
     if (result.error) {
-
-        console.error(
-            "Delete employee error:",
-            result.error
-        );
-
 
         showEmployeeMessage(
             "Unable to delete employee: " +
@@ -1874,101 +1598,83 @@ async function deleteEmployee(id) {
             true
         );
 
-
         return;
 
     }
 
-
     showEmployeeMessage(
         "Employee deleted."
     );
-
 
     await loadEmployees();
 
 }
 
 
-
 /* =========================================
-   GET DAILY TARGET
+   TARGET CALCULATION
 ========================================= */
 
-
-function getDailyTarget(
-    employee,
+function calculateTaskTarget(
+    projectId,
+    allocatedHours,
     attendance
 ) {
 
+    if (
+        attendance === "Absent"
+    ) {
 
-    const projectTarget =
+        return 0;
+
+    }
+
+    const project =
+        projects.find(
+            function(item) {
+
+                return String(item.id) ===
+                    String(projectId);
+
+            }
+        );
+
+    if (!project) {
+
+        return 0;
+
+    }
+
+    const hours =
         Number(
-            employee.projects
-            ? employee.projects.daily_target
-            : 0
-        );
+            allocatedHours
+        ) || 0;
 
+    if (hours <= 0) {
 
-    /*
-       PRESENT
-       Full project target
-    */
-
-
-    if (
-        attendance === "Present"
-    ) {
-
-        return projectTarget;
+        return 0;
 
     }
 
-
-    /*
-       HALF DAY
-       Half target rounded UP
-
-       125 / 2 = 62.5
-       Therefore = 63
-    */
-
-
-    if (
-        attendance === "Half Day"
-    ) {
-
-        return Math.ceil(
-            projectTarget / 2
-        );
-
-    }
-
-
-    /*
-       ABSENT
-    */
-
-
-    return 0;
+    return (
+        Number(
+            project.daily_target
+        ) / 8
+    ) * hours;
 
 }
-
 
 
 /* =========================================
    BUILD DAILY TRACKER
 ========================================= */
 
-
 function buildDailyTracker() {
-
 
     const table =
         document.getElementById(
             "dailyTrackerTable"
         );
-
 
     if (!table) {
 
@@ -1976,442 +1682,743 @@ function buildDailyTracker() {
 
     }
 
-
     table.innerHTML = "";
+
+    taskRows = [];
 
 
     employees.forEach(
-        function(employee, index) {
-
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
+        function(employee) {
 
             /*
-               EMPLOYEE
+               Create one default task
+               using employee's default project.
             */
 
-
-            const employeeCell =
-                document.createElement(
-                    "td"
-                );
-
-
-            employeeCell.textContent =
-                employee.employee_name;
-
-
-            row.appendChild(
-                employeeCell
+            createTaskRow(
+                employee,
+                employee.project_id,
+                true
             );
-
-
-            /*
-               EMP ID
-            */
-
-
-            const codeCell =
-                document.createElement(
-                    "td"
-                );
-
-
-            codeCell.textContent =
-                employee.employee_code;
-
-
-            row.appendChild(
-                codeCell
-            );
-
-
-            /*
-               PROJECT
-            */
-
-
-            const projectCell =
-                document.createElement(
-                    "td"
-                );
-
-
-            projectCell.textContent =
-                employee.projects
-                ? employee.projects.project_name
-                : "";
-
-
-            row.appendChild(
-                projectCell
-            );
-
-
-            /*
-               ATTENDANCE
-            */
-
-
-            const attendanceCell =
-                document.createElement(
-                    "td"
-                );
-
-
-            const attendance =
-                document.createElement(
-                    "select"
-                );
-
-
-            attendance.id =
-                "attendance_" + index;
-
-
-            attendance.innerHTML = `
-
-                <option value="Present">
-                    Present
-                </option>
-
-                <option value="Half Day">
-                    Half Day
-                </option>
-
-                <option value="Absent">
-                    Absent
-                </option>
-
-            `;
-
-
-            attendance.addEventListener(
-                "change",
-                function() {
-
-                    calculateDailyRow(
-                        index
-                    );
-
-                }
-            );
-
-
-            attendanceCell.appendChild(
-                attendance
-            );
-
-
-            row.appendChild(
-                attendanceCell
-            );
-
-
-            /*
-               DAILY TARGET
-            */
-
-
-            const targetCell =
-                document.createElement(
-                    "td"
-                );
-
-
-            targetCell.id =
-                "dailyTarget_" + index;
-
-
-            targetCell.textContent =
-                getDailyTarget(
-                    employee,
-                    "Present"
-                );
-
-
-            row.appendChild(
-                targetCell
-            );
-
-
-            /*
-               9 CLOCK HOURS
-
-               6-7 PM
-               7-8 PM
-               8-9 PM
-               9-10 PM
-               10-11 PM
-               11-12 AM
-               12-1 AM
-               1-2 AM
-               2-3 AM
-            */
-
-
-            for (
-                let hour = 1;
-                hour <= 9;
-                hour++
-            ) {
-
-
-                const hourCell =
-                    document.createElement(
-                        "td"
-                    );
-
-
-                const input =
-                    document.createElement(
-                        "input"
-                    );
-
-
-                input.type =
-                    "number";
-
-
-                input.min =
-                    "0";
-
-
-                input.value =
-                    "0";
-
-
-                input.className =
-                    "hour-input";
-
-
-                input.id =
-                    "productivity_" +
-                    index +
-                    "_" +
-                    hour;
-
-
-                input.addEventListener(
-                    "input",
-                    function() {
-
-                        calculateDailyRow(
-                            index
-                        );
-
-                    }
-                );
-
-
-                hourCell.appendChild(
-                    input
-                );
-
-
-                row.appendChild(
-                    hourCell
-                );
-
-            }
-
-
-            /*
-               BREAK MINUTES
-            */
-
-
-            const breakCell =
-                document.createElement(
-                    "td"
-                );
-
-
-            const breakInput =
-                document.createElement(
-                    "input"
-                );
-
-
-            breakInput.type =
-                "number";
-
-
-            breakInput.min =
-                "0";
-
-
-            breakInput.max =
-                "60";
-
-
-            breakInput.value =
-                "0";
-
-
-            breakInput.className =
-                "hour-input";
-
-
-            breakInput.id =
-                "break_" + index;
-
-
-            breakInput.addEventListener(
-                "input",
-                function() {
-
-                    calculateDailyRow(
-                        index
-                    );
-
-                }
-            );
-
-
-            breakCell.appendChild(
-                breakInput
-            );
-
-
-            row.appendChild(
-                breakCell
-            );
-
-
-            /*
-               BREAK STATUS
-            */
-
-
-            const breakStatusCell =
-                document.createElement(
-                    "td"
-                );
-
-
-            breakStatusCell.id =
-                "breakStatus_" + index;
-
-
-            breakStatusCell.textContent =
-                "0 / 60 min";
-
-
-            row.appendChild(
-                breakStatusCell
-            );
-
-
-            /*
-               ACHIEVED
-            */
-
-
-            const achievedCell =
-                document.createElement(
-                    "td"
-                );
-
-
-            achievedCell.id =
-                "achieved_" + index;
-
-
-            achievedCell.textContent =
-                "0";
-
-
-            row.appendChild(
-                achievedCell
-            );
-
-
-            /*
-               REMAINING
-            */
-
-
-            const remainingCell =
-                document.createElement(
-                    "td"
-                );
-
-
-            remainingCell.id =
-                "remaining_" + index;
-
-
-            remainingCell.textContent =
-                getDailyTarget(
-                    employee,
-                    "Present"
-                );
-
-
-            row.appendChild(
-                remainingCell
-            );
-
-
-            /*
-               ACHIEVEMENT %
-            */
-
-
-            const percentageCell =
-                document.createElement(
-                    "td"
-                );
-
-
-            percentageCell.id =
-                "percentage_" + index;
-
-
-            percentageCell.textContent =
-                "0%";
-
-
-            row.appendChild(
-                percentageCell
-            );
-
-
-            table.appendChild(
-                row
-            );
-
-
-            calculateDailyRow(
-                index
-            );
-
 
         }
     );
-
 
     updateSummary();
 
 }
 
 
-
 /* =========================================
-   CALCULATE DAILY ROW
+   CREATE TASK ROW
 ========================================= */
 
+function createTaskRow(
+    employee,
+    projectId = "",
+    isFirstTask = false,
+    existingData = null
+) {
 
-function calculateDailyRow(index) {
+    const table =
+        document.getElementById(
+            "dailyTrackerTable"
+        );
+
+    const rowId =
+        "task_" +
+        Date.now() +
+        "_" +
+        Math.random()
+            .toString(36)
+            .substring(2, 8);
+
+    const row =
+        document.createElement(
+            "tr"
+        );
+
+    row.dataset.rowId =
+        rowId;
+
+    row.dataset.employeeId =
+        employee.id;
+
+
+    /*
+       EMPLOYEE
+    */
+
+    const employeeCell =
+        document.createElement(
+            "td"
+        );
+
+    employeeCell.className =
+        "employee-name-cell";
+
+    employeeCell.textContent =
+        employee.employee_name;
+
+    row.appendChild(
+        employeeCell
+    );
+
+
+    /*
+       EMPLOYEE CODE
+    */
+
+    const codeCell =
+        document.createElement(
+            "td"
+        );
+
+    codeCell.textContent =
+        employee.employee_code;
+
+    row.appendChild(
+        codeCell
+    );
+
+
+    /*
+       PROJECT
+    */
+
+    const projectCell =
+        document.createElement(
+            "td"
+        );
+
+    const projectSelect =
+        document.createElement(
+            "select"
+        );
+
+    projectSelect.className =
+        "task-project";
+
+    projects.forEach(
+        function(project) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                project.id;
+
+            option.textContent =
+                project.project_name +
+                " (Target: " +
+                project.daily_target +
+                ")";
+
+            if (
+                String(project.id) ===
+                String(projectId)
+            ) {
+
+                option.selected =
+                    true;
+
+            }
+
+            projectSelect.appendChild(
+                option
+            );
+
+        }
+    );
+
+    projectCell.appendChild(
+        projectSelect
+    );
+
+    row.appendChild(
+        projectCell
+    );
+
+
+    /*
+       ATTENDANCE
+    */
+
+    const attendanceCell =
+        document.createElement(
+            "td"
+        );
+
+    if (isFirstTask) {
+
+        const attendance =
+            document.createElement(
+                "select"
+            );
+
+        attendance.className =
+            "attendance-select";
+
+        attendance.innerHTML = `
+
+            <option value="Present">
+                Present
+            </option>
+
+            <option value="Half Day">
+                Half Day
+            </option>
+
+            <option value="Absent">
+                Absent
+            </option>
+
+        `;
+
+        if (
+            existingData &&
+            existingData.attendance
+        ) {
+
+            attendance.value =
+                existingData.attendance;
+
+        }
+
+        attendance.addEventListener(
+            "change",
+            function() {
+
+                handleAttendanceChange(
+                    employee.id
+                );
+
+            }
+        );
+
+        attendanceCell.appendChild(
+            attendance
+        );
+
+    } else {
+
+        attendanceCell.textContent =
+            "Same";
+
+    }
+
+    row.appendChild(
+        attendanceCell
+    );
+
+
+    /*
+       ALLOCATED HOURS
+    */
+
+    const hoursCell =
+        document.createElement(
+            "td"
+        );
+
+    const hoursInput =
+        document.createElement(
+            "input"
+        );
+
+    hoursInput.type =
+        "number";
+
+    hoursInput.min =
+        "0";
+
+    hoursInput.max =
+        "8";
+
+    hoursInput.step =
+        "0.25";
+
+    hoursInput.className =
+        "task-hours";
+
+    hoursInput.value =
+        existingData
+        ? Number(
+            existingData.productive_hours
+        )
+        : "";
+
+    hoursInput.addEventListener(
+        "input",
+        function() {
+
+            calculateTaskRow(
+                row
+            );
+
+            validateEmployeeHours(
+                employee.id
+            );
+
+        }
+    );
+
+    hoursCell.appendChild(
+        hoursInput
+    );
+
+    row.appendChild(
+        hoursCell
+    );
+
+
+    /*
+       TARGET
+    */
+
+    const targetCell =
+        document.createElement(
+            "td"
+        );
+
+    targetCell.className =
+        "task-target";
+
+    row.appendChild(
+        targetCell
+    );
+
+
+    /*
+       HOURLY PRODUCTIVITY
+    */
+
+    const hourlyValues =
+        existingData
+        ? [
+
+            existingData.hour_6_7,
+            existingData.hour_7_8,
+            existingData.hour_8_9,
+            existingData.hour_9_10,
+            existingData.hour_10_11,
+            existingData.hour_11_12,
+            existingData.hour_12_1,
+            existingData.hour_1_2,
+            existingData.hour_2_3
+
+        ]
+        : [];
+
+
+    for (
+        let hour = 1;
+        hour <= 9;
+        hour++
+    ) {
+
+        const hourCell =
+            document.createElement(
+                "td"
+            );
+
+        const input =
+            document.createElement(
+                "input"
+            );
+
+        input.type =
+            "number";
+
+        input.min =
+            "0";
+
+        input.value =
+            hourlyValues.length
+            ? (
+                hourlyValues[hour - 1] || 0
+            )
+            : "0";
+
+        input.className =
+            "hour-input";
+
+        input.dataset.hour =
+            hour;
+
+        input.addEventListener(
+            "input",
+            function() {
+
+                calculateTaskRow(
+                    row
+                );
+
+                updateSummary();
+
+            }
+        );
+
+        hourCell.appendChild(
+            input
+        );
+
+        row.appendChild(
+            hourCell
+        );
+
+    }
+
+
+    /*
+       BREAK
+    */
+
+    const breakCell =
+        document.createElement(
+            "td"
+        );
+
+    if (isFirstTask) {
+
+        const breakInput =
+            document.createElement(
+                "input"
+            );
+
+        breakInput.type =
+            "number";
+
+        breakInput.min =
+            "0";
+
+        breakInput.max =
+            "60";
+
+        breakInput.value =
+            existingData
+            ? (
+                existingData.break_minutes ||
+                0
+            )
+            : 0;
+
+        breakInput.className =
+            "hour-input";
+
+        breakInput.classList.add(
+            "employee-break"
+        );
+
+        breakInput.addEventListener(
+            "input",
+            function() {
+
+                updateBreakStatus(
+                    employee.id
+                );
+
+            }
+        );
+
+        breakCell.appendChild(
+            breakInput
+        );
+
+    } else {
+
+        breakCell.textContent =
+            "Same";
+
+    }
+
+    row.appendChild(
+        breakCell
+    );
+
+
+    /*
+       BREAK STATUS
+    */
+
+    const breakStatusCell =
+        document.createElement(
+            "td"
+        );
+
+    breakStatusCell.className =
+        "break-status";
+
+    breakStatusCell.textContent =
+        isFirstTask
+        ? "0 / 60 min"
+        : "Same";
+
+    row.appendChild(
+        breakStatusCell
+    );
+
+
+    /*
+       ACHIEVED
+    */
+
+    const achievedCell =
+        document.createElement(
+            "td"
+        );
+
+    achievedCell.className =
+        "task-achieved";
+
+    achievedCell.textContent =
+        "0";
+
+    row.appendChild(
+        achievedCell
+    );
+
+
+    /*
+       REMAINING
+    */
+
+    const remainingCell =
+        document.createElement(
+            "td"
+        );
+
+    remainingCell.className =
+        "task-remaining";
+
+    remainingCell.textContent =
+        "0";
+
+    row.appendChild(
+        remainingCell
+    );
+
+
+    /*
+       PERCENTAGE
+    */
+
+    const percentageCell =
+        document.createElement(
+            "td"
+        );
+
+    percentageCell.className =
+        "task-percentage";
+
+    percentageCell.textContent =
+        "0%";
+
+    row.appendChild(
+        percentageCell
+    );
+
+
+    /*
+       ACTION
+    */
+
+    const actionCell =
+        document.createElement(
+            "td"
+        );
+
+    const actionDiv =
+        document.createElement(
+            "div"
+        );
+
+    actionDiv.className =
+        "task-action";
+
+
+    /*
+       ADD TASK
+    */
+
+    const addButton =
+        document.createElement(
+            "button"
+        );
+
+    addButton.type =
+        "button";
+
+    addButton.textContent =
+        "+ Task";
+
+    addButton.className =
+        "secondary-button";
+
+    addButton.onclick =
+        function() {
+
+            createTaskRow(
+                employee,
+                "",
+                false
+            );
+
+        };
+
+    actionDiv.appendChild(
+        addButton
+    );
+
+
+    /*
+       REMOVE
+    */
+
+    if (!isFirstTask) {
+
+        const removeButton =
+            document.createElement(
+                "button"
+            );
+
+        removeButton.type =
+            "button";
+
+        removeButton.textContent =
+            "Remove";
+
+        removeButton.className =
+            "delete-button";
+
+        removeButton.onclick =
+            function() {
+
+                row.remove();
+
+                validateEmployeeHours(
+                    employee.id
+                );
+
+                updateSummary();
+
+            };
+
+        actionDiv.appendChild(
+            removeButton
+        );
+
+    }
+
+    actionCell.appendChild(
+        actionDiv
+    );
+
+    row.appendChild(
+        actionCell
+    );
+
+
+    table.appendChild(
+        row
+    );
+
+
+    /*
+       Project change
+    */
+
+    projectSelect.addEventListener(
+        "change",
+        function() {
+
+            calculateTaskRow(
+                row
+            );
+
+        }
+    );
+
+
+    /*
+       Save row reference
+    */
+
+    taskRows.push({
+        row: row,
+        employeeId: employee.id
+    });
+
+
+    calculateTaskRow(
+        row
+    );
+
+    updateBreakStatus(
+        employee.id
+    );
+
+    validateEmployeeHours(
+        employee.id
+    );
+
+}
+
+
+/* =========================================
+   CALCULATE TASK ROW
+========================================= */
+
+function calculateTaskRow(row) {
+
+    const projectSelect =
+        row.querySelector(
+            ".task-project"
+        );
+
+    const hoursInput =
+        row.querySelector(
+            ".task-hours"
+        );
+
+    const targetCell =
+        row.querySelector(
+            ".task-target"
+        );
+
+    const achievedCell =
+        row.querySelector(
+            ".task-achieved"
+        );
+
+    const remainingCell =
+        row.querySelector(
+            ".task-remaining"
+        );
+
+    const percentageCell =
+        row.querySelector(
+            ".task-percentage"
+        );
+
+
+    const employeeId =
+        Number(
+            row.dataset.employeeId
+        );
 
 
     const employee =
-        employees[index];
+        employees.find(
+            function(item) {
+
+                return Number(item.id) ===
+                    employeeId;
+
+            }
+        );
 
 
     if (!employee) {
@@ -2422,72 +2429,66 @@ function calculateDailyRow(index) {
 
 
     const attendance =
-        document
-            .getElementById(
-                "attendance_" + index
-            )
-            .value;
+        getEmployeeAttendance(
+            employeeId
+        );
 
 
-    /*
-       TARGET
-    */
+    const hours =
+        Number(
+            hoursInput.value
+        ) || 0;
 
 
     const target =
-        getDailyTarget(
-            employee,
+        calculateTaskTarget(
+            projectSelect.value,
+            hours,
             attendance
         );
 
 
-    document
-        .getElementById(
-            "dailyTarget_" + index
-        )
-        .textContent =
-        target;
+    targetCell.textContent =
+        target.toFixed(2);
 
 
     /*
        ACHIEVED
     */
 
-
     let achieved = 0;
 
 
-    for (
-        let hour = 1;
-        hour <= 9;
-        hour++
-    ) {
-
-
-        const input =
-            document.getElementById(
-                "productivity_" +
-                index +
-                "_" +
-                hour
-            );
-
-
-        if (input) {
-
-            achieved +=
-                Number(
-                    input.value
-                ) || 0;
-
-        }
-
-    }
+    const hourInputs =
+        row.querySelectorAll(
+            ".hour-input"
+        );
 
 
     /*
-       ABSENT = ZERO PRODUCTIVITY
+       Break input also has
+       hour-input class.
+
+       Therefore only inputs
+       having data-hour are productivity.
     */
+
+    hourInputs.forEach(
+        function(input) {
+
+            if (
+                input.dataset.hour
+            ) {
+
+                achieved +=
+                    Number(
+                        input.value
+                    ) || 0;
+
+            }
+
+        }
+    );
 
 
     if (
@@ -2496,105 +2497,22 @@ function calculateDailyRow(index) {
 
         achieved = 0;
 
+        hourInputs.forEach(
+            function(input) {
 
-        for (
-            let hour = 1;
-            hour <= 9;
-            hour++
-        ) {
+                if (
+                    input.dataset.hour
+                ) {
 
+                    input.value =
+                        0;
 
-            const input =
-                document.getElementById(
-                    "productivity_" +
-                    index +
-                    "_" +
-                    hour
-                );
-
-
-            if (input) {
-
-                input.value = 0;
+                }
 
             }
-
-        }
-
-    }
-
-
-    /*
-       BREAK
-    */
-
-
-    let breakMinutes =
-        Number(
-            document
-                .getElementById(
-                    "break_" + index
-                )
-                .value
-        ) || 0;
-
-
-    if (
-        breakMinutes < 0
-    ) {
-
-        breakMinutes = 0;
-
-    }
-
-
-    if (
-        breakMinutes > 60
-    ) {
-
-        breakMinutes = 60;
-
-
-        document
-            .getElementById(
-                "break_" + index
-            )
-            .value = 60;
-
-    }
-
-
-    const breakStatus =
-        document.getElementById(
-            "breakStatus_" + index
         );
 
-
-    breakStatus.textContent =
-        breakMinutes +
-        " / 60 min";
-
-
-    if (
-        breakMinutes === 60
-    ) {
-
-        breakStatus.className =
-            "green";
-
     }
-
-    else {
-
-        breakStatus.className =
-            "yellow";
-
-    }
-
-
-    /*
-       REMAINING
-    */
 
 
     const remaining =
@@ -2602,11 +2520,6 @@ function calculateDailyRow(index) {
             target - achieved,
             0
         );
-
-
-    /*
-       ACHIEVEMENT %
-    */
 
 
     const percentage =
@@ -2618,26 +2531,12 @@ function calculateDailyRow(index) {
         : 0;
 
 
-    document
-        .getElementById(
-            "achieved_" + index
-        )
-        .textContent =
+    achievedCell.textContent =
         achieved;
 
 
-    document
-        .getElementById(
-            "remaining_" + index
-        )
-        .textContent =
-        remaining;
-
-
-    const percentageCell =
-        document.getElementById(
-            "percentage_" + index
-        );
+    remainingCell.textContent =
+        remaining.toFixed(2);
 
 
     percentageCell.textContent =
@@ -2645,17 +2544,12 @@ function calculateDailyRow(index) {
         "%";
 
 
-    /*
-       COLOR
-    */
-
-
     if (
         percentage >= 100
     ) {
 
         percentageCell.className =
-            "green";
+            "task-percentage green";
 
     }
 
@@ -2664,14 +2558,14 @@ function calculateDailyRow(index) {
     ) {
 
         percentageCell.className =
-            "yellow";
+            "task-percentage yellow";
 
     }
 
     else {
 
         percentageCell.className =
-            "red";
+            "task-percentage red";
 
     }
 
@@ -2681,88 +2575,392 @@ function calculateDailyRow(index) {
 }
 
 
+/* =========================================
+   GET EMPLOYEE ATTENDANCE
+========================================= */
+
+function getEmployeeAttendance(
+    employeeId
+) {
+
+    const rows =
+        getEmployeeRows(
+            employeeId
+        );
+
+    if (
+        rows.length === 0
+    ) {
+
+        return "Present";
+
+    }
+
+    const attendance =
+        rows[0].querySelector(
+            ".attendance-select"
+        );
+
+    if (!attendance) {
+
+        return "Present";
+
+    }
+
+    return attendance.value;
+
+}
+
+
+/* =========================================
+   GET EMPLOYEE ROWS
+========================================= */
+
+function getEmployeeRows(
+    employeeId
+) {
+
+    const allRows =
+        document.querySelectorAll(
+            "#dailyTrackerTable tr"
+        );
+
+    return Array.from(
+        allRows
+    ).filter(
+        function(row) {
+
+            return Number(
+                row.dataset.employeeId
+            ) ===
+            Number(employeeId);
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   ATTENDANCE CHANGE
+========================================= */
+
+function handleAttendanceChange(
+    employeeId
+) {
+
+    const attendance =
+        getEmployeeAttendance(
+            employeeId
+        );
+
+
+    const rows =
+        getEmployeeRows(
+            employeeId
+        );
+
+
+    if (
+        attendance === "Absent"
+    ) {
+
+        rows.forEach(
+            function(row) {
+
+                const hoursInput =
+                    row.querySelector(
+                        ".task-hours"
+                    );
+
+                hoursInput.value =
+                    0;
+
+
+                row.querySelectorAll(
+                    "input[data-hour]"
+                ).forEach(
+                    function(input) {
+
+                        input.value =
+                            0;
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+    rows.forEach(
+        function(row) {
+
+            calculateTaskRow(
+                row
+            );
+
+        }
+    );
+
+
+    validateEmployeeHours(
+        employeeId
+    );
+
+
+    updateSummary();
+
+}
+
+
+/* =========================================
+   VALIDATE TOTAL HOURS
+========================================= */
+
+function validateEmployeeHours(
+    employeeId
+) {
+
+    const rows =
+        getEmployeeRows(
+            employeeId
+        );
+
+
+    let totalHours =
+        0;
+
+
+    rows.forEach(
+        function(row) {
+
+            const input =
+                row.querySelector(
+                    ".task-hours"
+                );
+
+            totalHours +=
+                Number(
+                    input.value
+                ) || 0;
+
+        }
+    );
+
+
+    const attendance =
+        getEmployeeAttendance(
+            employeeId
+        );
+
+
+    const maximum =
+        attendance === "Half Day"
+        ? 4
+        : attendance === "Absent"
+        ? 0
+        : 8;
+
+
+    /*
+       Find employee first row.
+    */
+
+    if (
+        rows.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    const firstRow =
+        rows[0];
+
+
+    if (
+        totalHours > maximum
+    ) {
+
+        firstRow.style.background =
+            "#fee2e2";
+
+    }
+
+    else {
+
+        rows.forEach(
+            function(row) {
+
+                row.style.background =
+                    "white";
+
+            }
+        );
+
+    }
+
+
+    updateSummary();
+
+}
+
+
+/* =========================================
+   BREAK STATUS
+========================================= */
+
+function updateBreakStatus(
+    employeeId
+) {
+
+    const rows =
+        getEmployeeRows(
+            employeeId
+        );
+
+
+    if (
+        rows.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    const breakInput =
+        rows[0].querySelector(
+            ".employee-break"
+        );
+
+
+    const statusCell =
+        rows[0].querySelector(
+            ".break-status"
+        );
+
+
+    if (
+        !breakInput ||
+        !statusCell
+    ) {
+
+        return;
+
+    }
+
+
+    let minutes =
+        Number(
+            breakInput.value
+        ) || 0;
+
+
+    if (
+        minutes < 0
+    ) {
+
+        minutes = 0;
+
+        breakInput.value =
+            0;
+
+    }
+
+
+    if (
+        minutes > 60
+    ) {
+
+        minutes = 60;
+
+        breakInput.value =
+            60;
+
+    }
+
+
+    statusCell.textContent =
+        minutes +
+        " / 60 min";
+
+
+    if (
+        minutes === 60
+    ) {
+
+        statusCell.className =
+            "break-status green";
+
+    }
+
+    else {
+
+        statusCell.className =
+            "break-status yellow";
+
+    }
+
+}
+
 
 /* =========================================
    TEAM SUMMARY
 ========================================= */
 
-
 function updateSummary() {
 
+    let totalTarget =
+        0;
 
-    let totalTarget = 0;
-
-    let totalAchieved = 0;
-
-
-    employees.forEach(
-        function(employee, index) {
+    let totalAchieved =
+        0;
 
 
-            const attendanceElement =
-                document.getElementById(
-                    "attendance_" + index
+    const rows =
+        document.querySelectorAll(
+            "#dailyTrackerTable tr"
+        );
+
+
+    rows.forEach(
+        function(row) {
+
+            const targetCell =
+                row.querySelector(
+                    ".task-target"
+                );
+
+            const achievedCell =
+                row.querySelector(
+                    ".task-achieved"
                 );
 
 
-            if (!attendanceElement) {
+            if (
+                targetCell
+            ) {
 
-                return;
+                totalTarget +=
+                    Number(
+                        targetCell.textContent
+                    ) || 0;
 
             }
 
 
-            const attendance =
-                attendanceElement.value;
-
-
-            const target =
-                getDailyTarget(
-                    employee,
-                    attendance
-                );
-
-
-            totalTarget +=
-                target;
-
-
-            for (
-                let hour = 1;
-                hour <= 9;
-                hour++
+            if (
+                achievedCell
             ) {
 
-
-                const input =
-                    document.getElementById(
-                        "productivity_" +
-                        index +
-                        "_" +
-                        hour
-                    );
-
-
-                if (input) {
-
-                    /*
-                       If absent, productivity
-                       should remain zero.
-                    */
-
-
-                    if (
-                        attendance !== "Absent"
-                    ) {
-
-                        totalAchieved +=
-                            Number(
-                                input.value
-                            ) || 0;
-
-                    }
-
-                }
+                totalAchieved +=
+                    Number(
+                        achievedCell.textContent
+                    ) || 0;
 
             }
 
@@ -2800,7 +2998,7 @@ function updateSummary() {
             "totalTarget"
         )
         .textContent =
-        totalTarget;
+        totalTarget.toFixed(2);
 
 
     document
@@ -2816,7 +3014,7 @@ function updateSummary() {
             "totalRemaining"
         )
         .textContent =
-        totalRemaining;
+        totalRemaining.toFixed(2);
 
 
     document
@@ -2830,75 +3028,7 @@ function updateSummary() {
 }
 
 
-
 /* =========================================
-   BUTTON EVENTS
-========================================= */
-
-
-document
-    .getElementById(
-        "addProjectButton"
-    )
-    .addEventListener(
-        "click",
-        addProject
-    );
-
-
-document
-    .getElementById(
-        "addEmployeeButton"
-    )
-    .addEventListener(
-        "click",
-        addEmployee
-    );
-
-
-
-/* =========================================
-   DATE CHANGE
-========================================= */
-
-
-document
-    .getElementById(
-        "trackerDate"
-    )
-    .addEventListener(
-        "change",
-        async function() {
-
-            buildDailyTracker();
-
-            await loadDailyTracker();
-
-        }
-    );
-
-
-
-/* =========================================
-   START APPLICATION
-========================================= */
-
-
-async function startApplication() {
-
-    setTodayDate();
-
-    await loadProjects();
-
-    await loadEmployeeProjects();
-
-    await loadEmployees();
-
-    await loadDailyTracker();
-
-}
-
-    /* =========================================
    SAVE DAILY TRACKER
 ========================================= */
 
@@ -2922,7 +3052,9 @@ async function saveDailyTracker() {
     }
 
 
-    if (employees.length === 0) {
+    if (
+        employees.length === 0
+    ) {
 
         showTrackerMessage(
             "No employees found.",
@@ -2930,6 +3062,73 @@ async function saveDailyTracker() {
         );
 
         return;
+
+    }
+
+
+    /*
+       Validate employee hours
+    */
+
+    for (
+        const employee of employees
+    ) {
+
+        const rows =
+            getEmployeeRows(
+                employee.id
+            );
+
+
+        const attendance =
+            getEmployeeAttendance(
+                employee.id
+            );
+
+
+        let totalHours =
+            0;
+
+
+        rows.forEach(
+            function(row) {
+
+                totalHours +=
+                    Number(
+                        row.querySelector(
+                            ".task-hours"
+                        ).value
+                    ) || 0;
+
+            }
+        );
+
+
+        const maximum =
+            attendance === "Half Day"
+            ? 4
+            : attendance === "Absent"
+            ? 0
+            : 8;
+
+
+        if (
+            totalHours > maximum
+        ) {
+
+            showTrackerMessage(
+                employee.employee_name +
+                " has " +
+                totalHours +
+                " allocated hours. Maximum allowed is " +
+                maximum +
+                " hours.",
+                true
+            );
+
+            return;
+
+        }
 
     }
 
@@ -2942,59 +3141,96 @@ async function saveDailyTracker() {
     const records = [];
 
 
-    employees.forEach(
-        function(employee, index) {
+    const rows =
+        document.querySelectorAll(
+            "#dailyTrackerTable tr"
+        );
 
 
-            const attendance =
-                document.getElementById(
-                    "attendance_" + index
-                ).value;
+    rows.forEach(
+        function(row) {
 
-
-            const dailyTarget =
-                getDailyTarget(
-                    employee,
-                    attendance
+            const employeeId =
+                Number(
+                    row.dataset.employeeId
                 );
 
 
-            const hours = [];
+            const employee =
+                employees.find(
+                    function(item) {
 
+                        return Number(item.id) ===
+                            employeeId;
 
-            for (
-                let hour = 1;
-                hour <= 9;
-                hour++
-            ) {
-
-                const input =
-                    document.getElementById(
-                        "productivity_" +
-                        index +
-                        "_" +
-                        hour
-                    );
-
-
-                hours.push(
-                    Number(
-                        input.value
-                    ) || 0
+                    }
                 );
+
+
+            if (!employee) {
+
+                return;
 
             }
 
 
-            const breakMinutes =
+            const employeeRows =
+                getEmployeeRows(
+                    employeeId
+                );
+
+
+            const attendance =
+                getEmployeeAttendance(
+                    employeeId
+                );
+
+
+            const projectId =
                 Number(
-                    document.getElementById(
-                        "break_" + index
+                    row.querySelector(
+                        ".task-project"
+                    ).value
+                );
+
+
+            const productiveHours =
+                Number(
+                    row.querySelector(
+                        ".task-hours"
                     ).value
                 ) || 0;
 
 
-            const achieved =
+            const target =
+                calculateTaskTarget(
+                    projectId,
+                    productiveHours,
+                    attendance
+                );
+
+
+            const hourlyInputs =
+                row.querySelectorAll(
+                    "input[data-hour]"
+                );
+
+
+            const hours =
+                Array.from(
+                    hourlyInputs
+                ).map(
+                    function(input) {
+
+                        return Number(
+                            input.value
+                        ) || 0;
+
+                    }
+                );
+
+
+            let achieved =
                 hours.reduce(
                     function(total, value) {
 
@@ -3005,21 +3241,53 @@ async function saveDailyTracker() {
                 );
 
 
+            if (
+                attendance === "Absent"
+            ) {
+
+                achieved = 0;
+
+            }
+
+
             const remaining =
                 Math.max(
-                    dailyTarget -
+                    target -
                     achieved,
                     0
                 );
 
 
-            const achievementPercentage =
-                dailyTarget > 0
+            const percentage =
+                target > 0
                 ? (
                     achieved /
-                    dailyTarget
+                    target
                 ) * 100
                 : 0;
+
+
+            let breakMinutes =
+                0;
+
+
+            if (
+                employeeRows.length > 0
+            ) {
+
+                const breakInput =
+                    employeeRows[0].querySelector(
+                        ".employee-break"
+                    );
+
+                breakMinutes =
+                    Number(
+                        breakInput
+                        ? breakInput.value
+                        : 0
+                    ) || 0;
+
+            }
 
 
             records.push({
@@ -3028,40 +3296,46 @@ async function saveDailyTracker() {
                     trackerDate,
 
                 employee_id:
-                    employee.id,
+                    employeeId,
+
+                project_id:
+                    projectId,
 
                 attendance:
                     attendance,
 
+                productive_hours:
+                    productiveHours,
+
                 daily_target:
-                    dailyTarget,
+                    target,
 
                 hour_6_7:
-                    hours[0],
+                    hours[0] || 0,
 
                 hour_7_8:
-                    hours[1],
+                    hours[1] || 0,
 
                 hour_8_9:
-                    hours[2],
+                    hours[2] || 0,
 
                 hour_9_10:
-                    hours[3],
+                    hours[3] || 0,
 
                 hour_10_11:
-                    hours[4],
+                    hours[4] || 0,
 
                 hour_11_12:
-                    hours[5],
+                    hours[5] || 0,
 
                 hour_12_1:
-                    hours[6],
+                    hours[6] || 0,
 
                 hour_1_2:
-                    hours[7],
+                    hours[7] || 0,
 
                 hour_2_3:
-                    hours[8],
+                    hours[8] || 0,
 
                 break_minutes:
                     breakMinutes,
@@ -3073,7 +3347,7 @@ async function saveDailyTracker() {
                     remaining,
 
                 achievement_percentage:
-                    achievementPercentage
+                    percentage
 
             });
 
@@ -3081,34 +3355,84 @@ async function saveDailyTracker() {
     );
 
 
-    const result =
+    /*
+       Delete existing records
+       for this date first.
+
+       This allows the user to
+       add/remove tasks and save
+       again without duplicate rows.
+    */
+
+    const deleteResult =
         await supabaseClient
             .from(
-                "daily_productivity"
+                "daily_task_productivity"
             )
-            .upsert(
-                records,
-                {
-                    onConflict:
-                        "tracker_date,employee_id"
-                }
+            .delete()
+            .eq(
+                "tracker_date",
+                trackerDate
             );
 
 
-    if (result.error) {
+    if (
+        deleteResult.error
+    ) {
+
+        console.error(
+            deleteResult.error
+        );
+
+        showTrackerMessage(
+            "Unable to update existing tracker data: " +
+            deleteResult.error.message,
+            true
+        );
+
+        return;
+
+    }
+
+
+    if (
+        records.length === 0
+    ) {
+
+        showTrackerMessage(
+            "No task data to save.",
+            true
+        );
+
+        return;
+
+    }
+
+
+    const result =
+        await supabaseClient
+            .from(
+                "daily_task_productivity"
+            )
+            .insert(
+                records
+            );
+
+
+    if (
+        result.error
+    ) {
 
         console.error(
             "Save tracker error:",
             result.error
         );
 
-
         showTrackerMessage(
             "Unable to save tracker: " +
             result.error.message,
             true
         );
-
 
         return;
 
@@ -3123,39 +3447,6 @@ async function saveDailyTracker() {
 
 
 /* =========================================
-   TRACKER MESSAGE
-========================================= */
-
-function showTrackerMessage(
-    message,
-    isError = false
-) {
-
-    const element =
-        document.getElementById(
-            "trackerMessage"
-        );
-
-
-    element.textContent =
-        message;
-
-
-    element.style.color =
-        isError
-        ? "red"
-        : "green";
-
-}
-document
-    .getElementById(
-        "saveDailyTrackerButton"
-    )
-    .addEventListener(
-        "click",
-        saveDailyTracker
-    );
-    /* =========================================
    LOAD DAILY TRACKER
 ========================================= */
 
@@ -3177,29 +3468,44 @@ async function loadDailyTracker() {
     const result =
         await supabaseClient
             .from(
-                "daily_productivity"
+                "daily_task_productivity"
             )
-            .select("*")
+            .select(`
+                *,
+                employees (
+                    id,
+                    employee_name,
+                    employee_code
+                ),
+                projects (
+                    id,
+                    project_name,
+                    daily_target
+                )
+            `)
             .eq(
                 "tracker_date",
                 trackerDate
+            )
+            .order(
+                "employee_id"
             );
 
 
-    if (result.error) {
+    if (
+        result.error
+    ) {
 
         console.error(
-            "Load daily tracker error:",
+            "Load tracker error:",
             result.error
         );
-
 
         showTrackerMessage(
             "Unable to load tracker: " +
             result.error.message,
             true
         );
-
 
         return;
 
@@ -3211,20 +3517,32 @@ async function loadDailyTracker() {
 
 
     /*
-       If no data exists for this date,
-       leave tracker blank.
+       Rebuild tracker first.
     */
 
+    const table =
+        document.getElementById(
+            "dailyTrackerTable"
+        );
+
+    table.innerHTML = "";
+
+
+    /*
+       If no saved data,
+       create default rows.
+    */
 
     if (
         records.length === 0
     ) {
 
+        buildDailyTracker();
+
         showTrackerMessage(
             "No saved data found for " +
             trackerDate
         );
-
 
         return;
 
@@ -3232,135 +3550,79 @@ async function loadDailyTracker() {
 
 
     /*
-       Match each Supabase record
-       to the employee.
+       Group records by employee.
     */
+
+    const grouped = {};
+
+
+    records.forEach(
+        function(record) {
+
+            if (
+                !grouped[
+                    record.employee_id
+                ]
+            ) {
+
+                grouped[
+                    record.employee_id
+                ] = [];
+
+            }
+
+            grouped[
+                record.employee_id
+            ].push(
+                record
+            );
+
+        }
+    );
 
 
     employees.forEach(
-        function(employee, index) {
+        function(employee) {
+
+            const employeeRecords =
+                grouped[
+                    employee.id
+                ] || [];
 
 
-            const record =
-                records.find(
-                    function(item) {
+            if (
+                employeeRecords.length === 0
+            ) {
 
-                        return (
-                            item.employee_id ===
-                            employee.id
-                        );
-
-                    }
+                createTaskRow(
+                    employee,
+                    employee.project_id,
+                    true
                 );
-
-
-            if (!record) {
 
                 return;
 
             }
 
 
-            /*
-               ATTENDANCE
-            */
+            employeeRecords.forEach(
+                function(record, index) {
 
-
-            const attendance =
-                document.getElementById(
-                    "attendance_" +
-                    index
-                );
-
-
-            attendance.value =
-                record.attendance ||
-                "Present";
-
-
-            /*
-               HOURLY VALUES
-            */
-
-
-            const hourlyValues = [
-
-                record.hour_6_7,
-
-                record.hour_7_8,
-
-                record.hour_8_9,
-
-                record.hour_9_10,
-
-                record.hour_10_11,
-
-                record.hour_11_12,
-
-                record.hour_12_1,
-
-                record.hour_1_2,
-
-                record.hour_2_3
-
-            ];
-
-
-            hourlyValues.forEach(
-                function(value, hourIndex) {
-
-
-                    const input =
-                        document.getElementById(
-                            "productivity_" +
-                            index +
-                            "_" +
-                            (
-                                hourIndex + 1
-                            )
-                        );
-
-
-                    if (input) {
-
-                        input.value =
-                            value || 0;
-
-                    }
+                    createTaskRow(
+                        employee,
+                        record.project_id,
+                        index === 0,
+                        record
+                    );
 
                 }
             );
 
-
-            /*
-               BREAK
-            */
-
-
-            const breakInput =
-                document.getElementById(
-                    "break_" +
-                    index
-                );
-
-
-            breakInput.value =
-                record.break_minutes ||
-                0;
-
-
-            /*
-               RECALCULATE
-            */
-
-
-            calculateDailyRow(
-                index
-            );
-
-
         }
     );
+
+
+    updateSummary();
 
 
     showTrackerMessage(
@@ -3369,11 +3631,97 @@ async function loadDailyTracker() {
     );
 
 }
+
+
+/* =========================================
+   BUTTON EVENTS
+========================================= */
+
+document
+    .getElementById(
+        "addProjectButton"
+    )
+    .addEventListener(
+        "click",
+        addProject
+    );
+
+
+document
+    .getElementById(
+        "addEmployeeButton"
+    )
+    .addEventListener(
+        "click",
+        addEmployee
+    );
+
+
+document
+    .getElementById(
+        "saveDailyTrackerButton"
+    )
+    .addEventListener(
+        "click",
+        saveDailyTracker
+    );
+
+
+/* =========================================
+   DATE CHANGE
+========================================= */
+
+document
+    .getElementById(
+        "trackerDate"
+    )
+    .addEventListener(
+        "change",
+        async function() {
+
+            await loadDailyTracker();
+
+        }
+    );
+
+
+/* =========================================
+   START APPLICATION
+========================================= */
+
+async function startApplication() {
+
+    try {
+
+        setTodayDate();
+
+        await loadProjects();
+
+        await loadEmployees();
+
+        await loadDailyTracker();
+
+        console.log(
+            "Application started successfully."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Application startup error:",
+            error
+        );
+
+    }
+
+}
+
+
 startApplication();
 
-
 </script>
-
 
 </body>
 
