@@ -1,1350 +1,2098 @@
-```html
-<script>
+<!DOCTYPE html>
+<html lang="en">
 
-/* =========================================================
-   SUPABASE CONNECTION
-========================================================= */
+<head>
 
-const SUPABASE_URL =
-    "https://yhoblmvujfqnspaxdfav.supabase.co";
+    <meta charset="UTF-8">
 
-const SUPABASE_KEY =
-    "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-const supabaseClient =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
+    <title>Team Hourly Productivity Tracker</title>
 
 
-/* =========================================================
-   GLOBAL DATA
-========================================================= */
+    <!-- =====================================================
+         SUPABASE LIBRARY
+         THIS MUST LOAD BEFORE OUR JAVASCRIPT
+    ====================================================== -->
 
-let projects = [];
-let employees = [];
-
-
-/* =========================================================
-   MESSAGE FUNCTIONS
-========================================================= */
-
-function showProjectMessage(message, isError = false) {
-
-    const element =
-        document.getElementById("projectMessage");
-
-    if (!element) return;
-
-    element.textContent = message;
-
-    element.style.color =
-        isError ? "red" : "green";
-}
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
-function showEmployeeMessage(message, isError = false) {
+    <!-- =====================================================
+         STYLES
+    ====================================================== -->
 
-    const element =
-        document.getElementById("employeeMessage");
+    <style>
 
-    if (!element) return;
-
-    element.textContent = message;
-
-    element.style.color =
-        isError ? "red" : "green";
-}
-
-
-function showTrackerMessage(message, isError = false) {
-
-    const element =
-        document.getElementById("trackerMessage");
-
-    if (!element) return;
-
-    element.textContent = message;
-
-    element.style.color =
-        isError ? "red" : "green";
-}
-
-
-/* =========================================================
-   DATE
-========================================================= */
-
-function setTodayDate() {
-
-    const dateInput =
-        document.getElementById("trackerDate");
-
-    if (!dateInput) return;
-
-    const today =
-        new Date().toISOString().split("T")[0];
-
-    dateInput.value = today;
-}
-
-
-/* =========================================================
-   ADD PROJECT
-========================================================= */
-
-async function addProject() {
-
-    console.log("ADD PROJECT FUNCTION CALLED");
-
-    const name =
-        document
-            .getElementById("projectName")
-            .value
-            .trim();
-
-    const target =
-        Number(
-            document
-                .getElementById("projectTarget")
-                .value
-        );
-
-    if (!name) {
-
-        showProjectMessage(
-            "Please enter project name.",
-            true
-        );
-
-        return;
-    }
-
-    if (!target || target <= 0) {
-
-        showProjectMessage(
-            "Please enter a valid daily target.",
-            true
-        );
-
-        return;
-    }
-
-    showProjectMessage(
-        "Saving project..."
-    );
-
-    try {
-
-        const result =
-            await supabaseClient
-                .from("projects")
-                .insert({
-                    project_name: name,
-                    daily_target: target
-                })
-                .select();
-
-        console.log(
-            "Add project result:",
-            result
-        );
-
-        if (result.error) {
-
-            console.error(
-                "Add project error:",
-                result.error
-            );
-
-            showProjectMessage(
-                "Unable to save project: " +
-                result.error.message,
-                true
-            );
-
-            return;
+        * {
+            box-sizing: border-box;
         }
 
-        document.getElementById(
-            "projectName"
-        ).value = "";
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #222;
+        }
 
-        document.getElementById(
-            "projectTarget"
-        ).value = "";
+        header {
+            background: #1f2937;
+            color: white;
+            padding: 20px;
+        }
 
-        showProjectMessage(
-            "Project saved successfully."
-        );
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
 
-        await loadProjects();
+        .container {
+            width: 95%;
+            max-width: 1600px;
+            margin: 20px auto;
+        }
 
-    } catch (error) {
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .section h2 {
+            margin-top: 0;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input,
+        select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            min-width: 180px;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .primary-button {
+            background: #2563eb;
+            color: white;
+        }
+
+        .primary-button:hover {
+            opacity: 0.9;
+        }
+
+        .delete-button {
+            background: #dc2626;
+            color: white;
+        }
+
+        .message {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #f0f2f5;
+        }
+
+        .hour-input {
+            width: 70px;
+            min-width: 70px;
+            padding: 6px;
+        }
+
+        .green {
+            color: green;
+            font-weight: bold;
+        }
+
+        .yellow {
+            color: #d97706;
+            font-weight: bold;
+        }
+
+        .red {
+            color: red;
+            font-weight: bold;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .summary-card {
+            background: #f8fafc;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .summary-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+
+        .summary-card div {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header>
+
+        <h1>
+            Team Hourly Productivity Tracker
+        </h1>
+
+    </header>
+
+
+    <div class="container">
+
+
+        <!-- =================================================
+             PROJECT SETUP
+        ================================================== -->
+
+        <div class="section">
+
+            <h2>
+                Project Setup
+            </h2>
+
+            <div class="form-row">
+
+                <input
+                    type="text"
+                    id="projectName"
+                    placeholder="Project Name"
+                >
+
+                <input
+                    type="number"
+                    id="projectTarget"
+                    placeholder="Daily Target"
+                    min="1"
+                >
+
+                <button
+                    type="button"
+                    class="primary-button"
+                    id="addProjectButton"
+                >
+                    Add Project
+                </button>
+
+            </div>
+
+            <div
+                id="projectMessage"
+                class="message"
+            ></div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Project Name</th>
+                            <th>Daily Target</th>
+                            <th>Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="projectTable"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             EMPLOYEE SETUP
+        ================================================== -->
+
+        <div class="section">
+
+            <h2>
+                Employee Setup
+            </h2>
+
+            <div class="form-row">
+
+                <input
+                    type="text"
+                    id="employeeName"
+                    placeholder="Employee Name"
+                >
+
+                <input
+                    type="text"
+                    id="employeeCode"
+                    placeholder="Employee ID"
+                >
+
+                <select id="employeeProject">
+
+                    <option value="">
+                        Select Project
+                    </option>
+
+                </select>
+
+                <button
+                    type="button"
+                    class="primary-button"
+                    id="addEmployeeButton"
+                >
+                    Add Employee / Task
+                </button>
+
+            </div>
+
+            <div
+                id="employeeMessage"
+                class="message"
+            ></div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Employee Name</th>
+                            <th>Employee ID</th>
+                            <th>Project</th>
+                            <th>Daily Target</th>
+                            <th>Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="employeeTable"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             DAILY PRODUCTIVITY TRACKER
+        ================================================== -->
+
+        <div class="section">
+
+            <h2>
+                Daily Productivity Tracker
+            </h2>
+
+            <div class="form-row">
+
+                <label for="trackerDate">
+                    Date:
+                </label>
+
+                <input
+                    type="date"
+                    id="trackerDate"
+                >
+
+                <button
+                    type="button"
+                    class="primary-button"
+                    id="saveDailyTrackerButton"
+                >
+                    Save Daily Tracker
+                </button>
+
+            </div>
+
+
+            <div
+                id="trackerMessage"
+                class="message"
+            ></div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Employee</th>
+
+                            <th>EMP ID</th>
+
+                            <th>Project</th>
+
+                            <th>Attendance</th>
+
+                            <th>Target</th>
+
+                            <th>6-7 PM</th>
+
+                            <th>7-8 PM</th>
+
+                            <th>8-9 PM</th>
+
+                            <th>9-10 PM</th>
+
+                            <th>10-11 PM</th>
+
+                            <th>11-12 AM</th>
+
+                            <th>12-1 AM</th>
+
+                            <th>1-2 AM</th>
+
+                            <th>2-3 AM</th>
+
+                            <th>Break Min</th>
+
+                            <th>Break Status</th>
+
+                            <th>Achieved</th>
+
+                            <th>Remaining</th>
+
+                            <th>Achievement %</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="dailyTrackerTable"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TEAM SUMMARY
+        ================================================== -->
+
+        <div class="section">
+
+            <h2>
+                Team Summary
+            </h2>
+
+            <div class="summary-grid">
+
+
+                <div class="summary-card">
+
+                    <h3>
+                        Total Employees
+                    </h3>
+
+                    <div id="totalEmployees">
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <h3>
+                        Total Target
+                    </h3>
+
+                    <div id="totalTarget">
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <h3>
+                        Total Achieved
+                    </h3>
+
+                    <div id="totalAchieved">
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <h3>
+                        Total Remaining
+                    </h3>
+
+                    <div id="totalRemaining">
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <h3>
+                        Team Achievement
+                    </h3>
+
+                    <div id="teamAchievement">
+                        0%
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         APPLICATION JAVASCRIPT
+    ====================================================== -->
+
+    <script>
+
+
+    /* =====================================================
+       CHECK SUPABASE
+    ====================================================== */
+
+    console.log(
+        "Checking Supabase library..."
+    );
+
+
+    if (!window.supabase) {
 
         console.error(
-            "Unexpected project error:",
-            error
+            "SUPABASE LIBRARY NOT FOUND."
         );
 
-        showProjectMessage(
-            "Unexpected error: " +
-            error.message,
-            true
+        alert(
+            "Supabase library failed to load. Please check your internet connection."
         );
-    }
-}
 
-
-/* =========================================================
-   LOAD PROJECTS
-========================================================= */
-
-async function loadProjects() {
-
-    console.log("Loading projects...");
-
-    try {
-
-        const result =
-            await supabaseClient
-                .from("projects")
-                .select(
-                    "id, project_name, daily_target"
-                )
-                .order("project_name");
+    } else {
 
         console.log(
-            "Load projects result:",
-            result
+            "Supabase library loaded successfully."
         );
 
-        if (result.error) {
-
-            console.error(
-                "Load projects error:",
-                result.error
-            );
-
-            showProjectMessage(
-                "Unable to load projects: " +
-                result.error.message,
-                true
-            );
-
-            return;
-        }
-
-        projects =
-            result.data || [];
-
-        displayProjects();
-
-        loadEmployeeProjects();
-
-    } catch (error) {
-
-        console.error(
-            "Unexpected load projects error:",
-            error
-        );
     }
-}
 
 
-/* =========================================================
-   DISPLAY PROJECTS
-========================================================= */
+    /* =====================================================
+       SUPABASE CONNECTION
+    ====================================================== */
 
-function displayProjects() {
+    const SUPABASE_URL =
+        "https://yhoblmvujfqnspaxdfav.supabase.co";
 
-    const table =
-        document.getElementById(
-            "projectTable"
+
+    const SUPABASE_KEY =
+        "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
+
+
+    const supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
         );
 
-    if (!table) return;
 
-    table.innerHTML = "";
+    console.log(
+        "Supabase client created successfully."
+    );
 
-    projects.forEach(
-        function(project) {
 
-            const row =
-                document.createElement("tr");
+    /* =====================================================
+       GLOBAL DATA
+    ====================================================== */
 
-            const nameCell =
-                document.createElement("td");
+    let projects = [];
 
-            nameCell.textContent =
-                project.project_name;
+    let employees = [];
 
-            const targetCell =
-                document.createElement("td");
 
-            targetCell.textContent =
-                project.daily_target;
+    /* =====================================================
+       MESSAGE FUNCTIONS
+    ====================================================== */
 
-            const actionCell =
-                document.createElement("td");
+    function showProjectMessage(
+        message,
+        isError = false
+    ) {
 
-            const deleteButton =
-                document.createElement("button");
-
-            deleteButton.textContent =
-                "Delete";
-
-            deleteButton.className =
-                "delete-button";
-
-            deleteButton.type =
-                "button";
-
-            deleteButton.onclick =
-                function() {
-
-                    deleteProject(
-                        project.id
-                    );
-
-                };
-
-            actionCell.appendChild(
-                deleteButton
+        const element =
+            document.getElementById(
+                "projectMessage"
             );
 
-            row.appendChild(nameCell);
-            row.appendChild(targetCell);
-            row.appendChild(actionCell);
+        if (!element) return;
 
-            table.appendChild(row);
-        }
-    );
-}
+        element.textContent =
+            message;
+
+        element.style.color =
+            isError
+                ? "red"
+                : "green";
+    }
 
 
-/* =========================================================
-   DELETE PROJECT
-========================================================= */
+    function showEmployeeMessage(
+        message,
+        isError = false
+    ) {
 
-async function deleteProject(id) {
+        const element =
+            document.getElementById(
+                "employeeMessage"
+            );
 
-    const confirmed =
-        confirm(
-            "Are you sure you want to delete this project?"
+        if (!element) return;
+
+        element.textContent =
+            message;
+
+        element.style.color =
+            isError
+                ? "red"
+                : "green";
+    }
+
+
+    function showTrackerMessage(
+        message,
+        isError = false
+    ) {
+
+        const element =
+            document.getElementById(
+                "trackerMessage"
+            );
+
+        if (!element) return;
+
+        element.textContent =
+            message;
+
+        element.style.color =
+            isError
+                ? "red"
+                : "green";
+    }
+
+
+    /* =====================================================
+       DATE
+    ====================================================== */
+
+    function setTodayDate() {
+
+        const dateInput =
+            document.getElementById(
+                "trackerDate"
+            );
+
+        if (!dateInput) return;
+
+        const today =
+            new Date()
+                .toISOString()
+                .split("T")[0];
+
+        dateInput.value =
+            today;
+    }
+
+
+    /* =====================================================
+       ADD PROJECT
+    ====================================================== */
+
+    async function addProject() {
+
+        console.log(
+            "ADD PROJECT FUNCTION CALLED"
         );
 
-    if (!confirmed) return;
 
-    showProjectMessage(
-        "Checking project..."
-    );
-
-    try {
-
-        const employeeCheck =
-            await supabaseClient
-                .from("employees")
-                .select(
-                    "id, employee_name"
-                )
-                .eq(
-                    "project_id",
-                    id
-                );
-
-        if (employeeCheck.error) {
-
-            console.error(
-                "Project usage check error:",
-                employeeCheck.error
+        const nameElement =
+            document.getElementById(
+                "projectName"
             );
+
+
+        const targetElement =
+            document.getElementById(
+                "projectTarget"
+            );
+
+
+        const name =
+            nameElement.value.trim();
+
+
+        const target =
+            Number(
+                targetElement.value
+            );
+
+
+        if (!name) {
 
             showProjectMessage(
-                "Unable to check project usage: " +
-                employeeCheck.error.message,
+                "Please enter project name.",
                 true
             );
 
             return;
         }
+
 
         if (
-            employeeCheck.data &&
-            employeeCheck.data.length > 0
+            !target ||
+            target <= 0
         ) {
 
-            const names =
-                employeeCheck.data
-                    .map(
-                        function(employee) {
-                            return employee.employee_name;
-                        }
-                    )
-                    .join(", ");
-
             showProjectMessage(
-                "Cannot delete project. Assigned to: " +
-                names,
+                "Please enter a valid daily target.",
                 true
             );
 
             return;
         }
+
+
+        showProjectMessage(
+            "Saving project..."
+        );
+
+
+        try {
+
+            const result =
+                await supabaseClient
+                    .from("projects")
+                    .insert({
+                        project_name: name,
+                        daily_target: target
+                    })
+                    .select();
+
+
+            console.log(
+                "ADD PROJECT RESPONSE:",
+                result
+            );
+
+
+            if (result.error) {
+
+                console.error(
+                    "ADD PROJECT ERROR:",
+                    result.error
+                );
+
+
+                showProjectMessage(
+                    "Unable to save project: " +
+                    result.error.message,
+                    true
+                );
+
+                return;
+            }
+
+
+            nameElement.value = "";
+
+            targetElement.value = "";
+
+
+            showProjectMessage(
+                "Project saved successfully."
+            );
+
+
+            await loadProjects();
+
+        } catch (error) {
+
+            console.error(
+                "UNEXPECTED PROJECT ERROR:",
+                error
+            );
+
+
+            showProjectMessage(
+                "Unexpected error: " +
+                error.message,
+                true
+            );
+        }
+    }
+
+
+    /* =====================================================
+       LOAD PROJECTS
+    ====================================================== */
+
+    async function loadProjects() {
+
+        console.log(
+            "Loading projects..."
+        );
+
+
+        try {
+
+            const result =
+                await supabaseClient
+                    .from("projects")
+                    .select(
+                        "id, project_name, daily_target"
+                    )
+                    .order(
+                        "project_name"
+                    );
+
+
+            console.log(
+                "LOAD PROJECTS RESPONSE:",
+                result
+            );
+
+
+            if (result.error) {
+
+                console.error(
+                    "LOAD PROJECTS ERROR:",
+                    result.error
+                );
+
+
+                showProjectMessage(
+                    "Unable to load projects: " +
+                    result.error.message,
+                    true
+                );
+
+                return;
+            }
+
+
+            projects =
+                result.data || [];
+
+
+            displayProjects();
+
+            loadEmployeeProjects();
+
+
+        } catch (error) {
+
+            console.error(
+                "UNEXPECTED LOAD PROJECT ERROR:",
+                error
+            );
+        }
+    }
+
+
+    /* =====================================================
+       DISPLAY PROJECTS
+    ====================================================== */
+
+    function displayProjects() {
+
+        const table =
+            document.getElementById(
+                "projectTable"
+            );
+
+
+        if (!table) return;
+
+
+        table.innerHTML = "";
+
+
+        projects.forEach(
+            function(project) {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const nameCell =
+                    document.createElement(
+                        "td"
+                    );
+
+                nameCell.textContent =
+                    project.project_name;
+
+
+                const targetCell =
+                    document.createElement(
+                        "td"
+                    );
+
+                targetCell.textContent =
+                    project.daily_target;
+
+
+                const actionCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                const deleteButton =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                deleteButton.textContent =
+                    "Delete";
+
+
+                deleteButton.className =
+                    "delete-button";
+
+
+                deleteButton.type =
+                    "button";
+
+
+                deleteButton.onclick =
+                    function() {
+
+                        deleteProject(
+                            project.id
+                        );
+
+                    };
+
+
+                actionCell.appendChild(
+                    deleteButton
+                );
+
+
+                row.appendChild(
+                    nameCell
+                );
+
+                row.appendChild(
+                    targetCell
+                );
+
+                row.appendChild(
+                    actionCell
+                );
+
+
+                table.appendChild(
+                    row
+                );
+
+            }
+        );
+    }
+
+
+    /* =====================================================
+       DELETE PROJECT
+    ====================================================== */
+
+    async function deleteProject(id) {
+
+        const confirmed =
+            confirm(
+                "Are you sure you want to delete this project?"
+            );
+
+
+        if (!confirmed) return;
+
 
         showProjectMessage(
             "Deleting project..."
         );
 
-        const result =
-            await supabaseClient
-                .from("projects")
-                .delete()
-                .eq("id", id)
-                .select();
 
-        console.log(
-            "Delete project result:",
-            result
-        );
-
-        if (result.error) {
-
-            console.error(
-                "Delete project error:",
-                result.error
-            );
-
-            showProjectMessage(
-                "Unable to delete project: " +
-                result.error.message,
-                true
-            );
-
-            return;
-        }
-
-        if (
-            !result.data ||
-            result.data.length === 0
-        ) {
-
-            showProjectMessage(
-                "Project was not deleted. Check Supabase DELETE policy.",
-                true
-            );
-
-            return;
-        }
-
-        showProjectMessage(
-            "Project deleted successfully."
-        );
-
-        await loadProjects();
-        await loadEmployees();
-
-    } catch (error) {
-
-        console.error(
-            "Unexpected delete project error:",
-            error
-        );
-
-        showProjectMessage(
-            "Unexpected error: " +
-            error.message,
-            true
-        );
-    }
-}
-
-
-/* =========================================================
-   EMPLOYEE PROJECT DROPDOWN
-========================================================= */
-
-function loadEmployeeProjects() {
-
-    const dropdown =
-        document.getElementById(
-            "employeeProject"
-        );
-
-    if (!dropdown) return;
-
-    dropdown.innerHTML =
-        '<option value="">Select Project</option>';
-
-    projects.forEach(
-        function(project) {
-
-            const option =
-                document.createElement("option");
-
-            option.value =
-                project.id;
-
-            option.textContent =
-                project.project_name +
-                " (Target: " +
-                project.daily_target +
-                ")";
-
-            dropdown.appendChild(option);
-        }
-    );
-}
-
-
-/* =========================================================
-   ADD EMPLOYEE
-========================================================= */
-
-async function addEmployee() {
-
-    console.log(
-        "================================="
-    );
-
-    console.log(
-        "ADD EMPLOYEE FUNCTION CALLED"
-    );
-
-    console.log(
-        "================================="
-    );
-
-    const nameElement =
-        document.getElementById(
-            "employeeName"
-        );
-
-    const codeElement =
-        document.getElementById(
-            "employeeCode"
-        );
-
-    const projectElement =
-        document.getElementById(
-            "employeeProject"
-        );
-
-    if (
-        !nameElement ||
-        !codeElement ||
-        !projectElement
-    ) {
-
-        console.error(
-            "Employee form elements not found."
-        );
-
-        showEmployeeMessage(
-            "Employee form error. Check HTML element IDs.",
-            true
-        );
-
-        return;
-    }
-
-    const name =
-        nameElement.value.trim();
-
-    const employeeCode =
-        codeElement.value.trim();
-
-    const projectId =
-        projectElement.value;
-
-    console.log(
-        "Employee Name:",
-        name
-    );
-
-    console.log(
-        "Employee ID:",
-        employeeCode
-    );
-
-    console.log(
-        "Project ID:",
-        projectId
-    );
-
-
-    /* VALIDATION */
-
-    if (!name) {
-
-        showEmployeeMessage(
-            "Please enter employee name.",
-            true
-        );
-
-        return;
-    }
-
-    if (!employeeCode) {
-
-        showEmployeeMessage(
-            "Please enter employee ID.",
-            true
-        );
-
-        return;
-    }
-
-    if (!projectId) {
-
-        showEmployeeMessage(
-            "Please select a project.",
-            true
-        );
-
-        return;
-    }
-
-
-    showEmployeeMessage(
-        "Saving employee..."
-    );
-
-
-    try {
-
-        /* =====================================
-           SUPABASE INSERT
-        ===================================== */
-
-        const insertData = {
-
-            employee_name:
-                name,
-
-            employee_code:
-                employeeCode,
-
-            project_id:
-                Number(projectId)
-
-        };
-
-        console.log(
-            "Data being sent to Supabase:",
-            insertData
-        );
-
-
-        const result =
-            await supabaseClient
-                .from("employees")
-                .insert(insertData)
-                .select();
-
-
-        console.log(
-            "SUPABASE EMPLOYEE RESPONSE:",
-            result
-        );
-
-
-        /* =====================================
-           ERROR
-        ===================================== */
-
-        if (result.error) {
-
-            console.error(
-                "================================="
-            );
-
-            console.error(
-                "ADD EMPLOYEE SUPABASE ERROR"
-            );
-
-            console.error(
-                result.error
-            );
-
-            console.error(
-                "================================="
-            );
-
-            showEmployeeMessage(
-                "Unable to save employee: " +
-                result.error.message,
-                true
-            );
-
-            return;
-        }
-
-
-        /* =====================================
-           SUCCESS
-        ===================================== */
-
-        console.log(
-            "Employee inserted successfully:",
-            result.data
-        );
-
-
-        nameElement.value = "";
-
-        codeElement.value = "";
-
-        projectElement.value = "";
-
-
-        showEmployeeMessage(
-            "Employee saved successfully."
-        );
-
-
-        await loadEmployees();
-
-
-    } catch (error) {
-
-        console.error(
-            "================================="
-        );
-
-        console.error(
-            "UNEXPECTED ADD EMPLOYEE ERROR"
-        );
-
-        console.error(
-            error
-        );
-
-        console.error(
-            "================================="
-        );
-
-        showEmployeeMessage(
-            "Unexpected error: " +
-            error.message,
-            true
-        );
-    }
-}
-
-
-/* =========================================================
-   LOAD EMPLOYEES
-========================================================= */
-
-async function loadEmployees() {
-
-    console.log(
-        "Loading employees..."
-    );
-
-    try {
-
-        const result =
-            await supabaseClient
-                .from("employees")
-                .select(`
-                    id,
-                    employee_name,
-                    employee_code,
-                    project_id,
-                    projects (
-                        project_name,
-                        daily_target
+        try {
+
+            const result =
+                await supabaseClient
+                    .from("projects")
+                    .delete()
+                    .eq(
+                        "id",
+                        id
                     )
-                `)
-                .order("employee_name");
+                    .select();
 
-        console.log(
-            "Load employees result:",
-            result
-        );
 
-        if (result.error) {
-
-            console.error(
-                "Load employees error:",
-                result.error
-            );
-
-            showEmployeeMessage(
-                "Unable to load employees: " +
-                result.error.message,
-                true
-            );
-
-            return;
-        }
-
-        employees =
-            result.data || [];
-
-        displayEmployees();
-
-        buildDailyTracker();
-
-        updateSummary();
-
-    } catch (error) {
-
-        console.error(
-            "Unexpected employee loading error:",
-            error
-        );
-    }
-}
-
-
-/* =========================================================
-   DISPLAY EMPLOYEES
-========================================================= */
-
-function displayEmployees() {
-
-    const table =
-        document.getElementById(
-            "employeeTable"
-        );
-
-    if (!table) return;
-
-    table.innerHTML = "";
-
-    employees.forEach(
-        function(employee) {
-
-            const row =
-                document.createElement("tr");
-
-            const nameCell =
-                document.createElement("td");
-
-            nameCell.textContent =
-                employee.employee_name;
-
-            const codeCell =
-                document.createElement("td");
-
-            codeCell.textContent =
-                employee.employee_code;
-
-            const projectCell =
-                document.createElement("td");
-
-            projectCell.textContent =
-                employee.projects
-                ? employee.projects.project_name
-                : "";
-
-            const targetCell =
-                document.createElement("td");
-
-            targetCell.textContent =
-                employee.projects
-                ? employee.projects.daily_target
-                : "0";
-
-            const actionCell =
-                document.createElement("td");
-
-            const deleteButton =
-                document.createElement("button");
-
-            deleteButton.textContent =
-                "Delete";
-
-            deleteButton.className =
-                "delete-button";
-
-            deleteButton.type =
-                "button";
-
-            deleteButton.onclick =
-                function() {
-
-                    deleteEmployee(
-                        employee.id
-                    );
-
-                };
-
-            actionCell.appendChild(
-                deleteButton
-            );
-
-            row.appendChild(nameCell);
-            row.appendChild(codeCell);
-            row.appendChild(projectCell);
-            row.appendChild(targetCell);
-            row.appendChild(actionCell);
-
-            table.appendChild(row);
-        }
-    );
-}
-
-
-/* =========================================================
-   DELETE EMPLOYEE
-========================================================= */
-
-async function deleteEmployee(id) {
-
-    const confirmed =
-        confirm(
-            "Are you sure you want to delete this employee?"
-        );
-
-    if (!confirmed) return;
-
-    showEmployeeMessage(
-        "Deleting employee..."
-    );
-
-    try {
-
-        const result =
-            await supabaseClient
-                .from("employees")
-                .delete()
-                .eq("id", id)
-                .select();
-
-        console.log(
-            "Delete employee result:",
-            result
-        );
-
-        if (result.error) {
-
-            console.error(
-                "Delete employee error:",
-                result.error
-            );
-
-            showEmployeeMessage(
-                "Unable to delete employee: " +
-                result.error.message,
-                true
-            );
-
-            return;
-        }
-
-        if (
-            !result.data ||
-            result.data.length === 0
-        ) {
-
-            showEmployeeMessage(
-                "Employee was not deleted. Check Supabase DELETE policy.",
-                true
-            );
-
-            return;
-        }
-
-        showEmployeeMessage(
-            "Employee deleted successfully."
-        );
-
-        await loadEmployees();
-
-    } catch (error) {
-
-        console.error(
-            "Unexpected delete employee error:",
-            error
-        );
-
-        showEmployeeMessage(
-            "Unexpected error: " +
-            error.message,
-            true
-        );
-    }
-}
-
-
-/* =========================================================
-   DAILY TARGET
-========================================================= */
-
-function getDailyTarget(
-    employee,
-    attendance
-) {
-
-    const projectTarget =
-        Number(
-            employee.projects
-            ? employee.projects.daily_target
-            : 0
-        );
-
-    if (
-        attendance === "Present"
-    ) {
-
-        return projectTarget;
-    }
-
-    if (
-        attendance === "Half Day"
-    ) {
-
-        return Math.ceil(
-            projectTarget / 2
-        );
-    }
-
-    return 0;
-}
-
-
-/* =========================================================
-   BUILD DAILY TRACKER
-========================================================= */
-
-function buildDailyTracker() {
-
-    const table =
-        document.getElementById(
-            "dailyTrackerTable"
-        );
-
-    if (!table) return;
-
-    table.innerHTML = "";
-
-    employees.forEach(
-        function(employee, index) {
-
-            const row =
-                document.createElement("tr");
-
-
-            /* EMPLOYEE */
-
-            const employeeCell =
-                document.createElement("td");
-
-            employeeCell.textContent =
-                employee.employee_name;
-
-            row.appendChild(employeeCell);
-
-
-            /* EMP ID */
-
-            const codeCell =
-                document.createElement("td");
-
-            codeCell.textContent =
-                employee.employee_code;
-
-            row.appendChild(codeCell);
-
-
-            /* PROJECT */
-
-            const projectCell =
-                document.createElement("td");
-
-            projectCell.textContent =
-                employee.projects
-                ? employee.projects.project_name
-                : "";
-
-            row.appendChild(projectCell);
-
-
-            /* ATTENDANCE */
-
-            const attendanceCell =
-                document.createElement("td");
-
-            const attendance =
-                document.createElement("select");
-
-            attendance.id =
-                "attendance_" + index;
-
-            attendance.innerHTML = `
-                <option value="Present">Present</option>
-                <option value="Half Day">Half Day</option>
-                <option value="Absent">Absent</option>
-            `;
-
-            attendance.addEventListener(
-                "change",
-                function() {
-
-                    calculateDailyRow(index);
-
-                }
-            );
-
-            attendanceCell.appendChild(
-                attendance
-            );
-
-            row.appendChild(
-                attendanceCell
+            console.log(
+                "DELETE PROJECT RESPONSE:",
+                result
             );
 
 
-            /* TARGET */
+            if (result.error) {
 
-            const targetCell =
-                document.createElement("td");
-
-            targetCell.id =
-                "dailyTarget_" + index;
-
-            targetCell.textContent =
-                getDailyTarget(
-                    employee,
-                    "Present"
+                showProjectMessage(
+                    "Unable to delete project: " +
+                    result.error.message,
+                    true
                 );
 
-            row.appendChild(targetCell);
+                return;
+            }
 
 
-            /* 9 HOURS */
+            showProjectMessage(
+                "Project deleted successfully."
+            );
 
-            for (
-                let hour = 1;
-                hour <= 9;
-                hour++
-            ) {
 
-                const cell =
-                    document.createElement("td");
+            await loadProjects();
 
-                const input =
-                    document.createElement("input");
+            await loadEmployees();
 
-                input.type =
-                    "number";
 
-                input.min =
-                    "0";
+        } catch (error) {
 
-                input.value =
-                    "0";
+            console.error(
+                "DELETE PROJECT ERROR:",
+                error
+            );
 
-                input.className =
-                    "hour-input";
 
-                input.id =
-                    "productivity_" +
-                    index +
-                    "_" +
-                    hour;
+            showProjectMessage(
+                "Unexpected error: " +
+                error.message,
+                true
+            );
+        }
+    }
 
-                input.addEventListener(
-                    "input",
+
+    /* =====================================================
+       EMPLOYEE PROJECT DROPDOWN
+    ====================================================== */
+
+    function loadEmployeeProjects() {
+
+        const dropdown =
+            document.getElementById(
+                "employeeProject"
+            );
+
+
+        if (!dropdown) return;
+
+
+        dropdown.innerHTML =
+            '<option value="">Select Project</option>';
+
+
+        projects.forEach(
+            function(project) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    project.id;
+
+
+                option.textContent =
+                    project.project_name +
+                    " (Target: " +
+                    project.daily_target +
+                    ")";
+
+
+                dropdown.appendChild(
+                    option
+                );
+
+            }
+        );
+    }
+
+
+    /* =====================================================
+       ADD EMPLOYEE
+    ====================================================== */
+
+    async function addEmployee() {
+
+        console.log(
+            "================================="
+        );
+
+        console.log(
+            "ADD EMPLOYEE FUNCTION CALLED"
+        );
+
+        console.log(
+            "================================="
+        );
+
+
+        const nameElement =
+            document.getElementById(
+                "employeeName"
+            );
+
+
+        const codeElement =
+            document.getElementById(
+                "employeeCode"
+            );
+
+
+        const projectElement =
+            document.getElementById(
+                "employeeProject"
+            );
+
+
+        if (
+            !nameElement ||
+            !codeElement ||
+            !projectElement
+        ) {
+
+            console.error(
+                "Employee form elements NOT FOUND."
+            );
+
+
+            showEmployeeMessage(
+                "Employee form error. Check HTML IDs.",
+                true
+            );
+
+
+            return;
+        }
+
+
+        const name =
+            nameElement.value.trim();
+
+
+        const employeeCode =
+            codeElement.value.trim();
+
+
+        const projectId =
+            projectElement.value;
+
+
+        console.log(
+            "Employee Name:",
+            name
+        );
+
+
+        console.log(
+            "Employee ID:",
+            employeeCode
+        );
+
+
+        console.log(
+            "Project ID:",
+            projectId
+        );
+
+
+        if (!name) {
+
+            showEmployeeMessage(
+                "Please enter employee name.",
+                true
+            );
+
+            return;
+        }
+
+
+        if (!employeeCode) {
+
+            showEmployeeMessage(
+                "Please enter employee ID.",
+                true
+            );
+
+            return;
+        }
+
+
+        if (!projectId) {
+
+            showEmployeeMessage(
+                "Please select a project.",
+                true
+            );
+
+            return;
+        }
+
+
+        showEmployeeMessage(
+            "Saving employee..."
+        );
+
+
+        try {
+
+            const insertData = {
+
+                employee_name:
+                    name,
+
+                employee_code:
+                    employeeCode,
+
+                project_id:
+                    projectId
+
+            };
+
+
+            console.log(
+                "DATA BEING SENT:",
+                insertData
+            );
+
+
+            const result =
+                await supabaseClient
+                    .from("employees")
+                    .insert(
+                        insertData
+                    )
+                    .select();
+
+
+            console.log(
+                "SUPABASE EMPLOYEE RESPONSE:",
+                result
+            );
+
+
+            if (result.error) {
+
+                console.error(
+                    "ADD EMPLOYEE SUPABASE ERROR:",
+                    result.error
+                );
+
+
+                showEmployeeMessage(
+                    "Unable to save employee: " +
+                    result.error.message,
+                    true
+                );
+
+
+                return;
+            }
+
+
+            console.log(
+                "EMPLOYEE INSERTED SUCCESSFULLY:",
+                result.data
+            );
+
+
+            nameElement.value =
+                "";
+
+            codeElement.value =
+                "";
+
+            projectElement.value =
+                "";
+
+
+            showEmployeeMessage(
+                "Employee saved successfully."
+            );
+
+
+            await loadEmployees();
+
+
+        } catch (error) {
+
+            console.error(
+                "UNEXPECTED ADD EMPLOYEE ERROR:",
+                error
+            );
+
+
+            showEmployeeMessage(
+                "Unexpected error: " +
+                error.message,
+                true
+            );
+        }
+    }
+
+
+    /* =====================================================
+       LOAD EMPLOYEES
+    ====================================================== */
+
+    async function loadEmployees() {
+
+        console.log(
+            "Loading employees..."
+        );
+
+
+        try {
+
+            const result =
+                await supabaseClient
+                    .from("employees")
+                    .select(`
+                        id,
+                        employee_name,
+                        employee_code,
+                        project_id,
+                        projects (
+                            project_name,
+                            daily_target
+                        )
+                    `)
+                    .order(
+                        "employee_name"
+                    );
+
+
+            console.log(
+                "LOAD EMPLOYEES RESPONSE:",
+                result
+            );
+
+
+            if (result.error) {
+
+                console.error(
+                    "LOAD EMPLOYEES ERROR:",
+                    result.error
+                );
+
+
+                showEmployeeMessage(
+                    "Unable to load employees: " +
+                    result.error.message,
+                    true
+                );
+
+
+                return;
+            }
+
+
+            employees =
+                result.data || [];
+
+
+            displayEmployees();
+
+            buildDailyTracker();
+
+            updateSummary();
+
+
+        } catch (error) {
+
+            console.error(
+                "UNEXPECTED LOAD EMPLOYEE ERROR:",
+                error
+            );
+        }
+    }
+
+
+    /* =====================================================
+       DISPLAY EMPLOYEES
+    ====================================================== */
+
+    function displayEmployees() {
+
+        const table =
+            document.getElementById(
+                "employeeTable"
+            );
+
+
+        if (!table) return;
+
+
+        table.innerHTML = "";
+
+
+        employees.forEach(
+            function(employee) {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const nameCell =
+                    document.createElement(
+                        "td"
+                    );
+
+                nameCell.textContent =
+                    employee.employee_name;
+
+
+                const codeCell =
+                    document.createElement(
+                        "td"
+                    );
+
+                codeCell.textContent =
+                    employee.employee_code;
+
+
+                const projectCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                projectCell.textContent =
+                    employee.projects
+                    ? employee.projects.project_name
+                    : "";
+
+
+                const targetCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                targetCell.textContent =
+                    employee.projects
+                    ? employee.projects.daily_target
+                    : "0";
+
+
+                const actionCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                const deleteButton =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                deleteButton.textContent =
+                    "Delete";
+
+
+                deleteButton.className =
+                    "delete-button";
+
+
+                deleteButton.type =
+                    "button";
+
+
+                deleteButton.onclick =
                     function() {
 
-                        calculateDailyRow(index);
+                        deleteEmployee(
+                            employee.id
+                        );
+
+                    };
+
+
+                actionCell.appendChild(
+                    deleteButton
+                );
+
+
+                row.appendChild(
+                    nameCell
+                );
+
+                row.appendChild(
+                    codeCell
+                );
+
+                row.appendChild(
+                    projectCell
+                );
+
+                row.appendChild(
+                    targetCell
+                );
+
+                row.appendChild(
+                    actionCell
+                );
+
+
+                table.appendChild(
+                    row
+                );
+
+            }
+        );
+    }
+
+
+    /* =====================================================
+       DELETE EMPLOYEE
+    ====================================================== */
+
+    async function deleteEmployee(id) {
+
+        const confirmed =
+            confirm(
+                "Are you sure you want to delete this employee?"
+            );
+
+
+        if (!confirmed) return;
+
+
+        showEmployeeMessage(
+            "Deleting employee..."
+        );
+
+
+        try {
+
+            const result =
+                await supabaseClient
+                    .from("employees")
+                    .delete()
+                    .eq(
+                        "id",
+                        id
+                    )
+                    .select();
+
+
+            console.log(
+                "DELETE EMPLOYEE RESPONSE:",
+                result
+            );
+
+
+            if (result.error) {
+
+                showEmployeeMessage(
+                    "Unable to delete employee: " +
+                    result.error.message,
+                    true
+                );
+
+
+                return;
+            }
+
+
+            showEmployeeMessage(
+                "Employee deleted successfully."
+            );
+
+
+            await loadEmployees();
+
+
+        } catch (error) {
+
+            console.error(
+                "DELETE EMPLOYEE ERROR:",
+                error
+            );
+
+
+            showEmployeeMessage(
+                "Unexpected error: " +
+                error.message,
+                true
+            );
+        }
+    }
+
+
+    /* =====================================================
+       DAILY TARGET
+    ====================================================== */
+
+    function getDailyTarget(
+        employee,
+        attendance
+    ) {
+
+        const projectTarget =
+            Number(
+                employee.projects
+                ? employee.projects.daily_target
+                : 0
+            );
+
+
+        if (
+            attendance === "Present"
+        ) {
+
+            return projectTarget;
+        }
+
+
+        if (
+            attendance === "Half Day"
+        ) {
+
+            return Math.ceil(
+                projectTarget / 2
+            );
+        }
+
+
+        return 0;
+    }
+
+
+    /* =====================================================
+       BUILD DAILY TRACKER
+    ====================================================== */
+
+    function buildDailyTracker() {
+
+        const table =
+            document.getElementById(
+                "dailyTrackerTable"
+            );
+
+
+        if (!table) return;
+
+
+        table.innerHTML = "";
+
+
+        employees.forEach(
+            function(employee, index) {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                /* EMPLOYEE */
+
+                const employeeCell =
+                    document.createElement(
+                        "td"
+                    );
+
+                employeeCell.textContent =
+                    employee.employee_name;
+
+                row.appendChild(
+                    employeeCell
+                );
+
+
+                /* EMP ID */
+
+                const codeCell =
+                    document.createElement(
+                        "td"
+                    );
+
+                codeCell.textContent =
+                    employee.employee_code;
+
+                row.appendChild(
+                    codeCell
+                );
+
+
+                /* PROJECT */
+
+                const projectCell =
+                    document.createElement(
+                        "td"
+                    );
+
+                projectCell.textContent =
+                    employee.projects
+                    ? employee.projects.project_name
+                    : "";
+
+                row.appendChild(
+                    projectCell
+                );
+
+
+                /* ATTENDANCE */
+
+                const attendanceCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                const attendance =
+                    document.createElement(
+                        "select"
+                    );
+
+
+                attendance.id =
+                    "attendance_" +
+                    index;
+
+
+                attendance.innerHTML = `
+                    <option value="Present">
+                        Present
+                    </option>
+
+                    <option value="Half Day">
+                        Half Day
+                    </option>
+
+                    <option value="Absent">
+                        Absent
+                    </option>
+                `;
+
+
+                attendance.addEventListener(
+                    "change",
+                    function() {
+
+                        calculateDailyRow(
+                            index
+                        );
 
                     }
                 );
 
-                cell.appendChild(input);
 
-                row.appendChild(cell);
-            }
-
-
-            /* BREAK */
-
-            const breakCell =
-                document.createElement("td");
-
-            const breakInput =
-                document.createElement("input");
-
-            breakInput.type =
-                "number";
-
-            breakInput.min =
-                "0";
-
-            breakInput.max =
-                "60";
-
-            breakInput.value =
-                "0";
-
-            breakInput.className =
-                "hour-input";
-
-            breakInput.id =
-                "break_" + index;
-
-            breakInput.addEventListener(
-                "input",
-                function() {
-
-                    calculateDailyRow(index);
-
-                }
-            );
-
-            breakCell.appendChild(
-                breakInput
-            );
-
-            row.appendChild(breakCell);
-
-
-            /* BREAK STATUS */
-
-            const breakStatusCell =
-                document.createElement("td");
-
-            breakStatusCell.id =
-                "breakStatus_" + index;
-
-            breakStatusCell.textContent =
-                "0 / 60 min";
-
-            row.appendChild(
-                breakStatusCell
-            );
-
-
-            /* ACHIEVED */
-
-            const achievedCell =
-                document.createElement("td");
-
-            achievedCell.id =
-                "achieved_" + index;
-
-            achievedCell.textContent =
-                "0";
-
-            row.appendChild(achievedCell);
-
-
-            /* REMAINING */
-
-            const remainingCell =
-                document.createElement("td");
-
-            remainingCell.id =
-                "remaining_" + index;
-
-            remainingCell.textContent =
-                getDailyTarget(
-                    employee,
-                    "Present"
+                attendanceCell.appendChild(
+                    attendance
                 );
 
-            row.appendChild(remainingCell);
+
+                row.appendChild(
+                    attendanceCell
+                );
 
 
-            /* PERCENTAGE */
+                /* TARGET */
 
-            const percentageCell =
-                document.createElement("td");
-
-            percentageCell.id =
-                "percentage_" + index;
-
-            percentageCell.textContent =
-                "0%";
-
-            row.appendChild(percentageCell);
-
-            table.appendChild(row);
-
-            calculateDailyRow(index);
-        }
-    );
-
-    updateSummary();
-}
+                const targetCell =
+                    document.createElement(
+                        "td"
+                    );
 
 
-/* =========================================================
-   CALCULATE DAILY ROW
-========================================================= */
+                targetCell.id =
+                    "dailyTarget_" +
+                    index;
 
-function calculateDailyRow(index) {
 
-    const employee =
-        employees[index];
+                targetCell.textContent =
+                    getDailyTarget(
+                        employee,
+                        "Present"
+                    );
 
-    if (!employee) return;
 
-    const attendanceElement =
-        document.getElementById(
-            "attendance_" + index
+                row.appendChild(
+                    targetCell
+                );
+
+
+                /* 9 HOURS */
+
+                for (
+                    let hour = 1;
+                    hour <= 9;
+                    hour++
+                ) {
+
+                    const cell =
+                        document.createElement(
+                            "td"
+                        );
+
+
+                    const input =
+                        document.createElement(
+                            "input"
+                        );
+
+
+                    input.type =
+                        "number";
+
+
+                    input.min =
+                        "0";
+
+
+                    input.value =
+                        "0";
+
+
+                    input.className =
+                        "hour-input";
+
+
+                    input.id =
+                        "productivity_" +
+                        index +
+                        "_" +
+                        hour;
+
+
+                    input.addEventListener(
+                        "input",
+                        function() {
+
+                            calculateDailyRow(
+                                index
+                            );
+
+                        }
+                    );
+
+
+                    cell.appendChild(
+                        input
+                    );
+
+
+                    row.appendChild(
+                        cell
+                    );
+                }
+
+
+                /* BREAK */
+
+                const breakCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                const breakInput =
+                    document.createElement(
+                        "input"
+                    );
+
+
+                breakInput.type =
+                    "number";
+
+
+                breakInput.min =
+                    "0";
+
+
+                breakInput.max =
+                    "60";
+
+
+                breakInput.value =
+                    "0";
+
+
+                breakInput.className =
+                    "hour-input";
+
+
+                breakInput.id =
+                    "break_" +
+                    index;
+
+
+                breakInput.addEventListener(
+                    "input",
+                    function() {
+
+                        calculateDailyRow(
+                            index
+                        );
+
+                    }
+                );
+
+
+                breakCell.appendChild(
+                    breakInput
+                );
+
+
+                row.appendChild(
+                    breakCell
+                );
+
+
+                /* BREAK STATUS */
+
+                const breakStatusCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                breakStatusCell.id =
+                    "breakStatus_" +
+                    index;
+
+
+                breakStatusCell.textContent =
+                    "0 / 60 min";
+
+
+                row.appendChild(
+                    breakStatusCell
+                );
+
+
+                /* ACHIEVED */
+
+                const achievedCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                achievedCell.id =
+                    "achieved_" +
+                    index;
+
+
+                achievedCell.textContent =
+                    "0";
+
+
+                row.appendChild(
+                    achievedCell
+                );
+
+
+                /* REMAINING */
+
+                const remainingCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                remainingCell.id =
+                    "remaining_" +
+                    index;
+
+
+                remainingCell.textContent =
+                    getDailyTarget(
+                        employee,
+                        "Present"
+                    );
+
+
+                row.appendChild(
+                    remainingCell
+                );
+
+
+                /* PERCENTAGE */
+
+                const percentageCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                percentageCell.id =
+                    "percentage_" +
+                    index;
+
+
+                percentageCell.textContent =
+                    "0%";
+
+
+                row.appendChild(
+                    percentageCell
+                );
+
+
+                table.appendChild(
+                    row
+                );
+
+
+                calculateDailyRow(
+                    index
+                );
+
+            }
         );
 
-    if (!attendanceElement) return;
 
-    const attendance =
-        attendanceElement.value;
-
-    const target =
-        getDailyTarget(
-            employee,
-            attendance
-        );
-
-    document.getElementById(
-        "dailyTarget_" + index
-    ).textContent = target;
-
-
-    let achieved = 0;
-
-
-    /* HOURLY PRODUCTIVITY */
-
-    for (
-        let hour = 1;
-        hour <= 9;
-        hour++
-    ) {
-
-        const input =
-            document.getElementById(
-                "productivity_" +
-                index +
-                "_" +
-                hour
-            );
-
-        if (
-            input &&
-            attendance !== "Absent"
-        ) {
-
-            achieved +=
-                Number(input.value) || 0;
-        }
+        updateSummary();
     }
 
 
-    /* ABSENT */
+    /* =====================================================
+       CALCULATE DAILY ROW
+    ====================================================== */
 
-    if (
-        attendance === "Absent"
-    ) {
+    function calculateDailyRow(index) {
 
-        achieved = 0;
+        const employee =
+            employees[index];
+
+
+        if (!employee) return;
+
+
+        const attendanceElement =
+            document.getElementById(
+                "attendance_" +
+                index
+            );
+
+
+        if (!attendanceElement) return;
+
+
+        const attendance =
+            attendanceElement.value;
+
+
+        const target =
+            getDailyTarget(
+                employee,
+                attendance
+            );
+
+
+        document.getElementById(
+            "dailyTarget_" +
+            index
+        ).textContent =
+            target;
+
+
+        let achieved = 0;
+
 
         for (
             let hour = 1;
@@ -1360,154 +2108,25 @@ function calculateDailyRow(index) {
                     hour
                 );
 
-            if (input) {
-                input.value = 0;
+
+            if (
+                input &&
+                attendance !== "Absent"
+            ) {
+
+                achieved +=
+                    Number(
+                        input.value
+                    ) || 0;
             }
         }
-    }
 
 
-    /* BREAK */
+        if (
+            attendance === "Absent"
+        ) {
 
-    const breakInput =
-        document.getElementById(
-            "break_" + index
-        );
-
-    let breakMinutes =
-        Number(
-            breakInput
-                ? breakInput.value
-                : 0
-        ) || 0;
-
-    if (breakMinutes < 0) {
-        breakMinutes = 0;
-    }
-
-    if (breakMinutes > 60) {
-
-        breakMinutes = 60;
-
-        if (breakInput) {
-            breakInput.value = 60;
-        }
-    }
-
-
-    const breakStatus =
-        document.getElementById(
-            "breakStatus_" + index
-        );
-
-    if (breakStatus) {
-
-        breakStatus.textContent =
-            breakMinutes +
-            " / 60 min";
-
-        breakStatus.className =
-            breakMinutes === 60
-            ? "green"
-            : "yellow";
-    }
-
-
-    /* REMAINING */
-
-    const remaining =
-        Math.max(
-            target - achieved,
-            0
-        );
-
-
-    /* PERCENTAGE */
-
-    const percentage =
-        target > 0
-        ? (
-            achieved / target
-        ) * 100
-        : 0;
-
-
-    document.getElementById(
-        "achieved_" + index
-    ).textContent =
-        achieved;
-
-    document.getElementById(
-        "remaining_" + index
-    ).textContent =
-        remaining;
-
-
-    const percentageCell =
-        document.getElementById(
-            "percentage_" + index
-        );
-
-    percentageCell.textContent =
-        percentage.toFixed(1) +
-        "%";
-
-
-    if (
-        percentage >= 100
-    ) {
-
-        percentageCell.className =
-            "green";
-
-    } else if (
-        percentage >= 80
-    ) {
-
-        percentageCell.className =
-            "yellow";
-
-    } else {
-
-        percentageCell.className =
-            "red";
-    }
-
-    updateSummary();
-}
-
-
-/* =========================================================
-   SUMMARY
-========================================================= */
-
-function updateSummary() {
-
-    let totalTarget = 0;
-
-    let totalAchieved = 0;
-
-
-    employees.forEach(
-        function(employee, index) {
-
-            const attendanceElement =
-                document.getElementById(
-                    "attendance_" + index
-                );
-
-            if (!attendanceElement) return;
-
-            const attendance =
-                attendanceElement.value;
-
-            const target =
-                getDailyTarget(
-                    employee,
-                    attendance
-                );
-
-            totalTarget += target;
+            achieved = 0;
 
 
             for (
@@ -1524,126 +2143,184 @@ function updateSummary() {
                         hour
                     );
 
-                if (
-                    input &&
-                    attendance !== "Absent"
-                ) {
 
-                    totalAchieved +=
-                        Number(input.value) || 0;
+                if (input) {
+
+                    input.value =
+                        0;
+
                 }
+
             }
         }
-    );
 
 
-    const totalRemaining =
-        Math.max(
-            totalTarget -
-            totalAchieved,
-            0
-        );
+        const breakInput =
+            document.getElementById(
+                "break_" +
+                index
+            );
 
 
-    const teamAchievement =
-        totalTarget > 0
-        ? (
-            totalAchieved /
-            totalTarget
-        ) * 100
-        : 0;
+        let breakMinutes =
+            Number(
+                breakInput
+                ? breakInput.value
+                : 0
+            ) || 0;
 
 
-    document.getElementById(
-        "totalEmployees"
-    ).textContent =
-        employees.length;
+        if (breakMinutes < 0) {
 
-    document.getElementById(
-        "totalTarget"
-    ).textContent =
-        totalTarget;
-
-    document.getElementById(
-        "totalAchieved"
-    ).textContent =
-        totalAchieved;
-
-    document.getElementById(
-        "totalRemaining"
-    ).textContent =
-        totalRemaining;
-
-    document.getElementById(
-        "teamAchievement"
-    ).textContent =
-        teamAchievement.toFixed(1) +
-        "%";
-}
+            breakMinutes =
+                0;
+        }
 
 
-/* =========================================================
-   SAVE DAILY TRACKER
-========================================================= */
+        if (breakMinutes > 60) {
 
-async function saveDailyTracker() {
+            breakMinutes =
+                60;
 
-    console.log(
-        "SAVE DAILY TRACKER FUNCTION CALLED"
-    );
 
-    const trackerDate =
+            if (breakInput) {
+
+                breakInput.value =
+                    60;
+
+            }
+        }
+
+
+        const breakStatus =
+            document.getElementById(
+                "breakStatus_" +
+                index
+            );
+
+
+        if (breakStatus) {
+
+            breakStatus.textContent =
+                breakMinutes +
+                " / 60 min";
+
+            breakStatus.className =
+                breakMinutes === 60
+                ? "green"
+                : "yellow";
+        }
+
+
+        const remaining =
+            Math.max(
+                target -
+                achieved,
+                0
+            );
+
+
+        const percentage =
+            target > 0
+            ? (
+                achieved /
+                target
+            ) * 100
+            : 0;
+
+
         document.getElementById(
-            "trackerDate"
-        ).value;
+            "achieved_" +
+            index
+        ).textContent =
+            achieved;
 
-    if (!trackerDate) {
 
-        showTrackerMessage(
-            "Please select a date.",
-            true
-        );
+        document.getElementById(
+            "remaining_" +
+            index
+        ).textContent =
+            remaining;
 
-        return;
+
+        const percentageCell =
+            document.getElementById(
+                "percentage_" +
+                index
+            );
+
+
+        percentageCell.textContent =
+            percentage.toFixed(1) +
+            "%";
+
+
+        if (
+            percentage >= 100
+        ) {
+
+            percentageCell.className =
+                "green";
+
+        } else if (
+            percentage >= 80
+        ) {
+
+            percentageCell.className =
+                "yellow";
+
+        } else {
+
+            percentageCell.className =
+                "red";
+        }
+
+
+        updateSummary();
     }
 
-    if (employees.length === 0) {
 
-        showTrackerMessage(
-            "No employees found.",
-            true
-        );
+    /* =====================================================
+       SUMMARY
+    ====================================================== */
 
-        return;
-    }
+    function updateSummary() {
 
-    showTrackerMessage(
-        "Saving daily tracker..."
-    );
+        let totalTarget =
+            0;
 
 
-    try {
-
-        const records = [];
+        let totalAchieved =
+            0;
 
 
         employees.forEach(
             function(employee, index) {
 
-                const attendance =
+                const attendanceElement =
                     document.getElementById(
-                        "attendance_" + index
-                    ).value;
+                        "attendance_" +
+                        index
+                    );
 
 
-                const dailyTarget =
+                if (!attendanceElement)
+                    return;
+
+
+                const attendance =
+                    attendanceElement.value;
+
+
+                const target =
                     getDailyTarget(
                         employee,
                         attendance
                     );
 
 
-                const hours = [];
+                totalTarget +=
+                    target;
 
 
                 for (
@@ -1660,223 +2337,94 @@ async function saveDailyTracker() {
                             hour
                         );
 
-                    hours.push(
-                        Number(
-                            input.value
-                        ) || 0
-                    );
+
+                    if (
+                        input &&
+                        attendance !== "Absent"
+                    ) {
+
+                        totalAchieved +=
+                            Number(
+                                input.value
+                            ) || 0;
+
+                    }
                 }
 
-
-                let breakMinutes =
-                    Number(
-                        document.getElementById(
-                            "break_" + index
-                        ).value
-                    ) || 0;
-
-
-                if (breakMinutes > 60) {
-                    breakMinutes = 60;
-                }
-
-
-                let achieved =
-                    hours.reduce(
-                        function(total, value) {
-
-                            return total + value;
-
-                        },
-                        0
-                    );
-
-
-                if (
-                    attendance === "Absent"
-                ) {
-
-                    achieved = 0;
-                }
-
-
-                const remaining =
-                    Math.max(
-                        dailyTarget -
-                        achieved,
-                        0
-                    );
-
-
-                const achievementPercentage =
-                    dailyTarget > 0
-                    ? (
-                        achieved /
-                        dailyTarget
-                    ) * 100
-                    : 0;
-
-
-                records.push({
-
-                    tracker_date:
-                        trackerDate,
-
-                    employee_id:
-                        employee.id,
-
-                    attendance:
-                        attendance,
-
-                    daily_target:
-                        dailyTarget,
-
-                    hour_6_7:
-                        hours[0],
-
-                    hour_7_8:
-                        hours[1],
-
-                    hour_8_9:
-                        hours[2],
-
-                    hour_9_10:
-                        hours[3],
-
-                    hour_10_11:
-                        hours[4],
-
-                    hour_11_12:
-                        hours[5],
-
-                    hour_12_1:
-                        hours[6],
-
-                    hour_1_2:
-                        hours[7],
-
-                    hour_2_3:
-                        hours[8],
-
-                    break_minutes:
-                        breakMinutes,
-
-                    achieved:
-                        achieved,
-
-                    remaining:
-                        remaining,
-
-                    achievement_percentage:
-                        achievementPercentage
-                });
             }
         );
 
 
-        console.log(
-            "Daily records:",
-            records
-        );
-
-
-        const result =
-            await supabaseClient
-                .from("daily_productivity")
-                .upsert(
-                    records,
-                    {
-                        onConflict:
-                            "tracker_date,employee_id"
-                    }
-                );
-
-
-        console.log(
-            "Save tracker result:",
-            result
-        );
-
-
-        if (result.error) {
-
-            console.error(
-                "Save tracker error:",
-                result.error
+        const totalRemaining =
+            Math.max(
+                totalTarget -
+                totalAchieved,
+                0
             );
 
-            showTrackerMessage(
-                "Unable to save tracker: " +
-                result.error.message,
-                true
-            );
 
-            return;
-        }
-
-
-        showTrackerMessage(
-            "Daily tracker saved successfully."
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Unexpected tracker error:",
-            error
-        );
-
-        showTrackerMessage(
-            "Unexpected error: " +
-            error.message,
-            true
-        );
-    }
-}
+        const teamAchievement =
+            totalTarget > 0
+            ? (
+                totalAchieved /
+                totalTarget
+            ) * 100
+            : 0;
 
 
-/* =========================================================
-   LOAD DAILY TRACKER
-========================================================= */
-
-async function loadDailyTracker() {
-
-    const trackerDate =
         document.getElementById(
-            "trackerDate"
-        ).value;
+            "totalEmployees"
+        ).textContent =
+            employees.length;
 
-    if (!trackerDate) return;
+
+        document.getElementById(
+            "totalTarget"
+        ).textContent =
+            totalTarget;
 
 
-    try {
+        document.getElementById(
+            "totalAchieved"
+        ).textContent =
+            totalAchieved;
 
-        const result =
-            await supabaseClient
-                .from("daily_productivity")
-                .select("*")
-                .eq(
-                    "tracker_date",
-                    trackerDate
-                );
 
+        document.getElementById(
+            "totalRemaining"
+        ).textContent =
+            totalRemaining;
+
+
+        document.getElementById(
+            "teamAchievement"
+        ).textContent =
+            teamAchievement.toFixed(1) +
+            "%";
+    }
+
+
+    /* =====================================================
+       SAVE DAILY TRACKER
+    ====================================================== */
+
+    async function saveDailyTracker() {
 
         console.log(
-            "Load tracker result:",
-            result
+            "SAVE DAILY TRACKER FUNCTION CALLED"
         );
 
 
-        if (result.error) {
+        const trackerDate =
+            document.getElementById(
+                "trackerDate"
+            ).value;
 
-            console.error(
-                "Load tracker error:",
-                result.error
-            );
+
+        if (!trackerDate) {
 
             showTrackerMessage(
-                "Unable to load tracker: " +
-                result.error.message,
+                "Please select a date.",
                 true
             );
 
@@ -1884,266 +2432,652 @@ async function loadDailyTracker() {
         }
 
 
-        const records =
-            result.data || [];
-
-
-        if (records.length === 0) {
+        if (
+            employees.length === 0
+        ) {
 
             showTrackerMessage(
-                "No saved data found for " +
-                trackerDate
+                "No employees found.",
+                true
             );
 
             return;
         }
 
 
-        employees.forEach(
-            function(employee, index) {
-
-                const record =
-                    records.find(
-                        function(item) {
-
-                            return (
-                                item.employee_id ===
-                                employee.id
-                            );
-
-                        }
-                    );
+        showTrackerMessage(
+            "Saving daily tracker..."
+        );
 
 
-                if (!record) return;
+        try {
+
+            const records = [];
 
 
-                const attendance =
-                    document.getElementById(
-                        "attendance_" + index
-                    );
+            employees.forEach(
+                function(employee, index) {
 
-                attendance.value =
-                    record.attendance ||
-                    "Present";
-
-
-                const hourlyValues = [
-
-                    record.hour_6_7,
-                    record.hour_7_8,
-                    record.hour_8_9,
-                    record.hour_9_10,
-                    record.hour_10_11,
-                    record.hour_11_12,
-                    record.hour_12_1,
-                    record.hour_1_2,
-                    record.hour_2_3
-
-                ];
+                    const attendance =
+                        document.getElementById(
+                            "attendance_" +
+                            index
+                        ).value;
 
 
-                hourlyValues.forEach(
-                    function(value, hourIndex) {
+                    const dailyTarget =
+                        getDailyTarget(
+                            employee,
+                            attendance
+                        );
+
+
+                    const hours = [];
+
+
+                    for (
+                        let hour = 1;
+                        hour <= 9;
+                        hour++
+                    ) {
 
                         const input =
                             document.getElementById(
                                 "productivity_" +
                                 index +
                                 "_" +
-                                (hourIndex + 1)
+                                hour
                             );
 
-                        if (input) {
 
-                            input.value =
-                                value || 0;
-                        }
+                        hours.push(
+                            Number(
+                                input.value
+                            ) || 0
+                        );
+
                     }
+
+
+                    let breakMinutes =
+                        Number(
+                            document.getElementById(
+                                "break_" +
+                                index
+                            ).value
+                        ) || 0;
+
+
+                    if (
+                        breakMinutes > 60
+                    ) {
+
+                        breakMinutes =
+                            60;
+                    }
+
+
+                    let achieved =
+                        hours.reduce(
+                            function(
+                                total,
+                                value
+                            ) {
+
+                                return (
+                                    total +
+                                    value
+                                );
+
+                            },
+                            0
+                        );
+
+
+                    if (
+                        attendance ===
+                        "Absent"
+                    ) {
+
+                        achieved =
+                            0;
+                    }
+
+
+                    const remaining =
+                        Math.max(
+                            dailyTarget -
+                            achieved,
+                            0
+                        );
+
+
+                    const achievementPercentage =
+                        dailyTarget > 0
+                        ? (
+                            achieved /
+                            dailyTarget
+                        ) * 100
+                        : 0;
+
+
+                    records.push({
+
+                        tracker_date:
+                            trackerDate,
+
+                        employee_id:
+                            employee.id,
+
+                        attendance:
+                            attendance,
+
+                        daily_target:
+                            dailyTarget,
+
+                        hour_6_7:
+                            hours[0],
+
+                        hour_7_8:
+                            hours[1],
+
+                        hour_8_9:
+                            hours[2],
+
+                        hour_9_10:
+                            hours[3],
+
+                        hour_10_11:
+                            hours[4],
+
+                        hour_11_12:
+                            hours[5],
+
+                        hour_12_1:
+                            hours[6],
+
+                        hour_1_2:
+                            hours[7],
+
+                        hour_2_3:
+                            hours[8],
+
+                        break_minutes:
+                            breakMinutes,
+
+                        achieved:
+                            achieved,
+
+                        remaining:
+                            remaining,
+
+                        achievement_percentage:
+                            achievementPercentage
+
+                    });
+
+                }
+            );
+
+
+            console.log(
+                "DAILY RECORDS:",
+                records
+            );
+
+
+            const result =
+                await supabaseClient
+                    .from(
+                        "daily_productivity"
+                    )
+                    .upsert(
+                        records,
+                        {
+                            onConflict:
+                                "tracker_date,employee_id"
+                        }
+                    );
+
+
+            console.log(
+                "SAVE TRACKER RESPONSE:",
+                result
+            );
+
+
+            if (result.error) {
+
+                console.error(
+                    "SAVE TRACKER ERROR:",
+                    result.error
                 );
 
 
-                const breakInput =
-                    document.getElementById(
-                        "break_" + index
-                    );
-
-                breakInput.value =
-                    record.break_minutes || 0;
+                showTrackerMessage(
+                    "Unable to save tracker: " +
+                    result.error.message,
+                    true
+                );
 
 
-                calculateDailyRow(index);
+                return;
             }
-        );
 
 
-        showTrackerMessage(
-            "Saved data loaded for " +
-            trackerDate
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Unexpected load tracker error:",
-            error
-        );
-    }
-}
-
-
-/* =========================================================
-   BUTTON CONNECTIONS
-   =========================================================
-   THIS IS THE IMPORTANT FIX
-========================================================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
-
-        console.log(
-            "DOM loaded."
-        );
-
-
-        /* ADD PROJECT */
-
-        const addProjectButton =
-            document.getElementById(
-                "addProjectButton"
+            showTrackerMessage(
+                "Daily tracker saved successfully."
             );
 
-        if (addProjectButton) {
 
-            addProjectButton.addEventListener(
-                "click",
-                addProject
-            );
-
-            console.log(
-                "Add Project button connected."
-            );
-        }
-
-
-        /* ADD EMPLOYEE */
-
-        const addEmployeeButton =
-            document.getElementById(
-                "addEmployeeButton"
-            );
-
-        if (addEmployeeButton) {
-
-            addEmployeeButton.addEventListener(
-                "click",
-                addEmployee
-            );
-
-            console.log(
-                "Add Employee button connected."
-            );
-
-        } else {
+        } catch (error) {
 
             console.error(
-                "Add Employee button NOT FOUND."
+                "UNEXPECTED TRACKER ERROR:",
+                error
+            );
+
+
+            showTrackerMessage(
+                "Unexpected error: " +
+                error.message,
+                true
             );
         }
+    }
 
 
-        /* SAVE DAILY TRACKER */
+    /* =====================================================
+       LOAD DAILY TRACKER
+    ====================================================== */
 
-        const saveDailyTrackerButton =
-            document.getElementById(
-                "saveDailyTrackerButton"
-            );
-
-        if (saveDailyTrackerButton) {
-
-            saveDailyTrackerButton.addEventListener(
-                "click",
-                saveDailyTracker
-            );
-
-            console.log(
-                "Save Daily Tracker button connected."
-            );
-        }
-
-
-        /* DATE CHANGE */
+    async function loadDailyTracker() {
 
         const trackerDate =
             document.getElementById(
                 "trackerDate"
+            ).value;
+
+
+        if (!trackerDate)
+            return;
+
+
+        try {
+
+            const result =
+                await supabaseClient
+                    .from(
+                        "daily_productivity"
+                    )
+                    .select("*")
+                    .eq(
+                        "tracker_date",
+                        trackerDate
+                    );
+
+
+            console.log(
+                "LOAD TRACKER RESPONSE:",
+                result
             );
 
-        if (trackerDate) {
 
-            trackerDate.addEventListener(
-                "change",
-                async function() {
+            if (result.error) {
 
-                    buildDailyTracker();
+                console.error(
+                    "LOAD TRACKER ERROR:",
+                    result.error
+                );
 
-                    await loadDailyTracker();
+
+                showTrackerMessage(
+                    "Unable to load tracker: " +
+                    result.error.message,
+                    true
+                );
+
+
+                return;
+            }
+
+
+            const records =
+                result.data || [];
+
+
+            if (
+                records.length === 0
+            ) {
+
+                console.log(
+                    "No saved tracker data found."
+                );
+
+
+                return;
+            }
+
+
+            employees.forEach(
+                function(employee, index) {
+
+                    const record =
+                        records.find(
+                            function(item) {
+
+                                return (
+                                    item.employee_id ===
+                                    employee.id
+                                );
+
+                            }
+                        );
+
+
+                    if (!record)
+                        return;
+
+
+                    const attendance =
+                        document.getElementById(
+                            "attendance_" +
+                            index
+                        );
+
+
+                    attendance.value =
+                        record.attendance ||
+                        "Present";
+
+
+                    const hourlyValues = [
+
+                        record.hour_6_7,
+                        record.hour_7_8,
+                        record.hour_8_9,
+                        record.hour_9_10,
+                        record.hour_10_11,
+                        record.hour_11_12,
+                        record.hour_12_1,
+                        record.hour_1_2,
+                        record.hour_2_3
+
+                    ];
+
+
+                    hourlyValues.forEach(
+                        function(
+                            value,
+                            hourIndex
+                        ) {
+
+                            const input =
+                                document.getElementById(
+                                    "productivity_" +
+                                    index +
+                                    "_" +
+                                    (
+                                        hourIndex +
+                                        1
+                                    )
+                                );
+
+
+                            if (input) {
+
+                                input.value =
+                                    value || 0;
+
+                            }
+
+                        }
+                    );
+
+
+                    const breakInput =
+                        document.getElementById(
+                            "break_" +
+                            index
+                        );
+
+
+                    if (breakInput) {
+
+                        breakInput.value =
+                            record.break_minutes ||
+                            0;
+
+                    }
+
+
+                    calculateDailyRow(
+                        index
+                    );
 
                 }
             );
+
+
+            showTrackerMessage(
+                "Saved data loaded for " +
+                trackerDate
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "LOAD TRACKER UNEXPECTED ERROR:",
+                error
+            );
         }
+    }
+
+
+    /* =====================================================
+       BUTTON CONNECTIONS
+    ====================================================== */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function() {
+
+            console.log(
+                "DOM LOADED."
+            );
+
+
+            /* =============================================
+               ADD PROJECT BUTTON
+            ============================================== */
+
+            const addProjectButton =
+                document.getElementById(
+                    "addProjectButton"
+                );
+
+
+            if (
+                addProjectButton
+            ) {
+
+                addProjectButton.addEventListener(
+                    "click",
+                    addProject
+                );
+
+
+                console.log(
+                    "Add Project button connected."
+                );
+
+            } else {
+
+                console.error(
+                    "Add Project button NOT FOUND."
+                );
+
+            }
+
+
+            /* =============================================
+               ADD EMPLOYEE BUTTON
+            ============================================== */
+
+            const addEmployeeButton =
+                document.getElementById(
+                    "addEmployeeButton"
+                );
+
+
+            if (
+                addEmployeeButton
+            ) {
+
+                addEmployeeButton.addEventListener(
+                    "click",
+                    addEmployee
+                );
+
+
+                console.log(
+                    "Add Employee button connected."
+                );
+
+            } else {
+
+                console.error(
+                    "Add Employee button NOT FOUND."
+                );
+
+            }
+
+
+            /* =============================================
+               SAVE TRACKER BUTTON
+            ============================================== */
+
+            const saveDailyTrackerButton =
+                document.getElementById(
+                    "saveDailyTrackerButton"
+                );
+
+
+            if (
+                saveDailyTrackerButton
+            ) {
+
+                saveDailyTrackerButton.addEventListener(
+                    "click",
+                    saveDailyTracker
+                );
+
+
+                console.log(
+                    "Save Daily Tracker button connected."
+                );
+
+            } else {
+
+                console.error(
+                    "Save Daily Tracker button NOT FOUND."
+                );
+
+            }
+
+
+            /* =============================================
+               DATE CHANGE
+            ============================================== */
+
+            const trackerDate =
+                document.getElementById(
+                    "trackerDate"
+                );
+
+
+            if (
+                trackerDate
+            ) {
+
+                trackerDate.addEventListener(
+                    "change",
+                    async function() {
+
+                        buildDailyTracker();
+
+                        await loadDailyTracker();
+
+                    }
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       START APPLICATION
+    ====================================================== */
+
+    async function startApplication() {
+
+        console.log(
+            "================================="
+        );
+
+
+        console.log(
+            "STARTING APPLICATION"
+        );
+
+
+        console.log(
+            "================================="
+        );
+
+
+        setTodayDate();
+
+
+        await loadProjects();
+
+
+        await loadEmployees();
+
+
+        await loadDailyTracker();
+
+
+        console.log(
+            "================================="
+        );
+
+
+        console.log(
+            "APPLICATION LOADED SUCCESSFULLY"
+        );
+
+
+        console.log(
+            "================================="
+        );
 
     }
-);
 
 
-/* =========================================================
-   START APPLICATION
-========================================================= */
+    /* =====================================================
+       START
+    ====================================================== */
 
-async function startApplication() {
-
-    console.log(
-        "================================="
-    );
-
-    console.log(
-        "STARTING APPLICATION"
-    );
-
-    console.log(
-        "================================="
-    );
+    startApplication();
 
 
-    setTodayDate();
-
-    await loadProjects();
-
-    await loadEmployees();
-
-    await loadDailyTracker();
+    </script>
 
 
-    console.log(
-        "================================="
-    );
+</body>
 
-    console.log(
-        "APPLICATION LOADED SUCCESSFULLY"
-    );
-
-    console.log(
-        "================================="
-    );
-}
-
-
-/* =========================================================
-   START
-========================================================= */
-
-startApplication();
-
-</script>
+</html>
