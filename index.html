@@ -286,6 +286,134 @@
             color: #64748b;
         }
 
+
+        /* =========================================================
+           MANAGER CONTROL CENTER
+        ========================================================= */
+
+        .manager-control-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+        }
+
+        .manager-control-header {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+            flex-wrap:wrap;
+            margin-bottom:16px;
+        }
+
+        .manager-control-note {
+            font-size:11px;
+            color:#64748b;
+            margin-top:4px;
+        }
+
+        .manager-kpi-grid {
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(165px,1fr));
+            gap:12px;
+            margin-bottom:18px;
+        }
+
+        .manager-kpi {
+            background:#f8fafc;
+            border-radius:9px;
+            padding:14px;
+            border-left:4px solid #1261a0;
+        }
+
+        .manager-kpi.green { border-left-color:#198754; }
+        .manager-kpi.orange { border-left-color:#f59e0b; }
+        .manager-kpi.red { border-left-color:#dc3545; }
+
+        .manager-kpi-label {
+            font-size:10px;
+            color:#64748b;
+            font-weight:bold;
+            text-transform:uppercase;
+        }
+
+        .manager-kpi-value {
+            font-size:23px;
+            font-weight:bold;
+            color:#172b4d;
+            margin-top:5px;
+        }
+
+        .manager-kpi-sub {
+            font-size:10px;
+            color:#64748b;
+            margin-top:3px;
+        }
+
+        .manager-alerts {
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+            gap:12px;
+            margin-bottom:18px;
+        }
+
+        .manager-alert {
+            border-radius:9px;
+            padding:13px;
+            background:#f8fafc;
+        }
+
+        .manager-alert strong {
+            display:block;
+            font-size:12px;
+            margin-bottom:5px;
+        }
+
+        .manager-alert span {
+            font-size:11px;
+            color:#64748b;
+        }
+
+        .manager-table-wrap {
+            overflow-x:auto;
+        }
+
+        .manager-table {
+            min-width:900px;
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        .manager-table th {
+            background:#173b5e;
+            color:white;
+            padding:9px 7px;
+            font-size:10px;
+        }
+
+        .manager-table td {
+            padding:8px 7px;
+            border-bottom:1px solid #e2e8f0;
+            font-size:10px;
+            text-align:center;
+        }
+
+        .manager-table td.left { text-align:left; }
+
+        .manager-status {
+            display:inline-block;
+            padding:4px 7px;
+            border-radius:5px;
+            font-size:9px;
+            font-weight:bold;
+        }
+
+        .manager-status.green { background:#d1fae5; color:#047857; }
+        .manager-status.orange { background:#fef3c7; color:#b45309; }
+        .manager-status.red { background:#fee2e2; color:#b91c1c; }
+        .manager-status.grey { background:#e2e8f0; color:#475569; }
+
         /* =========================================================
            PROJECT CARDS
         ========================================================= */
@@ -1014,6 +1142,61 @@
         <div
             class="kpi-grid"
             id="kpiContainer">
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MANAGER CONTROL CENTER
+    ====================================================== -->
+
+    <div class="section management-only" id="managerControlSection">
+
+        <div class="section-title">
+            Manager Control Center
+        </div>
+
+        <div class="manager-control-card">
+
+            <div class="manager-control-header">
+                <div>
+                    <strong style="font-size:16px;color:#173b5e;">
+                        Daily Team Performance
+                    </strong>
+                    <div class="manager-control-note" id="managerControlDateLabel">
+                        Current tracker date
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="renderManagerControlCenter()">
+                    Refresh Manager View
+                </button>
+            </div>
+
+            <div class="manager-kpi-grid" id="managerControlKPIs"></div>
+            <div class="manager-alerts" id="managerControlAlerts"></div>
+
+            <div class="manager-table-wrap">
+                <table class="manager-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>EMP ID</th>
+                            <th>Project</th>
+                            <th>Attendance</th>
+                            <th>Target</th>
+                            <th>Achieved</th>
+                            <th>Remaining</th>
+                            <th>Achievement %</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="managerControlBody"></tbody>
+                </table>
+            </div>
+
         </div>
 
     </div>
@@ -5523,6 +5706,167 @@ async function updateKPI() {
 }
 
 
+
+
+/* =========================================================
+   MANAGER CONTROL CENTER
+========================================================= */
+
+function renderManagerControlCenter() {
+
+    const section = document.getElementById("managerControlSection");
+    if (!section) return;
+
+    if (currentRole !== "management") {
+        section.style.display = "none";
+        return;
+    }
+
+    section.style.display = "block";
+
+    const list = getFilteredEmployees();
+    const date = document.getElementById("trackerDate")?.value || "";
+
+    const label = document.getElementById("managerControlDateLabel");
+    if (label) {
+        label.textContent = date
+            ? `Tracker date: ${date} • ${list.length} employees in selected view`
+            : "Current tracker date";
+    }
+
+    let totalTarget = 0;
+    let totalAchieved = 0;
+    let present = 0;
+    let halfDay = 0;
+    let absent = 0;
+    let onTrack = 0;
+    let attention = 0;
+    let totalHours = 0;
+
+    const rows = [];
+
+    list.forEach(employee => {
+        const record = getProductionRecord(employee.id);
+        const attendance = record?.attendance || "Present";
+        const targetRaw = getDailyTarget(employee, attendance);
+        const target = targetRaw === null ? 0 : Number(targetRaw || 0);
+        const achieved = Number(record?.achieved || 0);
+        const remaining = Math.max(target - achieved, 0);
+        const pct = target > 0 ? achieved / target * 100 : null;
+        const project = getProjectById(employee.project_id);
+
+        if (attendance === "Absent") absent++;
+        else if (attendance === "Half Day") halfDay++;
+        else present++;
+
+        totalTarget += target;
+        totalAchieved += achieved;
+
+        if (pct !== null) {
+            if (pct >= 90) onTrack++;
+            else attention++;
+        }
+
+        hourFields.forEach(field => {
+            totalHours += Number(record?.[field] || 0);
+        });
+
+        rows.push({ employee, project, attendance, target, achieved, remaining, pct });
+    });
+
+    const teamPct = totalTarget > 0 ? totalAchieved / totalTarget * 100 : 0;
+    const deficit = Math.max(totalTarget - totalAchieved, 0);
+    const activeEmployees = present + halfDay;
+    const statusClass = teamPct >= 90 ? "green" : teamPct >= 70 ? "orange" : "red";
+
+    document.getElementById("managerControlKPIs").innerHTML = `
+        <div class="manager-kpi">
+            <div class="manager-kpi-label">Team FTE</div>
+            <div class="manager-kpi-value">${list.length}</div>
+            <div class="manager-kpi-sub">Employees in selected view</div>
+        </div>
+        <div class="manager-kpi green">
+            <div class="manager-kpi-label">Present</div>
+            <div class="manager-kpi-value">${present}</div>
+            <div class="manager-kpi-sub">${halfDay} half day • ${absent} absent</div>
+        </div>
+        <div class="manager-kpi">
+            <div class="manager-kpi-label">Daily Target</div>
+            <div class="manager-kpi-value">${totalTarget}</div>
+            <div class="manager-kpi-sub">Based on attendance</div>
+        </div>
+        <div class="manager-kpi">
+            <div class="manager-kpi-label">Achieved</div>
+            <div class="manager-kpi-value">${totalAchieved}</div>
+            <div class="manager-kpi-sub">Current tracker date</div>
+        </div>
+        <div class="manager-kpi ${statusClass}">
+            <div class="manager-kpi-label">Team Achievement</div>
+            <div class="manager-kpi-value">${teamPct.toFixed(1)}%</div>
+            <div class="manager-kpi-sub">Target vs achieved</div>
+        </div>
+        <div class="manager-kpi ${deficit > 0 ? "red" : "green"}">
+            <div class="manager-kpi-label">Team Deficit</div>
+            <div class="manager-kpi-value">${deficit}</div>
+            <div class="manager-kpi-sub">Production remaining</div>
+        </div>
+        <div class="manager-kpi">
+            <div class="manager-kpi-label">Hourly Production</div>
+            <div class="manager-kpi-value">${totalHours}</div>
+            <div class="manager-kpi-sub">Total units entered</div>
+        </div>
+    `;
+
+    const top = rows.filter(r => r.pct !== null).sort((a,b) => b.pct - a.pct)[0];
+    const low = rows.filter(r => r.pct !== null).sort((a,b) => a.pct - b.pct)[0];
+
+    document.getElementById("managerControlAlerts").innerHTML = `
+        <div class="manager-alert">
+            <strong>🏆 Top Performer</strong>
+            <span>${top ? `${escapeHtml(top.employee.employee_name)} — ${top.pct.toFixed(1)}%` : "No production data yet"}</span>
+        </div>
+        <div class="manager-alert">
+            <strong>⚠️ Needs Attention</strong>
+            <span>${low && low.pct < 90 ? `${escapeHtml(low.employee.employee_name)} — ${low.pct.toFixed(1)}%` : "No employee below 90%"}</span>
+        </div>
+        <div class="manager-alert">
+            <strong>🎯 On Track</strong>
+            <span>${onTrack} employees at or above 90% achievement</span>
+        </div>
+        <div class="manager-alert">
+            <strong>📌 Active Workforce</strong>
+            <span>${activeEmployees} employees available today</span>
+        </div>
+    `;
+
+    const tbody = document.getElementById("managerControlBody");
+    tbody.innerHTML = "";
+
+    rows.sort((a,b) => (b.pct ?? -1) - (a.pct ?? -1)).forEach(r => {
+        let cls = "grey";
+        let text = "N/A";
+        if (r.pct !== null) {
+            cls = r.pct >= 90 ? "green" : r.pct >= 70 ? "orange" : "red";
+            text = r.pct >= 90 ? "ON TRACK" : r.pct >= 70 ? "MONITOR" : "ATTENTION";
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td class="left">${escapeHtml(r.employee.employee_name)}</td>
+            <td>${escapeHtml(r.employee.employee_code)}</td>
+            <td>${escapeHtml(r.project?.project_name || "")}</td>
+            <td>${escapeHtml(r.attendance)}</td>
+            <td>${r.target}</td>
+            <td>${r.achieved}</td>
+            <td>${r.remaining}</td>
+            <td>${r.pct === null ? "N/A" : r.pct.toFixed(1) + "%"}</td>
+            <td><span class="manager-status ${cls}">${text}</span></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+
 /* =========================================================
    UPDATE DASHBOARD
 ========================================================= */
@@ -5534,6 +5878,8 @@ async function updateDashboard() {
     renderSubProjectDashboard();
 
     renderPerformanceSummary();
+
+    renderManagerControlCenter();
 
     // updateKPI() already calculates and renders
     // Current Month Shrinkage inside Performance Overview.
