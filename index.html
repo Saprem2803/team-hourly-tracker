@@ -498,6 +498,22 @@
             padding: 2px;
         }
 
+        .production-input.hour-locked {
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+            cursor: not-allowed;
+            font-weight: 700;
+        }
+
+        .hour-lock-label {
+            display: inline-block;
+            margin-top: 3px;
+            font-size: 8px;
+            font-weight: 700;
+            color: #64748b;
+        }
+
         .status {
             display: inline-block;
             padding: 4px 7px;
@@ -684,6 +700,89 @@
 
         }
 
+
+        /* =========================================================
+           ACCESS CONTROL / LOGIN
+        ========================================================== */
+
+        .auth-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f4f7fb;
+            padding: 20px;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            border-radius: 14px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.10);
+        }
+
+        .auth-card h2 {
+            margin: 0 0 8px;
+            color: #173b5e;
+        }
+
+        .auth-card p {
+            color: #64748b;
+            font-size: 13px;
+            margin: 0 0 20px;
+        }
+
+        .auth-card input {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .auth-card button {
+            width: 100%;
+        }
+
+        .auth-error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 12px;
+            min-height: 18px;
+        }
+
+        .app-hidden {
+            display: none !important;
+        }
+
+        .user-bar {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.16);
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .user-email {
+            font-size: 12px;
+            opacity: .9;
+        }
+
+        .btn-logout {
+            background: white;
+            color: #0f3d68;
+            padding: 6px 10px;
+            font-size: 11px;
+        }
+
     </style>
 
 </head>
@@ -691,7 +790,44 @@
 <body>
 
 
-<div class="header">
+<!-- =====================================================
+     LOGIN / ACCESS CONTROL
+====================================================== -->
+
+<div id="authScreen" class="auth-screen">
+
+    <div class="auth-card">
+
+        <h2>Hourly Production Management</h2>
+
+        <p>Sign in with your company account to access your assigned project.</p>
+
+        <input
+            type="email"
+            id="loginEmail"
+            placeholder="Company email"
+            autocomplete="username">
+
+        <input
+            type="password"
+            id="loginPassword"
+            placeholder="Password"
+            autocomplete="current-password">
+
+        <button
+            class="btn-primary"
+            onclick="loginUser()">
+            Sign In
+        </button>
+
+        <div id="authError" class="auth-error"></div>
+
+    </div>
+
+</div>
+
+
+<div id="appHeader" class="header app-hidden">
 
     <h1>
         Hourly Production Management Dashboard
@@ -701,10 +837,16 @@
         Production monitoring • Project performance • Employee productivity
     </p>
 
+    <div class="user-bar">
+        <span id="userEmail" class="user-email"></span>
+        <span id="userRole" class="role-badge"></span>
+        <button class="btn-logout" onclick="logoutUser()">Logout</button>
+    </div>
+
 </div>
 
 
-<div class="container">
+<div id="appContainer" class="container app-hidden">
 
 
     <!-- =====================================================
@@ -1013,7 +1155,7 @@
          SETUP
     ====================================================== -->
 
-    <div class="section">
+    <div class="section management-only" id="managementSetupSection">
 
         <div class="section-title">
             Setup
@@ -1303,6 +1445,16 @@ let subProjects = [];
 let employeeProjects = [];
 let dailyProduction = [];
 
+// =========================================================
+// USER ACCESS CONTROL
+// management  = all projects
+// team_lead   = only assigned project(s)
+// =========================================================
+let currentUser = null;
+let currentRole = null;
+let accessibleProjectIds = [];
+let accessReady = false;
+
 
 /* =========================================================
    HOUR FIELDS
@@ -1336,6 +1488,106 @@ const hourLabels = [
     "2–3 AM"
 
 ];
+
+
+/* =========================================================
+   HOURLY LOCKING
+   Past completed shift hours become read-only.
+   Current hour remains editable until the hour ends.
+========================================================= */
+
+function getShiftHourIndexForDate(trackerDate) {
+
+    if (!trackerDate) {
+        return -1;
+    }
+
+    const now = new Date();
+
+    const today = getTodayString();
+
+    // Previous dates are completely locked.
+    if (trackerDate < today) {
+        return hourFields.length;
+    }
+
+    // Future dates are completely editable.
+    if (trackerDate > today) {
+        return -1;
+    }
+
+    const hour = now.getHours();
+
+    // Shift: 6 PM–3 AM.
+    // 6 PM -> index 0, 7 PM -> index 1 ... 2 AM -> index 8.
+    if (hour >= 18) {
+        return Math.min(hour - 18, hourFields.length);
+    }
+
+    if (hour < 3) {
+        return Math.min(hour + 6, hourFields.length);
+    }
+
+    // Between 3 AM and 6 PM, today's 6 PM shift has not started.
+    return -1;
+}
+
+
+function isHourLocked(index, trackerDate) {
+
+    const currentIndex =
+        getShiftHourIndexForDate(trackerDate);
+
+    return currentIndex >= 0 && index < currentIndex;
+}
+
+
+function applyHourlyLocksToRow(row) {
+
+    if (!row) return;
+
+    const trackerDate =
+        document.getElementById("trackerDate")?.value;
+
+    hourFields.forEach((field, index) => {
+
+        const input =
+            row.querySelector(`[data-field="${field}"]`);
+
+        if (!input) return;
+
+        const locked =
+            isHourLocked(index, trackerDate);
+
+        input.readOnly = locked;
+        input.classList.toggle("hour-locked", locked);
+        input.title = locked
+            ? "Locked: past shift hour"
+            : "Editable";
+
+        const cell = input.parentElement;
+        let lockLabel =
+            cell.querySelector(".hour-lock-label");
+
+        if (locked) {
+            if (!lockLabel) {
+                lockLabel = document.createElement("span");
+                lockLabel.className = "hour-lock-label";
+                lockLabel.textContent = "LOCKED";
+                cell.appendChild(lockLabel);
+            }
+        } else if (lockLabel) {
+            lockLabel.remove();
+        }
+    });
+}
+
+
+function applyHourlyLocks() {
+    document
+        .querySelectorAll("#trackerBody tr[data-employee-id]")
+        .forEach(applyHourlyLocksToRow);
+}
 
 
 /* =========================================================
@@ -1467,6 +1719,195 @@ function setTodayDate() {
 
 
 /* =========================================================
+   AUTHENTICATION / PROJECT ACCESS
+========================================================= */
+
+function setAuthError(message = "") {
+
+    const el = document.getElementById("authError");
+
+    if (el) {
+        el.textContent = message;
+    }
+
+}
+
+
+async function loginUser() {
+
+    const email =
+        document.getElementById("loginEmail").value.trim();
+
+    const password =
+        document.getElementById("loginPassword").value;
+
+    setAuthError("");
+
+    if (!email || !password) {
+        setAuthError("Enter your email and password.");
+        return;
+    }
+
+    const { error } =
+        await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+        });
+
+    if (error) {
+        console.error("Login:", error);
+        setAuthError(error.message);
+        return;
+    }
+
+}
+
+
+async function logoutUser() {
+
+    await supabaseClient.auth.signOut();
+
+    currentUser = null;
+    currentRole = null;
+    accessibleProjectIds = [];
+    accessReady = false;
+
+    document.getElementById("authScreen").classList.remove("app-hidden");
+    document.getElementById("appHeader").classList.add("app-hidden");
+    document.getElementById("appContainer").classList.add("app-hidden");
+
+}
+
+
+async function loadUserAccess() {
+
+    if (!currentUser) {
+        throw new Error("No authenticated user.");
+    }
+
+    const { data, error } =
+        await supabaseClient
+            .from("user_project_access")
+            .select("role,project_id")
+            .eq("user_id", currentUser.id);
+
+    if (error) {
+        console.error("User access:", error);
+        throw new Error(
+            "User access is not configured. Please contact management."
+        );
+    }
+
+    if (!data || !data.length) {
+        throw new Error(
+            "No project access is assigned to this account. Please contact management."
+        );
+    }
+
+    currentRole =
+        data.some(r => r.role === "management")
+            ? "management"
+            : "team_lead";
+
+    accessibleProjectIds =
+        data
+            .filter(r => r.project_id !== null && r.project_id !== undefined)
+            .map(r => Number(r.project_id));
+
+    accessReady = true;
+
+    const emailEl = document.getElementById("userEmail");
+    const roleEl = document.getElementById("userRole");
+
+    if (emailEl) {
+        emailEl.textContent = currentUser.email || "";
+    }
+
+    if (roleEl) {
+        roleEl.textContent =
+            currentRole === "management"
+                ? "MANAGEMENT"
+                : "TEAM LEAD";
+    }
+
+    // Team Leads should not have access to project/sub-project/employee setup.
+    document.querySelectorAll(".management-only").forEach(el => {
+        el.classList.toggle(
+            "app-hidden",
+            currentRole !== "management"
+        );
+    });
+
+}
+
+
+function canAccessProject(projectId) {
+
+    if (!accessReady) {
+        return false;
+    }
+
+    if (currentRole === "management") {
+        return true;
+    }
+
+    return accessibleProjectIds.includes(Number(projectId));
+
+}
+
+
+async function initializeAuthentication() {
+
+    const {
+        data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    if (!session) {
+        document.getElementById("authScreen").classList.remove("app-hidden");
+        document.getElementById("appHeader").classList.add("app-hidden");
+        document.getElementById("appContainer").classList.add("app-hidden");
+        return false;
+    }
+
+    currentUser = session.user;
+
+    try {
+        await loadUserAccess();
+    }
+    catch (error) {
+        console.error("Access initialization:", error);
+        setAuthError(error.message);
+        document.getElementById("authScreen").classList.remove("app-hidden");
+        document.getElementById("appHeader").classList.add("app-hidden");
+        document.getElementById("appContainer").classList.add("app-hidden");
+        return false;
+    }
+
+    document.getElementById("authScreen").classList.add("app-hidden");
+    document.getElementById("appHeader").classList.remove("app-hidden");
+    document.getElementById("appContainer").classList.remove("app-hidden");
+
+    return true;
+}
+
+
+supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+
+    if (!session) {
+        currentUser = null;
+        currentRole = null;
+        accessibleProjectIds = [];
+        accessReady = false;
+
+        document.getElementById("authScreen").classList.remove("app-hidden");
+        document.getElementById("appHeader").classList.add("app-hidden");
+        document.getElementById("appContainer").classList.add("app-hidden");
+    }
+
+});
+
+
+/* =========================================================
    LOAD PROJECTS
 ========================================================= */
 
@@ -1502,7 +1943,9 @@ async function loadProjects() {
 
 
     projects =
-        data || [];
+        (data || []).filter(project =>
+            canAccessProject(project.id)
+        );
 
 
     return true;
@@ -1551,7 +1994,9 @@ async function loadSubProjects() {
 
 
     subProjects =
-        data || [];
+        (data || []).filter(sp =>
+            canAccessProject(sp.project_id)
+        );
 
 
     return true;
@@ -1599,7 +2044,9 @@ async function loadEmployees() {
 
 
     employees =
-        data || [];
+        (data || []).filter(employee =>
+            canAccessProject(employee.project_id)
+        );
 
 
     return true;
@@ -1640,7 +2087,9 @@ async function loadEmployeeProjects() {
 
 
     employeeProjects =
-        data || [];
+        (data || []).filter(mapping =>
+            canAccessProject(mapping.project_id)
+        );
 
 
     return true;
@@ -1697,10 +2146,16 @@ async function loadDailyTracker() {
 
 
     dailyProduction =
-        data || [];
+        (data || []).filter(record =>
+            employees.some(employee =>
+                Number(employee.id) === Number(record.employee_id)
+            )
+        );
 
 
     buildDailyTracker();
+
+    applyHourlyLocks();
 
     updateDashboard();
 
@@ -2791,6 +3246,9 @@ function buildDailyTracker() {
                 )
             );
 
+
+            applyHourlyLocksToRow(tr);
+
         }
     );
 
@@ -3083,26 +3541,37 @@ function getRowData(row) {
 
 
     hourFields.forEach(
-        field => {
+        (field, index) => {
 
             const input =
                 row.querySelector(
                     `[data-field="${field}"]`
                 );
 
+            const locked =
+                isHourLocked(
+                    index,
+                    record.tracker_date
+                );
+
+            // Never submit a client-side change to a locked hour.
+            // Reuse the value already stored in Supabase.
+            const existingRecord =
+                getProductionRecord(employeeId);
+
+            const rawValue =
+                locked && existingRecord
+                    ? existingRecord[field]
+                    : input?.value;
 
             const value =
                 Math.max(
-                    Number(
-                        input?.value || 0
-                    ),
+                    Number(rawValue || 0),
                     0
                 );
 
-
             record[field] =
                 value;
-
 
             achieved +=
                 value;
@@ -6556,6 +7025,28 @@ document
     );
 
 
+document.addEventListener("keydown", function(event) {
+
+    if (event.key === "Enter" &&
+        !document.getElementById("authScreen").classList.contains("app-hidden")) {
+
+        loginUser();
+    }
+
+});
+
+
+/* =========================================================
+   AUTO-LOCK PAST HOURS
+   Re-evaluate every minute so the current hour becomes locked
+   automatically when it rolls into the next hour.
+========================================================= */
+
+setInterval(() => {
+    applyHourlyLocks();
+}, 60 * 1000);
+
+
 /* =========================================================
    START APPLICATION
 ========================================================= */
@@ -6563,6 +7054,13 @@ document
 async function startApplication() {
 
     try {
+
+        const authenticated =
+            await initializeAuthentication();
+
+        if (!authenticated) {
+            return;
+        }
 
         setTodayDate();
 
