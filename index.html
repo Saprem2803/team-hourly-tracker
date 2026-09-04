@@ -5053,9 +5053,11 @@ async function updateDashboard() {
 
     renderPerformanceSummary();
 
+    // updateKPI() already calculates and renders
+    // Current Month Shrinkage inside Performance Overview.
+    // Do not call renderShrinkageDetails() because that function
+    // is not required and caused the startup ReferenceError.
     await updateKPI();
-
-    await renderShrinkageDetails();
 
 }
 
