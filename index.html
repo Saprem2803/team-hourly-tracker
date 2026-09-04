@@ -367,6 +367,89 @@
         }
 
         /* =========================================================
+           SHRINKAGE DETAILS
+        ========================================================= */
+
+        .shrinkage-details-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+        }
+
+        .shrinkage-details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .shrinkage-details-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #173b5e;
+        }
+
+        .shrinkage-details-note {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .shrinkage-status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .shrinkage-status.low {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .shrinkage-status.moderate {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .shrinkage-status.high {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .shrinkage-metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+            gap: 12px;
+        }
+
+        .shrinkage-metric {
+            background: #f8fafc;
+            border-radius: 9px;
+            padding: 14px;
+            border-left: 4px solid #1261a0;
+        }
+
+        .shrinkage-metric span {
+            display: block;
+            font-size: 10px;
+            color: #64748b;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .shrinkage-metric strong {
+            display: block;
+            font-size: 22px;
+            color: #172b4d;
+            margin-top: 5px;
+        }
+
+        /* =========================================================
            TABLE
         ========================================================= */
 
@@ -4971,6 +5054,8 @@ async function updateDashboard() {
     renderPerformanceSummary();
 
     await updateKPI();
+
+    await renderShrinkageDetails();
 
 }
 
