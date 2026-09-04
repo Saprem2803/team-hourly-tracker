@@ -718,8 +718,6 @@
 
             <div class="download-buttons">
 
-                <!-- DAILY REPORT -->
-
                 <button
                     class="btn-download"
                     onclick="downloadDailyCSV()">
@@ -728,8 +726,6 @@
 
                 </button>
 
-
-                <!-- MTD DATE RANGE -->
 
                 <div class="report-date-fields">
 
@@ -974,7 +970,10 @@
                 </button>
 
                 <div class="setup-note">
-                    For BFW, leave project target blank and set AR target to 55 under Sub-Project Setup.
+
+                    For BFW, leave project target blank and set AR target to 55
+                    under Sub-Project Setup.
+
                 </div>
 
             </div>
@@ -1169,13 +1168,9 @@ const supabaseClient =
 ========================================================= */
 
 let projects = [];
-
 let employees = [];
-
 let subProjects = [];
-
 let employeeProjects = [];
-
 let dailyProduction = [];
 
 
@@ -1243,8 +1238,7 @@ function showMessage(text, type = "success") {
 
 function getTodayString() {
 
-    const today =
-        new Date();
+    const today = new Date();
 
     const yyyy =
         today.getFullYear();
@@ -1269,17 +1263,14 @@ function setTodayDate() {
     const todayValue =
         getTodayString();
 
-
-    const input =
-        document.getElementById(
-            "trackerDate"
-        );
-
-
-    input.value =
+    document.getElementById(
+        "trackerDate"
+    ).value =
         todayValue;
 
-    input.max =
+    document.getElementById(
+        "trackerDate"
+    ).max =
         todayValue;
 
 
@@ -1287,7 +1278,6 @@ function setTodayDate() {
         document.getElementById(
             "mtdFromDate"
         );
-
 
     const toDate =
         document.getElementById(
@@ -1301,11 +1291,6 @@ function setTodayDate() {
     toDate.max =
         todayValue;
 
-
-    /*
-       Default MTD range:
-       First day of current month → today
-    */
 
     const firstDay =
         todayValue.substring(
@@ -1338,6 +1323,7 @@ async function loadProjects() {
             .select("*")
             .order("project_name");
 
+
     if (error) {
 
         console.error(
@@ -1353,6 +1339,7 @@ async function loadProjects() {
         return false;
 
     }
+
 
     projects =
         data || [];
@@ -1379,6 +1366,7 @@ async function loadSubProjects() {
             .order("project_id")
             .order("sub_project_name");
 
+
     if (error) {
 
         console.error(
@@ -1394,6 +1382,7 @@ async function loadSubProjects() {
         return false;
 
     }
+
 
     subProjects =
         data || [];
@@ -1419,6 +1408,7 @@ async function loadEmployees() {
             .eq("active", true)
             .order("employee_name");
 
+
     if (error) {
 
         console.error(
@@ -1434,6 +1424,7 @@ async function loadEmployees() {
         return false;
 
     }
+
 
     employees =
         data || [];
@@ -1457,6 +1448,7 @@ async function loadEmployeeProjects() {
             .from("employee_projects")
             .select("*");
 
+
     if (error) {
 
         console.warn(
@@ -1464,11 +1456,13 @@ async function loadEmployeeProjects() {
             error.message
         );
 
-        employeeProjects = [];
+        employeeProjects =
+            [];
 
         return false;
 
     }
+
 
     employeeProjects =
         data || [];
@@ -1488,6 +1482,7 @@ async function loadDailyTracker() {
         document.getElementById(
             "trackerDate"
         ).value;
+
 
     if (!date)
         return;
@@ -1592,6 +1587,10 @@ function getEmployeeSubProject(employee) {
         return null;
 
 
+    /* First priority:
+       employees.sub_project_id
+    */
+
     if (
         employee.sub_project_id !== null &&
         employee.sub_project_id !== undefined &&
@@ -1613,40 +1612,56 @@ function getEmployeeSubProject(employee) {
     }
 
 
-    const mapping =
-        employeeProjects.find(
+    /* Second priority:
+       employee_projects mapping
+    */
+
+    const mappings =
+        employeeProjects.filter(
             ep =>
                 Number(ep.employee_id) ===
                 Number(employee.id)
         );
 
 
-    if (
-        mapping &&
-        mapping.sub_project_id !== null &&
-        mapping.sub_project_id !== undefined
+    for (
+        const mapping of mappings
     ) {
 
-        const mappedSubProject =
-            getSubProjectById(
-                mapping.sub_project_id
-            );
+        if (
+            mapping.sub_project_id !== null &&
+            mapping.sub_project_id !== undefined &&
+            mapping.sub_project_id !== ""
+        ) {
+
+            const mappedSubProject =
+                getSubProjectById(
+                    mapping.sub_project_id
+                );
 
 
-        if (mappedSubProject) {
+            if (mappedSubProject) {
 
-            return mappedSubProject;
+                return mappedSubProject;
+
+            }
 
         }
 
     }
 
 
+    /* Third priority:
+       If employee's project has exactly
+       one active sub-project, use it.
+    */
+
     const projectSubProjects =
         subProjects.filter(
             sp =>
                 Number(sp.project_id) ===
-                Number(employee.project_id)
+                Number(employee.project_id) &&
+                sp.active === true
         );
 
 
@@ -1678,6 +1693,11 @@ function getEmployeeTarget(employee) {
 
     if (subProject) {
 
+        /*
+           Explicit non-target sub-project.
+           Example: WRMC AR.
+        */
+
         if (
             subProject.target_based === false
         ) {
@@ -1687,12 +1707,27 @@ function getEmployeeTarget(employee) {
         }
 
 
+        if (
+            subProject.daily_target === null ||
+            subProject.daily_target === undefined ||
+            subProject.daily_target === ""
+        ) {
+
+            return null;
+
+        }
+
+
         return Number(
-            subProject.daily_target || 0
+            subProject.daily_target
         );
 
     }
 
+
+    /*
+       Fallback to project-level target.
+    */
 
     const project =
         getProjectById(
@@ -1704,11 +1739,20 @@ function getEmployeeTarget(employee) {
         return null;
 
 
-    return project.daily_target === null ||
-           project.daily_target === undefined ||
-           project.daily_target === ""
-        ? null
-        : Number(project.daily_target);
+    if (
+        project.daily_target === null ||
+        project.daily_target === undefined ||
+        project.daily_target === ""
+    ) {
+
+        return null;
+
+    }
+
+
+    return Number(
+        project.daily_target
+    );
 
 }
 
@@ -1862,9 +1906,11 @@ function loadProjectFilter(
 
 
     select.innerHTML =
-        `<option value="">
+        `
+        <option value="">
             All Projects
-         </option>`;
+        </option>
+        `;
 
 
     projects.forEach(
@@ -1907,7 +1953,8 @@ function loadProjectFilter(
     }
     else {
 
-        select.value = "";
+        select.value =
+            "";
 
     }
 
@@ -1941,9 +1988,11 @@ function loadSubProjectFilter(
 
 
     select.innerHTML =
-        `<option value="">
+        `
+        <option value="">
             All Sub-Projects
-         </option>`;
+        </option>
+        `;
 
 
     let list =
@@ -2004,7 +2053,8 @@ function loadSubProjectFilter(
     }
     else {
 
-        select.value = "";
+        select.value =
+            "";
 
     }
 
@@ -2016,6 +2066,12 @@ function loadSubProjectFilter(
 ========================================================= */
 
 function handleProjectFilterChange() {
+
+    /*
+       Changing project resets sub-project filter
+       so an old sub-project from another project
+       cannot remain selected.
+    */
 
     loadSubProjectFilter("");
 
@@ -2066,15 +2122,19 @@ function loadEmployeeProjectDropdown() {
 
 
     select.innerHTML =
-        `<option value="">
+        `
+        <option value="">
             Select Project
-         </option>`;
+        </option>
+        `;
 
 
     parent.innerHTML =
-        `<option value="">
+        `
+        <option value="">
             Select Project
-         </option>`;
+        </option>
+        `;
 
 
     projects.forEach(
@@ -2132,7 +2192,6 @@ function loadEmployeeProjectDropdown() {
         select.value =
             currentEmployeeProject;
 
-
         loadEmployeeSubProjectDropdown();
 
     }
@@ -2172,18 +2231,22 @@ function loadEmployeeSubProjectDropdown() {
         );
 
 
-    select.innerHTML = "";
+    select.innerHTML =
+        "";
 
 
     if (!projectId) {
 
-        select.disabled = true;
+        select.disabled =
+            true;
 
 
         select.innerHTML =
-            `<option value="">
+            `
+            <option value="">
                 Select Project First
-             </option>`;
+            </option>
+            `;
 
 
         return;
@@ -2202,13 +2265,16 @@ function loadEmployeeSubProjectDropdown() {
 
     if (!list.length) {
 
-        select.disabled = true;
+        select.disabled =
+            true;
 
 
         select.innerHTML =
-            `<option value="">
+            `
+            <option value="">
                 No Sub-Project Required
-             </option>`;
+            </option>
+            `;
 
 
         return;
@@ -2216,13 +2282,16 @@ function loadEmployeeSubProjectDropdown() {
     }
 
 
-    select.disabled = false;
+    select.disabled =
+        false;
 
 
     select.innerHTML =
-        `<option value="">
+        `
+        <option value="">
             Select Sub-Project
-         </option>`;
+        </option>
+        `;
 
 
     list.forEach(
@@ -2266,15 +2335,18 @@ function displayEmployees() {
         );
 
 
-    container.innerHTML = "";
+    container.innerHTML =
+        "";
 
 
     if (!employees.length) {
 
         container.innerHTML =
-            `<div class="employee-item">
+            `
+            <div class="employee-item">
                 No active employees found.
-             </div>`;
+            </div>
+            `;
 
 
         return;
@@ -2392,7 +2464,11 @@ async function addProject() {
     const duplicate =
         projects.some(
             p =>
-                p.project_name.trim().toLowerCase() ===
+                String(
+                    p.project_name || ""
+                )
+                .trim()
+                .toLowerCase() ===
                 name.toLowerCase()
         );
 
@@ -2443,16 +2519,17 @@ async function addProject() {
 
     document.getElementById(
         "projectName"
-    ).value = "";
+    ).value =
+        "";
 
 
     document.getElementById(
         "projectTarget"
-    ).value = "";
+    ).value =
+        "";
 
 
     await loadProjects();
-
 
     loadProjectFilter();
 
@@ -2582,7 +2659,8 @@ async function addSubProject() {
                 target_based:
                     targetBased,
 
-                active: true
+                active:
+                    true
 
             });
 
@@ -2603,12 +2681,14 @@ async function addSubProject() {
 
     document.getElementById(
         "subProjectName"
-    ).value = "";
+    ).value =
+        "";
 
 
     document.getElementById(
         "subProjectTarget"
-    ).value = "";
+    ).value =
+        "";
 
 
     await loadSubProjects();
@@ -2624,8 +2704,6 @@ async function addSubProject() {
     loadEmployeeSubProjectDropdown();
 
     displayEmployees();
-
-    renderSubProjectDashboard();
 
     updateDashboard();
 
@@ -2706,9 +2784,11 @@ async function addEmployee() {
     const duplicateEmployee =
         employees.some(
             e =>
-                String(e.employee_code)
-                    .trim()
-                    .toLowerCase() ===
+                String(
+                    e.employee_code || ""
+                )
+                .trim()
+                .toLowerCase() ===
                 code.toLowerCase()
         );
 
@@ -2797,7 +2877,8 @@ async function addEmployee() {
                         ? Number(subProjectId)
                         : null,
 
-                active: true
+                active:
+                    true
 
             })
             .select()
@@ -2817,6 +2898,10 @@ async function addEmployee() {
 
     }
 
+
+    /*
+       Create employee-project mapping.
+    */
 
     const {
         error: mappingError
@@ -2851,17 +2936,20 @@ async function addEmployee() {
 
     document.getElementById(
         "employeeName"
-    ).value = "";
+    ).value =
+        "";
 
 
     document.getElementById(
         "employeeCode"
-    ).value = "";
+    ).value =
+        "";
 
 
     document.getElementById(
         "employeeProject"
-    ).value = "";
+    ).value =
+        "";
 
 
     const employeeSubProject =
@@ -2875,9 +2963,11 @@ async function addEmployee() {
 
 
     employeeSubProject.innerHTML =
-        `<option value="">
+        `
+        <option value="">
             Select Project First
-         </option>`;
+        </option>
+        `;
 
 
     await loadEmployees();
@@ -2910,7 +3000,8 @@ function buildDailyTracker() {
         );
 
 
-    tbody.innerHTML = "";
+    tbody.innerHTML =
+        "";
 
 
     const visibleEmployees =
@@ -2964,6 +3055,11 @@ function buildDailyTracker() {
                 );
 
 
+            /*
+               Important:
+               Missing record defaults to Present.
+            */
+
             const attendance =
                 record?.attendance ||
                 "Present";
@@ -3000,11 +3096,9 @@ function buildDailyTracker() {
 
 
                 <td>
-
                     ${escapeHtml(
                         employee.employee_code
                     )}
-
                 </td>
 
 
@@ -3049,7 +3143,9 @@ function buildDailyTracker() {
                                     ? "selected"
                                     : ""
                             }>
+
                             Present
+
                         </option>
 
                         <option
@@ -3059,7 +3155,9 @@ function buildDailyTracker() {
                                     ? "selected"
                                     : ""
                             }>
+
                             Half Day
+
                         </option>
 
                         <option
@@ -3069,7 +3167,9 @@ function buildDailyTracker() {
                                     ? "selected"
                                     : ""
                             }>
+
                             Absent
+
                         </option>
 
                     </select>
@@ -3243,7 +3343,8 @@ function recalculateRow(element) {
             : target;
 
 
-    let achieved = 0;
+    let achieved =
+        0;
 
 
     hourFields.forEach(
@@ -3256,8 +3357,11 @@ function recalculateRow(element) {
 
 
             const value =
-                Number(
-                    input?.value || 0
+                Math.max(
+                    Number(
+                        input?.value || 0
+                    ),
+                    0
                 );
 
 
@@ -3270,6 +3374,11 @@ function recalculateRow(element) {
                     `[data-hour-index="${index}"]`
                 );
 
+
+            /*
+               Non-target and absent:
+               hourly status = N/A
+            */
 
             if (
                 target === null ||
@@ -3351,7 +3460,8 @@ function recalculateRow(element) {
 
     const remaining =
         Math.max(
-            target - achieved,
+            target -
+            achieved,
             0
         );
 
@@ -3375,7 +3485,8 @@ function recalculateRow(element) {
     row.querySelector(
         ".achievement"
     ).textContent =
-        percentage.toFixed(1) + "%";
+        percentage.toFixed(1) +
+        "%";
 
 
     if (
@@ -3466,7 +3577,8 @@ function getRowData(row) {
     };
 
 
-    let achieved = 0;
+    let achieved =
+        0;
 
 
     hourFields.forEach(
@@ -3479,8 +3591,11 @@ function getRowData(row) {
 
 
             const value =
-                Number(
-                    input?.value || 0
+                Math.max(
+                    Number(
+                        input?.value || 0
+                    ),
+                    0
                 );
 
 
@@ -3514,7 +3629,8 @@ function getRowData(row) {
 
         record.remaining =
             Math.max(
-                target - achieved,
+                target -
+                achieved,
                 0
             );
 
@@ -3596,7 +3712,10 @@ async function saveEmployeeProduction(
 
     if (error) {
 
-        console.error(error);
+        console.error(
+            "Save Employee Production:",
+            error
+        );
 
         showMessage(
             error.message,
@@ -3692,7 +3811,10 @@ async function saveAllProduction() {
 
     if (error) {
 
-        console.error(error);
+        console.error(
+            "Save All Production:",
+            error
+        );
 
         showMessage(
             error.message,
@@ -3735,15 +3857,25 @@ function getProjectMetrics(
     let totalEmployees =
         list.length;
 
-    let target = 0;
 
-    let targetAchieved = 0;
+    let target =
+        0;
 
-    let totalAchieved = 0;
 
-    let present = 0;
+    let targetAchieved =
+        0;
 
-    let absent = 0;
+
+    let totalAchieved =
+        0;
+
+
+    let present =
+        0;
+
+
+    let absent =
+        0;
 
 
     list.forEach(
@@ -3793,9 +3925,19 @@ function getProjectMetrics(
                 );
 
 
+            /*
+               Total production includes
+               target and non-target production.
+            */
+
             totalAchieved +=
                 achieved;
 
+
+            /*
+               Target calculations only use
+               target-based employees.
+            */
 
             if (
                 employeeTarget !== null &&
@@ -3887,9 +4029,12 @@ function getSubProjectMetrics(
         );
 
 
-    let target = 0;
+    let target =
+        0;
 
-    let achieved = 0;
+
+    let achieved =
+        0;
 
 
     list.forEach(
@@ -4000,7 +4145,8 @@ function renderProjectDashboard() {
         );
 
 
-    container.innerHTML = "";
+    container.innerHTML =
+        "";
 
 
     const selectedProject =
@@ -4008,6 +4154,10 @@ function renderProjectDashboard() {
             "projectFilter"
         ).value;
 
+
+    /*
+       ALL PROJECTS VIEW
+    */
 
     if (!selectedProject) {
 
@@ -4047,6 +4197,10 @@ function renderProjectDashboard() {
 
     }
 
+
+    /*
+       SELECTED PROJECT VIEW
+    */
 
     const project =
         getProjectById(
@@ -4207,7 +4361,8 @@ function renderSubProjectDashboard() {
         );
 
 
-    container.innerHTML = "";
+    container.innerHTML =
+        "";
 
 
     const selectedProject =
@@ -4403,7 +4558,8 @@ function renderPerformanceSummary() {
         );
 
 
-    tbody.innerHTML = "";
+    tbody.innerHTML =
+        "";
 
 
     const list =
@@ -4481,7 +4637,8 @@ function renderPerformanceSummary() {
             const remaining =
                 isTargetBased
                     ? Math.max(
-                        target - achieved,
+                        target -
+                        achieved,
                         0
                     )
                     : null;
@@ -4498,7 +4655,7 @@ function renderPerformanceSummary() {
                     : null;
 
 
-            let status = "";
+            let status;
 
 
             if (!isTargetBased) {
@@ -4597,9 +4754,7 @@ function renderPerformanceSummary() {
 
 
                 <td>
-
                     ${achieved}
-
                 </td>
 
 
@@ -4679,15 +4834,24 @@ function updateKPI() {
         getFilteredEmployees();
 
 
-    let totalTarget = 0;
+    let totalTarget =
+        0;
 
-    let totalAchieved = 0;
 
-    let targetAchieved = 0;
+    let totalAchieved =
+        0;
 
-    let present = 0;
 
-    let absent = 0;
+    let targetAchieved =
+        0;
+
+
+    let present =
+        0;
+
+
+    let absent =
+        0;
 
 
     list.forEach(
@@ -4731,9 +4895,19 @@ function updateKPI() {
                 );
 
 
+            /*
+               Achieved always includes
+               all actual production.
+            */
+
             totalAchieved +=
                 production;
 
+
+            /*
+               Target calculations only include
+               target-based work.
+            */
 
             if (
                 target !== null
@@ -4795,7 +4969,14 @@ function updateKPI() {
 
         title =
             sp
-                ? `${project ? project.project_name + " → " : ""}${sp.sub_project_name || "Unnamed Sub-Project"}`
+                ? `${
+                    project
+                        ? project.project_name + " → "
+                        : ""
+                }${
+                    sp.sub_project_name ||
+                    "Unnamed Sub-Project"
+                }`
                 : "Selected Sub-Project";
 
     }
@@ -5136,7 +5317,9 @@ function downloadCSV(
 
     const csvContent =
         "\uFEFF" +
-        csvLines.join("\r\n");
+        csvLines.join(
+            "\r\n"
+        );
 
 
     const blob =
@@ -5163,6 +5346,7 @@ function downloadCSV(
 
     link.href =
         url;
+
 
     link.download =
         filename;
@@ -5350,11 +5534,6 @@ async function downloadDailyCSV() {
     );
 
 
-    /*
-       Fresh query from Supabase ensures
-       the report contains the latest saved data.
-    */
-
     const records =
         await getDailyReportRecords(
             date
@@ -5394,6 +5573,11 @@ async function downloadDailyCSV() {
                         )
                 );
 
+
+            /*
+               Missing record defaults to Present,
+               consistent with tracker.
+            */
 
             const attendance =
                 record?.attendance ||
@@ -5547,7 +5731,74 @@ async function downloadDailyCSV() {
 
 
 /* =========================================================
-   MTD REPORT - DATE RANGE
+   CREATE DATE RANGE
+========================================================= */
+
+function getDateRange(
+    fromDate,
+    toDate
+) {
+
+    const dates = [];
+
+
+    let current =
+        new Date(
+            `${fromDate}T00:00:00`
+        );
+
+
+    const end =
+        new Date(
+            `${toDate}T00:00:00`
+        );
+
+
+    while (
+        current <= end
+    ) {
+
+        const yyyy =
+            current.getFullYear();
+
+
+        const mm =
+            String(
+                current.getMonth() + 1
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const dd =
+            String(
+                current.getDate()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        dates.push(
+            `${yyyy}-${mm}-${dd}`
+        );
+
+
+        current.setDate(
+            current.getDate() + 1
+        );
+
+    }
+
+
+    return dates;
+
+}
+
+
+/* =========================================================
+   MTD REPORT - CORRECTED
 ========================================================= */
 
 async function downloadMTDCSV() {
@@ -5564,7 +5815,10 @@ async function downloadMTDCSV() {
         ).value;
 
 
-    if (!fromDate || !toDate) {
+    if (
+        !fromDate ||
+        !toDate
+    ) {
 
         showMessage(
             "Select both From Date and To Date",
@@ -5613,8 +5867,8 @@ async function downloadMTDCSV() {
 
 
     /*
-       Fetch all saved production records
-       between From Date and To Date.
+       Fetch ALL saved production records
+       in the selected date range.
     */
 
     const {
@@ -5655,23 +5909,34 @@ async function downloadMTDCSV() {
         data || [];
 
 
+    /*
+       IMPORTANT:
+       Build every date between From and To.
+
+       Example:
+
+       09/02 → 09/03
+
+       Date 1 = 09/02
+       Date 2 = 09/03
+
+       Even if there is no saved production
+       record on one of these dates, the date
+       is still counted as Present by default.
+    */
+
+    const dates =
+        getDateRange(
+            fromDate,
+            toDate
+        );
+
+
     const rows = [];
 
 
     visibleEmployees.forEach(
         employee => {
-
-            const employeeRecords =
-                records.filter(
-                    record =>
-                        Number(
-                            record.employee_id
-                        ) ===
-                        Number(
-                            employee.id
-                        )
-                );
-
 
             const project =
                 getProjectById(
@@ -5683,6 +5948,21 @@ async function downloadMTDCSV() {
                 getEmployeeSubProject(
                     employee
                 );
+
+
+            /*
+               Determine whether this employee
+               belongs to a target-based sub-project.
+            */
+
+            const employeeTarget =
+                getEmployeeTarget(
+                    employee
+                );
+
+
+            const targetBased =
+                employeeTarget !== null;
 
 
             let mtdTarget =
@@ -5710,17 +5990,43 @@ async function downloadMTDCSV() {
 
 
             /*
-               Count only dates for which
-               a production record exists.
+               Process EVERY date in range.
             */
 
-            employeeRecords.forEach(
-                record => {
+            dates.forEach(
+                date => {
+
+                    const record =
+                        records.find(
+                            r =>
+                                Number(
+                                    r.employee_id
+                                ) ===
+                                Number(
+                                    employee.id
+                                ) &&
+                                r.tracker_date ===
+                                date
+                        );
+
+
+                    /*
+                       IMPORTANT:
+
+                       If no record exists,
+                       attendance defaults to Present.
+
+                       This matches the Daily Tracker.
+                    */
 
                     const attendance =
-                        record.attendance ||
+                        record?.attendance ||
                         "Present";
 
+
+                    /*
+                       Attendance count.
+                    */
 
                     if (
                         attendance === "Absent"
@@ -5743,14 +6049,63 @@ async function downloadMTDCSV() {
                     }
 
 
-                    const dailyTarget =
+                    /*
+                       Calculate daily target.
+
+                       Present:
+                       full target
+
+                       Half Day:
+                       CEILING(target / 2)
+
+                       Absent:
+                       0
+
+                       Non-target:
+                       null
+                    */
+
+                    let dailyTarget =
                         getDailyTarget(
                             employee,
                             attendance
                         );
 
 
+                    /*
+                       If a saved target exists,
+                       use the target actually saved
+                       for that date.
+
+                       This preserves historical
+                       daily target values where available.
+                    */
+
                     if (
+                        record &&
+                        record.daily_target !== null &&
+                        record.daily_target !== undefined &&
+                        record.daily_target !== "" &&
+                        targetBased
+                    ) {
+
+                        dailyTarget =
+                            Number(
+                                record.daily_target
+                            );
+
+                    }
+
+
+                    /*
+                       Add target for every date.
+
+                       Missing record still contributes
+                       Present/full target.
+                    */
+
+                    if (
+                        targetBased &&
                         dailyTarget !== null
                     ) {
 
@@ -5762,9 +6117,17 @@ async function downloadMTDCSV() {
                     }
 
 
+                    /*
+                       Production:
+
+                       Missing record = 0
+
+                       Saved record = actual achieved.
+                    */
+
                     const achieved =
                         Number(
-                            record.achieved || 0
+                            record?.achieved || 0
                         );
 
 
@@ -5784,33 +6147,103 @@ async function downloadMTDCSV() {
             );
 
 
-            const targetBased =
-                getEmployeeTarget(
-                    employee
-                ) !== null;
+            /*
+               NON-TARGET EMPLOYEE
+            */
 
+            if (!targetBased) {
+
+                rows.push({
+
+                    "From Date":
+                        fromDate,
+
+                    "To Date":
+                        toDate,
+
+                    "Employee":
+                        employee.employee_name,
+
+                    "EMP ID":
+                        employee.employee_code,
+
+                    "Project":
+                        project
+                            ? project.project_name
+                            : "",
+
+                    "Sub-Project":
+                        subProject
+                            ? (
+                                subProject.sub_project_name ||
+                                "Unnamed Sub-Project"
+                            )
+                            : "Not Required",
+
+                    "Days Present":
+                        daysPresent,
+
+                    "Half Days":
+                        halfDays,
+
+                    "Absent Days":
+                        absentDays,
+
+                    "Days With Production":
+                        daysWithProduction,
+
+                    "MTD Target":
+                        "N/A",
+
+                    "MTD Achieved":
+                        mtdAchieved,
+
+                    "MTD Remaining":
+                        "N/A",
+
+                    "MTD Achievement %":
+                        "N/A",
+
+                    "Status":
+                        "N/A"
+
+                });
+
+
+                return;
+
+            }
+
+
+            /*
+               Cap target-achieved at MTD target.
+
+               Example:
+
+               MTD Target = 240
+               MTD Achieved = 270
+
+               Target Achieved = 240
+               Remaining = 0
+               Achievement = 100%
+            */
 
             const targetAchieved =
-                targetBased
-                    ? Math.min(
-                        mtdAchieved,
-                        mtdTarget
-                    )
-                    : 0;
+                Math.min(
+                    mtdAchieved,
+                    mtdTarget
+                );
 
 
             const remaining =
-                targetBased
-                    ? Math.max(
-                        mtdTarget -
-                        targetAchieved,
-                        0
-                    )
-                    : null;
+                Math.max(
+                    mtdTarget -
+                    targetAchieved,
+                    0
+                );
 
 
             const achievement =
-                targetBased &&
                 mtdTarget > 0
                     ? Number(
                         (
@@ -5878,17 +6311,13 @@ async function downloadMTDCSV() {
                     daysWithProduction,
 
                 "MTD Target":
-                    targetBased
-                        ? mtdTarget
-                        : "N/A",
+                    mtdTarget,
 
                 "MTD Achieved":
                     mtdAchieved,
 
                 "MTD Remaining":
-                    remaining === null
-                        ? "N/A"
-                        : remaining,
+                    remaining,
 
                 "MTD Achievement %":
                     achievement === null
@@ -6040,7 +6469,6 @@ async function startApplication() {
         console.log(
             "Hourly Production Management Dashboard loaded successfully"
         );
-
 
     }
     catch (error) {
