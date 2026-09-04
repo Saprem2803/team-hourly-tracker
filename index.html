@@ -1503,32 +1503,33 @@ function getShiftHourIndexForDate(trackerDate) {
     }
 
     const now = new Date();
+    const activeShiftDate = getCurrentShiftDateString();
 
-    const today = getTodayString();
-
-    // Previous dates are completely locked.
-    if (trackerDate < today) {
+    // Any shift before the currently active shift is completely locked.
+    if (trackerDate < activeShiftDate) {
         return hourFields.length;
     }
 
-    // Future dates are completely editable.
-    if (trackerDate > today) {
+    // Any future shift is completely editable.
+    if (trackerDate > activeShiftDate) {
         return -1;
     }
 
     const hour = now.getHours();
 
-    // Shift: 6 PM–3 AM.
-    // 6 PM -> index 0, 7 PM -> index 1 ... 2 AM -> index 8.
+    // 6 PM–11:59 PM: 6 PM = index 0, 7 PM = index 1, etc.
     if (hour >= 18) {
         return Math.min(hour - 18, hourFields.length);
     }
 
+    // 12 AM–2:59 AM still belongs to the previous day's shift.
+    // 12 AM = index 6, 1 AM = index 7, 2 AM = index 8.
     if (hour < 3) {
         return Math.min(hour + 6, hourFields.length);
     }
 
-    // Between 3 AM and 6 PM, today's 6 PM shift has not started.
+    // 3 AM–5:59 PM: the next 6 PM shift has not started,
+    // so none of today's hours should be locked yet.
     return -1;
 }
 
@@ -1634,88 +1635,90 @@ function showMessage(
    TODAY
 ========================================================= */
 
-function getTodayString() {
+function formatLocalDate(date) {
 
-    const today =
-        new Date();
-
-
-    const yyyy =
-        today.getFullYear();
-
-
-    const mm =
-        String(
-            today.getMonth() + 1
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    const dd =
-        String(
-            today.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
-
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
 
     return `${yyyy}-${mm}-${dd}`;
+}
 
+
+function getTodayString() {
+    return formatLocalDate(new Date());
+}
+
+
+/*
+   Tracker date represents the shift START date.
+   Shift runs from 6:00 PM to 3:00 AM.
+   Therefore, between midnight and 2:59 AM, the active shift
+   still belongs to yesterday's tracker date.
+*/
+function getCurrentShiftDateString() {
+
+    const now = new Date();
+    const shiftDate = new Date(now);
+
+    if (now.getHours() < 3) {
+        shiftDate.setDate(shiftDate.getDate() - 1);
+    }
+
+    return formatLocalDate(shiftDate);
+}
+
+
+function getTrackerDefaultDate() {
+    return getCurrentShiftDateString();
 }
 
 
 function setTodayDate() {
 
-    const todayValue =
+    const calendarToday =
         getTodayString();
 
+    const trackerDate =
+        getTrackerDefaultDate();
 
     document.getElementById(
         "trackerDate"
     ).value =
-        todayValue;
-
+        trackerDate;
 
     document.getElementById(
         "trackerDate"
     ).max =
-        todayValue;
-
+        calendarToday;
 
     document.getElementById(
         "mtdFromDate"
     ).max =
-        todayValue;
-
+        calendarToday;
 
     document.getElementById(
         "mtdToDate"
     ).max =
-        todayValue;
-
+        calendarToday;
 
     const firstDay =
-        todayValue.substring(
+        calendarToday.substring(
             0,
             8
         ) + "01";
-
 
     document.getElementById(
         "mtdFromDate"
     ).value =
         firstDay;
 
-
     document.getElementById(
         "mtdToDate"
     ).value =
-        todayValue;
-
+        calendarToday;
 }
+
 
 
 /* =========================================================
