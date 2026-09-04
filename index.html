@@ -190,6 +190,30 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            align-items: end;
+        }
+
+        .report-date-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .report-date-group label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #64748b;
+        }
+
+        .report-date-group input {
+            width: 145px;
+        }
+
+        .report-date-fields {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: end;
         }
 
         /* =========================================================
@@ -557,6 +581,24 @@
                 align-items: flex-start;
             }
 
+            .download-buttons {
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .report-date-fields {
+                width: 100%;
+            }
+
+            .report-date-group {
+                flex: 1;
+            }
+
+            .report-date-group input {
+                width: 100%;
+            }
+
         }
 
     </style>
@@ -660,13 +702,14 @@
             <div>
 
                 <div class="download-title">
-                    Production Downloads
+                    Production Reports
                 </div>
 
                 <div class="download-note">
 
-                    Downloads follow the selected date,
-                    project and sub-project filters.
+                    Daily Report uses the selected Tracker Date.
+                    MTD Report uses the From Date and To Date selected below.
+                    Reports follow the selected Project and Sub-Project filters.
 
                 </div>
 
@@ -675,22 +718,52 @@
 
             <div class="download-buttons">
 
+                <!-- DAILY REPORT -->
+
                 <button
                     class="btn-download"
                     onclick="downloadDailyCSV()">
 
-                    📥 Download Daily CSV
+                    📥 Daily Report
 
                 </button>
 
 
-                <button
-                    class="btn-download"
-                    onclick="downloadMTDCSV()">
+                <!-- MTD DATE RANGE -->
 
-                    📊 Download MTD CSV
+                <div class="report-date-fields">
 
-                </button>
+                    <div class="report-date-group">
+
+                        <label>MTD From Date</label>
+
+                        <input
+                            type="date"
+                            id="mtdFromDate">
+
+                    </div>
+
+
+                    <div class="report-date-group">
+
+                        <label>MTD To Date</label>
+
+                        <input
+                            type="date"
+                            id="mtdToDate">
+
+                    </div>
+
+
+                    <button
+                        class="btn-download"
+                        onclick="downloadMTDCSV()">
+
+                        📊 MTD Report
+
+                    </button>
+
+                </div>
 
             </div>
 
@@ -1168,10 +1241,7 @@ function showMessage(text, type = "success") {
    TODAY
 ========================================================= */
 
-function setTodayDate() {
-
-    const input =
-        document.getElementById("trackerDate");
+function getTodayString() {
 
     const today =
         new Date();
@@ -1189,13 +1259,65 @@ function setTodayDate() {
             today.getDate()
         ).padStart(2, "0");
 
+    return `${yyyy}-${mm}-${dd}`;
+
+}
+
+
+function setTodayDate() {
+
     const todayValue =
-        `${yyyy}-${mm}-${dd}`;
+        getTodayString();
+
+
+    const input =
+        document.getElementById(
+            "trackerDate"
+        );
+
 
     input.value =
         todayValue;
 
     input.max =
+        todayValue;
+
+
+    const fromDate =
+        document.getElementById(
+            "mtdFromDate"
+        );
+
+
+    const toDate =
+        document.getElementById(
+            "mtdToDate"
+        );
+
+
+    fromDate.max =
+        todayValue;
+
+    toDate.max =
+        todayValue;
+
+
+    /*
+       Default MTD range:
+       First day of current month → today
+    */
+
+    const firstDay =
+        todayValue.substring(
+            0,
+            8
+        ) + "01";
+
+
+    fromDate.value =
+        firstDay;
+
+    toDate.value =
         todayValue;
 
 }
@@ -1218,7 +1340,10 @@ async function loadProjects() {
 
     if (error) {
 
-        console.error("Projects:", error);
+        console.error(
+            "Projects:",
+            error
+        );
 
         showMessage(
             "Unable to load projects",
@@ -1256,7 +1381,10 @@ async function loadSubProjects() {
 
     if (error) {
 
-        console.error("Sub Projects:", error);
+        console.error(
+            "Sub Projects:",
+            error
+        );
 
         showMessage(
             "Unable to load sub-projects",
@@ -1293,7 +1421,10 @@ async function loadEmployees() {
 
     if (error) {
 
-        console.error("Employees:", error);
+        console.error(
+            "Employees:",
+            error
+        );
 
         showMessage(
             "Unable to load employees",
@@ -1361,6 +1492,7 @@ async function loadDailyTracker() {
     if (!date)
         return;
 
+
     const {
         data,
         error
@@ -1372,6 +1504,7 @@ async function loadDailyTracker() {
                 "tracker_date",
                 date
             );
+
 
     if (error) {
 
@@ -1389,8 +1522,10 @@ async function loadDailyTracker() {
 
     }
 
+
     dailyProduction =
         data || [];
+
 
     buildDailyTracker();
 
@@ -1425,6 +1560,7 @@ function getSubProjectById(id) {
         return null;
 
     }
+
 
     return subProjects.find(
         s =>
@@ -1467,6 +1603,7 @@ function getEmployeeSubProject(employee) {
                 employee.sub_project_id
             );
 
+
         if (directSubProject) {
 
             return directSubProject;
@@ -1494,6 +1631,7 @@ function getEmployeeSubProject(employee) {
             getSubProjectById(
                 mapping.sub_project_id
             );
+
 
         if (mappedSubProject) {
 
@@ -1547,6 +1685,7 @@ function getEmployeeTarget(employee) {
             return null;
 
         }
+
 
         return Number(
             subProject.daily_target || 0
@@ -1652,6 +1791,7 @@ function getFilteredEmployees() {
             "projectFilter"
         ).value;
 
+
     const subProjectValue =
         document.getElementById(
             "subProjectFilter"
@@ -1660,7 +1800,6 @@ function getFilteredEmployees() {
 
     return employees.filter(
         employee => {
-
 
             if (
                 projectValue &&
@@ -1736,11 +1875,14 @@ function loadProjectFilter(
                     "option"
                 );
 
+
             option.value =
                 project.id;
 
+
             option.textContent =
                 project.project_name;
+
 
             select.appendChild(
                 option
@@ -1828,13 +1970,16 @@ function loadSubProjectFilter(
                     "option"
                 );
 
+
             option.value =
                 sp.id;
+
 
             option.textContent =
                 sp.target_based
                     ? `${sp.sub_project_name} - Target ${sp.daily_target}`
                     : `${sp.sub_project_name} - N/A`;
+
 
             select.appendChild(
                 option
@@ -1935,17 +2080,19 @@ function loadEmployeeProjectDropdown() {
     projects.forEach(
         project => {
 
-
             const option1 =
                 document.createElement(
                     "option"
                 );
 
+
             option1.value =
                 project.id;
 
+
             option1.textContent =
                 project.project_name;
+
 
             select.appendChild(
                 option1
@@ -1957,11 +2104,14 @@ function loadEmployeeProjectDropdown() {
                     "option"
                 );
 
+
             option2.value =
                 project.id;
 
+
             option2.textContent =
                 project.project_name;
+
 
             parent.appendChild(
                 option2
@@ -1981,6 +2131,7 @@ function loadEmployeeProjectDropdown() {
 
         select.value =
             currentEmployeeProject;
+
 
         loadEmployeeSubProjectDropdown();
 
@@ -2028,10 +2179,12 @@ function loadEmployeeSubProjectDropdown() {
 
         select.disabled = true;
 
+
         select.innerHTML =
             `<option value="">
                 Select Project First
              </option>`;
+
 
         return;
 
@@ -2051,10 +2204,12 @@ function loadEmployeeSubProjectDropdown() {
 
         select.disabled = true;
 
+
         select.innerHTML =
             `<option value="">
                 No Sub-Project Required
              </option>`;
+
 
         return;
 
@@ -2077,6 +2232,7 @@ function loadEmployeeSubProjectDropdown() {
                 document.createElement(
                     "option"
                 );
+
 
             option.value =
                 sp.id;
@@ -2119,6 +2275,7 @@ function displayEmployees() {
             `<div class="employee-item">
                 No active employees found.
              </div>`;
+
 
         return;
 
@@ -2181,7 +2338,8 @@ function displayEmployees() {
                     ${
                         subProject
                             ? escapeHtml(
-                                subProject.sub_project_name
+                                subProject.sub_project_name ||
+                                "Unnamed Sub-Project"
                             )
                             : "Not Required"
                     }
@@ -2868,7 +3026,8 @@ function buildDailyTracker() {
                     ${
                         subProject
                             ? escapeHtml(
-                                subProject.sub_project_name
+                                subProject.sub_project_name ||
+                                "Unnamed Sub-Project"
                             )
                             : "Not Required"
                     }
@@ -4897,10 +5056,6 @@ async function refreshDashboard() {
    CSV HELPERS
 ========================================================= */
 
-/*
-   Converts a value into a CSV-safe value.
-*/
-
 function csvEscape(value) {
 
     if (
@@ -4925,16 +5080,15 @@ function csvEscape(value) {
 }
 
 
-/*
-   Downloads CSV file to user's computer.
-*/
-
 function downloadCSV(
     rows,
     filename
 ) {
 
-    if (!rows || !rows.length) {
+    if (
+        !rows ||
+        !rows.length
+    ) {
 
         showMessage(
             "No data available for download",
@@ -4980,11 +5134,6 @@ function downloadCSV(
     );
 
 
-    /*
-       UTF-8 BOM helps Excel correctly display
-       employee names and other text.
-    */
-
     const csvContent =
         "\uFEFF" +
         csvLines.join("\r\n");
@@ -5018,11 +5167,14 @@ function downloadCSV(
     link.download =
         filename;
 
+
     document.body.appendChild(
         link
     );
 
+
     link.click();
+
 
     document.body.removeChild(
         link
@@ -5037,7 +5189,7 @@ function downloadCSV(
 
 
 /* =========================================================
-   GET FILTER DESCRIPTION
+   GET DOWNLOAD FILTER DESCRIPTION
 ========================================================= */
 
 function getDownloadFilterText() {
@@ -5111,10 +5263,53 @@ function getDownloadFilterText() {
 
 
 /* =========================================================
-   DAILY CSV DOWNLOAD
+   GET DAILY REPORT RECORDS
 ========================================================= */
 
-function downloadDailyCSV() {
+async function getDailyReportRecords(
+    date
+) {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("daily_productivity")
+            .select("*")
+            .eq(
+                "tracker_date",
+                date
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Daily Report:",
+            error
+        );
+
+        showMessage(
+            "Unable to load daily report data",
+            "error"
+        );
+
+        return null;
+
+    }
+
+
+    return data || [];
+
+}
+
+
+/* =========================================================
+   DAILY REPORT
+========================================================= */
+
+async function downloadDailyCSV() {
 
     const date =
         document.getElementById(
@@ -5150,6 +5345,26 @@ function downloadDailyCSV() {
     }
 
 
+    showMessage(
+        "Preparing Daily Report..."
+    );
+
+
+    /*
+       Fresh query from Supabase ensures
+       the report contains the latest saved data.
+    */
+
+    const records =
+        await getDailyReportRecords(
+            date
+        );
+
+
+    if (records === null)
+        return;
+
+
     const rows = [];
 
 
@@ -5169,8 +5384,14 @@ function downloadDailyCSV() {
 
 
             const record =
-                getProductionRecord(
-                    employee.id
+                records.find(
+                    r =>
+                        Number(
+                            r.employee_id
+                        ) ===
+                        Number(
+                            employee.id
+                        )
                 );
 
 
@@ -5223,20 +5444,10 @@ function downloadDailyCSV() {
                 target !== null
             ) {
 
-                if (
+                status =
                     percentage >= 100
-                ) {
-
-                    status =
-                        "ON TRACK";
-
-                }
-                else {
-
-                    status =
-                        "NEED ATTENTION";
-
-                }
+                        ? "ON TRACK"
+                        : "NEED ATTENTION";
 
             }
 
@@ -5293,15 +5504,18 @@ function downloadDailyCSV() {
             row["Achieved"] =
                 achieved;
 
+
             row["Remaining"] =
                 remaining === null
                     ? "N/A"
                     : remaining;
 
+
             row["Achievement %"] =
                 percentage === null
                     ? "N/A"
                     : percentage + "%";
+
 
             row["Status"] =
                 status;
@@ -5326,28 +5540,34 @@ function downloadDailyCSV() {
 
 
     showMessage(
-        "Daily production CSV downloaded successfully"
+        "Daily Report downloaded successfully"
     );
 
 }
 
 
 /* =========================================================
-   MTD CSV DOWNLOAD
+   MTD REPORT - DATE RANGE
 ========================================================= */
 
 async function downloadMTDCSV() {
 
-    const selectedDate =
+    const fromDate =
         document.getElementById(
-            "trackerDate"
+            "mtdFromDate"
         ).value;
 
 
-    if (!selectedDate) {
+    const toDate =
+        document.getElementById(
+            "mtdToDate"
+        ).value;
+
+
+    if (!fromDate || !toDate) {
 
         showMessage(
-            "Select tracker date first",
+            "Select both From Date and To Date",
             "error"
         );
 
@@ -5356,28 +5576,46 @@ async function downloadMTDCSV() {
     }
 
 
-    /*
-       Get first day of selected month.
-    */
+    if (
+        fromDate >
+        toDate
+    ) {
 
-    const firstDay =
-        selectedDate.substring(
-            0,
-            8
-        ) +
-        "01";
+        showMessage(
+            "From Date cannot be later than To Date",
+            "error"
+        );
+
+        return;
+
+    }
 
 
-    /*
-       Pull all production records
-       from first day of month through
-       selected date.
-    */
+    const visibleEmployees =
+        getFilteredEmployees();
+
+
+    if (!visibleEmployees.length) {
+
+        showMessage(
+            "No employees found for the selected filter",
+            "error"
+        );
+
+        return;
+
+    }
+
 
     showMessage(
-        "Preparing MTD download..."
+        "Preparing MTD Report..."
     );
 
+
+    /*
+       Fetch all saved production records
+       between From Date and To Date.
+    */
 
     const {
         data,
@@ -5388,11 +5626,11 @@ async function downloadMTDCSV() {
             .select("*")
             .gte(
                 "tracker_date",
-                firstDay
+                fromDate
             )
             .lte(
                 "tracker_date",
-                selectedDate
+                toDate
             );
 
 
@@ -5415,22 +5653,6 @@ async function downloadMTDCSV() {
 
     const records =
         data || [];
-
-
-    const visibleEmployees =
-        getFilteredEmployees();
-
-
-    if (!visibleEmployees.length) {
-
-        showMessage(
-            "No employees found for the selected filter",
-            "error"
-        );
-
-        return;
-
-    }
 
 
     const rows = [];
@@ -5486,6 +5708,11 @@ async function downloadMTDCSV() {
             let daysWithProduction =
                 0;
 
+
+            /*
+               Count only dates for which
+               a production record exists.
+            */
 
             employeeRecords.forEach(
                 record => {
@@ -5557,13 +5784,6 @@ async function downloadMTDCSV() {
             );
 
 
-            /*
-               If there is no saved record for the
-               employee on a date, that date is not
-               counted as attendance.
-            */
-
-
             const targetBased =
                 getEmployeeTarget(
                     employee
@@ -5620,11 +5840,11 @@ async function downloadMTDCSV() {
 
             rows.push({
 
-                "MTD From":
-                    firstDay,
+                "From Date":
+                    fromDate,
 
-                "MTD Through":
-                    selectedDate,
+                "To Date":
+                    toDate,
 
                 "Employee":
                     employee.employee_name,
@@ -5696,15 +5916,8 @@ async function downloadMTDCSV() {
     }
 
 
-    const month =
-        selectedDate.substring(
-            0,
-            7
-        );
-
-
     const filename =
-        `Hourly_Production_MTD_${month}.csv`;
+        `Hourly_Production_MTD_${fromDate}_to_${toDate}.csv`;
 
 
     downloadCSV(
@@ -5714,7 +5927,7 @@ async function downloadMTDCSV() {
 
 
     showMessage(
-        "MTD production CSV downloaded successfully"
+        "MTD Report downloaded successfully"
     );
 
 }
