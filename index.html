@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -269,7 +268,7 @@ button:disabled {
 
 .project-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 16px;
 }
 
@@ -360,8 +359,20 @@ button:disabled {
     font-weight: 700;
 }
 
+.status-green {
+    color: #15803d;
+}
+
+.status-yellow {
+    color: #d97706;
+}
+
+.status-red {
+    color: #dc2626;
+}
+
 /* =========================================================
-   SUB PROJECT CARDS
+   SUB PROJECTS
 ========================================================= */
 
 .sub-project-list {
@@ -374,7 +385,7 @@ button:disabled {
     background: white;
     border: 1px solid #dbe3ee;
     border-radius: 9px;
-    padding: 11px 12px;
+    padding: 12px;
     cursor: pointer;
     transition: .2s;
 }
@@ -385,7 +396,7 @@ button:disabled {
 }
 
 .sub-project-card.active {
-    border-color: #2563eb;
+    border: 2px solid #2563eb;
     background: #eff6ff;
 }
 
@@ -408,6 +419,7 @@ button:disabled {
 
 .sub-project-metrics {
     display: flex;
+    flex-wrap: wrap;
     gap: 15px;
     margin-top: 8px;
     font-size: 11px;
@@ -589,7 +601,7 @@ tbody tr:hover {
 }
 
 .setup-subproject {
-    min-width: 200px;
+    min-width: 210px;
 }
 
 /* =========================================================
@@ -757,7 +769,7 @@ Save Daily Tracker
 
 <div class="kpi-card">
 <div class="kpi-label">Achievement</div>
-<div class="kpi-value" id="teamAchievement">0%</div>
+<div class="kpi-value" id="teamAchievement">N/A</div>
 <div class="kpi-sub">Target-based performance</div>
 </div>
 
@@ -926,7 +938,7 @@ Current selected project/team performance.
 
 <div class="summary-card">
 <h3>Achievement</h3>
-<div id="summaryAchievement">0%</div>
+<div id="summaryAchievement">N/A</div>
 </div>
 
 </div>
@@ -948,7 +960,7 @@ Project Setup
 </h2>
 
 <p class="section-description">
-Add and manage standalone projects.
+Add and manage projects. Parent projects can use sub-project targets.
 </p>
 
 </div>
@@ -967,7 +979,7 @@ placeholder="Project Name"
 type="number"
 id="projectTarget"
 placeholder="Daily Target"
-min="1"
+min="0"
 >
 
 <button
@@ -1110,7 +1122,7 @@ class="message"
 <script>
 
 /* =========================================================
-   SUPABASE CONNECTION
+   SUPABASE
 ========================================================= */
 
 const SUPABASE_URL =
@@ -1348,7 +1360,11 @@ function getSubProjectById(id) {
 
 function getEmployeeSubProject(employee) {
 
-    if (!employee.sub_project_id) {
+    if (
+        employee.sub_project_id === null ||
+        employee.sub_project_id === undefined ||
+        employee.sub_project_id === ""
+    ) {
         return null;
     }
 
@@ -1357,24 +1373,54 @@ function getEmployeeSubProject(employee) {
     );
 }
 
+/* =========================================================
+   EMPLOYEE TARGET
+========================================================= */
+
 function getEmployeeTarget(employee) {
 
     const subProject =
         getEmployeeSubProject(employee);
 
+    /*
+       Employee has a sub-project.
+    */
+
     if (subProject) {
 
+        /*
+           Non-target based role.
+           Example: WRMC AR.
+        */
+
         if (
-            subProject.daily_target === null ||
-            subProject.daily_target === undefined
+            subProject.target_based === false
         ) {
             return null;
         }
 
-        return Number(
-            subProject.daily_target
-        );
+        if (
+            subProject.daily_target === null ||
+            subProject.daily_target === undefined ||
+            subProject.daily_target === ""
+        ) {
+            return null;
+        }
+
+        const target =
+            Number(
+                subProject.daily_target
+            );
+
+        return Number.isFinite(target)
+            ? target
+            : null;
     }
+
+    /*
+       Standalone project.
+       Example: NS.
+    */
 
     const project =
         getProjectById(
@@ -1387,7 +1433,8 @@ function getEmployeeTarget(employee) {
 
     if (
         project.daily_target === null ||
-        project.daily_target === undefined
+        project.daily_target === undefined ||
+        project.daily_target === ""
     ) {
         return null;
     }
@@ -1409,9 +1456,11 @@ async function loadProjects() {
     const result =
         await supabaseClient
             .from("projects")
-            .select(
-                "id, project_name, daily_target"
-            )
+            .select(`
+                id,
+                project_name,
+                daily_target
+            `)
             .order("project_name");
 
     if (result.error) {
@@ -1427,17 +1476,20 @@ async function loadProjects() {
             true
         );
 
-        return;
+        return false;
     }
 
     projects =
         result.data || [];
 
+    console.log(
+        "PROJECTS LOADED:",
+        projects
+    );
+
     displayProjects();
 
-    loadEmployeeProjectDropdown();
-
-    renderProjectDashboard();
+    return true;
 }
 
 /* =========================================================
@@ -1449,12 +1501,16 @@ async function loadSubProjects() {
     const result =
         await supabaseClient
             .from("sub_projects")
-            .select(
-                "id, project_id, sub_project_name, daily_target"
-            )
-            .order(
-                "sub_project_name"
-            );
+            .select(`
+                id,
+                project_id,
+                sub_project_name,
+                daily_target,
+                target_based,
+                active
+            `)
+            .eq("active",true)
+            .order("sub_project_name");
 
     if (result.error) {
 
@@ -1469,15 +1525,20 @@ async function loadSubProjects() {
             true
         );
 
-        return;
+        return false;
     }
 
     subProjects =
         result.data || [];
 
-    loadEmployeeSubProjectDropdown();
+    console.log(
+        "SUB PROJECTS LOADED:",
+        subProjects
+    );
 
-    renderProjectDashboard();
+    loadEmployeeProjectDropdown();
+
+    return true;
 }
 
 /* =========================================================
@@ -1497,17 +1558,37 @@ function displayProjects() {
 
     projects.forEach(function(project) {
 
+        const children =
+            subProjects.filter(function(sp) {
+
+                return String(sp.project_id) ===
+                    String(project.id);
+
+            });
+
         const row =
             document.createElement("tr");
 
         row.innerHTML = `
 
             <td>
-                ${escapeHtml(project.project_name)}
+                ${escapeHtml(
+                    project.project_name
+                )}
             </td>
 
             <td>
-                ${formatTarget(project.daily_target)}
+
+                ${
+                    children.length > 0
+                    ? `<span class="na-text">
+                        See Sub-Projects
+                       </span>`
+                    : formatTarget(
+                        project.daily_target
+                    )
+                }
+
             </td>
 
             <td>
@@ -1553,12 +1634,16 @@ async function addProject() {
             .value
             .trim();
 
+    const targetInput =
+        document
+            .getElementById("projectTarget")
+            .value
+            .trim();
+
     const target =
-        Number(
-            document
-                .getElementById("projectTarget")
-                .value
-        );
+        targetInput === ""
+        ? 0
+        : Number(targetInput);
 
     if (!name) {
 
@@ -1570,7 +1655,13 @@ async function addProject() {
         return;
     }
 
-    if (!target || target <= 0) {
+    if (
+        targetInput !== "" &&
+        (
+            !Number.isFinite(target) ||
+            target < 0
+        )
+    ) {
 
         showProjectMessage(
             "Please enter a valid daily target.",
@@ -1588,10 +1679,16 @@ async function addProject() {
         await supabaseClient
             .from("projects")
             .insert({
-                project_name: name,
-                daily_target: target
+
+                project_name:
+                    name,
+
+                daily_target:
+                    target
+
             })
-            .select();
+            .select()
+            .single();
 
     if (result.error) {
 
@@ -1617,6 +1714,10 @@ async function addProject() {
     );
 
     await loadProjects();
+
+    loadEmployeeProjectDropdown();
+
+    renderProjectDashboard();
 }
 
 /* =========================================================
@@ -1658,7 +1759,9 @@ async function deleteProject(id) {
     );
 
     await loadProjects();
+
     await loadSubProjects();
+
     await loadEmployees();
 }
 
@@ -1674,6 +1777,9 @@ function loadEmployeeProjectDropdown() {
         );
 
     if (!dropdown) return;
+
+    const currentValue =
+        dropdown.value;
 
     dropdown.innerHTML =
         `<option value="">Select Project</option>`;
@@ -1696,15 +1802,31 @@ function loadEmployeeProjectDropdown() {
 
         option.textContent =
             hasSubProjects
-            ? project.project_name
+            ? project.project_name +
+              " → Select Sub-Project"
             : project.project_name +
               " (Target: " +
-              formatTarget(project.daily_target) +
+              formatTarget(
+                  project.daily_target
+              ) +
               ")";
 
         dropdown.appendChild(option);
 
     });
+
+    if (
+        currentValue &&
+        projects.some(function(p) {
+            return String(p.id) ===
+                String(currentValue);
+        })
+    ) {
+
+        dropdown.value =
+            currentValue;
+
+    }
 
     loadEmployeeSubProjectDropdown();
 }
@@ -1740,7 +1862,8 @@ function loadEmployeeSubProjectDropdown() {
 
     if (!projectId) {
 
-        subProjectDropdown.disabled = true;
+        subProjectDropdown.disabled =
+            true;
 
         return;
     }
@@ -1753,9 +1876,18 @@ function loadEmployeeSubProjectDropdown() {
 
         });
 
-    if (projectSubProjects.length === 0) {
+    console.log(
+        "SUB PROJECTS FOR PROJECT",
+        projectId,
+        projectSubProjects
+    );
 
-        subProjectDropdown.disabled = true;
+    if (
+        projectSubProjects.length === 0
+    ) {
+
+        subProjectDropdown.disabled =
+            true;
 
         subProjectDropdown.innerHTML =
             `<option value="">Not Required</option>`;
@@ -1763,27 +1895,32 @@ function loadEmployeeSubProjectDropdown() {
         return;
     }
 
-    subProjectDropdown.disabled = false;
+    subProjectDropdown.disabled =
+        false;
 
-    projectSubProjects.forEach(function(sp) {
+    projectSubProjects.forEach(
+        function(sp) {
 
-        const option =
-            document.createElement("option");
+            const option =
+                document.createElement("option");
 
-        option.value =
-            sp.id;
+            option.value =
+                sp.id;
 
-        option.textContent =
-            sp.sub_project_name +
-            " (Target: " +
-            formatTarget(sp.daily_target) +
-            ")";
+            option.textContent =
+                sp.sub_project_name +
+                " (Target: " +
+                formatTarget(
+                    sp.daily_target
+                ) +
+                ")";
 
-        subProjectDropdown.appendChild(
-            option
-        );
+            subProjectDropdown.appendChild(
+                option
+            );
 
-    });
+        }
+    );
 }
 
 /* =========================================================
@@ -1809,10 +1946,15 @@ async function addEmployee() {
             .getElementById("employeeProject")
             .value;
 
+    const subProjectDropdown =
+        document.getElementById(
+            "employeeSubProject"
+        );
+
     const subProjectId =
-        document
-            .getElementById("employeeSubProject")
-            .value;
+        subProjectDropdown.disabled
+        ? ""
+        : subProjectDropdown.value;
 
     if (!name) {
 
@@ -1897,6 +2039,11 @@ async function addEmployee() {
 
     if (employeeResult.error) {
 
+        console.error(
+            "EMPLOYEE SAVE ERROR:",
+            employeeResult.error
+        );
+
         showEmployeeMessage(
             "Unable to save employee: " +
             employeeResult.error.message,
@@ -1908,6 +2055,11 @@ async function addEmployee() {
 
     const employee =
         employeeResult.data;
+
+    /*
+       Keep employee_projects
+       synchronized if possible.
+    */
 
     const projectResult =
         await supabaseClient
@@ -1935,8 +2087,8 @@ async function addEmployee() {
         );
 
         showEmployeeMessage(
-            "Employee saved, but project assignment history could not be updated.",
-            true
+            "Employee saved successfully. Assignment history could not be updated.",
+            false
         );
 
     } else {
@@ -1959,14 +2111,7 @@ async function addEmployee() {
         "employeeProject"
     ).value = "";
 
-    document.getElementById(
-        "employeeSubProject"
-    ).innerHTML =
-        `<option value="">Select Sub-Project</option>`;
-
-    document.getElementById(
-        "employeeSubProject"
-    ).disabled = true;
+    loadEmployeeSubProjectDropdown();
 
     await loadEmployees();
 }
@@ -2004,19 +2149,20 @@ async function loadEmployees() {
             true
         );
 
-        return;
+        return false;
     }
 
     employees =
         result.data || [];
 
+    console.log(
+        "EMPLOYEES LOADED:",
+        employees
+    );
+
     displayEmployees();
 
-    buildDailyTracker();
-
-    renderProjectDashboard();
-
-    updateDashboard();
+    return true;
 }
 
 /* =========================================================
@@ -2033,6 +2179,19 @@ function displayEmployees() {
     if (!table) return;
 
     table.innerHTML = "";
+
+    if (employees.length === 0) {
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="6" class="empty-state">
+                    No active employees found.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
 
     employees.forEach(function(employee) {
 
@@ -2074,7 +2233,7 @@ function displayEmployees() {
                     ? escapeHtml(
                         project.project_name
                     )
-                    : ""
+                    : "—"
                 }
             </td>
 
@@ -2091,7 +2250,9 @@ function displayEmployees() {
             <td>
                 ${
                     target === null
-                    ? `<span class="na-text">N/A</span>`
+                    ? `<span class="na-text">
+                        N/A
+                       </span>`
                     : target
                 }
             </td>
@@ -2163,6 +2324,10 @@ async function deleteEmployee(id) {
     );
 
     await loadEmployees();
+
+    buildDailyTracker();
+
+    await loadDailyTracker();
 }
 
 /* =========================================================
@@ -2180,23 +2345,25 @@ function getDailyTarget(
         );
 
     /*
-       WRMC AR has no target.
-       Return null instead of zero.
+       Non-target role.
     */
 
     if (baseTarget === null) {
+
         return null;
     }
 
     if (
         attendance === "Present"
     ) {
+
         return baseTarget;
     }
 
     if (
         attendance === "Half Day"
     ) {
+
         return Math.ceil(
             baseTarget / 2
         );
@@ -2206,7 +2373,7 @@ function getDailyTarget(
 }
 
 /* =========================================================
-   CREATE HOURLY INPUTS
+   HOURLY INPUTS
 ========================================================= */
 
 function createHourlyInputs(index) {
@@ -2255,6 +2422,19 @@ function buildDailyTracker() {
 
     table.innerHTML = "";
 
+    if (employees.length === 0) {
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="20" class="empty-state">
+                    No active employees found.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
     employees.forEach(
         function(employee,index) {
 
@@ -2300,7 +2480,7 @@ function buildDailyTracker() {
                         ? escapeHtml(
                             project.project_name
                         )
-                        : ""
+                        : "—"
                     }
                 </td>
 
@@ -2419,6 +2599,7 @@ function buildDailyTracker() {
 
                         }
                     );
+
             }
 
             document
@@ -2436,7 +2617,9 @@ function buildDailyTracker() {
                     }
                 );
 
-            calculateDailyRow(index);
+            calculateDailyRow(
+                index
+            );
 
         }
     );
@@ -2521,6 +2704,7 @@ function calculateDailyRow(index) {
             input.value = 0;
 
         }
+
     }
 
     if (
@@ -2553,8 +2737,10 @@ function calculateDailyRow(index) {
         );
 
     if (breakInput) {
+
         breakInput.value =
             breakMinutes;
+
     }
 
     const breakStatus =
@@ -2572,6 +2758,7 @@ function calculateDailyRow(index) {
             breakMinutes === 60
             ? "green"
             : "yellow";
+
     }
 
     const achievedCell =
@@ -2580,8 +2767,10 @@ function calculateDailyRow(index) {
         );
 
     if (achievedCell) {
+
         achievedCell.textContent =
             achieved;
+
     }
 
     const remainingCell =
@@ -2595,14 +2784,16 @@ function calculateDailyRow(index) {
         );
 
     /*
-       Non-target-based employee
+       Non-target role.
     */
 
     if (target === null) {
 
         if (remainingCell) {
+
             remainingCell.textContent =
                 "N/A";
+
         }
 
         if (percentageCell) {
@@ -2612,6 +2803,7 @@ function calculateDailyRow(index) {
 
             percentageCell.className =
                 "na-text";
+
         }
 
         updateDashboard();
@@ -2646,7 +2838,9 @@ function calculateDailyRow(index) {
             percentage.toFixed(1) +
             "%";
 
-        if (percentage >= 100) {
+        if (
+            percentage >= 100
+        ) {
 
             percentageCell.className =
                 "green";
@@ -2662,7 +2856,9 @@ function calculateDailyRow(index) {
 
             percentageCell.className =
                 "red";
+
         }
+
     }
 
     updateDashboard();
@@ -2718,7 +2914,9 @@ function getEmployeeMetrics(
                 Number(
                     input.value
                 ) || 0;
+
         }
+
     }
 
     if (
@@ -2726,11 +2924,8 @@ function getEmployeeMetrics(
     ) {
 
         achieved = 0;
-    }
 
-    /*
-       Non-target-based
-    */
+    }
 
     if (target === null) {
 
@@ -2738,11 +2933,14 @@ function getEmployeeMetrics(
 
             target: null,
 
-            achieved: achieved,
+            achieved:
+                achieved,
 
-            remaining: null,
+            remaining:
+                null,
 
-            percentage: null
+            percentage:
+                null
 
         };
 
@@ -2764,13 +2962,17 @@ function getEmployeeMetrics(
 
     return {
 
-        target: target,
+        target:
+            target,
 
-        achieved: achieved,
+        achieved:
+            achieved,
 
-        remaining: remaining,
+        remaining:
+            remaining,
 
-        percentage: percentage
+        percentage:
+            percentage
 
     };
 }
@@ -2786,13 +2988,19 @@ function employeeMatchesSelection(
     if (
         selectedProjectId === null
     ) {
+
         return true;
     }
 
     if (
-        String(employee.project_id) !==
-        String(selectedProjectId)
+        String(
+            employee.project_id
+        ) !==
+        String(
+            selectedProjectId
+        )
     ) {
+
         return false;
     }
 
@@ -2826,6 +3034,8 @@ function getDashboardMetrics() {
 
     let totalAchieved = 0;
 
+    let totalRemaining = 0;
+
     employees.forEach(
         function(employee,index) {
 
@@ -2834,6 +3044,7 @@ function getDashboardMetrics() {
                     employee
                 )
             ) {
+
                 return;
             }
 
@@ -2852,6 +3063,9 @@ function getDashboardMetrics() {
                 totalTarget +=
                     metrics.target;
 
+                totalRemaining +=
+                    metrics.remaining;
+
             }
 
             totalAchieved +=
@@ -2859,13 +3073,6 @@ function getDashboardMetrics() {
 
         }
     );
-
-    const totalRemaining =
-        Math.max(
-            totalTarget -
-            totalAchieved,
-            0
-        );
 
     const achievement =
         totalTarget > 0
@@ -2904,32 +3111,70 @@ function updateDashboard() {
     const metrics =
         getDashboardMetrics();
 
-    document.getElementById(
-        "totalEmployees"
-    ).textContent =
-        metrics.employees;
+    const totalEmployees =
+        document.getElementById(
+            "totalEmployees"
+        );
 
-    document.getElementById(
-        "totalTarget"
-    ).textContent =
-        metrics.target;
+    if (totalEmployees) {
 
-    document.getElementById(
-        "totalAchieved"
-    ).textContent =
-        metrics.achieved;
+        totalEmployees.textContent =
+            metrics.employees;
 
-    document.getElementById(
-        "totalRemaining"
-    ).textContent =
-        metrics.remaining;
+    }
 
-    document.getElementById(
-        "teamAchievement"
-    ).textContent =
+    const totalTarget =
+        document.getElementById(
+            "totalTarget"
+        );
+
+    if (totalTarget) {
+
+        totalTarget.textContent =
+            metrics.target;
+
+    }
+
+    const totalAchieved =
+        document.getElementById(
+            "totalAchieved"
+        );
+
+    if (totalAchieved) {
+
+        totalAchieved.textContent =
+            metrics.achieved;
+
+    }
+
+    const totalRemaining =
+        document.getElementById(
+            "totalRemaining"
+        );
+
+    if (totalRemaining) {
+
+        totalRemaining.textContent =
+            metrics.remaining;
+
+    }
+
+    const achievementText =
         metrics.achievement === null
         ? "N/A"
         : metrics.achievement.toFixed(1) + "%";
+
+    const teamAchievement =
+        document.getElementById(
+            "teamAchievement"
+        );
+
+    if (teamAchievement) {
+
+        teamAchievement.textContent =
+            achievementText;
+
+    }
 
     document.getElementById(
         "summaryEmployees"
@@ -2954,9 +3199,7 @@ function updateDashboard() {
     document.getElementById(
         "summaryAchievement"
     ).textContent =
-        metrics.achievement === null
-        ? "N/A"
-        : metrics.achievement.toFixed(1) + "%";
+        achievementText;
 
     updateSelectedLabel();
 
@@ -3039,6 +3282,8 @@ function getProjectMetrics(
 
     let achieved = 0;
 
+    let remaining = 0;
+
     employees.forEach(
         function(employee,index) {
 
@@ -3049,6 +3294,7 @@ function getProjectMetrics(
                 ) !==
                 String(projectId)
             ) {
+
                 return;
             }
 
@@ -3067,6 +3313,9 @@ function getProjectMetrics(
                 target +=
                     metrics.target;
 
+                remaining +=
+                    metrics.remaining;
+
             }
 
             achieved +=
@@ -3074,12 +3323,6 @@ function getProjectMetrics(
 
         }
     );
-
-    const remaining =
-        Math.max(
-            target - achieved,
-            0
-        );
 
     const percentage =
         target > 0
@@ -3123,6 +3366,8 @@ function getSubProjectMetrics(
 
     let achieved = 0;
 
+    let remaining = 0;
+
     employees.forEach(
         function(employee,index) {
 
@@ -3132,6 +3377,7 @@ function getSubProjectMetrics(
                 ) !==
                 String(subProjectId)
             ) {
+
                 return;
             }
 
@@ -3150,6 +3396,9 @@ function getSubProjectMetrics(
                 target +=
                     metrics.target;
 
+                remaining +=
+                    metrics.remaining;
+
             }
 
             achieved +=
@@ -3162,19 +3411,6 @@ function getSubProjectMetrics(
         getSubProjectById(
             subProjectId
         );
-
-    /*
-       Use actual employee target total.
-       This supports Present/Half Day.
-    */
-
-    const remaining =
-        target > 0
-        ? Math.max(
-            target - achieved,
-            0
-        )
-        : null;
 
     const percentage =
         target > 0
@@ -3224,6 +3460,10 @@ function renderProjectDashboard() {
 
     container.innerHTML = "";
 
+    /*
+       ALL PROJECTS
+    */
+
     const allMetrics =
         getProjectMetrics(null);
 
@@ -3235,6 +3475,10 @@ function renderProjectDashboard() {
             true
         )
     );
+
+    /*
+       INDIVIDUAL PROJECTS
+    */
 
     projects.forEach(function(project) {
 
@@ -3354,8 +3598,7 @@ function createProjectCard(
         metrics.percentage === null
     ) {
 
-        statusClass =
-            "";
+        statusClass = "";
 
         statusText =
             "Non-target based";
@@ -3382,6 +3625,31 @@ function createProjectCard(
 
     }
 
+    const hasSubProjects =
+        subProjects.some(
+            function(sp) {
+
+                return (
+                    String(
+                        sp.project_id
+                    ) ===
+                    String(
+                        projectId
+                    )
+                );
+
+            }
+        );
+
+    const targetDisplay =
+        hasSubProjects
+        ? "See Sub-Projects"
+        : (
+            metrics.target > 0
+            ? metrics.target
+            : "N/A"
+        );
+
     card.innerHTML = `
 
         <div class="project-name">
@@ -3396,11 +3664,7 @@ function createProjectCard(
 
             <span>
                 Target:
-                ${
-                    metrics.target > 0
-                    ? metrics.target
-                    : "N/A"
-                }
+                ${targetDisplay}
             </span>
 
         </div>
@@ -3472,16 +3736,12 @@ function createProjectCard(
         "click",
         function(event) {
 
-            /*
-               If a sub-project was clicked,
-               don't trigger project selection.
-            */
-
             if (
                 event.target.closest(
                     ".sub-project-card"
                 )
             ) {
+
                 return;
             }
 
@@ -3536,6 +3796,9 @@ function createSubProjectCard(
     const percentage =
         metrics.percentage;
 
+    const isNonTarget =
+        subProject.target_based === false;
+
     card.innerHTML = `
 
         <div class="sub-project-header">
@@ -3550,9 +3813,11 @@ function createSubProjectCard(
 
                 Target:
                 ${
-                    subProject.daily_target === null
+                    isNonTarget
                     ? "N/A"
-                    : subProject.daily_target
+                    : formatTarget(
+                        subProject.daily_target
+                    )
                 }
 
             </div>
@@ -3565,6 +3830,17 @@ function createSubProjectCard(
                 FTE:
                 <strong>
                     ${metrics.employeeCount}
+                </strong>
+            </span>
+
+            <span>
+                Target:
+                <strong>
+                    ${
+                        metrics.target > 0
+                        ? metrics.target
+                        : "N/A"
+                    }
                 </strong>
             </span>
 
@@ -3740,6 +4016,8 @@ function applyProjectFilter() {
     });
 
     applyProjectActiveState();
+
+    updateSelectedLabel();
 }
 
 /* =========================================================
@@ -3820,11 +4098,18 @@ async function saveDailyTracker() {
     employees.forEach(
         function(employee,index) {
 
-            const attendance =
+            const attendanceElement =
                 document.getElementById(
                     "attendance_" +
                     index
-                ).value;
+                );
+
+            if (!attendanceElement) {
+                return;
+            }
+
+            const attendance =
+                attendanceElement.value;
 
             const dailyTarget =
                 getDailyTarget(
@@ -3849,9 +4134,11 @@ async function saveDailyTracker() {
                     );
 
                 hours.push(
-                    Number(
+                    input
+                    ? Number(
                         input.value
                     ) || 0
+                    : 0
                 );
 
             }
@@ -3891,16 +4178,11 @@ async function saveDailyTracker() {
 
             }
 
-            /*
-               IMPORTANT:
-               Non-target based employees
-               store NULL for target,
-               remaining and percentage.
-            */
+            let remaining =
+                null;
 
-            let remaining = null;
-
-            let achievementPercentage = null;
+            let achievementPercentage =
+                null;
 
             if (
                 dailyTarget !== null
@@ -4140,7 +4422,9 @@ async function loadDailyTracker() {
 
             }
 
-            calculateDailyRow(index);
+            calculateDailyRow(
+                index
+            );
 
         }
     );
@@ -4294,22 +4578,118 @@ async function startApplication() {
 
     setTodayDate();
 
-    await loadProjects();
+    /*
+       STEP 1
+       Load projects.
+    */
 
-    await loadSubProjects();
+    const projectsLoaded =
+        await loadProjects();
 
-    await loadEmployees();
+    if (!projectsLoaded) {
+
+        console.error(
+            "Application stopped because projects could not be loaded."
+        );
+
+        return;
+    }
+
+    /*
+       STEP 2
+       Load sub-projects.
+    */
+
+    const subProjectsLoaded =
+        await loadSubProjects();
+
+    if (!subProjectsLoaded) {
+
+        console.error(
+            "Application stopped because sub-projects could not be loaded."
+        );
+
+        return;
+    }
+
+    /*
+       STEP 3
+       Refresh project setup
+       after sub-projects are available.
+    */
+
+    displayProjects();
+
+    loadEmployeeProjectDropdown();
+
+    /*
+       STEP 4
+       Load employees.
+    */
+
+    const employeesLoaded =
+        await loadEmployees();
+
+    if (!employeesLoaded) {
+
+        console.error(
+            "Application stopped because employees could not be loaded."
+        );
+
+        return;
+    }
+
+    /*
+       STEP 5
+       Build tracker only after
+       ALL data is loaded.
+    */
+
+    buildDailyTracker();
+
+    /*
+       STEP 6
+       Load today's saved data.
+    */
 
     await loadDailyTracker();
+
+    /*
+       STEP 7
+       Final dashboard refresh.
+    */
+
+    renderProjectDashboard();
+
+    applyProjectFilter();
 
     applyDateEditLock();
 
     updateDashboard();
 
     console.log(
+        "PROJECTS:",
+        projects
+    );
+
+    console.log(
+        "SUB PROJECTS:",
+        subProjects
+    );
+
+    console.log(
+        "EMPLOYEES:",
+        employees
+    );
+
+    console.log(
         "Hourly Production Dashboard loaded successfully."
     );
 }
+
+/* =========================================================
+   START
+========================================================= */
 
 startApplication();
 
@@ -4318,4 +4698,3 @@ startApplication();
 </body>
 
 </html>
-```
