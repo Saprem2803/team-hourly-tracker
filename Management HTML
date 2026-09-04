@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WRMC Management Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#172033}.hidden{display:none!important}
+.topbar{background:#101828;color:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;gap:18px;position:sticky;top:0;z-index:20}.brand h1{margin:0;font-size:22px}.brand p{margin:5px 0 0;color:#aeb8c8;font-size:12px}.top-actions{display:flex;gap:9px;align-items:center}.btn{border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer;background:#fff;color:#172033}.btn.primary{background:#2563eb;color:#fff}.btn.ghost{background:#243044;color:#fff}.btn:hover{opacity:.9}.container{max-width:1500px;margin:auto;padding:24px}.filters{background:#fff;border:1px solid #e4e9f1;border-radius:14px;padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:end;box-shadow:0 3px 14px rgba(16,24,40,.05)}label{font-size:11px;font-weight:700;color:#667085;display:block;margin-bottom:6px}.field{min-width:165px}.field select,.field input{width:100%;height:40px;border:1px solid #d7dee9;border-radius:8px;padding:0 10px;background:#fff}.status{margin-left:auto;font-size:12px;color:#667085}.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin:18px 0}.kpi{background:#fff;border:1px solid #e4e9f1;border-radius:14px;padding:17px;box-shadow:0 3px 14px rgba(16,24,40,.05)}.kpi .label{font-size:11px;color:#667085;font-weight:700;text-transform:uppercase}.kpi .value{font-size:27px;font-weight:800;margin-top:7px}.kpi .sub{font-size:11px;color:#98a2b3;margin-top:5px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px}.card{background:#fff;border:1px solid #e4e9f1;border-radius:14px;padding:18px;box-shadow:0 3px 14px rgba(16,24,40,.05)}.card h2{font-size:15px;margin:0 0 4px}.card .muted{font-size:11px;color:#98a2b3;margin-bottom:12px}.chart-wrap{height:300px;position:relative}.full{grid-column:1/-1}.insights{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.insight{padding:14px;border-radius:10px;background:#f8fafc;border:1px solid #e7ebf2}.insight strong{display:block;font-size:13px;margin-bottom:6px}.insight span{font-size:12px;color:#667085}.table-wrap{overflow:auto;max-height:460px}.table{width:100%;border-collapse:collapse;font-size:12px}.table th,.table td{padding:10px;border-bottom:1px solid #edf0f5;text-align:left;white-space:nowrap}.table th{font-size:10px;text-transform:uppercase;color:#667085;background:#f8fafc;position:sticky;top:0}.pill{padding:4px 8px;border-radius:20px;font-weight:700;font-size:10px}.good{background:#dcfce7;color:#166534}.warn{background:#fef3c7;color:#92400e}.bad{background:#fee2e2;color:#991b1b}.auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#eef3f9}.login{width:390px;background:#fff;padding:30px;border-radius:16px;box-shadow:0 15px 50px rgba(16,24,40,.12)}.login h1{margin:0 0 8px}.login p{color:#667085;font-size:13px}.login input{width:100%;height:44px;margin:7px 0;border:1px solid #d7dee9;border-radius:8px;padding:0 12px}.login button{width:100%;height:44px;margin-top:8px}.error{color:#b42318;font-size:12px;margin-top:10px}.footer{text-align:center;color:#98a2b3;font-size:11px;padding:10px 0 20px}
+@media(max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.insights{grid-template-columns:repeat(2,1fr)}}@media(max-width:800px){.grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.topbar{padding:15px}.container{padding:14px}.status{width:100%;margin-left:0}}
+</style>
+</head>
+<body>
+<div id="authScreen" class="auth">
+  <div class="login">
+    <h1>Management Dashboard</h1>
+    <p>Management-only executive view for production, workforce and performance trends.</p>
+    <input id="email" type="email" placeholder="Email address">
+    <input id="password" type="password" placeholder="Password">
+    <button class="btn primary" onclick="login()">Sign In</button>
+    <div id="authError" class="error"></div>
+  </div>
+</div>
+<div id="app" class="hidden">
+<header class="topbar">
+  <div class="brand"><h1>WRMC Management Dashboard</h1><p>Executive Performance • Production • Workforce • Shrinkage</p></div>
+  <div class="top-actions"><span id="userLabel" style="font-size:11px;color:#aeb8c8"></span><button class="btn ghost" onclick="openOperations()">Operations Dashboard</button><button class="btn" onclick="logout()">Logout</button></div>
+</header>
+<main class="container">
+  <section class="filters">
+    <div class="field"><label>From Date</label><input id="fromDate" type="date"></div>
+    <div class="field"><label>To Date</label><input id="toDate" type="date"></div>
+    <div class="field"><label>Project</label><select id="projectFilter"><option value="">All Projects</option></select></div>
+    <button class="btn primary" onclick="refreshDashboard()">Refresh Dashboard</button>
+    <button class="btn" onclick="setMTD()">Current MTD</button>
+    <div id="status" class="status">Ready</div>
+  </section>
+
+  <section class="kpis">
+    <div class="kpi"><div class="label">Total FTE</div><div id="kpiFte" class="value">0</div><div class="sub">Active workforce</div></div>
+    <div class="kpi"><div class="label">Present</div><div id="kpiPresent" class="value">0</div><div class="sub">Average daily presence</div></div>
+    <div class="kpi"><div class="label">MTD Target</div><div id="kpiTarget" class="value">0</div><div class="sub">Scheduled production</div></div>
+    <div class="kpi"><div class="label">MTD Achieved</div><div id="kpiAchieved" class="value">0</div><div class="sub">Total production</div></div>
+    <div class="kpi"><div class="label">Achievement</div><div id="kpiAchievement" class="value">0%</div><div class="sub">Achieved ÷ target</div></div>
+    <div class="kpi"><div class="label">Shrinkage</div><div id="kpiShrinkage" class="value">0%</div><div class="sub">Absence + half day</div></div>
+  </section>
+
+  <section class="card full" style="margin-bottom:16px"><h2>Management Insights</h2><div class="muted">Automatically generated from the selected period.</div><div class="insights">
+    <div class="insight"><strong id="insight1Title">Top Performer</strong><span id="insight1">-</span></div>
+    <div class="insight"><strong id="insight2Title">Needs Attention</strong><span id="insight2">-</span></div>
+    <div class="insight"><strong id="insight3Title">Trend</strong><span id="insight3">-</span></div>
+    <div class="insight"><strong id="insight4Title">Workforce</strong><span id="insight4">-</span></div>
+  </div></section>
+
+  <section class="grid">
+    <div class="card"><h2>Daily Target vs Achieved</h2><div class="muted">Production trend across the selected period.</div><div class="chart-wrap"><canvas id="dailyChart"></canvas></div></div>
+    <div class="card"><h2>Daily Achievement %</h2><div class="muted">Day-by-day team achievement.</div><div class="chart-wrap"><canvas id="achievementChart"></canvas></div></div>
+    <div class="card"><h2>Project Performance</h2><div class="muted">Achieved production by project.</div><div class="chart-wrap"><canvas id="projectChart"></canvas></div></div>
+    <div class="card"><h2>Workforce / Shrinkage Trend</h2><div class="muted">Present, half day and absent trend.</div><div class="chart-wrap"><canvas id="shrinkageChart"></canvas></div></div>
+  </section>
+
+  <section class="card full" style="margin-bottom:16px"><h2>Employee Performance</h2><div class="muted">Selected-period ranking. Historical saved daily targets are used when available.</div><div class="table-wrap"><table class="table"><thead><tr><th>Rank</th><th>Employee</th><th>EMP ID</th><th>Project</th><th>Target</th><th>Achieved</th><th>Achievement</th><th>Deficit</th><th>Days</th><th>Status</th></tr></thead><tbody id="employeeTable"></tbody></table></div></section>
+
+  <section class="card full"><h2>Project Performance Summary</h2><div class="muted">Period-level management view.</div><div class="table-wrap"><table class="table"><thead><tr><th>Project</th><th>FTE</th><th>Target</th><th>Achieved</th><th>Achievement</th><th>Deficit</th><th>Avg / FTE Day</th></tr></thead><tbody id="projectTable"></tbody></table></div></section>
+  <div class="footer">Management Dashboard • Data sourced from the existing Supabase productivity system</div>
+</main>
+</div>
+<script>
+const SUPABASE_URL="https://yhoblmvujfqnspaxdfav.supabase.co";
+const SUPABASE_KEY="sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const OPERATIONS_DASHBOARD_URL="Hourly_Production_Management_Dashboard_HOURLY_REMINDERS.html";
+const hourFields=["hour_6_7","hour_7_8","hour_8_9","hour_9_10","hour_10_11","hour_11_12","hour_12_1","hour_1_2","hour_2_3"];
+let currentUser=null, charts={}, projects=[], employees=[], records=[], accessProjects=[];
+const $=id=>document.getElementById(id);
+function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+function localDate(d=new Date()){const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,10)}
+function setMTD(){const now=new Date(); $('fromDate').value=localDate(new Date(now.getFullYear(),now.getMonth(),1));$('toDate').value=localDate(now);refreshDashboard()}
+function setStatus(t){$('status').textContent=t}
+async function login(){const email=$('email').value.trim(),password=$('password').value;$('authError').textContent="";const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});if(error){$('authError').textContent=error.message;return}await initialize(data.user)}
+async function initialize(user){currentUser=user;const {data,error}=await supabaseClient.from('user_project_access').select('role,project_id').eq('user_id',user.id);if(error||!data?.length){$('authError').textContent='No dashboard access is assigned to this account.';await supabaseClient.auth.signOut();return}if(!data.some(x=>x.role==='management')){$('authError').textContent='Management access is required for this dashboard.';await supabaseClient.auth.signOut();return}accessProjects=data.filter(x=>x.project_id!=null).map(x=>Number(x.project_id));$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userLabel').textContent=user.email||'';await loadReferenceData();setMTD()}
+async function loadReferenceData(){setStatus('Loading projects and employees…');let q=await supabaseClient.from('projects').select('*').order('project_name');if(q.error)throw q.error;projects=q.data||[];q=await supabaseClient.from('employees').select('*').eq('active',true).order('employee_name');if(q.error)throw q.error;employees=q.data||[];if(accessProjects.length)employees=employees.filter(e=>accessProjects.includes(Number(e.project_id)));$('projectFilter').innerHTML='<option value="">All Projects</option>'+projects.filter(p=>!accessProjects.length||accessProjects.includes(Number(p.id))).map(p=>`<option value="${p.id}">${esc(p.project_name)}</option>`).join('')}
+async function fetchAll(table,build){let out=[],from=0;while(true){let q=build().range(from,from+999);if(q.error)throw q.error;out=out.concat(q.data||[]);if(!q.data||q.data.length<1000)break;from+=1000}return out}
+async function refreshDashboard(){try{const from=$('fromDate').value,to=$('toDate').value;if(!from||!to)return;setStatus('Loading productivity…');const projectId=$('projectFilter').value;let q=fetchAll('daily_productivity',()=>{let x=supabaseClient.from('daily_productivity').select('*').gte('tracker_date',from).lte('tracker_date',to);return x});records=await q;if(projectId)records=records.filter(r=>{const e=employees.find(x=>Number(x.id)===Number(r.employee_id));return e&&Number(e.project_id)===Number(projectId)});renderAll();setStatus(`Updated ${new Date().toLocaleTimeString()}`)}catch(e){console.error(e);setStatus('Unable to load data');alert(e.message||'Unable to load dashboard data')}}
+function projectName(id){return projects.find(p=>Number(p.id)===Number(id))?.project_name||'Unassigned'}
+function employeeRows(){const map={};records.forEach(r=>{const e=employees.find(x=>Number(x.id)===Number(r.employee_id));if(!e)return;if(!map[e.id])map[e.id]={e,target:0,achieved:0,days:0,present:0,half:0,absent:0};const a=map[e.id];a.target+=Number(r.daily_target)||0;a.achieved+=hourFields.reduce((s,f)=>s+(Number(r[f])||0),0);a.days++;const at=(r.attendance||'present').toLowerCase();if(at==='present')a.present++;else if(at==='half day'||at==='half_day'||at==='halfday')a.half++;else if(at==='absent')a.absent++});return Object.values(map)}
+function dayRows(){const map={};records.forEach(r=>{if(!map[r.tracker_date])map[r.tracker_date]={date:r.tracker_date,target:0,achieved:0,present:0,half:0,absent:0};const d=map[r.tracker_date];d.target+=Number(r.daily_target)||0;d.achieved+=hourFields.reduce((s,f)=>s+(Number(r[f])||0),0);const at=(r.attendance||'present').toLowerCase();if(at==='present')d.present++;else if(at.includes('half'))d.half++;else if(at==='absent')d.absent++});return Object.values(map).sort((a,b)=>a.date.localeCompare(b.date))}
+function renderAll(){const er=employeeRows(),dr=dayRows();let target=records.reduce((s,r)=>s+(Number(r.daily_target)||0),0),ach=records.reduce((s,r)=>s+hourFields.reduce((x,f)=>x+(Number(r[f])||0),0),0);const activeIds=new Set(records.map(r=>r.employee_id));const present=dr.length?dr.reduce((s,d)=>s+d.present,0)/dr.length:0;const shrinkDen=dr.reduce((s,d)=>s+d.present+d.half+d.absent,0);const shrinkNum=dr.reduce((s,d)=>s+d.absent+d.half*.5,0);$('kpiFte').textContent=activeIds.size;$('kpiPresent').textContent=present.toFixed(1);$('kpiTarget').textContent=target.toLocaleString();$('kpiAchieved').textContent=ach.toLocaleString();$('kpiAchievement').textContent=(target?ach/target*100:0).toFixed(1)+'%';$('kpiShrinkage').textContent=(shrinkDen?shrinkNum/shrinkDen*100:0).toFixed(1)+'%';renderInsights(er,dr,target,ach);renderCharts(dr,er);renderEmployeeTable(er);renderProjectTable()}
+function renderInsights(er,dr,target,ach){const ranked=[...er].filter(x=>x.target>0).sort((a,b)=>b.achieved/b.target-a.achieved/a.target);if(ranked[0])$('insight1').textContent=`${ranked[0].e.employee_name} — ${(ranked[0].achieved/ranked[0].target*100).toFixed(1)}% achievement.`;else $('insight1').textContent='No production data.';const low=ranked[ranked.length-1];if(low) $('insight2').textContent=`${low.e.employee_name} — ${(low.achieved/low.target*100).toFixed(1)}% achievement; ${Math.max(0,low.target-low.achieved)} deficit.`;else $('insight2').textContent='No attention item.';if(dr.length>1){const mid=Math.floor(dr.length/2),first=dr.slice(0,mid).reduce((s,x)=>s+x.achieved,0),second=dr.slice(mid).reduce((s,x)=>s+x.achieved,0);const pct=first?(second/Math.max(1,dr.slice(mid).length))/(first/Math.max(1,mid))-1:0;$('insight3').textContent=`Production ${pct>=0?'improved':'declined'} ${(Math.abs(pct)*100).toFixed(1)}% in the second half of the period.`}else $('insight3').textContent='Select a longer period to see trend.';const total=dr.reduce((s,d)=>s+d.present+d.half+d.absent,0),sh=total?dr.reduce((s,d)=>s+d.absent+d.half*.5,0)/total*100:0;$('insight4').textContent=`${er.length} employees with activity. Shrinkage ${sh.toFixed(1)}% for the selected period.`}
+function destroy(name){if(charts[name])charts[name].destroy()}
+function renderCharts(dr,er){destroy('daily');destroy('achievement');destroy('project');destroy('shrinkage');const labels=dr.map(x=>x.date.slice(5));charts.daily=new Chart($('dailyChart'),{type:'line',data:{labels,datasets:[{label:'Target',data:dr.map(x=>x.target),tension:.25},{label:'Achieved',data:dr.map(x=>x.achieved),tension:.25}]},options:{responsive:true,maintainAspectRatio:false}});charts.achievement=new Chart($('achievementChart'),{type:'bar',data:{labels,datasets:[{label:'Achievement %',data:dr.map(x=>x.target?x.achieved/x.target*100:0)}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100}}}});const pm={};er.forEach(x=>{const n=projectName(x.e.project_id);if(!pm[n])pm[n]={t:0,a:0};pm[n].t+=x.target;pm[n].a+=x.achieved});charts.project=new Chart($('projectChart'),{type:'bar',data:{labels:Object.keys(pm),datasets:[{label:'Achieved',data:Object.values(pm).map(x=>x.a)},{label:'Target',data:Object.values(pm).map(x=>x.t)}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y'}});charts.shrinkage=new Chart($('shrinkageChart'),{type:'line',data:{labels,datasets:[{label:'Present',data:dr.map(x=>x.present),tension:.2},{label:'Half Day',data:dr.map(x=>x.half),tension:.2},{label:'Absent',data:dr.map(x=>x.absent),tension:.2}]},options:{responsive:true,maintainAspectRatio:false}})}
+function renderEmployeeTable(er){er.sort((a,b)=>(b.target?b.achieved/b.target:0)-(a.target?a.achieved/a.target:0));$('employeeTable').innerHTML=er.map((x,i)=>{const pct=x.target?x.achieved/x.target*100:0;const cls=pct>=90?'good':pct>=70?'warn':'bad';const st=pct>=90?'ON TRACK':pct>=70?'MONITOR':'ATTENTION';return `<tr><td>${i+1}</td><td>${esc(x.e.employee_name)}</td><td>${esc(x.e.employee_id||x.e.emp_id||'')}</td><td>${esc(projectName(x.e.project_id))}</td><td>${x.target.toLocaleString()}</td><td>${x.achieved.toLocaleString()}</td><td>${pct.toFixed(1)}%</td><td>${Math.max(0,x.target-x.achieved).toLocaleString()}</td><td>${x.days}</td><td><span class="pill ${cls}">${st}</span></td></tr>`}).join('')||'<tr><td colspan="10">No data for selected period.</td></tr>'}
+function renderProjectTable(){const map={};records.forEach(r=>{const e=employees.find(x=>Number(x.id)===Number(r.employee_id));if(!e)return;const n=projectName(e.project_id);if(!map[n])map[n]={ids:new Set(),t:0,a:0};map[n].ids.add(e.id);map[n].t+=Number(r.daily_target)||0;map[n].a+=hourFields.reduce((s,f)=>s+(Number(r[f])||0),0)});$('projectTable').innerHTML=Object.entries(map).map(([n,x])=>{const pct=x.t?x.a/x.t*100:0;const days=records.filter(r=>{const e=employees.find(z=>Number(z.id)===Number(r.employee_id));return e&&projectName(e.project_id)===n}).length;return `<tr><td>${esc(n)}</td><td>${x.ids.size}</td><td>${x.t.toLocaleString()}</td><td>${x.a.toLocaleString()}</td><td>${pct.toFixed(1)}%</td><td>${Math.max(0,x.t-x.a).toLocaleString()}</td><td>${days?(x.a/days).toFixed(1):0}</td></tr>`}).join('')||'<tr><td colspan="7">No data for selected period.</td></tr>'}
+function openOperations(){window.location.href=OPERATIONS_DASHBOARD_URL}
+async function logout(){await supabaseClient.auth.signOut();location.reload()}
+supabaseClient.auth.getSession().then(async({data})=>{if(data.session)await initialize(data.session.user)});supabaseClient.auth.onAuthStateChange((_e,session)=>{if(!session){$('authScreen').classList.remove('hidden');$('app').classList.add('hidden')}});
+</script>
+</body>
+</html>
