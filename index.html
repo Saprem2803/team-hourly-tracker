@@ -1,848 +1,512 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Hourly Production Dashboard</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-
-/* =========================================================
-   GLOBAL
-========================================================= */
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-    background: #eef3f8;
-    color: #172033;
-}
-
-
-/* =========================================================
-   HEADER
-========================================================= */
-
-.header {
-    background: linear-gradient(
-        135deg,
-        #0b3a66,
-        #1261a0
-    );
-
-    color: white;
-
-    padding: 20px 28px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
-}
-
-.header-left h1 {
-    margin: 0;
-
-    font-size: 25px;
-
-    font-weight: 700;
-
-    letter-spacing: 0.2px;
-}
-
-.header-left p {
-    margin: 5px 0 0;
-
-    font-size: 13px;
-
-    opacity: 0.85;
-}
-
-.header-right {
-    text-align: right;
-
-    font-size: 13px;
-
-    opacity: 0.9;
-}
-
-
-/* =========================================================
-   MAIN CONTAINER
-========================================================= */
-
-.container {
-    max-width: 1900px;
-
-    margin: auto;
-
-    padding: 22px;
-}
-
-
-/* =========================================================
-   TOOLBAR
-========================================================= */
-
-.toolbar {
-    background: white;
-
-    padding: 15px 18px;
-
-    border-radius: 12px;
-
-    margin-bottom: 20px;
-
-    display: flex;
-
-    gap: 12px;
-
-    align-items: center;
-
-    flex-wrap: wrap;
-
-    border: 1px solid #dbe4ee;
-
-    box-shadow:
-        0 2px 8px rgba(23,32,51,0.06);
-}
-
-.toolbar label {
-    font-size: 12px;
-
-    font-weight: 700;
-
-    color: #506176;
-}
-
-input,
-select {
-    padding: 9px 11px;
-
-    border: 1px solid #cbd5e1;
-
-    border-radius: 7px;
-
-    font-size: 13px;
-
-    background: white;
-
-    color: #172033;
-
-    outline: none;
-}
-
-input:focus,
-select:focus {
-    border-color: #1976d2;
-
-    box-shadow:
-        0 0 0 3px rgba(25,118,210,0.10);
-}
-
-button {
-    padding: 9px 15px;
-
-    border: none;
-
-    border-radius: 7px;
-
-    background: #1261a0;
-
-    color: white;
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-}
-
-button:hover {
-    transform: translateY(-1px);
-
-    box-shadow:
-        0 3px 8px rgba(0,0,0,0.12);
-}
-
-button.delete {
-    background: #dc3545;
-}
-
-button.secondary {
-    background: #64748b;
-}
-
-
-/* =========================================================
-   MESSAGE
-========================================================= */
-
-.message {
-    padding: 11px 14px;
-
-    margin-bottom: 15px;
-
-    border-radius: 8px;
-
-    display: none;
-
-    font-size: 13px;
-
-    font-weight: 600;
-}
-
-.success {
-    background: #e8f7ee;
-
-    color: #187a45;
-
-    border-left: 4px solid #22a05a;
-}
-
-.error {
-    background: #fdecec;
-
-    color: #b42332;
-
-    border-left: 4px solid #dc3545;
-}
-
-
-/* =========================================================
-   SECTION
-========================================================= */
-
-.section {
-    margin-bottom: 25px;
-}
-
-.section-title {
-    font-size: 19px;
-
-    font-weight: 700;
-
-    color: #183b5b;
-
-    margin-bottom: 12px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-}
-
-.section-title::before {
-    content: "";
-
-    width: 5px;
-
-    height: 22px;
-
-    background: #1261a0;
-
-    border-radius: 5px;
-
-    display: inline-block;
-}
-
-
-/* =========================================================
-   KPI
-========================================================= */
-
-.kpi-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(5, 1fr);
-
-    gap: 15px;
-}
-
-.kpi {
-    background: white;
-
-    border-radius: 12px;
-
-    padding: 18px;
-
-    position: relative;
-
-    overflow: hidden;
-
-    border: 1px solid #dbe4ee;
-
-    box-shadow:
-        0 3px 10px rgba(23,32,51,0.07);
-}
-
-.kpi::after {
-    content: "";
-
-    position: absolute;
-
-    right: -20px;
-
-    top: -20px;
-
-    width: 75px;
-
-    height: 75px;
-
-    border-radius: 50%;
-
-    background: rgba(18,97,160,0.08);
-}
-
-.kpi-title {
-    font-size: 12px;
-
-    color: #68788d;
-
-    font-weight: 600;
-
-    text-transform: uppercase;
-
-    letter-spacing: 0.4px;
-}
-
-.kpi-value {
-    font-size: 29px;
-
-    font-weight: 750;
-
-    margin-top: 8px;
-
-    color: #173b5e;
-}
-
-.kpi:nth-child(1) {
-    border-top: 4px solid #1261a0;
-}
-
-.kpi:nth-child(2) {
-    border-top: 4px solid #1976d2;
-}
-
-.kpi:nth-child(3) {
-    border-top: 4px solid #20a05a;
-}
-
-.kpi:nth-child(4) {
-    border-top: 4px solid #e67e22;
-}
-
-.kpi:nth-child(5) {
-    border-top: 4px solid #6f42c1;
-}
-
-
-/* =========================================================
-   PROJECT DASHBOARD
-========================================================= */
-
-.project-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(auto-fit, minmax(360px, 1fr));
-
-    gap: 16px;
-}
-
-.project-card {
-    background: white;
-
-    border-radius: 12px;
-
-    padding: 17px;
-
-    border: 1px solid #d8e1eb;
-
-    box-shadow:
-        0 3px 10px rgba(23,32,51,0.07);
-
-    border-top: 5px solid #1261a0;
-}
-
-.project-card:hover {
-    box-shadow:
-        0 5px 15px rgba(23,32,51,0.11);
-}
-
-.project-header {
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    margin-bottom: 13px;
-}
-
-.project-name {
-    font-size: 18px;
-
-    font-weight: 750;
-
-    color: #173b5e;
-}
-
-.project-target {
-    font-size: 12px;
-
-    font-weight: 600;
-
-    color: #63748a;
-}
-
-.project-metrics {
-    display: grid;
-
-    grid-template-columns:
-        repeat(4, 1fr);
-
-    gap: 7px;
-}
-
-.metric {
-    background: #f6f9fc;
-
-    padding: 9px;
-
-    border-radius: 7px;
-
-    border: 1px solid #e5ebf2;
-}
-
-.metric-title {
-    font-size: 10px;
-
-    color: #718096;
-
-    text-transform: uppercase;
-}
-
-.metric-value {
-    font-weight: 750;
-
-    margin-top: 4px;
-
-    color: #263d55;
-}
-
-
-/* =========================================================
-   SUB PROJECT
-========================================================= */
-
-.sub-project-list {
-    margin-top: 15px;
-
-    border-top: 1px solid #e4eaf0;
-
-    padding-top: 12px;
-}
-
-.sub-project-card {
-    background: #f8fbfe;
-
-    border: 1px solid #d9e5ef;
-
-    padding: 12px;
-
-    border-radius: 9px;
-
-    margin-bottom: 9px;
-
-    border-left: 4px solid #1976d2;
-}
-
-.sub-project-header {
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    margin-bottom: 8px;
-}
-
-.sub-project-name {
-    font-size: 14px;
-
-    font-weight: 700;
-
-    color: #234c70;
-}
-
-.sub-project-target {
-    font-size: 11px;
-
-    color: #65768a;
-
-    font-weight: 600;
-}
-
-.sub-project-metrics {
-    display: grid;
-
-    grid-template-columns:
-        repeat(4, 1fr);
-
-    gap: 6px;
-}
-
-
-/* =========================================================
-   TABLE
-========================================================= */
-
-.table-wrapper {
-    overflow-x: auto;
-
-    background: white;
-
-    border-radius: 12px;
-
-    border: 1px solid #dbe4ee;
-
-    box-shadow:
-        0 3px 10px rgba(23,32,51,0.06);
-}
-
-table {
-    width: 100%;
-
-    border-collapse: collapse;
-
-    min-width: 1800px;
-}
-
-th {
-    background: #173f65;
-
-    color: white;
-
-    padding: 11px 8px;
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-    white-space: nowrap;
-
-    border-right: 1px solid rgba(255,255,255,0.08);
-}
-
-td {
-    padding: 9px 7px;
-
-    border-bottom: 1px solid #e7edf3;
-
-    font-size: 12px;
-
-    text-align: center;
-
-    white-space: nowrap;
-
-    vertical-align: middle;
-}
-
-tbody tr:hover {
-    background: #f7fbff;
-}
-
-td.left {
-    text-align: left;
-
-    font-weight: 600;
-}
-
-
-/* =========================================================
-   HOURLY PRODUCTION INPUT
-========================================================= */
-
-.production-input {
-    width: 58px;
-
-    padding: 7px 5px;
-
-    text-align: center;
-
-    border-radius: 6px;
-
-    font-weight: 700;
-}
-
-.production-input:focus {
-    border-color: #1976d2;
-}
-
-
-/* =========================================================
-   HOUR STATUS
-========================================================= */
-
-.hour-status {
-    display: block;
-
-    margin-top: 5px;
-
-    padding: 3px 5px;
-
-    border-radius: 4px;
-
-    font-size: 8px;
-
-    font-weight: 800;
-
-    letter-spacing: 0.2px;
-}
-
-.status-track {
-    color: #137a43;
-
-    background: #dcf6e7;
-
-    border: 1px solid #b7e8ca;
-}
-
-.status-attention {
-    color: #b42332;
-
-    background: #fde3e6;
-
-    border: 1px solid #f6bdc4;
-}
-
-.status-na {
-    color: #667085;
-
-    background: #eef0f3;
-
-    border: 1px solid #d9dde3;
-}
-
-
-/* =========================================================
-   ATTENDANCE
-========================================================= */
-
-.attendance-select {
-    min-width: 88px;
-
-    font-weight: 600;
-}
-
-.attendance-present {
-    color: #16834b;
-}
-
-.attendance-half {
-    color: #b7791f;
-}
-
-.attendance-absent {
-    color: #c53030;
-}
-
-
-/* =========================================================
-   ACHIEVEMENT COLORS
-========================================================= */
-
-.achievement-good {
-    color: #16834b;
-
-    font-weight: 800;
-}
-
-.achievement-warning {
-    color: #b7791f;
-
-    font-weight: 800;
-}
-
-.achievement-danger {
-    color: #c53030;
-
-    font-weight: 800;
-}
-
-
-/* =========================================================
-   BADGES
-========================================================= */
-
-.badge {
-    display: inline-block;
-
-    padding: 4px 8px;
-
-    border-radius: 20px;
-
-    font-size: 10px;
-
-    font-weight: 800;
-}
-
-.badge-target {
-    background: #e0effc;
-
-    color: #1261a0;
-
-    border: 1px solid #c6e1f7;
-}
-
-.badge-na {
-    background: #edf0f3;
-
-    color: #657080;
-
-    border: 1px solid #d9dee4;
-}
-
-
-/* =========================================================
-   SETUP
-========================================================= */
-
-.setup-grid {
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr 1fr 1fr auto;
-
-    gap: 10px;
-
-    background: white;
-
-    padding: 16px;
-
-    border-radius: 12px;
-
-    border: 1px solid #dbe4ee;
-
-    box-shadow:
-        0 3px 10px rgba(23,32,51,0.06);
-}
-
-.setup-grid input,
-.setup-grid select {
-    width: 100%;
-}
-
-
-/* =========================================================
-   PERFORMANCE SUMMARY
-========================================================= */
-
-#performanceSummary table {
-    min-width: 900px;
-}
-
-#performanceSummary th {
-    background: #24557e;
-}
-
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media(max-width: 1200px) {
-
-    .kpi-grid {
-        grid-template-columns:
-            repeat(3, 1fr);
-    }
-
-    .setup-grid {
-        grid-template-columns:
-            1fr 1fr 1fr;
-    }
-
-}
-
-@media(max-width: 800px) {
-
-    .kpi-grid {
-        grid-template-columns:
-            repeat(2, 1fr);
-    }
-
-    .setup-grid {
-        grid-template-columns:
-            1fr 1fr;
-    }
-
-}
-
-@media(max-width: 550px) {
-
-    .kpi-grid {
-        grid-template-columns:
-            1fr;
-    }
-
-    .setup-grid {
-        grid-template-columns:
-            1fr;
-    }
-
-}
-
-</style>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Hourly Production Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        /* =========================================================
+           HEADER
+        ========================================================= */
+
+        .header {
+            background: linear-gradient(135deg, #0f3d68, #1261a0);
+            color: white;
+            padding: 22px 30px;
+            box-shadow: 0 3px 12px rgba(0,0,0,.15);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        .header p {
+            margin: 6px 0 0;
+            opacity: .85;
+            font-size: 14px;
+        }
+
+        /* =========================================================
+           MAIN
+        ========================================================= */
+
+        .container {
+            padding: 24px;
+            max-width: 1800px;
+            margin: auto;
+        }
+
+        /* =========================================================
+           CONTROLS
+        ========================================================= */
+
+        .controls {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 22px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: end;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+
+        .control-group label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        select,
+        input {
+            height: 38px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            padding: 0 10px;
+            font-size: 13px;
+            background: white;
+        }
+
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: #1261a0;
+            box-shadow: 0 0 0 2px rgba(18,97,160,.12);
+        }
+
+        button {
+            border: none;
+            border-radius: 7px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .btn-primary {
+            background: #1261a0;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0f4f84;
+        }
+
+        .btn-success {
+            background: #198754;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+
+        /* =========================================================
+           SECTION
+        ========================================================= */
+
+        .section {
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 14px;
+            color: #173b5e;
+        }
+
+        /* =========================================================
+           KPI
+        ========================================================= */
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+            border-top: 5px solid #1261a0;
+        }
+
+        .kpi-card.green {
+            border-top-color: #198754;
+        }
+
+        .kpi-card.orange {
+            border-top-color: #f59e0b;
+        }
+
+        .kpi-card.red {
+            border-top-color: #dc3545;
+        }
+
+        .kpi-card.grey {
+            border-top-color: #64748b;
+        }
+
+        .kpi-label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .kpi-value {
+            font-size: 27px;
+            font-weight: bold;
+            margin-top: 7px;
+            color: #172b4d;
+        }
+
+        .kpi-sub {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        /* =========================================================
+           PROJECT CARDS
+        ========================================================= */
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+            border-left: 6px solid #1261a0;
+        }
+
+        .project-card-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #173b5e;
+            margin-bottom: 16px;
+        }
+
+        .project-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .metric-box {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .metric-box span {
+            display: block;
+            font-size: 11px;
+            color: #64748b;
+            font-weight: bold;
+        }
+
+        .metric-box strong {
+            display: block;
+            font-size: 20px;
+            margin-top: 4px;
+        }
+
+        /* =========================================================
+           SUB PROJECT
+        ========================================================= */
+
+        .subproject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+        }
+
+        .subproject-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07);
+        }
+
+        .subproject-title {
+            font-weight: bold;
+            color: #1261a0;
+            margin-bottom: 10px;
+        }
+
+        .subproject-info {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.7;
+        }
+
+        /* =========================================================
+           TABLE
+        ========================================================= */
+
+        .table-wrapper {
+            overflow-x: auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1450px;
+        }
+
+        th {
+            background: #173b5e;
+            color: white;
+            padding: 11px 8px;
+            font-size: 11px;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        td {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 8px;
+            font-size: 11px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        td.left {
+            text-align: left;
+        }
+
+        .production-input {
+            width: 58px;
+            height: 30px;
+            text-align: center;
+            padding: 2px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 7px;
+            border-radius: 5px;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .status.ontrack {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .status.attention {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .status.na {
+            background: #e5e7eb;
+            color: #4b5563;
+        }
+
+        .achievement-good {
+            color: #198754;
+            font-weight: bold;
+        }
+
+        .achievement-low {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .achievement-na {
+            color: #64748b;
+            font-weight: bold;
+        }
+
+        /* =========================================================
+           ATTENDANCE
+        ========================================================= */
+
+        .attendance-select {
+            width: 95px;
+        }
+
+        /* =========================================================
+           SETUP CARDS
+        ========================================================= */
+
+        .setup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 18px;
+        }
+
+        .setup-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+        }
+
+        .setup-card h3 {
+            margin-top: 0;
+            color: #173b5e;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-field label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+
+        .employee-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .employee-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 12px;
+        }
+
+        /* =========================================================
+           MESSAGE
+        ========================================================= */
+
+        .message {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            padding: 13px 18px;
+            background: #173b5e;
+            color: white;
+            border-radius: 8px;
+            display: none;
+            z-index: 9999;
+            box-shadow: 0 4px 15px rgba(0,0,0,.2);
+        }
+
+        .message.success {
+            background: #198754;
+        }
+
+        .message.error {
+            background: #dc3545;
+        }
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media(max-width: 700px) {
+
+            .container {
+                padding: 12px;
+            }
+
+            .header {
+                padding: 18px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group {
+                width: 100%;
+            }
+
+        }
+
+    </style>
 
 </head>
 
-
 <body>
 
-
-<!-- =======================================================
+<!-- =========================================================
      HEADER
-======================================================= -->
+========================================================= -->
 
 <div class="header">
 
-    <div class="header-left">
+    <h1>Hourly Production Dashboard</h1>
 
-        <h1>
-            Hourly Production Dashboard
-        </h1>
-
-        <p>
-            Revenue Cycle Operations • Daily Productivity Monitoring
-        </p>
-
-    </div>
-
-    <div class="header-right">
-
-        AMI Operations
-
-    </div>
+    <p>
+        Production monitoring • Project performance • Employee productivity
+    </p>
 
 </div>
 
@@ -850,513 +514,474 @@ td.left {
 <div class="container">
 
 
-<!-- =======================================================
-     GLOBAL MESSAGE
-======================================================= -->
+    <!-- =====================================================
+         FILTERS
+    ====================================================== -->
+
+    <div class="controls">
+
+        <div class="control-group">
+
+            <label>Tracker Date</label>
+
+            <input
+                type="date"
+                id="trackerDate">
+
+        </div>
+
+
+        <div class="control-group">
+
+            <label>Project</label>
+
+            <select
+                id="projectFilter"
+                onchange="handleProjectFilterChange()">
+
+                <option value="">
+                    All Projects
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="control-group">
+
+            <label>Sub-Project</label>
+
+            <select
+                id="subProjectFilter"
+                onchange="updateDashboard()">
+
+                <option value="">
+                    All Sub-Projects
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            class="btn-primary"
+            onclick="refreshDashboard()">
+
+            Refresh
+
+        </button>
+
+
+        <button
+            class="btn-success"
+            onclick="saveAllProduction()">
+
+            Save Production
+
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         KPI SECTION
+    ====================================================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Performance Overview
+        </div>
+
+        <div
+            class="kpi-grid"
+            id="kpiContainer">
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PROJECT PERFORMANCE
+    ====================================================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Project Performance
+        </div>
+
+        <div
+            class="project-grid"
+            id="projectDashboard">
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUB PROJECT PERFORMANCE
+    ====================================================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Sub-Project Performance
+        </div>
+
+        <div
+            class="subproject-grid"
+            id="subProjectDashboard">
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         HOURLY PRODUCTION
+    ====================================================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Hourly Production
+        </div>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Employee</th>
+
+                        <th>EMP ID</th>
+
+                        <th>Project</th>
+
+                        <th>Sub-Project</th>
+
+                        <th>Attendance</th>
+
+                        <th>Daily Target</th>
+
+                        <th>6–7 PM</th>
+
+                        <th>7–8 PM</th>
+
+                        <th>8–9 PM</th>
+
+                        <th>9–10 PM</th>
+
+                        <th>10–11 PM</th>
+
+                        <th>11 PM–12 AM</th>
+
+                        <th>12–1 AM</th>
+
+                        <th>1–2 AM</th>
+
+                        <th>2–3 AM</th>
+
+                        <th>Achieved</th>
+
+                        <th>Remaining</th>
+
+                        <th>Achievement %</th>
+
+                        <th>Save</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="trackerBody"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PERFORMANCE SUMMARY
+    ====================================================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Performance Summary
+        </div>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Employee</th>
+
+                        <th>EMP ID</th>
+
+                        <th>Project</th>
+
+                        <th>Sub-Project</th>
+
+                        <th>Target</th>
+
+                        <th>Achieved</th>
+
+                        <th>Remaining</th>
+
+                        <th>Achievement %</th>
+
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="performanceSummaryBody"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SETUP
+    ====================================================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Setup
+        </div>
+
+        <div class="setup-grid">
+
+
+            <!-- PROJECT SETUP -->
+
+            <div class="setup-card">
+
+                <h3>Project Setup</h3>
+
+                <div class="form-field">
+
+                    <label>Project Name</label>
+
+                    <input
+                        id="projectName"
+                        placeholder="Project Name">
+
+                </div>
+
+                <br>
+
+                <div class="form-field">
+
+                    <label>Daily Target</label>
+
+                    <input
+                        type="number"
+                        id="projectTarget"
+                        placeholder="Daily Target">
+
+                </div>
+
+                <br>
+
+                <button
+                    class="btn-primary"
+                    onclick="addProject()">
+
+                    Add Project
+
+                </button>
+
+            </div>
+
+
+            <!-- SUB PROJECT SETUP -->
+
+            <div class="setup-card">
+
+                <h3>Sub-Project Setup</h3>
+
+                <div class="form-field">
+
+                    <label>Project</label>
+
+                    <select id="subProjectParent">
+
+                        <option value="">
+                            Select Project
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <br>
+
+                <div class="form-field">
+
+                    <label>Sub-Project Name</label>
+
+                    <input
+                        id="subProjectName"
+                        placeholder="Example: AR">
+
+                </div>
+
+                <br>
+
+                <div class="form-field">
+
+                    <label>Daily Target</label>
+
+                    <input
+                        type="number"
+                        id="subProjectTarget"
+                        placeholder="Daily Target">
+
+                </div>
+
+                <br>
+
+                <label>
+
+                    <input
+                        type="checkbox"
+                        id="subProjectTargetBased"
+                        checked>
+
+                    Target Based
+
+                </label>
+
+                <br><br>
+
+                <button
+                    class="btn-primary"
+                    onclick="addSubProject()">
+
+                    Add Sub-Project
+
+                </button>
+
+            </div>
+
+
+            <!-- EMPLOYEE SETUP -->
+
+            <div class="setup-card">
+
+                <h3>Employee Setup</h3>
+
+                <div class="form-row">
+
+                    <div class="form-field">
+
+                        <label>Employee Name</label>
+
+                        <input
+                            id="employeeName"
+                            placeholder="Employee Name">
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label>Employee ID</label>
+
+                        <input
+                            id="employeeCode"
+                            placeholder="Employee ID">
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label>Project</label>
+
+                    <select
+                        id="employeeProject"
+                        onchange="loadEmployeeSubProjectDropdown()">
+
+                        <option value="">
+                            Select Project
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <br>
+
+
+                <div class="form-field">
+
+                    <label>Sub-Project</label>
+
+                    <select id="employeeSubProject">
+
+                        <option value="">
+                            Select Project First
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <br>
+
+                <button
+                    class="btn-primary"
+                    onclick="addEmployee()">
+
+                    Add Employee
+
+                </button>
+
+
+                <div
+                    class="employee-list"
+                    id="employeeList">
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 
 <div
-    id="globalMessage"
-    class="message">
-</div>
-
-
-<!-- =======================================================
-     TOOLBAR
-======================================================= -->
-
-<div class="toolbar">
-
-    <label>
-        Date
-    </label>
-
-    <input
-        type="date"
-        id="trackerDate"
-    >
-
-
-    <label>
-        Project
-    </label>
-
-    <select id="projectFilter">
-
-        <option value="">
-            All Projects
-        </option>
-
-    </select>
-
-
-    <label>
-        Sub-Project
-    </label>
-
-    <select id="subProjectFilter">
-
-        <option value="">
-            All Sub-Projects
-        </option>
-
-    </select>
-
-
-    <button
-        onclick="loadDailyTracker()">
-
-        Refresh
-
-    </button>
-
-</div>
-
-
-<!-- =======================================================
-     KPI
-======================================================= -->
-
-<div class="section">
-
-    <div class="section-title">
-        Daily Overview
-    </div>
-
-
-    <div class="kpi-grid">
-
-
-        <div class="kpi">
-
-            <div class="kpi-title">
-                Employees
-            </div>
-
-            <div
-                class="kpi-value"
-                id="kpiEmployees">
-                0
-            </div>
-
-        </div>
-
-
-        <div class="kpi">
-
-            <div class="kpi-title">
-                Daily Target
-            </div>
-
-            <div
-                class="kpi-value"
-                id="kpiTarget">
-                0
-            </div>
-
-        </div>
-
-
-        <div class="kpi">
-
-            <div class="kpi-title">
-                Achieved
-            </div>
-
-            <div
-                class="kpi-value"
-                id="kpiAchieved">
-                0
-            </div>
-
-        </div>
-
-
-        <div class="kpi">
-
-            <div class="kpi-title">
-                Remaining
-            </div>
-
-            <div
-                class="kpi-value"
-                id="kpiRemaining">
-                0
-            </div>
-
-        </div>
-
-
-        <div class="kpi">
-
-            <div class="kpi-title">
-                Achievement
-            </div>
-
-            <div
-                class="kpi-value"
-                id="kpiAchievement">
-                0%
-            </div>
-
-        </div>
-
-
-    </div>
-
-</div>
-
-
-<!-- =======================================================
-     PROJECT PERFORMANCE
-======================================================= -->
-
-<div class="section">
-
-    <div class="section-title">
-        Project Performance
-    </div>
-
-
-    <div
-        class="project-grid"
-        id="projectDashboard">
-    </div>
-
-</div>
-
-
-<!-- =======================================================
-     HOURLY PRODUCTION
-======================================================= -->
-
-<div class="section">
-
-    <div class="section-title">
-        Hourly Production
-    </div>
-
-
-    <div class="table-wrapper">
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Employee
-                    </th>
-
-                    <th>
-                        EMP ID
-                    </th>
-
-                    <th>
-                        Project
-                    </th>
-
-                    <th>
-                        Sub-Project
-                    </th>
-
-                    <th>
-                        Attendance
-                    </th>
-
-                    <th>
-                        Daily Target
-                    </th>
-
-                    <th>
-                        6–7 PM
-                    </th>
-
-                    <th>
-                        7–8 PM
-                    </th>
-
-                    <th>
-                        8–9 PM
-                    </th>
-
-                    <th>
-                        9–10 PM
-                    </th>
-
-                    <th>
-                        10–11 PM
-                    </th>
-
-                    <th>
-                        11 PM–12 AM
-                    </th>
-
-                    <th>
-                        12–1 AM
-                    </th>
-
-                    <th>
-                        1–2 AM
-                    </th>
-
-                    <th>
-                        2–3 AM
-                    </th>
-
-                    <th>
-                        Achieved
-                    </th>
-
-                    <th>
-                        Remaining
-                    </th>
-
-                    <th>
-                        Achievement %
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody
-                id="dailyTrackerBody">
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
-
-
-<!-- =======================================================
-     PERFORMANCE SUMMARY
-======================================================= -->
-
-<div class="section">
-
-    <div class="section-title">
-        Performance Summary
-    </div>
-
-
-    <div
-        class="table-wrapper"
-        id="performanceSummary">
-    </div>
-
-</div>
-
-
-<!-- =======================================================
-     PROJECT SETUP
-======================================================= -->
-
-<div class="section">
-
-    <div class="section-title">
-        Project Setup
-    </div>
-
-
-    <div class="setup-grid">
-
-        <input
-            type="text"
-            id="projectName"
-            placeholder="Project Name"
-        >
-
-
-        <input
-            type="number"
-            id="projectTarget"
-            placeholder="Target"
-            min="0"
-        >
-
-
-        <div></div>
-
-        <div></div>
-
-
-        <button
-            onclick="addProject()">
-
-            Add Project
-
-        </button>
-
-    </div>
-
-
-    <div
-        id="projectMessage"
-        class="message">
-    </div>
-
-
-    <div class="table-wrapper"
-         style="margin-top:15px;">
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Project Name
-                    </th>
-
-                    <th>
-                        Target
-                    </th>
-
-                    <th>
-                        Action
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody
-                id="projectSetupBody">
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
-
-
-<!-- =======================================================
-     EMPLOYEE SETUP
-======================================================= -->
-
-<div class="section">
-
-    <div class="section-title">
-        Employee Setup
-    </div>
-
-
-    <div class="setup-grid">
-
-        <input
-            type="text"
-            id="employeeName"
-            placeholder="Employee Name"
-        >
-
-
-        <input
-            type="text"
-            id="employeeCode"
-            placeholder="EMP ID"
-        >
-
-
-        <select id="employeeProject">
-
-            <option value="">
-                Select Project
-            </option>
-
-        </select>
-
-
-        <select
-            id="employeeSubProject"
-            disabled>
-
-            <option value="">
-                Select Project First
-            </option>
-
-        </select>
-
-
-        <button
-            onclick="addEmployee()">
-
-            Add Employee
-
-        </button>
-
-    </div>
-
-
-    <div
-        id="employeeMessage"
-        class="message">
-    </div>
-
-
-    <div class="table-wrapper"
-         style="margin-top:15px;">
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Employee Name
-                    </th>
-
-                    <th>
-                        EMP ID
-                    </th>
-
-                    <th>
-                        Project
-                    </th>
-
-                    <th>
-                        Sub-Project
-                    </th>
-
-                    <th>
-                        Target
-                    </th>
-
-                    <th>
-                        Action
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody
-                id="employeeSetupBody">
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
-
-
+    class="message"
+    id="message">
 </div>
 
 
 <script>
 
-
 /* =========================================================
-   SUPABASE
+   SUPABASE CONNECTION
 ========================================================= */
 
 const SUPABASE_URL =
@@ -1373,7 +998,7 @@ const supabaseClient =
 
 
 /* =========================================================
-   GLOBAL VARIABLES
+   GLOBAL DATA
 ========================================================= */
 
 let projects = [];
@@ -1382,11 +1007,11 @@ let employees = [];
 
 let subProjects = [];
 
-let dailyData = [];
+let dailyProduction = [];
 
 
 /* =========================================================
-   HOUR FIELDS
+   HOURS
 ========================================================= */
 
 const hourFields = [
@@ -1403,12 +1028,57 @@ const hourFields = [
 
 ];
 
+const hourLabels = [
+
+    "6–7 PM",
+    "7–8 PM",
+    "8–9 PM",
+    "9–10 PM",
+    "10–11 PM",
+    "11 PM–12 AM",
+    "12–1 AM",
+    "1–2 AM",
+    "2–3 AM"
+
+];
+
 
 /* =========================================================
-   DATE
+   MESSAGE
+========================================================= */
+
+function showMessage(
+    text,
+    type = "success"
+) {
+
+    const box =
+        document.getElementById("message");
+
+    box.textContent = text;
+
+    box.className =
+        "message " + type;
+
+    box.style.display = "block";
+
+    setTimeout(() => {
+
+        box.style.display = "none";
+
+    }, 3000);
+
+}
+
+
+/* =========================================================
+   TODAY
 ========================================================= */
 
 function setTodayDate() {
+
+    const input =
+        document.getElementById("trackerDate");
 
     const today =
         new Date();
@@ -1419,86 +1089,18 @@ function setTodayDate() {
     const mm =
         String(
             today.getMonth() + 1
-        ).padStart(
-            2,
-            "0"
-        );
+        ).padStart(2, "0");
 
     const dd =
         String(
             today.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
+        ).padStart(2, "0");
 
-    document.getElementById(
-        "trackerDate"
-    ).value =
+    input.value =
         `${yyyy}-${mm}-${dd}`;
 
-}
-
-
-/* =========================================================
-   MESSAGES
-========================================================= */
-
-function showMessage(
-    elementId,
-    message,
-    error = false
-) {
-
-    const element =
-        document.getElementById(
-            elementId
-        );
-
-    if (!element)
-        return;
-
-    element.textContent =
-        message;
-
-    element.className =
-        "message " +
-        (
-            error
-                ? "error"
-                : "success"
-        );
-
-    element.style.display =
-        "block";
-
-}
-
-
-function showProjectMessage(
-    message,
-    error = false
-) {
-
-    showMessage(
-        "projectMessage",
-        message,
-        error
-    );
-
-}
-
-
-function showEmployeeMessage(
-    message,
-    error = false
-) {
-
-    showMessage(
-        "employeeMessage",
-        message,
-        error
-    );
+    input.max =
+        input.value;
 
 }
 
@@ -1509,41 +1111,30 @@ function showEmployeeMessage(
 
 async function loadProjects() {
 
-    const result =
+    const {
+        data,
+        error
+    } =
         await supabaseClient
             .from("projects")
-            .select(
-                "id, project_name, daily_target"
-            )
-            .order(
-                "project_name"
-            );
+            .select("*")
+            .order("project_name");
 
+    if (error) {
 
-    if (result.error) {
+        console.error(error);
 
-        console.error(
-            "PROJECT LOAD ERROR:",
-            result.error
+        showMessage(
+            "Unable to load projects",
+            "error"
         );
 
-        showProjectMessage(
-            result.error.message,
-            true
-        );
-
-        return false;
+        return;
 
     }
 
-
     projects =
-        result.data || [];
-
-
-    displayProjects();
-
-    return true;
+        data || [];
 
 }
 
@@ -1554,54 +1145,31 @@ async function loadProjects() {
 
 async function loadSubProjects() {
 
-    const result =
+    const {
+        data,
+        error
+    } =
         await supabaseClient
             .from("sub_projects")
-            .select(`
-                id,
-                project_id,
-                sub_project_name,
-                daily_target,
-                target_based,
-                active
-            `)
-            .eq(
-                "active",
-                true
-            )
-            .order(
-                "sub_project_name"
-            );
+            .select("*")
+            .eq("active", true)
+            .order("sub_project_name");
 
+    if (error) {
 
-    if (result.error) {
+        console.error(error);
 
-        console.error(
-            "SUB PROJECT LOAD ERROR:",
-            result.error
+        showMessage(
+            "Unable to load sub-projects",
+            "error"
         );
 
-        showEmployeeMessage(
-            result.error.message,
-            true
-        );
-
-        return false;
+        return;
 
     }
 
-
     subProjects =
-        result.data || [];
-
-
-    console.log(
-        "SUB PROJECTS:",
-        subProjects
-    );
-
-
-    return true;
+        data || [];
 
 }
 
@@ -1612,85 +1180,110 @@ async function loadSubProjects() {
 
 async function loadEmployees() {
 
-    const result =
+    const {
+        data,
+        error
+    } =
         await supabaseClient
             .from("employees")
-            .select(`
-                id,
-                employee_name,
-                employee_code,
-                project_id,
-                sub_project_id,
-                active
-            `)
-            .eq(
-                "active",
-                true
-            )
-            .order(
-                "employee_name"
-            );
+            .select("*")
+            .eq("active", true)
+            .order("employee_name");
 
+    if (error) {
 
-    if (result.error) {
+        console.error(error);
 
-        console.error(
-            "EMPLOYEE LOAD ERROR:",
-            result.error
+        showMessage(
+            "Unable to load employees",
+            "error"
         );
 
-        showEmployeeMessage(
-            result.error.message,
-            true
-        );
-
-        return false;
+        return;
 
     }
 
-
     employees =
-        result.data || [];
-
-
-    return true;
+        data || [];
 
 }
 
 
 /* =========================================================
-   PROJECT LOOKUP
+   LOAD DAILY PRODUCTIVITY
 ========================================================= */
 
-function getProjectById(
-    id
-) {
+async function loadDailyTracker() {
+
+    const date =
+        document.getElementById(
+            "trackerDate"
+        ).value;
+
+    if (!date)
+        return;
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("daily_productivity")
+            .select("*")
+            .eq(
+                "tracker_date",
+                date
+            );
+
+    if (error) {
+
+        console.error(error);
+
+        showMessage(
+            "Unable to load daily productivity",
+            "error"
+        );
+
+        return;
+
+    }
+
+    dailyProduction =
+        data || [];
+
+    buildDailyTracker();
+
+    updateDashboard();
+
+}
+
+
+/* =========================================================
+   PROJECT HELPERS
+========================================================= */
+
+function getProjectById(id) {
 
     return projects.find(
-        project =>
-            Number(
-                project.id
-            ) ===
-            Number(id)
+        p => Number(p.id) === Number(id)
     );
 
 }
 
 
-/* =========================================================
-   SUB PROJECT LOOKUP
-========================================================= */
-
-function getSubProjectById(
-    id
-) {
+function getSubProjectById(id) {
 
     return subProjects.find(
-        subProject =>
-            Number(
-                subProject.id
-            ) ===
-            Number(id)
+        s => Number(s.id) === Number(id)
+    );
+
+}
+
+
+function getEmployeeById(id) {
+
+    return employees.find(
+        e => Number(e.id) === Number(id)
     );
 
 }
@@ -1700,18 +1293,10 @@ function getSubProjectById(
    EMPLOYEE SUB PROJECT
 ========================================================= */
 
-function getEmployeeSubProject(
-    employee
-) {
+function getEmployeeSubProject(employee) {
 
-    if (
-        !employee.sub_project_id
-    ) {
-
+    if (!employee.sub_project_id)
         return null;
-
-    }
-
 
     return getSubProjectById(
         employee.sub_project_id
@@ -1724,15 +1309,10 @@ function getEmployeeSubProject(
    EMPLOYEE TARGET
 ========================================================= */
 
-function getEmployeeTarget(
-    employee
-) {
+function getEmployeeTarget(employee) {
 
     const subProject =
-        getEmployeeSubProject(
-            employee
-        );
-
+        getEmployeeSubProject(employee);
 
     if (subProject) {
 
@@ -1744,58 +1324,29 @@ function getEmployeeTarget(
 
         }
 
-
-        if (
-            subProject.daily_target === null ||
-            subProject.daily_target === undefined ||
-            subProject.daily_target === ""
-        ) {
-
-            return null;
-
-        }
-
-
         return Number(
-            subProject.daily_target
+            subProject.daily_target || 0
         );
 
     }
-
 
     const project =
         getProjectById(
             employee.project_id
         );
 
-
-    if (!project) {
-
+    if (!project)
         return null;
-
-    }
-
-
-    if (
-        project.daily_target === null ||
-        project.daily_target === undefined ||
-        project.daily_target === ""
-    ) {
-
-        return null;
-
-    }
-
 
     return Number(
-        project.daily_target
+        project.daily_target || 0
     );
 
 }
 
 
 /* =========================================================
-   ATTENDANCE TARGET
+   DAILY TARGET
 ========================================================= */
 
 function getDailyTarget(
@@ -1808,16 +1359,14 @@ function getDailyTarget(
             employee
         );
 
-
     if (
         target === null ||
-        !Number.isFinite(target)
+        target === undefined
     ) {
 
         return null;
 
     }
-
 
     if (
         attendance === "Absent"
@@ -1826,7 +1375,6 @@ function getDailyTarget(
         return 0;
 
     }
-
 
     if (
         attendance === "Half Day"
@@ -1838,2577 +1386,71 @@ function getDailyTarget(
 
     }
 
-
     return target;
 
 }
 
 
 /* =========================================================
-   PROJECT DROPDOWN
+   GET PRODUCTION RECORD
 ========================================================= */
 
-function loadEmployeeProjectDropdown() {
-
-    const select =
-        document.getElementById(
-            "employeeProject"
-        );
-
-
-    select.innerHTML = `
-        <option value="">
-            Select Project
-        </option>
-    `;
-
-
-    projects.forEach(
-        project => {
-
-            const hasSubProjects =
-                subProjects.some(
-                    sp =>
-                        Number(
-                            sp.project_id
-                        ) ===
-                        Number(
-                            project.id
-                        )
-                );
-
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-
-            option.value =
-                project.id;
-
-
-            option.textContent =
-                hasSubProjects
-                    ? `${project.project_name} → Select Sub-Project`
-                    : project.project_name;
-
-
-            select.appendChild(
-                option
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   SUB PROJECT DROPDOWN
-========================================================= */
-
-function loadEmployeeSubProjectDropdown() {
-
-    const projectSelect =
-        document.getElementById(
-            "employeeProject"
-        );
-
-
-    const subProjectSelect =
-        document.getElementById(
-            "employeeSubProject"
-        );
-
-
-    const projectId =
-        projectSelect.value;
-
-
-    subProjectSelect.innerHTML =
-        "";
-
-
-    if (!projectId) {
-
-        subProjectSelect.disabled =
-            true;
-
-        subProjectSelect.innerHTML = `
-            <option value="">
-                Select Project First
-            </option>
-        `;
-
-        return;
-
-    }
-
-
-    const children =
-        subProjects.filter(
-            sp =>
-                Number(
-                    sp.project_id
-                ) ===
-                Number(
-                    projectId
-                )
-        );
-
-
-    /*
-       NO SUB PROJECT
-       NS
-    */
-
-    if (
-        children.length === 0
-    ) {
-
-        subProjectSelect.disabled =
-            true;
-
-        subProjectSelect.innerHTML = `
-            <option value="">
-                Not Required
-            </option>
-        `;
-
-        return;
-
-    }
-
-
-    /*
-       SUB PROJECT REQUIRED
-    */
-
-    subProjectSelect.disabled =
-        false;
-
-
-    subProjectSelect.innerHTML = `
-        <option value="">
-            Select Sub-Project
-        </option>
-    `;
-
-
-    children.forEach(
-        subProject => {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-
-            option.value =
-                subProject.id;
-
-
-            const target =
-                subProject.target_based === false
-                    ? "N/A"
-                    : subProject.daily_target;
-
-
-            option.textContent =
-                `${subProject.sub_project_name} (Target: ${target})`;
-
-
-            subProjectSelect.appendChild(
-                option
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   DISPLAY PROJECTS
-========================================================= */
-
-function displayProjects() {
-
-    const body =
-        document.getElementById(
-            "projectSetupBody"
-        );
-
-
-    body.innerHTML =
-        "";
-
-
-    projects.forEach(
-        project => {
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-
-            const target =
-                project.daily_target === null ||
-                project.daily_target === undefined
-                    ? "N/A"
-                    : project.daily_target;
-
-
-            row.innerHTML = `
-
-                <td class="left">
-                    ${escapeHtml(
-                        project.project_name
-                    )}
-                </td>
-
-                <td>
-                    ${target}
-                </td>
-
-                <td>
-
-                    <button
-                        class="delete"
-                        onclick="deleteProject(${project.id})">
-
-                        Delete
-
-                    </button>
-
-                </td>
-
-            `;
-
-
-            body.appendChild(
-                row
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   DISPLAY EMPLOYEES
-========================================================= */
-
-function displayEmployees() {
-
-    const body =
-        document.getElementById(
-            "employeeSetupBody"
-        );
-
-
-    body.innerHTML =
-        "";
-
-
-    employees.forEach(
-        employee => {
-
-            const project =
-                getProjectById(
-                    employee.project_id
-                );
-
-
-            const subProject =
-                getEmployeeSubProject(
-                    employee
-                );
-
-
-            const target =
-                getEmployeeTarget(
-                    employee
-                );
-
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-
-            row.innerHTML = `
-
-                <td class="left">
-
-                    ${escapeHtml(
-                        employee.employee_name
-                    )}
-
-                </td>
-
-
-                <td>
-
-                    ${escapeHtml(
-                        employee.employee_code || ""
-                    )}
-
-                </td>
-
-
-                <td>
-
-                    ${
-                        project
-                            ? escapeHtml(
-                                project.project_name
-                            )
-                            : "N/A"
-                    }
-
-                </td>
-
-
-                <td>
-
-                    ${
-                        subProject
-                            ? escapeHtml(
-                                subProject.sub_project_name
-                            )
-                            : "Not Required"
-                    }
-
-                </td>
-
-
-                <td>
-
-                    ${
-                        target === null
-
-                            ? `
-                                <span class="badge badge-na">
-                                    N/A
-                                </span>
-                              `
-
-                            : `
-                                <span class="badge badge-target">
-                                    ${target}
-                                </span>
-                              `
-                    }
-
-                </td>
-
-
-                <td>
-
-                    <button
-                        class="delete"
-                        onclick="deleteEmployee(${employee.id})">
-
-                        Delete
-
-                    </button>
-
-                </td>
-
-            `;
-
-
-            body.appendChild(
-                row
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   ADD PROJECT
-========================================================= */
-
-async function addProject() {
-
-    const name =
-        document.getElementById(
-            "projectName"
-        ).value.trim();
-
-
-    const targetValue =
-        document.getElementById(
-            "projectTarget"
-        ).value;
-
-
-    if (!name) {
-
-        showProjectMessage(
-            "Please enter project name.",
-            true
-        );
-
-        return;
-
-    }
-
-
-    const target =
-        targetValue === ""
-            ? null
-            : Number(
-                targetValue
-            );
-
-
-    const result =
-        await supabaseClient
-            .from("projects")
-            .insert({
-
-                project_name:
-                    name,
-
-                daily_target:
-                    target
-
-            });
-
-
-    if (result.error) {
-
-        showProjectMessage(
-            result.error.message,
-            true
-        );
-
-        return;
-
-    }
-
-
-    document.getElementById(
-        "projectName"
-    ).value = "";
-
-
-    document.getElementById(
-        "projectTarget"
-    ).value = "";
-
-
-    showProjectMessage(
-        "Project added successfully."
-    );
-
-
-    await loadProjects();
-
-
-    loadEmployeeProjectDropdown();
-
-
-    loadProjectFilter();
-
-
-    renderProjectDashboard();
-
-}
-
-
-/* =========================================================
-   ADD EMPLOYEE
-========================================================= */
-
-async function addEmployee() {
-
-    const name =
-        document.getElementById(
-            "employeeName"
-        ).value.trim();
-
-
-    const code =
-        document.getElementById(
-            "employeeCode"
-        ).value.trim();
-
-
-    const projectId =
-        document.getElementById(
-            "employeeProject"
-        ).value;
-
-
-    const subProjectSelect =
-        document.getElementById(
-            "employeeSubProject"
-        );
-
-
-    const subProjectId =
-        subProjectSelect.disabled
-            ? null
-            : subProjectSelect.value || null;
-
-
-    if (!name) {
-
-        showEmployeeMessage(
-            "Please enter employee name.",
-            true
-        );
-
-        return;
-
-    }
-
-
-    if (!code) {
-
-        showEmployeeMessage(
-            "Please enter EMP ID.",
-            true
-        );
-
-        return;
-
-    }
-
-
-    if (!projectId) {
-
-        showEmployeeMessage(
-            "Please select a project.",
-            true
-        );
-
-        return;
-
-    }
-
-
-    const hasSubProjects =
-        subProjects.some(
-            sp =>
-                Number(
-                    sp.project_id
-                ) ===
-                Number(
-                    projectId
-                )
-        );
-
-
-    if (
-        hasSubProjects &&
-        !subProjectId
-    ) {
-
-        showEmployeeMessage(
-            "Please select a sub-project.",
-            true
-        );
-
-        return;
-
-    }
-
-
-    const result =
-        await supabaseClient
-            .from("employees")
-            .insert({
-
-                employee_name:
-                    name,
-
-                employee_code:
-                    code,
-
-                project_id:
-                    Number(
-                        projectId
-                    ),
-
-                sub_project_id:
-                    subProjectId
-                        ? Number(
-                            subProjectId
-                        )
-                        : null,
-
-                active:
-                    true
-
-            })
-            .select()
-            .single();
-
-
-    if (result.error) {
-
-        showEmployeeMessage(
-            result.error.message,
-            true
-        );
-
-        return;
-
-    }
-
-
-    /*
-       OPTIONAL MAPPING
-    */
-
-    const mapping =
-        await supabaseClient
-            .from("employee_projects")
-            .insert({
-
-                employee_id:
-                    result.data.id,
-
-                project_id:
-                    Number(
-                        projectId
-                    ),
-
-                sub_project_id:
-                    subProjectId
-                        ? Number(
-                            subProjectId
-                        )
-                        : null
-
-            });
-
-
-    if (
-        mapping.error
-    ) {
-
-        console.warn(
-            "Mapping warning:",
-            mapping.error
-        );
-
-    }
-
-
-    document.getElementById(
-        "employeeName"
-    ).value = "";
-
-
-    document.getElementById(
-        "employeeCode"
-    ).value = "";
-
-
-    document.getElementById(
-        "employeeProject"
-    ).value = "";
-
-
-    loadEmployeeSubProjectDropdown();
-
-
-    showEmployeeMessage(
-        "Employee added successfully."
-    );
-
-
-    await loadEmployees();
-
-
-    displayEmployees();
-
-
-    buildDailyTracker();
-
-
-    renderProjectDashboard();
-
-
-    updateDashboard();
-
-}
-
-
-/* =========================================================
-   DELETE EMPLOYEE
-========================================================= */
-
-async function deleteEmployee(
-    id
-) {
-
-    if (
-        !confirm(
-            "Are you sure you want to delete this employee?"
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    const result =
-        await supabaseClient
-            .from("employees")
-            .update({
-                active: false
-            })
-            .eq(
-                "id",
-                id
-            );
-
-
-    if (result.error) {
-
-        showEmployeeMessage(
-            result.error.message,
-            true
-        );
-
-        return;
-
-    }
-
-
-    await loadEmployees();
-
-
-    displayEmployees();
-
-
-    buildDailyTracker();
-
-
-    await loadDailyTracker();
-
-
-    renderProjectDashboard();
-
-}
-
-
-/* =========================================================
-   DELETE PROJECT
-========================================================= */
-
-async function deleteProject(
-    id
-) {
-
-    if (
-        !confirm(
-            "Are you sure you want to delete this project?"
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    const result =
-        await supabaseClient
-            .from("projects")
-            .delete()
-            .eq(
-                "id",
-                id
-            );
-
-
-    if (result.error) {
-
-        showProjectMessage(
-            result.error.message,
-            true
-        );
-
-        return;
-
-    }
-
-
-    await loadProjects();
-
-    await loadSubProjects();
-
-    await loadEmployees();
-
-
-    displayEmployees();
-
-    loadEmployeeProjectDropdown();
-
-    loadProjectFilter();
-
-    loadSubProjectFilter();
-
-    buildDailyTracker();
-
-    renderProjectDashboard();
-
-    updateDashboard();
-
-}
-
-
-/* =========================================================
-   DAILY RECORD
-========================================================= */
-
-function getDailyRecord(
+function getProductionRecord(
     employeeId
 ) {
 
-    return dailyData.find(
-        record =>
-            Number(
-                record.employee_id
-            ) ===
-            Number(
-                employeeId
-            )
+    return dailyProduction.find(
+        r =>
+            Number(r.employee_id) ===
+            Number(employeeId)
     );
 
 }
 
 
 /* =========================================================
-   FILTER EMPLOYEES
+   GET FILTERED EMPLOYEES
 ========================================================= */
 
 function getFilteredEmployees() {
 
-    let result =
-        [...employees];
-
-
-    const projectId =
+    const projectValue =
         document.getElementById(
             "projectFilter"
         ).value;
 
-
-    const subProjectId =
+    const subProjectValue =
         document.getElementById(
             "subProjectFilter"
         ).value;
 
-
-    if (projectId) {
-
-        result =
-            result.filter(
-                employee =>
-                    String(
-                        employee.project_id
-                    ) ===
-                    String(
-                        projectId
-                    )
-            );
-
-    }
-
-
-    if (subProjectId) {
-
-        result =
-            result.filter(
-                employee =>
-                    String(
-                        employee.sub_project_id
-                    ) ===
-                    String(
-                        subProjectId
-                    )
-            );
-
-    }
-
-
-    return result;
-
-}
-
-
-/* =========================================================
-   BUILD DAILY TRACKER
-========================================================= */
-
-function buildDailyTracker() {
-
-    const body =
-        document.getElementById(
-            "dailyTrackerBody"
-        );
-
-
-    body.innerHTML =
-        "";
-
-
-    const visibleEmployees =
-        getFilteredEmployees();
-
-
-    visibleEmployees.forEach(
+    return employees.filter(
         employee => {
 
-            const record =
-                getDailyRecord(
-                    employee.id
-                );
-
-
-            const attendance =
-                record?.attendance ||
-                "Present";
-
-
-            const target =
-                getDailyTarget(
-                    employee,
-                    attendance
-                );
-
-
-            const project =
-                getProjectById(
-                    employee.project_id
-                );
-
-
-            const subProject =
-                getEmployeeSubProject(
-                    employee
-                );
-
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-
-            row.dataset.employeeId =
-                employee.id;
-
-
-            row.innerHTML = `
-
-                <td class="left">
-
-                    ${escapeHtml(
-                        employee.employee_name
-                    )}
-
-                </td>
-
-
-                <td>
-
-                    ${escapeHtml(
-                        employee.employee_code || ""
-                    )}
-
-                </td>
-
-
-                <td>
-
-                    ${
-                        project
-                            ? escapeHtml(
-                                project.project_name
-                            )
-                            : "N/A"
-                    }
-
-                </td>
-
-
-                <td>
-
-                    ${
-                        subProject
-                            ? escapeHtml(
-                                subProject.sub_project_name
-                            )
-                            : "Not Required"
-                    }
-
-                </td>
-
-
-                <td>
-
-                    <select
-                        class="attendance-select"
-                        data-employee-id="${employee.id}">
-
-                        <option
-                            value="Present"
-                            ${attendance === "Present" ? "selected" : ""}>
-
-                            Present
-
-                        </option>
-
-
-                        <option
-                            value="Half Day"
-                            ${attendance === "Half Day" ? "selected" : ""}>
-
-                            Half Day
-
-                        </option>
-
-
-                        <option
-                            value="Absent"
-                            ${attendance === "Absent" ? "selected" : ""}>
-
-                            Absent
-
-                        </option>
-
-                    </select>
-
-                </td>
-
-
-                <td class="daily-target-cell">
-
-                    ${
-                        target === null
-                            ? "N/A"
-                            : target
-                    }
-
-                </td>
-
-
-                ${buildHourCells(
-                    employee,
-                    record
-                )}
-
-
-                <td class="achieved-cell">
-
-                    ${
-                        record?.achieved || 0
-                    }
-
-                </td>
-
-
-                <td class="remaining-cell">
-
-                    ${
-                        target === null
-                            ? "N/A"
-                            : Math.max(
-                                0,
-                                target -
-                                Number(
-                                    record?.achieved || 0
-                                )
-                            )
-                    }
-
-                </td>
-
-
-                <td class="percentage-cell">
-
-                    ${
-                        target === null
-                            ? "N/A"
-                            : calculatePercentage(
-                                Number(
-                                    record?.achieved || 0
-                                ),
-                                target
-                            )
-                    }
-
-                </td>
-
-            `;
-
-
-            body.appendChild(
-                row
-            );
-
-        }
-    );
-
-
-    /*
-       ATTENDANCE EVENTS
-    */
-
-    document
-        .querySelectorAll(
-            ".attendance-select"
-        )
-        .forEach(
-            select => {
-
-                select.addEventListener(
-                    "change",
-                    function() {
-
-                        updateRowForAttendance(
-                            Number(
-                                this.dataset.employeeId
-                            ),
-                            this.value
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-    /*
-       PRODUCTION EVENTS
-    */
-
-    document
-        .querySelectorAll(
-            ".production-input"
-        )
-        .forEach(
-            input => {
-
-                input.addEventListener(
-                    "input",
-                    function() {
-
-                        updateRowCalculations(
-                            Number(
-                                this.dataset.employeeId
-                            )
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   BUILD HOUR CELLS
-========================================================= */
-
-function buildHourCells(
-    employee,
-    record
-) {
-
-    let html =
-        "";
-
-
-    const target =
-        getEmployeeTarget(
-            employee
-        );
-
-
-    hourFields.forEach(
-        field => {
-
-            const value =
-                record?.[field] || 0;
-
-
             if (
-                target === null
+                projectValue &&
+                Number(employee.project_id) !==
+                Number(projectValue)
             ) {
 
-                html += `
-
-                    <td>
-
-                        <input
-                            type="number"
-                            min="0"
-                            class="production-input"
-                            data-employee-id="${employee.id}"
-                            data-hour="${field}"
-                            value="${value}"
-                        >
-
-
-                        <span
-                            class="hour-status status-na">
-
-                            N/A
-
-                        </span>
-
-                    </td>
-
-                `;
-
-                return;
+                return false;
 
             }
-
-
-            const hourlyTarget =
-                target /
-                hourFields.length;
-
-
-            const onTrack =
-                Number(value) >=
-                hourlyTarget;
-
-
-            html += `
-
-                <td>
-
-                    <input
-                        type="number"
-                        min="0"
-                        class="production-input"
-                        data-employee-id="${employee.id}"
-                        data-hour="${field}"
-                        value="${value}"
-                    >
-
-
-                    <span
-                        class="hour-status ${
-                            onTrack
-                                ? "status-track"
-                                : "status-attention"
-                        }">
-
-                        ${
-                            onTrack
-                                ? "ON TRACK"
-                                : "NEED ATTENTION"
-                        }
-
-                    </span>
-
-                </td>
-
-            `;
-
-        }
-    );
-
-
-    return html;
-
-}
-
-
-/* =========================================================
-   UPDATE ROW
-========================================================= */
-
-function updateRowCalculations(
-    employeeId
-) {
-
-    const row =
-        document.querySelector(
-            `tr[data-employee-id="${employeeId}"]`
-        );
-
-
-    if (!row)
-        return;
-
-
-    const employee =
-        employees.find(
-            e =>
-                Number(
-                    e.id
-                ) ===
-                Number(
-                    employeeId
-                )
-        );
-
-
-    const attendance =
-        row.querySelector(
-            ".attendance-select"
-        ).value;
-
-
-    const target =
-        getDailyTarget(
-            employee,
-            attendance
-        );
-
-
-    let achieved =
-        0;
-
-
-    row.querySelectorAll(
-        ".production-input"
-    )
-    .forEach(
-        input => {
-
-            const value =
-                Number(
-                    input.value || 0
-                );
-
-
-            achieved +=
-                value;
-
-
-            const status =
-                input.parentElement
-                    .querySelector(
-                        ".hour-status"
-                    );
-
 
             if (
-                target === null
+                subProjectValue &&
+                Number(employee.sub_project_id) !==
+                Number(subProjectValue)
             ) {
 
-                status.textContent =
-                    "N/A";
-
-                status.className =
-                    "hour-status status-na";
-
-                return;
+                return false;
 
             }
 
-
-            const hourlyTarget =
-                target /
-                hourFields.length;
-
-
-            if (
-                value >=
-                hourlyTarget
-            ) {
-
-                status.textContent =
-                    "ON TRACK";
-
-                status.className =
-                    "hour-status status-track";
-
-            } else {
-
-                status.textContent =
-                    "NEED ATTENTION";
-
-                status.className =
-                    "hour-status status-attention";
-
-            }
+            return true;
 
         }
     );
-
-
-    row.querySelector(
-        ".achieved-cell"
-    ).textContent =
-        achieved;
-
-
-    const remaining =
-        target === null
-            ? null
-            : Math.max(
-                0,
-                target -
-                achieved
-            );
-
-
-    row.querySelector(
-        ".remaining-cell"
-    ).textContent =
-        remaining === null
-            ? "N/A"
-            : remaining;
-
-
-    row.querySelector(
-        ".percentage-cell"
-    ).textContent =
-        target === null
-            ? "N/A"
-            : calculatePercentage(
-                achieved,
-                target
-            );
-
-
-    updateDashboard();
-
-}
-
-
-/* =========================================================
-   ATTENDANCE UPDATE
-========================================================= */
-
-function updateRowForAttendance(
-    employeeId,
-    attendance
-) {
-
-    const row =
-        document.querySelector(
-            `tr[data-employee-id="${employeeId}"]`
-        );
-
-
-    const employee =
-        employees.find(
-            e =>
-                Number(
-                    e.id
-                ) ===
-                Number(
-                    employeeId
-                )
-        );
-
-
-    const target =
-        getDailyTarget(
-            employee,
-            attendance
-        );
-
-
-    row.querySelector(
-        ".daily-target-cell"
-    ).textContent =
-        target === null
-            ? "N/A"
-            : target;
-
-
-    updateRowCalculations(
-        employeeId
-    );
-
-}
-
-
-/* =========================================================
-   LOAD DAILY TRACKER
-========================================================= */
-
-async function loadDailyTracker() {
-
-    const date =
-        document.getElementById(
-            "trackerDate"
-        ).value;
-
-
-    if (!date)
-        return;
-
-
-    const result =
-        await supabaseClient
-            .from(
-                "daily_productivity"
-            )
-            .select("*")
-            .eq(
-                "tracker_date",
-                date
-            );
-
-
-    if (result.error) {
-
-        console.error(
-            "DAILY LOAD ERROR:",
-            result.error
-        );
-
-        return;
-
-    }
-
-
-    dailyData =
-        result.data || [];
-
-
-    buildDailyTracker();
-
-    updateDashboard();
-
-}
-
-
-/* =========================================================
-   DASHBOARD METRICS
-========================================================= */
-
-function getDashboardMetrics() {
-
-    const visibleEmployees =
-        getFilteredEmployees();
-
-
-    let target =
-        0;
-
-
-    let achieved =
-        0;
-
-
-    let targetAchieved =
-        0;
-
-
-    visibleEmployees.forEach(
-        employee => {
-
-            const record =
-                getDailyRecord(
-                    employee.id
-                );
-
-
-            const attendance =
-                record?.attendance ||
-                "Present";
-
-
-            const employeeTarget =
-                getDailyTarget(
-                    employee,
-                    attendance
-                );
-
-
-            const employeeAchieved =
-                Number(
-                    record?.achieved || 0
-                );
-
-
-            achieved +=
-                employeeAchieved;
-
-
-            if (
-                employeeTarget !== null &&
-                employeeTarget > 0
-            ) {
-
-                target +=
-                    employeeTarget;
-
-                targetAchieved +=
-                    employeeAchieved;
-
-            }
-
-        }
-    );
-
-
-    const remaining =
-        Math.max(
-            0,
-            target -
-            targetAchieved
-        );
-
-
-    const percentage =
-        target > 0
-            ? (
-                targetAchieved /
-                target *
-                100
-            )
-            : 0;
-
-
-    return {
-
-        employees:
-            visibleEmployees.length,
-
-        target,
-
-        achieved,
-
-        remaining,
-
-        percentage
-
-    };
-
-}
-
-
-/* =========================================================
-   UPDATE DASHBOARD
-========================================================= */
-
-function updateDashboard() {
-
-    const metrics =
-        getDashboardMetrics();
-
-
-    document.getElementById(
-        "kpiEmployees"
-    ).textContent =
-        metrics.employees;
-
-
-    document.getElementById(
-        "kpiTarget"
-    ).textContent =
-        metrics.target;
-
-
-    document.getElementById(
-        "kpiAchieved"
-    ).textContent =
-        metrics.achieved;
-
-
-    document.getElementById(
-        "kpiRemaining"
-    ).textContent =
-        metrics.remaining;
-
-
-    const achievement =
-        document.getElementById(
-            "kpiAchievement"
-        );
-
-
-    achievement.textContent =
-        `${metrics.percentage.toFixed(1)}%`;
-
-
-    /*
-       KPI ACHIEVEMENT COLOR
-    */
-
-    achievement.style.color =
-        metrics.percentage >= 100
-            ? "#16834b"
-            : metrics.percentage >= 80
-                ? "#b7791f"
-                : "#c53030";
-
-
-    renderProjectDashboard();
-
-    renderPerformanceSummary();
-
-}
-
-
-/* =========================================================
-   PROJECT METRICS
-========================================================= */
-
-function getProjectMetrics(
-    projectId
-) {
-
-    const filtered =
-        employees.filter(
-            employee =>
-                projectId === null ||
-                Number(
-                    employee.project_id
-                ) ===
-                Number(
-                    projectId
-                )
-        );
-
-
-    let target =
-        0;
-
-
-    let achieved =
-        0;
-
-
-    let targetAchieved =
-        0;
-
-
-    filtered.forEach(
-        employee => {
-
-            const record =
-                getDailyRecord(
-                    employee.id
-                );
-
-
-            const attendance =
-                record?.attendance ||
-                "Present";
-
-
-            const employeeTarget =
-                getDailyTarget(
-                    employee,
-                    attendance
-                );
-
-
-            const employeeAchieved =
-                Number(
-                    record?.achieved || 0
-                );
-
-
-            achieved +=
-                employeeAchieved;
-
-
-            if (
-                employeeTarget !== null &&
-                employeeTarget > 0
-            ) {
-
-                target +=
-                    employeeTarget;
-
-                targetAchieved +=
-                    employeeAchieved;
-
-            }
-
-        }
-    );
-
-
-    return {
-
-        employees:
-            filtered.length,
-
-        target,
-
-        achieved,
-
-        remaining:
-            Math.max(
-                0,
-                target -
-                targetAchieved
-            ),
-
-        percentage:
-            target > 0
-                ? targetAchieved /
-                  target *
-                  100
-                : null
-
-    };
-
-}
-
-
-/* =========================================================
-   SUB PROJECT METRICS
-========================================================= */
-
-function getSubProjectMetrics(
-    subProjectId
-) {
-
-    const filtered =
-        employees.filter(
-            employee =>
-                Number(
-                    employee.sub_project_id
-                ) ===
-                Number(
-                    subProjectId
-                )
-        );
-
-
-    let target =
-        0;
-
-
-    let achieved =
-        0;
-
-
-    let targetAchieved =
-        0;
-
-
-    filtered.forEach(
-        employee => {
-
-            const record =
-                getDailyRecord(
-                    employee.id
-                );
-
-
-            const attendance =
-                record?.attendance ||
-                "Present";
-
-
-            const employeeTarget =
-                getDailyTarget(
-                    employee,
-                    attendance
-                );
-
-
-            const employeeAchieved =
-                Number(
-                    record?.achieved || 0
-                );
-
-
-            achieved +=
-                employeeAchieved;
-
-
-            if (
-                employeeTarget !== null &&
-                employeeTarget > 0
-            ) {
-
-                target +=
-                    employeeTarget;
-
-                targetAchieved +=
-                    employeeAchieved;
-
-            }
-
-        }
-    );
-
-
-    return {
-
-        employees:
-            filtered.length,
-
-        target,
-
-        achieved,
-
-        remaining:
-            Math.max(
-                0,
-                target -
-                targetAchieved
-            ),
-
-        percentage:
-            target > 0
-                ? targetAchieved /
-                  target *
-                  100
-                : null
-
-    };
-
-}
-
-
-/* =========================================================
-   PROJECT DASHBOARD
-========================================================= */
-
-function renderProjectDashboard() {
-
-    const container =
-        document.getElementById(
-            "projectDashboard"
-        );
-
-
-    container.innerHTML =
-        "";
-
-
-    const allMetrics =
-        getProjectMetrics(
-            null
-        );
-
-
-    container.appendChild(
-        createProjectCard(
-            "All Projects",
-            allMetrics,
-            null
-        )
-    );
-
-
-    projects.forEach(
-        project => {
-
-            const metrics =
-                getProjectMetrics(
-                    project.id
-                );
-
-
-            container.appendChild(
-                createProjectCard(
-                    project.project_name,
-                    metrics,
-                    project.id
-                )
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   CREATE PROJECT CARD
-========================================================= */
-
-function createProjectCard(
-    name,
-    metrics,
-    projectId
-) {
-
-    const card =
-        document.createElement(
-            "div"
-        );
-
-
-    card.className =
-        "project-card";
-
-
-    const targetText =
-        metrics.target > 0
-            ? metrics.target
-            : "N/A";
-
-
-    const percentageText =
-        metrics.percentage === null
-            ? "N/A"
-            : `${metrics.percentage.toFixed(1)}%`;
-
-
-    card.innerHTML = `
-
-        <div class="project-header">
-
-            <div class="project-name">
-
-                ${escapeHtml(name)}
-
-            </div>
-
-
-            <div class="project-target">
-
-                Target:
-                ${targetText}
-
-            </div>
-
-        </div>
-
-
-        <div class="project-metrics">
-
-
-            <div class="metric">
-
-                <div class="metric-title">
-                    Employees
-                </div>
-
-                <div class="metric-value">
-                    ${metrics.employees}
-                </div>
-
-            </div>
-
-
-            <div class="metric">
-
-                <div class="metric-title">
-                    Achieved
-                </div>
-
-                <div class="metric-value">
-                    ${metrics.achieved}
-                </div>
-
-            </div>
-
-
-            <div class="metric">
-
-                <div class="metric-title">
-                    Remaining
-                </div>
-
-                <div class="metric-value">
-
-                    ${
-                        metrics.target > 0
-                            ? metrics.remaining
-                            : "N/A"
-                    }
-
-                </div>
-
-            </div>
-
-
-            <div class="metric">
-
-                <div class="metric-title">
-                    Achievement
-                </div>
-
-                <div
-                    class="metric-value"
-                    style="
-                        color:${
-                            metrics.percentage === null
-                                ? "#657080"
-                                : metrics.percentage >= 100
-                                    ? "#16834b"
-                                    : metrics.percentage >= 80
-                                        ? "#b7791f"
-                                        : "#c53030"
-                        };
-                    ">
-
-                    ${percentageText}
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-    `;
-
-
-    /*
-       SUB PROJECTS
-    */
-
-    if (
-        projectId !== null
-    ) {
-
-        const children =
-            subProjects.filter(
-                sp =>
-                    Number(
-                        sp.project_id
-                    ) ===
-                    Number(
-                        projectId
-                    )
-            );
-
-
-        if (
-            children.length > 0
-        ) {
-
-            const list =
-                document.createElement(
-                    "div"
-                );
-
-
-            list.className =
-                "sub-project-list";
-
-
-            children.forEach(
-                subProject => {
-
-                    const metrics =
-                        getSubProjectMetrics(
-                            subProject.id
-                        );
-
-
-                    const subCard =
-                        document.createElement(
-                            "div"
-                        );
-
-
-                    subCard.className =
-                        "sub-project-card";
-
-
-                    const targetText =
-                        subProject.target_based === false
-                            ? "N/A"
-                            : subProject.daily_target;
-
-
-                    const percentageText =
-                        subProject.target_based === false ||
-                        metrics.percentage === null
-                            ? "N/A"
-                            : `${metrics.percentage.toFixed(1)}%`;
-
-
-                    subCard.innerHTML = `
-
-                        <div class="sub-project-header">
-
-                            <div class="sub-project-name">
-
-                                ${escapeHtml(
-                                    subProject.sub_project_name
-                                )}
-
-                            </div>
-
-
-                            <div class="sub-project-target">
-
-                                Target:
-                                ${targetText}
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="sub-project-metrics">
-
-
-                            <div class="metric">
-
-                                <div class="metric-title">
-                                    Employees
-                                </div>
-
-                                <div class="metric-value">
-                                    ${metrics.employees}
-                                </div>
-
-                            </div>
-
-
-                            <div class="metric">
-
-                                <div class="metric-title">
-                                    Achieved
-                                </div>
-
-                                <div class="metric-value">
-                                    ${metrics.achieved}
-                                </div>
-
-                            </div>
-
-
-                            <div class="metric">
-
-                                <div class="metric-title">
-                                    Remaining
-                                </div>
-
-                                <div class="metric-value">
-
-                                    ${
-                                        subProject.target_based === false
-                                            ? "N/A"
-                                            : metrics.remaining
-                                    }
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="metric">
-
-                                <div class="metric-title">
-                                    Achievement
-                                </div>
-
-                                <div
-                                    class="metric-value"
-                                    style="
-                                        color:${
-                                            subProject.target_based === false
-                                                ? "#657080"
-                                                : metrics.percentage >= 100
-                                                    ? "#16834b"
-                                                    : metrics.percentage >= 80
-                                                        ? "#b7791f"
-                                                        : "#c53030"
-                                        };
-                                    ">
-
-                                    ${percentageText}
-
-                                </div>
-
-                            </div>
-
-
-                        </div>
-
-                    `;
-
-
-                    list.appendChild(
-                        subCard
-                    );
-
-                }
-            );
-
-
-            card.appendChild(
-                list
-            );
-
-        }
-
-    }
-
-
-    return card;
-
-}
-
-
-/* =========================================================
-   PERFORMANCE SUMMARY
-========================================================= */
-
-function renderPerformanceSummary() {
-
-    const container =
-        document.getElementById(
-            "performanceSummary"
-        );
-
-
-    const visibleEmployees =
-        getFilteredEmployees();
-
-
-    let html = `
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Employee
-                    </th>
-
-                    <th>
-                        Project
-                    </th>
-
-                    <th>
-                        Sub-Project
-                    </th>
-
-                    <th>
-                        Target
-                    </th>
-
-                    <th>
-                        Achieved
-                    </th>
-
-                    <th>
-                        Remaining
-                    </th>
-
-                    <th>
-                        Achievement %
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-    `;
-
-
-    visibleEmployees.forEach(
-        employee => {
-
-            const project =
-                getProjectById(
-                    employee.project_id
-                );
-
-
-            const subProject =
-                getEmployeeSubProject(
-                    employee
-                );
-
-
-            const record =
-                getDailyRecord(
-                    employee.id
-                );
-
-
-            const attendance =
-                record?.attendance ||
-                "Present";
-
-
-            const target =
-                getDailyTarget(
-                    employee,
-                    attendance
-                );
-
-
-            const achieved =
-                Number(
-                    record?.achieved || 0
-                );
-
-
-            const remaining =
-                target === null
-                    ? "N/A"
-                    : Math.max(
-                        0,
-                        target -
-                        achieved
-                    );
-
-
-            const percentage =
-                target === null
-                    ? "N/A"
-                    : calculatePercentage(
-                        achieved,
-                        target
-                    );
-
-
-            html += `
-
-                <tr>
-
-                    <td class="left">
-
-                        ${escapeHtml(
-                            employee.employee_name
-                        )}
-
-                    </td>
-
-
-                    <td>
-
-                        ${
-                            project
-                                ? escapeHtml(
-                                    project.project_name
-                                )
-                                : "N/A"
-                        }
-
-                    </td>
-
-
-                    <td>
-
-                        ${
-                            subProject
-                                ? escapeHtml(
-                                    subProject.sub_project_name
-                                )
-                                : "Not Required"
-                        }
-
-                    </td>
-
-
-                    <td>
-
-                        ${
-                            target === null
-                                ? "N/A"
-                                : target
-                        }
-
-                    </td>
-
-
-                    <td>
-
-                        ${achieved}
-
-                    </td>
-
-
-                    <td>
-
-                        ${remaining}
-
-                    </td>
-
-
-                    <td>
-
-                        <strong
-                            style="
-                                color:${
-                                    target === null
-                                        ? "#657080"
-                                        : achieved >= target
-                                            ? "#16834b"
-                                            : achieved >= target * 0.8
-                                                ? "#b7791f"
-                                                : "#c53030"
-                                };
-                            ">
-
-                            ${percentage}
-
-                        </strong>
-
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
-    );
-
-
-    html += `
-
-            </tbody>
-
-        </table>
-
-    `;
-
-
-    container.innerHTML =
-        html;
-
-}
-
-
-/* =========================================================
-   PERCENTAGE
-========================================================= */
-
-function calculatePercentage(
-    achieved,
-    target
-) {
-
-    if (
-        target === null ||
-        target <= 0
-    ) {
-
-        return "N/A";
-
-    }
-
-
-    return (
-        achieved /
-        target *
-        100
-    ).toFixed(1) + "%";
 
 }
 
@@ -4424,13 +1466,8 @@ function loadProjectFilter() {
             "projectFilter"
         );
 
-
-    select.innerHTML = `
-        <option value="">
-            All Projects
-        </option>
-    `;
-
+    select.innerHTML =
+        `<option value="">All Projects</option>`;
 
     projects.forEach(
         project => {
@@ -4440,14 +1477,11 @@ function loadProjectFilter() {
                     "option"
                 );
 
-
             option.value =
                 project.id;
 
-
             option.textContent =
                 project.project_name;
-
 
             select.appendChild(
                 option
@@ -4470,39 +1504,27 @@ function loadSubProjectFilter() {
             "subProjectFilter"
         );
 
-
-    const projectId =
+    const selectedProject =
         document.getElementById(
             "projectFilter"
         ).value;
 
-
-    select.innerHTML = `
-        <option value="">
-            All Sub-Projects
-        </option>
-    `;
-
+    select.innerHTML =
+        `<option value="">All Sub-Projects</option>`;
 
     let list =
         subProjects;
 
-
-    if (projectId) {
+    if (selectedProject) {
 
         list =
-            list.filter(
+            subProjects.filter(
                 sp =>
-                    Number(
-                        sp.project_id
-                    ) ===
-                    Number(
-                        projectId
-                    )
+                    Number(sp.project_id) ===
+                    Number(selectedProject)
             );
 
     }
-
 
     list.forEach(
         sp => {
@@ -4512,14 +1534,11 @@ function loadSubProjectFilter() {
                     "option"
                 );
 
-
             option.value =
                 sp.id;
 
-
             option.textContent =
                 sp.sub_project_name;
-
 
             select.appendChild(
                 option
@@ -4532,45 +1551,2666 @@ function loadSubProjectFilter() {
 
 
 /* =========================================================
-   ESCAPE HTML
+   HANDLE PROJECT FILTER
 ========================================================= */
 
-function escapeHtml(
-    value
-) {
+function handleProjectFilterChange() {
 
-    if (
-        value === null ||
-        value === undefined
-    ) {
+    loadSubProjectFilter();
 
-        return "";
+    document.getElementById(
+        "subProjectFilter"
+    ).value = "";
+
+    buildDailyTracker();
+
+    updateDashboard();
+
+}
+
+
+/* =========================================================
+   EMPLOYEE PROJECT DROPDOWN
+========================================================= */
+
+function loadEmployeeProjectDropdown() {
+
+    const select =
+        document.getElementById(
+            "employeeProject"
+        );
+
+    const parent =
+        document.getElementById(
+            "subProjectParent"
+        );
+
+    select.innerHTML =
+        `<option value="">Select Project</option>`;
+
+    parent.innerHTML =
+        `<option value="">Select Project</option>`;
+
+    projects.forEach(
+        project => {
+
+            const option1 =
+                document.createElement(
+                    "option"
+                );
+
+            option1.value =
+                project.id;
+
+            option1.textContent =
+                project.project_name;
+
+            select.appendChild(
+                option1
+            );
+
+
+            const option2 =
+                document.createElement(
+                    "option"
+                );
+
+            option2.value =
+                project.id;
+
+            option2.textContent =
+                project.project_name;
+
+            parent.appendChild(
+                option2
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   EMPLOYEE SUB PROJECT DROPDOWN
+========================================================= */
+
+function loadEmployeeSubProjectDropdown() {
+
+    const projectId =
+        document.getElementById(
+            "employeeProject"
+        ).value;
+
+    const select =
+        document.getElementById(
+            "employeeSubProject"
+        );
+
+    select.innerHTML = "";
+
+    if (!projectId) {
+
+        select.disabled = true;
+
+        select.innerHTML =
+            `<option value="">
+                Select Project First
+             </option>`;
+
+        return;
+
+    }
+
+    const list =
+        subProjects.filter(
+            sp =>
+                Number(sp.project_id) ===
+                Number(projectId)
+        );
+
+    if (!list.length) {
+
+        select.disabled = true;
+
+        select.innerHTML =
+            `<option value="">
+                Not Required
+             </option>`;
+
+        return;
+
+    }
+
+    select.disabled = false;
+
+    select.innerHTML =
+        `<option value="">
+            Select Sub-Project
+         </option>`;
+
+    list.forEach(
+        sp => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                sp.id;
+
+            option.textContent =
+                sp.sub_project_name;
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DISPLAY EMPLOYEES
+========================================================= */
+
+function displayEmployees() {
+
+    const container =
+        document.getElementById(
+            "employeeList"
+        );
+
+    container.innerHTML = "";
+
+    employees.forEach(
+        employee => {
+
+            const project =
+                getProjectById(
+                    employee.project_id
+                );
+
+            const subProject =
+                getEmployeeSubProject(
+                    employee
+                );
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "employee-item";
+
+            item.innerHTML = `
+
+                <div>
+
+                    <strong>
+                        ${escapeHtml(employee.employee_name)}
+                    </strong>
+
+                    <br>
+
+                    ${escapeHtml(employee.employee_code)}
+
+                    |
+                    ${project
+                        ? escapeHtml(project.project_name)
+                        : "N/A"}
+
+                    |
+                    ${subProject
+                        ? escapeHtml(subProject.sub_project_name)
+                        : "Not Required"}
+
+                </div>
+
+            `;
+
+            container.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ADD PROJECT
+========================================================= */
+
+async function addProject() {
+
+    const name =
+        document.getElementById(
+            "projectName"
+        ).value.trim();
+
+    const target =
+        document.getElementById(
+            "projectTarget"
+        ).value;
+
+    if (!name) {
+
+        showMessage(
+            "Enter project name",
+            "error"
+        );
+
+        return;
+
+    }
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("projects")
+            .insert({
+
+                project_name: name,
+
+                daily_target:
+                    target
+                        ? Number(target)
+                        : null
+
+            });
+
+    if (error) {
+
+        console.error(error);
+
+        showMessage(
+            error.message,
+            "error"
+        );
+
+        return;
+
+    }
+
+    document.getElementById(
+        "projectName"
+    ).value = "";
+
+    document.getElementById(
+        "projectTarget"
+    ).value = "";
+
+    await loadProjects();
+
+    loadProjectFilter();
+
+    loadEmployeeProjectDropdown();
+
+    showMessage(
+        "Project added successfully"
+    );
+
+}
+
+
+/* =========================================================
+   ADD SUB PROJECT
+========================================================= */
+
+async function addSubProject() {
+
+    const projectId =
+        document.getElementById(
+            "subProjectParent"
+        ).value;
+
+    const name =
+        document.getElementById(
+            "subProjectName"
+        ).value.trim();
+
+    const target =
+        document.getElementById(
+            "subProjectTarget"
+        ).value;
+
+    const targetBased =
+        document.getElementById(
+            "subProjectTargetBased"
+        ).checked;
+
+    if (!projectId) {
+
+        showMessage(
+            "Select project",
+            "error"
+        );
+
+        return;
+
+    }
+
+    if (!name) {
+
+        showMessage(
+            "Enter sub-project name",
+            "error"
+        );
+
+        return;
+
+    }
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("sub_projects")
+            .insert({
+
+                project_id:
+                    Number(projectId),
+
+                sub_project_name:
+                    name,
+
+                daily_target:
+                    target
+                        ? Number(target)
+                        : null,
+
+                target_based:
+                    targetBased,
+
+                active: true
+
+            });
+
+    if (error) {
+
+        console.error(error);
+
+        showMessage(
+            error.message,
+            "error"
+        );
+
+        return;
+
+    }
+
+    document.getElementById(
+        "subProjectName"
+    ).value = "";
+
+    document.getElementById(
+        "subProjectTarget"
+    ).value = "";
+
+    await loadSubProjects();
+
+    loadSubProjectFilter();
+
+    loadEmployeeSubProjectDropdown();
+
+    showMessage(
+        "Sub-project added successfully"
+    );
+
+}
+
+
+/* =========================================================
+   ADD EMPLOYEE
+========================================================= */
+
+async function addEmployee() {
+
+    const name =
+        document.getElementById(
+            "employeeName"
+        ).value.trim();
+
+    const code =
+        document.getElementById(
+            "employeeCode"
+        ).value.trim();
+
+    const projectId =
+        document.getElementById(
+            "employeeProject"
+        ).value;
+
+    const subProjectId =
+        document.getElementById(
+            "employeeSubProject"
+        ).value;
+
+
+    if (!name) {
+
+        showMessage(
+            "Enter employee name",
+            "error"
+        );
+
+        return;
 
     }
 
 
-    return String(value)
+    if (!code) {
 
+        showMessage(
+            "Enter employee ID",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (!projectId) {
+
+        showMessage(
+            "Select project",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const projectSubProjects =
+        subProjects.filter(
+            sp =>
+                Number(sp.project_id) ===
+                Number(projectId)
+        );
+
+
+    if (
+        projectSubProjects.length &&
+        !subProjectId
+    ) {
+
+        showMessage(
+            "Select sub-project",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("employees")
+            .insert({
+
+                employee_name:
+                    name,
+
+                employee_code:
+                    code,
+
+                project_id:
+                    Number(projectId),
+
+                sub_project_id:
+                    subProjectId
+                        ? Number(subProjectId)
+                        : null,
+
+                active: true
+
+            })
+            .select()
+            .single();
+
+
+    if (error) {
+
+        console.error(error);
+
+        showMessage(
+            error.message,
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       ALSO CREATE EMPLOYEE PROJECT MAPPING
+    ====================================================== */
+
+    const {
+        error: mappingError
+    } =
+        await supabaseClient
+            .from("employee_projects")
+            .insert({
+
+                employee_id:
+                    data.id,
+
+                project_id:
+                    Number(projectId),
+
+                sub_project_id:
+                    subProjectId
+                        ? Number(subProjectId)
+                        : null
+
+            });
+
+
+    if (mappingError) {
+
+        console.warn(
+            "Employee-project mapping:",
+            mappingError
+        );
+
+    }
+
+
+    document.getElementById(
+        "employeeName"
+    ).value = "";
+
+    document.getElementById(
+        "employeeCode"
+    ).value = "";
+
+    document.getElementById(
+        "employeeProject"
+    ).value = "";
+
+    document.getElementById(
+        "employeeSubProject"
+    ).innerHTML =
+        `<option value="">
+            Select Project First
+         </option>`;
+
+    await loadEmployees();
+
+    displayEmployees();
+
+    buildDailyTracker();
+
+    updateDashboard();
+
+    showMessage(
+        "Employee added successfully"
+    );
+
+}
+
+
+/* =========================================================
+   BUILD DAILY TRACKER
+========================================================= */
+
+function buildDailyTracker() {
+
+    const tbody =
+        document.getElementById(
+            "trackerBody"
+        );
+
+    tbody.innerHTML = "";
+
+    const visibleEmployees =
+        getFilteredEmployees();
+
+
+    if (!visibleEmployees.length) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td colspan="19"
+                    style="
+                        padding:30px;
+                        color:#64748b;
+                    ">
+
+                    No employees found
+                    for the selected filter.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    visibleEmployees.forEach(
+        employee => {
+
+            const project =
+                getProjectById(
+                    employee.project_id
+                );
+
+            const subProject =
+                getEmployeeSubProject(
+                    employee
+                );
+
+            const record =
+                getProductionRecord(
+                    employee.id
+                );
+
+
+            const attendance =
+                record?.attendance ||
+                "Present";
+
+
+            const target =
+                getDailyTarget(
+                    employee,
+                    attendance
+                );
+
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            tr.dataset.employeeId =
+                employee.id;
+
+
+            let html = `
+
+                <td class="left">
+                    <strong>
+                        ${escapeHtml(employee.employee_name)}
+                    </strong>
+                </td>
+
+                <td>
+                    ${escapeHtml(employee.employee_code)}
+                </td>
+
+                <td>
+                    ${project
+                        ? escapeHtml(project.project_name)
+                        : "N/A"}
+                </td>
+
+                <td>
+                    ${subProject
+                        ? escapeHtml(subProject.sub_project_name)
+                        : "Not Required"}
+                </td>
+
+                <td>
+
+                    <select
+                        class="attendance-select"
+                        data-field="attendance"
+                        onchange="recalculateRow(this)">
+
+                        <option
+                            value="Present"
+                            ${attendance === "Present"
+                                ? "selected"
+                                : ""}>
+                            Present
+                        </option>
+
+                        <option
+                            value="Half Day"
+                            ${attendance === "Half Day"
+                                ? "selected"
+                                : ""}>
+                            Half Day
+                        </option>
+
+                        <option
+                            value="Absent"
+                            ${attendance === "Absent"
+                                ? "selected"
+                                : ""}>
+                            Absent
+                        </option>
+
+                    </select>
+
+                </td>
+
+                <td
+                    class="daily-target"
+                    data-value="${target ?? ""}">
+
+                    ${
+                        target === null
+                            ? "N/A"
+                            : target
+                    }
+
+                </td>
+
+            `;
+
+
+            hourFields.forEach(
+                (field, index) => {
+
+                    const value =
+                        Number(
+                            record?.[field] || 0
+                        );
+
+
+                    const hourlyExpected =
+                        target === null
+                            ? null
+                            : target / 9;
+
+
+                    let status =
+                        "";
+
+                    if (
+                        target === null
+                    ) {
+
+                        status = `
+                            <span class="status na">
+                                N/A
+                            </span>
+                        `;
+
+                    }
+                    else if (
+                        attendance ===
+                        "Absent"
+                    ) {
+
+                        status = `
+                            <span class="status na">
+                                N/A
+                            </span>
+                        `;
+
+                    }
+                    else if (
+                        value >=
+                        hourlyExpected
+                    ) {
+
+                        status = `
+                            <span class="status ontrack">
+                                ON TRACK
+                            </span>
+                        `;
+
+                    }
+                    else {
+
+                        status = `
+                            <span class="status attention">
+                                NEED ATTENTION
+                            </span>
+                        `;
+
+                    }
+
+
+                    html += `
+
+                        <td>
+
+                            <input
+                                type="number"
+                                min="0"
+                                class="production-input"
+                                data-field="${field}"
+                                value="${value}"
+                                oninput="recalculateRow(this)">
+
+                            <br>
+
+                            <span
+                                class="hour-status"
+                                data-hour-index="${index}">
+
+                                ${status}
+
+                            </span>
+
+                        </td>
+
+                    `;
+
+                }
+            );
+
+
+            html += `
+
+                <td
+                    class="achieved">
+                    0
+                </td>
+
+                <td
+                    class="remaining">
+                    ${
+                        target === null
+                            ? "N/A"
+                            : target
+                    }
+                </td>
+
+                <td
+                    class="achievement">
+                    ${
+                        target === null
+                            ? "N/A"
+                            : "0%"
+                    }
+                </td>
+
+                <td>
+
+                    <button
+                        class="btn-success"
+                        onclick="saveEmployeeProduction(${employee.id})">
+
+                        Save
+
+                    </button>
+
+                </td>
+
+            `;
+
+
+            tr.innerHTML =
+                html;
+
+
+            tbody.appendChild(
+                tr
+            );
+
+
+            recalculateRow(
+                tr.querySelector(
+                    '[data-field="attendance"]'
+                )
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   RECALCULATE ROW
+========================================================= */
+
+function recalculateRow(element) {
+
+    const row =
+        element.closest("tr");
+
+    if (!row)
+        return;
+
+
+    const employeeId =
+        Number(
+            row.dataset.employeeId
+        );
+
+    const employee =
+        getEmployeeById(
+            employeeId
+        );
+
+    if (!employee)
+        return;
+
+
+    const attendance =
+        row.querySelector(
+            '[data-field="attendance"]'
+        ).value;
+
+
+    const target =
+        getDailyTarget(
+            employee,
+            attendance
+        );
+
+
+    row.querySelector(
+        ".daily-target"
+    ).textContent =
+        target === null
+            ? "N/A"
+            : target;
+
+
+    let achieved = 0;
+
+
+    hourFields.forEach(
+        (field, index) => {
+
+            const input =
+                row.querySelector(
+                    `[data-field="${field}"]`
+                );
+
+            const value =
+                Number(
+                    input?.value || 0
+                );
+
+            achieved +=
+                value;
+
+
+            const statusContainer =
+                row.querySelector(
+                    `[data-hour-index="${index}"]`
+                );
+
+
+            if (
+                target === null ||
+                attendance === "Absent"
+            ) {
+
+                statusContainer.innerHTML = `
+                    <span class="status na">
+                        N/A
+                    </span>
+                `;
+
+                return;
+
+            }
+
+
+            const hourlyTarget =
+                target / 9;
+
+
+            if (
+                value >= hourlyTarget
+            ) {
+
+                statusContainer.innerHTML = `
+                    <span class="status ontrack">
+                        ON TRACK
+                    </span>
+                `;
+
+            }
+            else {
+
+                statusContainer.innerHTML = `
+                    <span class="status attention">
+                        NEED ATTENTION
+                    </span>
+                `;
+
+            }
+
+        }
+    );
+
+
+    row.querySelector(
+        ".achieved"
+    ).textContent =
+        achieved;
+
+
+    if (target === null) {
+
+        row.querySelector(
+            ".remaining"
+        ).textContent =
+            "N/A";
+
+        row.querySelector(
+            ".achievement"
+        ).textContent =
+            "N/A";
+
+        row.querySelector(
+            ".achievement"
+        ).className =
+            "achievement achievement-na";
+
+        return;
+
+    }
+
+
+    const remaining =
+        Math.max(
+            target - achieved,
+            0
+        );
+
+
+    const percentage =
+        target > 0
+            ? (achieved / target) * 100
+            : 0;
+
+
+    row.querySelector(
+        ".remaining"
+    ).textContent =
+        remaining;
+
+
+    row.querySelector(
+        ".achievement"
+    ).textContent =
+        percentage.toFixed(1) + "%";
+
+
+    if (
+        percentage >= 100
+    ) {
+
+        row.querySelector(
+            ".achievement"
+        ).className =
+            "achievement achievement-good";
+
+    }
+    else {
+
+        row.querySelector(
+            ".achievement"
+        ).className =
+            "achievement achievement-low";
+
+    }
+
+}
+
+
+/* =========================================================
+   GET ROW DATA
+========================================================= */
+
+function getRowData(row) {
+
+    const employeeId =
+        Number(
+            row.dataset.employeeId
+        );
+
+    const employee =
+        getEmployeeById(
+            employeeId
+        );
+
+    const attendance =
+        row.querySelector(
+            '[data-field="attendance"]'
+        ).value;
+
+
+    const target =
+        getDailyTarget(
+            employee,
+            attendance
+        );
+
+
+    const record = {
+
+        tracker_date:
+            document.getElementById(
+                "trackerDate"
+            ).value,
+
+        employee_id:
+            employeeId,
+
+        attendance:
+            attendance,
+
+        daily_target:
+            target,
+
+        break_minutes:
+            0,
+
+        achieved:
+            0,
+
+        remaining:
+            target,
+
+        achievement_percentage:
+            null
+
+    };
+
+
+    let achieved = 0;
+
+
+    hourFields.forEach(
+        field => {
+
+            const input =
+                row.querySelector(
+                    `[data-field="${field}"]`
+                );
+
+            const value =
+                Number(
+                    input?.value || 0
+                );
+
+            record[field] =
+                value;
+
+            achieved +=
+                value;
+
+        }
+    );
+
+
+    record.achieved =
+        achieved;
+
+
+    if (target === null) {
+
+        record.remaining =
+            null;
+
+        record.achievement_percentage =
+            null;
+
+    }
+    else {
+
+        record.remaining =
+            Math.max(
+                target - achieved,
+                0
+            );
+
+        record.achievement_percentage =
+            target > 0
+                ? Number(
+                    (
+                        achieved /
+                        target *
+                        100
+                    ).toFixed(2)
+                )
+                : 0;
+
+    }
+
+
+    return record;
+
+}
+
+
+/* =========================================================
+   SAVE ONE EMPLOYEE
+========================================================= */
+
+async function saveEmployeeProduction(
+    employeeId
+) {
+
+    const row =
+        document.querySelector(
+            `tr[data-employee-id="${employeeId}"]`
+        );
+
+    if (!row) {
+
+        showMessage(
+            "Employee row not found",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const record =
+        getRowData(row);
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("daily_productivity")
+            .upsert(
+                record,
+                {
+                    onConflict:
+                        "tracker_date,employee_id"
+                }
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showMessage(
+            error.message,
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    showMessage(
+        "Production saved successfully"
+    );
+
+
+    await loadDailyTracker();
+
+}
+
+
+/* =========================================================
+   SAVE ALL PRODUCTION
+========================================================= */
+
+async function saveAllProduction() {
+
+    const rows =
+        document.querySelectorAll(
+            "#trackerBody tr[data-employee-id]"
+        );
+
+
+    if (!rows.length) {
+
+        showMessage(
+            "No employee data to save",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const records = [];
+
+
+    rows.forEach(
+        row => {
+
+            records.push(
+                getRowData(row)
+            );
+
+        }
+    );
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("daily_productivity")
+            .upsert(
+                records,
+                {
+                    onConflict:
+                        "tracker_date,employee_id"
+                }
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showMessage(
+            error.message,
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    showMessage(
+        "All production saved successfully"
+    );
+
+
+    await loadDailyTracker();
+
+}
+
+
+/* =========================================================
+   GET PROJECT METRICS
+========================================================= */
+
+function getProjectMetrics(
+    projectId = null
+) {
+
+    const list =
+        projectId === null
+            ? employees
+            : employees.filter(
+                e =>
+                    Number(e.project_id) ===
+                    Number(projectId)
+            );
+
+
+    let totalEmployees =
+        list.length;
+
+    let target =
+        0;
+
+    let targetAchieved =
+        0;
+
+    let totalAchieved =
+        0;
+
+    let present =
+        0;
+
+    let absent =
+        0;
+
+
+    list.forEach(
+        employee => {
+
+            const record =
+                getProductionRecord(
+                    employee.id
+                );
+
+
+            const attendance =
+                record?.attendance ||
+                "Present";
+
+
+            if (
+                attendance ===
+                "Absent"
+            ) {
+
+                absent++;
+
+            }
+            else {
+
+                present++;
+
+            }
+
+
+            const employeeTarget =
+                getEmployeeTarget(
+                    employee
+                );
+
+
+            const dailyTarget =
+                getDailyTarget(
+                    employee,
+                    attendance
+                );
+
+
+            const achieved =
+                Number(
+                    record?.achieved || 0
+                );
+
+
+            totalAchieved +=
+                achieved;
+
+
+            if (
+                employeeTarget !==
+                null &&
+                dailyTarget !== null
+            ) {
+
+                target +=
+                    dailyTarget;
+
+                targetAchieved +=
+                    Math.min(
+                        achieved,
+                        dailyTarget
+                    );
+
+            }
+
+        }
+    );
+
+
+    const remaining =
+        Math.max(
+            target - targetAchieved,
+            0
+        );
+
+
+    const achievement =
+        target > 0
+            ? (
+                targetAchieved /
+                target *
+                100
+            )
+            : null;
+
+
+    return {
+
+        totalEmployees,
+        target,
+        targetAchieved,
+        totalAchieved,
+        remaining,
+        achievement,
+        present,
+        absent
+
+    };
+
+}
+
+
+/* =========================================================
+   GET SUB PROJECT METRICS
+========================================================= */
+
+function getSubProjectMetrics(
+    subProjectId
+) {
+
+    const list =
+        employees.filter(
+            e =>
+                Number(e.sub_project_id) ===
+                Number(subProjectId)
+        );
+
+
+    let target = 0;
+
+    let achieved = 0;
+
+
+    list.forEach(
+        employee => {
+
+            const record =
+                getProductionRecord(
+                    employee.id
+                );
+
+
+            const attendance =
+                record?.attendance ||
+                "Present";
+
+
+            const employeeTarget =
+                getEmployeeTarget(
+                    employee
+                );
+
+
+            const dailyTarget =
+                getDailyTarget(
+                    employee,
+                    attendance
+                );
+
+
+            const production =
+                Number(
+                    record?.achieved || 0
+                );
+
+
+            achieved +=
+                production;
+
+
+            if (
+                employeeTarget !== null &&
+                dailyTarget !== null
+            ) {
+
+                target +=
+                    dailyTarget;
+
+            }
+
+        }
+    );
+
+
+    const targetAchieved =
+        Math.min(
+            achieved,
+            target
+        );
+
+
+    const remaining =
+        Math.max(
+            target - targetAchieved,
+            0
+        );
+
+
+    const percentage =
+        target > 0
+            ? (
+                targetAchieved /
+                target *
+                100
+            )
+            : null;
+
+
+    return {
+
+        employees:
+            list.length,
+
+        target,
+
+        achieved,
+
+        targetAchieved,
+
+        remaining,
+
+        percentage
+
+    };
+
+}
+
+
+/* =========================================================
+   RENDER PROJECT DASHBOARD
+========================================================= */
+
+function renderProjectDashboard() {
+
+    const container =
+        document.getElementById(
+            "projectDashboard"
+        );
+
+
+    container.innerHTML = "";
+
+
+    const selectedProject =
+        document.getElementById(
+            "projectFilter"
+        ).value;
+
+
+    /* =====================================================
+       ALL PROJECTS
+    ====================================================== */
+
+    if (!selectedProject) {
+
+        const allMetrics =
+            getProjectMetrics(null);
+
+
+        container.appendChild(
+            createProjectCard(
+                "All Projects",
+                allMetrics,
+                null
+            )
+        );
+
+
+        projects.forEach(
+            project => {
+
+                const metrics =
+                    getProjectMetrics(
+                        project.id
+                    );
+
+
+                container.appendChild(
+                    createProjectCard(
+                        project.project_name,
+                        metrics,
+                        project.id
+                    )
+                );
+
+            }
+        );
+
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       SELECTED PROJECT ONLY
+    ====================================================== */
+
+    const project =
+        getProjectById(
+            Number(selectedProject)
+        );
+
+
+    if (!project)
+        return;
+
+
+    const metrics =
+        getProjectMetrics(
+            project.id
+        );
+
+
+    container.appendChild(
+        createProjectCard(
+            project.project_name,
+            metrics,
+            project.id
+        )
+    );
+
+}
+
+
+/* =========================================================
+   CREATE PROJECT CARD
+========================================================= */
+
+function createProjectCard(
+    title,
+    metrics,
+    projectId
+) {
+
+    const card =
+        document.createElement(
+            "div"
+        );
+
+
+    card.className =
+        "project-card";
+
+
+    card.innerHTML = `
+
+        <div class="project-card-title">
+
+            ${escapeHtml(title)}
+
+        </div>
+
+
+        <div class="project-metrics">
+
+            <div class="metric-box">
+
+                <span>Employees</span>
+
+                <strong>
+                    ${metrics.totalEmployees}
+                </strong>
+
+            </div>
+
+
+            <div class="metric-box">
+
+                <span>Present</span>
+
+                <strong>
+                    ${metrics.present}
+                </strong>
+
+            </div>
+
+
+            <div class="metric-box">
+
+                <span>Target</span>
+
+                <strong>
+                    ${metrics.target}
+                </strong>
+
+            </div>
+
+
+            <div class="metric-box">
+
+                <span>Achieved</span>
+
+                <strong>
+                    ${metrics.totalAchieved}
+                </strong>
+
+            </div>
+
+
+            <div class="metric-box">
+
+                <span>Remaining</span>
+
+                <strong>
+                    ${
+                        metrics.target > 0
+                            ? metrics.remaining
+                            : "N/A"
+                    }
+                </strong>
+
+            </div>
+
+
+            <div class="metric-box">
+
+                <span>Achievement</span>
+
+                <strong>
+
+                    ${
+                        metrics.achievement === null
+                            ? "N/A"
+                            : metrics.achievement.toFixed(1) + "%"
+                    }
+
+                </strong>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    return card;
+
+}
+
+
+/* =========================================================
+   RENDER SUB PROJECT DASHBOARD
+========================================================= */
+
+function renderSubProjectDashboard() {
+
+    const container =
+        document.getElementById(
+            "subProjectDashboard"
+        );
+
+
+    container.innerHTML = "";
+
+
+    const selectedProject =
+        document.getElementById(
+            "projectFilter"
+        ).value;
+
+
+    let list =
+        subProjects;
+
+
+    if (selectedProject) {
+
+        list =
+            subProjects.filter(
+                sp =>
+                    Number(sp.project_id) ===
+                    Number(selectedProject)
+            );
+
+    }
+
+
+    const selectedSubProject =
+        document.getElementById(
+            "subProjectFilter"
+        ).value;
+
+
+    if (selectedSubProject) {
+
+        list =
+            list.filter(
+                sp =>
+                    Number(sp.id) ===
+                    Number(selectedSubProject)
+            );
+
+    }
+
+
+    if (!list.length) {
+
+        container.innerHTML = `
+
+            <div class="subproject-card">
+
+                <div class="subproject-title">
+                    No Sub-Projects
+                </div>
+
+                <div class="subproject-info">
+                    No sub-projects are configured
+                    for the selected filter.
+                </div>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    list.forEach(
+        subProject => {
+
+            const project =
+                getProjectById(
+                    subProject.project_id
+                );
+
+
+            const metrics =
+                getSubProjectMetrics(
+                    subProject.id
+                );
+
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "subproject-card";
+
+
+            card.innerHTML = `
+
+                <div class="subproject-title">
+
+                    ${project
+                        ? escapeHtml(project.project_name)
+                        : ""}
+
+                    →
+                    ${escapeHtml(
+                        subProject.sub_project_name
+                    )}
+
+                </div>
+
+
+                <div class="subproject-info">
+
+                    Employees:
+                    <strong>
+                        ${metrics.employees}
+                    </strong>
+
+                    <br>
+
+                    Target:
+                    <strong>
+                        ${
+                            subProject.target_based
+                                ? metrics.target
+                                : "N/A"
+                        }
+                    </strong>
+
+                    <br>
+
+                    Achieved:
+                    <strong>
+                        ${metrics.achieved}
+                    </strong>
+
+                    <br>
+
+                    Remaining:
+                    <strong>
+                        ${
+                            subProject.target_based
+                                ? metrics.remaining
+                                : "N/A"
+                        }
+                    </strong>
+
+                    <br>
+
+                    Achievement:
+                    <strong>
+                        ${
+                            !subProject.target_based
+                                ? "N/A"
+                                : metrics.percentage === null
+                                    ? "N/A"
+                                    : metrics.percentage.toFixed(1) + "%"
+                        }
+                    </strong>
+
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                card
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   PERFORMANCE SUMMARY
+========================================================= */
+
+function renderPerformanceSummary() {
+
+    const tbody =
+        document.getElementById(
+            "performanceSummaryBody"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    const list =
+        getFilteredEmployees();
+
+
+    if (!list.length) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td colspan="9"
+                    style="padding:25px;color:#64748b">
+
+                    No employees found.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    list.forEach(
+        employee => {
+
+            const project =
+                getProjectById(
+                    employee.project_id
+                );
+
+
+            const subProject =
+                getEmployeeSubProject(
+                    employee
+                );
+
+
+            const record =
+                getProductionRecord(
+                    employee.id
+                );
+
+
+            const attendance =
+                record?.attendance ||
+                "Present";
+
+
+            const target =
+                getDailyTarget(
+                    employee,
+                    attendance
+                );
+
+
+            const achieved =
+                Number(
+                    record?.achieved || 0
+                );
+
+
+            const isTargetBased =
+                target !== null;
+
+
+            const remaining =
+                isTargetBased
+                    ? Math.max(
+                        target - achieved,
+                        0
+                    )
+                    : null;
+
+
+            const percentage =
+                isTargetBased &&
+                target > 0
+                    ? (
+                        achieved /
+                        target *
+                        100
+                    )
+                    : null;
+
+
+            let status = "";
+
+
+            if (!isTargetBased) {
+
+                status = `
+                    <span class="status na">
+                        N/A
+                    </span>
+                `;
+
+            }
+            else if (
+                percentage >= 100
+            ) {
+
+                status = `
+                    <span class="status ontrack">
+                        ON TRACK
+                    </span>
+                `;
+
+            }
+            else {
+
+                status = `
+                    <span class="status attention">
+                        NEED ATTENTION
+                    </span>
+                `;
+
+            }
+
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            tr.innerHTML = `
+
+                <td class="left">
+
+                    ${escapeHtml(
+                        employee.employee_name
+                    )}
+
+                </td>
+
+                <td>
+
+                    ${escapeHtml(
+                        employee.employee_code
+                    )}
+
+                </td>
+
+                <td>
+
+                    ${project
+                        ? escapeHtml(
+                            project.project_name
+                        )
+                        : "N/A"}
+
+                </td>
+
+                <td>
+
+                    ${
+                        subProject
+                            ? escapeHtml(
+                                subProject.sub_project_name
+                            )
+                            : "Not Required"
+                    }
+
+                </td>
+
+                <td>
+
+                    ${
+                        isTargetBased
+                            ? target
+                            : "N/A"
+                    }
+
+                </td>
+
+                <td>
+
+                    ${achieved}
+
+                </td>
+
+                <td>
+
+                    ${
+                        isTargetBased
+                            ? remaining
+                            : "N/A"
+                    }
+
+                </td>
+
+                <td class="${
+                    percentage !== null &&
+                    percentage >= 100
+                        ? "achievement-good"
+                        : percentage !== null
+                            ? "achievement-low"
+                            : "achievement-na"
+                }">
+
+                    ${
+                        percentage === null
+                            ? "N/A"
+                            : percentage.toFixed(1) + "%"
+                    }
+
+                </td>
+
+                <td>
+
+                    ${status}
+
+                </td>
+
+            `;
+
+
+            tbody.appendChild(
+                tr
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE KPI
+========================================================= */
+
+function updateKPI() {
+
+    const container =
+        document.getElementById(
+            "kpiContainer"
+        );
+
+
+    const selectedProject =
+        document.getElementById(
+            "projectFilter"
+        ).value;
+
+
+    const selectedSubProject =
+        document.getElementById(
+            "subProjectFilter"
+        ).value;
+
+
+    let list =
+        getFilteredEmployees();
+
+
+    let totalTarget = 0;
+
+    let totalAchieved = 0;
+
+    let targetAchieved = 0;
+
+    let present = 0;
+
+    let absent = 0;
+
+
+    list.forEach(
+        employee => {
+
+            const record =
+                getProductionRecord(
+                    employee.id
+                );
+
+
+            const attendance =
+                record?.attendance ||
+                "Present";
+
+
+            if (
+                attendance ===
+                "Absent"
+            ) {
+
+                absent++;
+
+            }
+            else {
+
+                present++;
+
+            }
+
+
+            const target =
+                getDailyTarget(
+                    employee,
+                    attendance
+                );
+
+
+            const production =
+                Number(
+                    record?.achieved || 0
+                );
+
+
+            totalAchieved +=
+                production;
+
+
+            if (
+                target !== null
+            ) {
+
+                totalTarget +=
+                    target;
+
+                targetAchieved +=
+                    Math.min(
+                        production,
+                        target
+                    );
+
+            }
+
+        }
+    );
+
+
+    const remaining =
+        Math.max(
+            totalTarget -
+            targetAchieved,
+            0
+        );
+
+
+    const achievement =
+        totalTarget > 0
+            ? (
+                targetAchieved /
+                totalTarget *
+                100
+            )
+            : null;
+
+
+    const title =
+        selectedSubProject
+            ? getSubProjectById(
+                Number(
+                    selectedSubProject
+                )
+            )?.sub_project_name
+            : selectedProject
+                ? getProjectById(
+                    Number(
+                        selectedProject
+                    )
+                )?.project_name
+                : "All Projects";
+
+
+    container.innerHTML = `
+
+        <div class="kpi-card">
+
+            <div class="kpi-label">
+                Selected View
+            </div>
+
+            <div class="kpi-value">
+                ${escapeHtml(title || "All Projects")}
+            </div>
+
+            <div class="kpi-sub">
+                Current dashboard filter
+            </div>
+
+        </div>
+
+
+        <div class="kpi-card">
+
+            <div class="kpi-label">
+                Employees
+            </div>
+
+            <div class="kpi-value">
+                ${list.length}
+            </div>
+
+            <div class="kpi-sub">
+                Active employees
+            </div>
+
+        </div>
+
+
+        <div class="kpi-card green">
+
+            <div class="kpi-label">
+                Present
+            </div>
+
+            <div class="kpi-value">
+                ${present}
+            </div>
+
+            <div class="kpi-sub">
+                Working today
+            </div>
+
+        </div>
+
+
+        <div class="kpi-card red">
+
+            <div class="kpi-label">
+                Absent
+            </div>
+
+            <div class="kpi-value">
+                ${absent}
+            </div>
+
+            <div class="kpi-sub">
+                No production target
+            </div>
+
+        </div>
+
+
+        <div class="kpi-card">
+
+            <div class="kpi-label">
+                Target
+            </div>
+
+            <div class="kpi-value">
+                ${
+                    totalTarget > 0
+                        ? totalTarget
+                        : "N/A"
+                }
+            </div>
+
+            <div class="kpi-sub">
+                Target-based work only
+            </div>
+
+        </div>
+
+
+        <div class="kpi-card green">
+
+            <div class="kpi-label">
+                Achieved
+            </div>
+
+            <div class="kpi-value">
+                ${totalAchieved}
+            </div>
+
+            <div class="kpi-sub">
+                Total production
+            </div>
+
+        </div>
+
+
+        <div class="kpi-card orange">
+
+            <div class="kpi-label">
+                Remaining
+            </div>
+
+            <div class="kpi-value">
+                ${
+                    totalTarget > 0
+                        ? remaining
+                        : "N/A"
+                }
+            </div>
+
+            <div class="kpi-sub">
+                Target balance
+            </div>
+
+        </div>
+
+
+        <div class="kpi-card ${
+            achievement !== null &&
+            achievement >= 100
+                ? "green"
+                : "red"
+        }">
+
+            <div class="kpi-label">
+                Achievement
+            </div>
+
+            <div class="kpi-value">
+
+                ${
+                    achievement === null
+                        ? "N/A"
+                        : achievement.toFixed(1) + "%"
+                }
+
+            </div>
+
+            <div class="kpi-sub">
+                Target achievement
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   UPDATE DASHBOARD
+========================================================= */
+
+function updateDashboard() {
+
+    updateKPI();
+
+    renderProjectDashboard();
+
+    renderSubProjectDashboard();
+
+    renderPerformanceSummary();
+
+}
+
+
+/* =========================================================
+   REFRESH
+========================================================= */
+
+async function refreshDashboard() {
+
+    await loadProjects();
+
+    await loadSubProjects();
+
+    await loadEmployees();
+
+    loadProjectFilter();
+
+    loadSubProjectFilter();
+
+    loadEmployeeProjectDropdown();
+
+    displayEmployees();
+
+    await loadDailyTracker();
+
+    updateDashboard();
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value) {
+
+    return String(
+        value ?? ""
+    )
         .replace(
             /&/g,
             "&amp;"
         )
-
         .replace(
             /</g,
             "&lt;"
         )
-
         .replace(
             />/g,
             "&gt;"
         )
-
         .replace(
             /"/g,
             "&quot;"
         )
-
         .replace(
             /'/g,
             "&#039;"
@@ -4580,52 +4220,8 @@ function escapeHtml(
 
 
 /* =========================================================
-   EVENTS
+   DATE CHANGE
 ========================================================= */
-
-document
-    .getElementById(
-        "employeeProject"
-    )
-    .addEventListener(
-        "change",
-        loadEmployeeSubProjectDropdown
-    );
-
-
-document
-    .getElementById(
-        "projectFilter"
-    )
-    .addEventListener(
-        "change",
-        function() {
-
-            loadSubProjectFilter();
-
-            buildDailyTracker();
-
-            updateDashboard();
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "subProjectFilter"
-    )
-    .addEventListener(
-        "change",
-        function() {
-
-            buildDailyTracker();
-
-            updateDashboard();
-
-        }
-    );
-
 
 document
     .getElementById(
@@ -4633,7 +4229,11 @@ document
     )
     .addEventListener(
         "change",
-        loadDailyTracker
+        async function() {
+
+            await loadDailyTracker();
+
+        }
     );
 
 
@@ -4643,78 +4243,54 @@ document
 
 async function startApplication() {
 
-    console.log(
-        "Starting Hourly Production Dashboard..."
-    );
+    try {
 
+        setTodayDate();
 
-    setTodayDate();
-
-
-    const projectsLoaded =
         await loadProjects();
 
-
-    if (!projectsLoaded)
-        return;
-
-
-    const subProjectsLoaded =
         await loadSubProjects();
 
-
-    if (!subProjectsLoaded)
-        return;
-
-
-    const employeesLoaded =
         await loadEmployees();
 
+        loadProjectFilter();
 
-    if (!employeesLoaded)
-        return;
+        loadSubProjectFilter();
 
+        loadEmployeeProjectDropdown();
 
-    displayProjects();
+        displayEmployees();
 
-    loadEmployeeProjectDropdown();
+        buildDailyTracker();
 
-    loadProjectFilter();
+        renderProjectDashboard();
 
-    loadSubProjectFilter();
+        renderSubProjectDashboard();
 
-    displayEmployees();
+        renderPerformanceSummary();
 
-    buildDailyTracker();
+        await loadDailyTracker();
 
-    renderProjectDashboard();
+        updateDashboard();
 
-    await loadDailyTracker();
+        console.log(
+            "Hourly Production Dashboard loaded successfully"
+        );
 
-    updateDashboard();
+    }
+    catch (error) {
 
+        console.error(
+            "Application startup error:",
+            error
+        );
 
-    console.log(
-        "Projects:",
-        projects
-    );
+        showMessage(
+            "Dashboard failed to load. Check browser console.",
+            "error"
+        );
 
-
-    console.log(
-        "Sub Projects:",
-        subProjects
-    );
-
-
-    console.log(
-        "Employees:",
-        employees
-    );
-
-
-    console.log(
-        "Dashboard loaded successfully."
-    );
+    }
 
 }
 
@@ -4726,4 +4302,3 @@ startApplication();
 </body>
 
 </html>
-```
