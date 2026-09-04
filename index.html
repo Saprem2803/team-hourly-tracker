@@ -12,13 +12,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-
     <style>
 
         * {
             box-sizing: border-box;
         }
-
 
         body {
             margin: 0;
@@ -27,37 +25,25 @@
             color: #1f2937;
         }
 
-
-        /* =====================================================
-           HEADER
-        ====================================================== */
-
         header {
             background: linear-gradient(
                 135deg,
                 #111827,
                 #1e3a8a
             );
-
             color: white;
             padding: 24px 30px;
-
-            box-shadow:
-                0 4px 15px rgba(0,0,0,0.12);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
         }
-
 
         .header-content {
             max-width: 1600px;
             margin: auto;
-
             display: flex;
             justify-content: space-between;
             align-items: center;
-
             gap: 20px;
         }
-
 
         .header-title h1 {
             margin: 0;
@@ -65,13 +51,11 @@
             font-weight: 700;
         }
 
-
         .header-title p {
             margin: 7px 0 0;
             color: #cbd5e1;
             font-size: 14px;
         }
-
 
         .header-badge {
             background: rgba(255,255,255,0.12);
@@ -81,39 +65,23 @@
             font-size: 13px;
         }
 
-
-        /* =====================================================
-           MAIN CONTAINER
-        ====================================================== */
-
         .container {
             width: 94%;
             max-width: 1600px;
             margin: 25px auto 50px;
         }
 
-
-        /* =====================================================
-           DASHBOARD TOP BAR
-        ====================================================== */
-
         .dashboard-toolbar {
             background: white;
             border-radius: 14px;
             padding: 18px 20px;
-
             display: flex;
             justify-content: space-between;
             align-items: center;
-
             gap: 15px;
-
             margin-bottom: 20px;
-
-            box-shadow:
-                0 3px 12px rgba(15,23,42,0.06);
+            box-shadow: 0 3px 12px rgba(15,23,42,0.06);
         }
-
 
         .toolbar-left {
             display: flex;
@@ -122,272 +90,198 @@
             flex-wrap: wrap;
         }
 
-
         .toolbar-title {
             font-size: 18px;
             font-weight: 700;
         }
-
 
         .date-label {
             font-size: 13px;
             color: #64748b;
         }
 
-
         input,
         select {
             padding: 10px 12px;
-
             border: 1px solid #d1d5db;
             border-radius: 8px;
-
             background: white;
-
             min-width: 160px;
-
             font-size: 14px;
-
             outline: none;
         }
-
 
         input:focus,
         select:focus {
             border-color: #2563eb;
-
-            box-shadow:
-                0 0 0 3px rgba(37,99,235,0.10);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
         }
 
+        input:disabled,
+        select:disabled {
+            background: #f1f5f9;
+            color: #64748b;
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
 
         button {
             padding: 10px 16px;
-
             border: none;
             border-radius: 8px;
-
             cursor: pointer;
-
             font-size: 14px;
             font-weight: 600;
         }
 
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
 
         .primary-button {
             background: #2563eb;
             color: white;
         }
 
-
-        .primary-button:hover {
+        .primary-button:hover:not(:disabled) {
             background: #1d4ed8;
         }
-
 
         .secondary-button {
             background: #eef2ff;
             color: #3730a3;
         }
 
-
         .secondary-button:hover {
             background: #e0e7ff;
         }
-
 
         .delete-button {
             background: #dc2626;
             color: white;
         }
 
-
         .delete-button:hover {
             background: #b91c1c;
         }
 
-
-        /* =====================================================
-           KPI CARDS
-        ====================================================== */
+        .lock-button {
+            background: #64748b;
+            color: white;
+        }
 
         .kpi-grid {
             display: grid;
-
             grid-template-columns:
                 repeat(5, minmax(170px, 1fr));
-
             gap: 16px;
-
             margin-bottom: 22px;
         }
-
 
         .kpi-card {
             background: white;
-
             border-radius: 14px;
-
             padding: 20px;
-
-            box-shadow:
-                0 3px 12px rgba(15,23,42,0.06);
-
+            box-shadow: 0 3px 12px rgba(15,23,42,0.06);
             position: relative;
-
             overflow: hidden;
         }
 
-
         .kpi-card::after {
             content: "";
-
             position: absolute;
-
             right: -20px;
             bottom: -30px;
-
             width: 90px;
             height: 90px;
-
             border-radius: 50%;
-
             background: #eff6ff;
         }
 
-
         .kpi-label {
             color: #64748b;
-
             font-size: 13px;
-
             font-weight: 600;
-
             text-transform: uppercase;
-
             letter-spacing: .5px;
         }
 
-
         .kpi-value {
             font-size: 30px;
-
             font-weight: 700;
-
             margin-top: 9px;
-
             color: #111827;
-
             position: relative;
-
             z-index: 2;
         }
 
-
         .kpi-sub {
             margin-top: 6px;
-
             font-size: 12px;
-
             color: #94a3b8;
         }
 
-
-        /* =====================================================
-           PROJECT SECTION
-        ====================================================== */
-
-        .dashboard-section {
+        .dashboard-section,
+        .tracker-section,
+        .setup-section {
             background: white;
-
             border-radius: 14px;
-
             padding: 22px;
-
             margin-bottom: 22px;
-
-            box-shadow:
-                0 3px 12px rgba(15,23,42,0.06);
+            box-shadow: 0 3px 12px rgba(15,23,42,0.06);
         }
-
 
         .section-header {
             display: flex;
-
             justify-content: space-between;
-
             align-items: center;
-
             gap: 10px;
-
             margin-bottom: 18px;
         }
 
-
         .section-title {
             margin: 0;
-
             font-size: 19px;
-
             font-weight: 700;
         }
 
-
         .section-description {
             margin: 4px 0 0;
-
             color: #64748b;
-
             font-size: 13px;
         }
 
-
         .project-grid {
             display: grid;
-
             grid-template-columns:
                 repeat(auto-fit, minmax(250px, 1fr));
-
             gap: 16px;
         }
 
-
         .project-card {
             background: #f8fafc;
-
             border: 1px solid #e2e8f0;
-
             border-radius: 13px;
-
             padding: 18px;
-
             cursor: pointer;
-
             transition:
                 transform .2s,
                 box-shadow .2s,
                 border-color .2s;
-
             position: relative;
         }
 
-
         .project-card:hover {
             transform: translateY(-2px);
-
-            box-shadow:
-                0 7px 18px rgba(15,23,42,0.08);
-
+            box-shadow: 0 7px 18px rgba(15,23,42,0.08);
             border-color: #93c5fd;
         }
 
-
         .project-card.active {
             border: 2px solid #2563eb;
-
             background: #eff6ff;
         }
-
 
         .project-card.all-projects {
             background: linear-gradient(
@@ -397,368 +291,229 @@
             );
         }
 
-
         .project-name {
             font-size: 17px;
-
             font-weight: 700;
-
             margin-bottom: 12px;
         }
-
 
         .project-meta {
             display: flex;
-
             justify-content: space-between;
-
             font-size: 12px;
-
             color: #64748b;
-
             margin-bottom: 12px;
         }
 
-
         .project-metrics {
             display: grid;
-
             grid-template-columns:
                 repeat(3, 1fr);
-
             gap: 8px;
-
             margin-bottom: 14px;
         }
 
-
         .project-metric {
             background: white;
-
             border-radius: 8px;
-
             padding: 9px;
-
             text-align: center;
-
             border: 1px solid #e5e7eb;
         }
 
-
         .project-metric span {
             display: block;
-
             font-size: 11px;
-
             color: #64748b;
         }
 
-
         .project-metric strong {
             display: block;
-
             margin-top: 3px;
-
             font-size: 16px;
         }
 
-
         .progress-track {
             height: 8px;
-
             background: #e2e8f0;
-
             border-radius: 10px;
-
             overflow: hidden;
         }
 
-
         .progress-bar {
             height: 100%;
-
             background: #2563eb;
-
             border-radius: 10px;
-
             transition: width .3s;
         }
 
-
         .project-status {
             margin-top: 8px;
-
             text-align: right;
-
             font-size: 12px;
-
             font-weight: 700;
         }
-
-
-        /* =====================================================
-           STATUS
-        ====================================================== */
 
         .status-green {
             color: #15803d;
         }
 
-
         .status-yellow {
             color: #b45309;
         }
-
 
         .status-red {
             color: #dc2626;
         }
 
-
-        /* =====================================================
-           TRACKER
-        ====================================================== */
-
-        .tracker-section {
-            background: white;
-
-            border-radius: 14px;
-
-            padding: 22px;
-
-            margin-bottom: 22px;
-
-            box-shadow:
-                0 3px 12px rgba(15,23,42,0.06);
-        }
-
-
         .tracker-toolbar {
             display: flex;
-
             justify-content: space-between;
-
             align-items: center;
-
             flex-wrap: wrap;
-
             gap: 12px;
-
             margin-bottom: 15px;
         }
 
-
         .selected-project {
             background: #eff6ff;
-
             color: #1d4ed8;
-
             border-radius: 20px;
-
             padding: 8px 13px;
-
             font-size: 13px;
-
             font-weight: 600;
         }
 
+        .lock-banner {
+            display: none;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .lock-banner.visible {
+            display: block;
+        }
 
         .table-wrapper {
             overflow-x: auto;
-
             border-radius: 10px;
-
             border: 1px solid #e2e8f0;
         }
 
-
         table {
             width: 100%;
-
             border-collapse: collapse;
-
             min-width: 1300px;
         }
-
 
         th,
         td {
             border-bottom: 1px solid #e5e7eb;
-
             padding: 9px;
-
             text-align: center;
-
             font-size: 13px;
         }
 
-
         th {
             background: #f1f5f9;
-
             color: #475569;
-
             font-weight: 700;
-
             position: sticky;
-
             top: 0;
-
             z-index: 2;
         }
-
 
         tbody tr:hover {
             background: #f8fafc;
         }
 
-
         .employee-name-cell {
             font-weight: 700;
-
             text-align: left;
         }
 
-
         .project-cell {
             color: #475569;
-
             font-weight: 600;
         }
 
-
         .hour-input {
             width: 65px;
-
             min-width: 65px;
-
             padding: 7px 5px;
-
             text-align: center;
         }
-
 
         .achievement-cell {
             font-weight: 700;
         }
 
-
-        /* =====================================================
-           SUMMARY
-        ====================================================== */
-
         .summary-grid {
             display: grid;
-
             grid-template-columns:
                 repeat(auto-fit, minmax(170px, 1fr));
-
             gap: 15px;
         }
 
-
         .summary-card {
             background: #f8fafc;
-
             border: 1px solid #e2e8f0;
-
             border-radius: 11px;
-
             padding: 17px;
-
             text-align: center;
         }
-
 
         .summary-card h3 {
             margin: 0 0 8px;
-
             font-size: 12px;
-
             color: #64748b;
-
             text-transform: uppercase;
         }
 
-
         .summary-card div {
             font-size: 25px;
-
             font-weight: 700;
         }
-
-
-        /* =====================================================
-           ADMIN SETUP
-        ====================================================== */
-
-        .setup-section {
-            background: white;
-
-            border-radius: 14px;
-
-            padding: 22px;
-
-            margin-bottom: 22px;
-
-            box-shadow:
-                0 3px 12px rgba(15,23,42,0.06);
-        }
-
 
         .form-row {
             display: flex;
-
             flex-wrap: wrap;
-
             gap: 10px;
-
             align-items: center;
         }
 
-
         .message {
             margin-top: 10px;
-
             font-size: 13px;
-
             font-weight: 600;
         }
 
-
         .green {
             color: #15803d;
-
             font-weight: 700;
         }
-
 
         .yellow {
             color: #d97706;
-
             font-weight: 700;
         }
-
 
         .red {
             color: #dc2626;
-
             font-weight: 700;
         }
 
-
         .empty-state {
             padding: 35px;
-
             text-align: center;
-
             color: #94a3b8;
         }
-
-
-        /* =====================================================
-           RESPONSIVE
-        ====================================================== */
 
         @media (max-width: 1100px) {
 
@@ -769,7 +524,6 @@
 
         }
 
-
         @media (max-width: 700px) {
 
             .header-content {
@@ -777,12 +531,10 @@
                 align-items: flex-start;
             }
 
-
             .kpi-grid {
                 grid-template-columns:
                     repeat(2, 1fr);
             }
-
 
             .dashboard-toolbar {
                 align-items: flex-start;
@@ -790,7 +542,6 @@
             }
 
         }
-
 
         @media (max-width: 480px) {
 
@@ -811,10 +562,6 @@
 
 <body>
 
-
-<!-- =====================================================
-     HEADER
-====================================================== -->
 
 <header>
 
@@ -877,6 +624,7 @@
         >
             All Projects
         </button>
+
 
         <button
             type="button"
@@ -1038,7 +786,7 @@
 
 
 <!-- =====================================================
-     DAILY TRACKER
+     HOURLY TRACKER
 ====================================================== -->
 
 <div class="tracker-section">
@@ -1068,6 +816,18 @@
     </div>
 
 
+    <!-- =================================================
+         PREVIOUS DAY LOCK MESSAGE
+    ================================================== -->
+
+    <div
+        id="lockBanner"
+        class="lock-banner"
+    >
+        🔒 This date is closed. Previous-day production cannot be edited.
+    </div>
+
+
     <div
         id="trackerMessage"
         class="message"
@@ -1083,41 +843,23 @@
                 <tr>
 
                     <th>Employee</th>
-
                     <th>EMP ID</th>
-
                     <th>Project</th>
-
                     <th>Attendance</th>
-
                     <th>Target</th>
-
                     <th>6-7 PM</th>
-
                     <th>7-8 PM</th>
-
                     <th>8-9 PM</th>
-
                     <th>9-10 PM</th>
-
                     <th>10-11 PM</th>
-
                     <th>11-12 AM</th>
-
                     <th>12-1 AM</th>
-
                     <th>1-2 AM</th>
-
                     <th>2-3 AM</th>
-
                     <th>Break Min</th>
-
                     <th>Break Status</th>
-
                     <th>Achieved</th>
-
                     <th>Remaining</th>
-
                     <th>Achievement %</th>
 
                 </tr>
@@ -1135,7 +877,7 @@
 
 
 <!-- =====================================================
-     TEAM SUMMARY
+     PERFORMANCE SUMMARY
 ====================================================== -->
 
 <div class="dashboard-section">
@@ -1158,6 +900,7 @@
 
 
     <div class="summary-grid">
+
 
         <div class="summary-card">
 
@@ -1294,9 +1037,7 @@
                 <tr>
 
                     <th>Project Name</th>
-
                     <th>Daily Target</th>
-
                     <th>Action</th>
 
                 </tr>
@@ -1387,13 +1128,9 @@
                 <tr>
 
                     <th>Employee Name</th>
-
                     <th>Employee ID</th>
-
                     <th>Project</th>
-
                     <th>Daily Target</th>
-
                     <th>Action</th>
 
                 </tr>
@@ -1417,7 +1154,7 @@
 
 
 /* =====================================================
-   SUPABASE
+   SUPABASE CONNECTION
 ====================================================== */
 
 const SUPABASE_URL =
@@ -1447,7 +1184,7 @@ let selectedProjectId = null;
 
 
 /* =====================================================
-   MESSAGES
+   MESSAGE FUNCTIONS
 ====================================================== */
 
 function showProjectMessage(
@@ -1467,8 +1204,8 @@ function showProjectMessage(
 
     element.style.color =
         isError
-            ? "#dc2626"
-            : "#15803d";
+        ? "#dc2626"
+        : "#15803d";
 }
 
 
@@ -1489,8 +1226,8 @@ function showEmployeeMessage(
 
     element.style.color =
         isError
-            ? "#dc2626"
-            : "#15803d";
+        ? "#dc2626"
+        : "#15803d";
 }
 
 
@@ -1511,13 +1248,55 @@ function showTrackerMessage(
 
     element.style.color =
         isError
-            ? "#dc2626"
-            : "#15803d";
+        ? "#dc2626"
+        : "#15803d";
 }
 
 
 /* =====================================================
-   LOCAL DATE
+   GET LOCAL TODAY
+====================================================== */
+
+function getLocalToday() {
+
+    const now =
+        new Date();
+
+
+    const year =
+        now.getFullYear();
+
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return (
+        year +
+        "-" +
+        month +
+        "-" +
+        day
+    );
+}
+
+
+/* =====================================================
+   SET TODAY
 ====================================================== */
 
 function setTodayDate() {
@@ -1527,26 +1306,160 @@ function setTodayDate() {
             "trackerDate"
         );
 
-    if (!dateInput) return;
 
-    const now =
-        new Date();
+    if (!dateInput)
+        return;
 
-    const year =
-        now.getFullYear();
-
-    const month =
-        String(
-            now.getMonth() + 1
-        ).padStart(2, "0");
-
-    const day =
-        String(
-            now.getDate()
-        ).padStart(2, "0");
 
     dateInput.value =
-        `${year}-${month}-${day}`;
+        getLocalToday();
+}
+
+
+/* =====================================================
+   CHECK IF DATE IS PREVIOUS
+====================================================== */
+
+function isPreviousDate() {
+
+    const dateInput =
+        document.getElementById(
+            "trackerDate"
+        );
+
+
+    if (!dateInput)
+        return false;
+
+
+    const selectedDate =
+        dateInput.value;
+
+
+    if (!selectedDate)
+        return false;
+
+
+    const today =
+        getLocalToday();
+
+
+    return (
+        selectedDate <
+        today
+    );
+}
+
+
+/* =====================================================
+   APPLY DATE EDIT LOCK
+====================================================== */
+
+function applyDateEditLock() {
+
+    const locked =
+        isPreviousDate();
+
+
+    const trackerInputs =
+        document.querySelectorAll(
+            "#dailyTrackerTable input, #dailyTrackerTable select"
+        );
+
+
+    trackerInputs.forEach(
+        function(input) {
+
+            input.disabled =
+                locked;
+
+        }
+    );
+
+
+    const saveButton =
+        document.getElementById(
+            "saveDailyTrackerButton"
+        );
+
+
+    if (saveButton) {
+
+        saveButton.disabled =
+            locked;
+
+
+        if (locked) {
+
+            saveButton.textContent =
+                "🔒 Previous Day Locked";
+
+            saveButton.classList.remove(
+                "primary-button"
+            );
+
+            saveButton.classList.add(
+                "lock-button"
+            );
+
+        } else {
+
+            saveButton.textContent =
+                "Save Daily Tracker";
+
+            saveButton.classList.remove(
+                "lock-button"
+            );
+
+            saveButton.classList.add(
+                "primary-button"
+            );
+
+        }
+
+    }
+
+
+    const lockBanner =
+        document.getElementById(
+            "lockBanner"
+        );
+
+
+    if (lockBanner) {
+
+        if (locked) {
+
+            lockBanner.classList.add(
+                "visible"
+            );
+
+        } else {
+
+            lockBanner.classList.remove(
+                "visible"
+            );
+
+        }
+
+    }
+
+
+    const message =
+        document.getElementById(
+            "trackerMessage"
+        );
+
+
+    if (message && locked) {
+
+        message.textContent =
+            "🔒 Previous day data is locked and cannot be edited.";
+
+        message.style.color =
+            "#dc2626";
+    }
+
 }
 
 
@@ -1718,6 +1631,10 @@ function displayProjects() {
         );
 
 
+    if (!table)
+        return;
+
+
     table.innerHTML = "";
 
 
@@ -1725,13 +1642,17 @@ function displayProjects() {
         function(project) {
 
             const row =
-                document.createElement("tr");
+                document.createElement(
+                    "tr"
+                );
 
 
             row.innerHTML = `
 
                 <td>
-                    ${escapeHtml(project.project_name)}
+                    ${escapeHtml(
+                        project.project_name
+                    )}
                 </td>
 
                 <td>
@@ -1739,12 +1660,14 @@ function displayProjects() {
                 </td>
 
                 <td>
+
                     <button
                         type="button"
                         class="delete-button"
                     >
                         Delete
                     </button>
+
                 </td>
 
             `;
@@ -1764,7 +1687,9 @@ function displayProjects() {
                 );
 
 
-            table.appendChild(row);
+            table.appendChild(
+                row
+            );
 
         }
     );
@@ -1793,7 +1718,10 @@ async function deleteProject(id) {
         await supabaseClient
             .from("projects")
             .delete()
-            .eq("id", id)
+            .eq(
+                "id",
+                id
+            )
             .select();
 
 
@@ -1840,6 +1768,10 @@ function loadEmployeeProjects() {
         document.getElementById(
             "employeeProject"
         );
+
+
+    if (!dropdown)
+        return;
 
 
     dropdown.innerHTML =
@@ -2076,6 +2008,10 @@ function displayEmployees() {
         );
 
 
+    if (!table)
+        return;
+
+
     table.innerHTML = "";
 
 
@@ -2083,17 +2019,23 @@ function displayEmployees() {
         function(employee) {
 
             const row =
-                document.createElement("tr");
+                document.createElement(
+                    "tr"
+                );
 
 
             row.innerHTML = `
 
                 <td>
-                    ${escapeHtml(employee.employee_name)}
+                    ${escapeHtml(
+                        employee.employee_name
+                    )}
                 </td>
 
                 <td>
-                    ${escapeHtml(employee.employee_code)}
+                    ${escapeHtml(
+                        employee.employee_code
+                    )}
                 </td>
 
                 <td>
@@ -2142,7 +2084,9 @@ function displayEmployees() {
                 );
 
 
-            table.appendChild(row);
+            table.appendChild(
+                row
+            );
 
         }
     );
@@ -2173,7 +2117,10 @@ async function deleteEmployee(id) {
             await supabaseClient
                 .from("employees")
                 .delete()
-                .eq("id", id)
+                .eq(
+                    "id",
+                    id
+                )
                 .select();
 
 
@@ -2255,7 +2202,8 @@ function buildDailyTracker() {
         );
 
 
-    if (!table) return;
+    if (!table)
+        return;
 
 
     table.innerHTML = "";
@@ -2265,7 +2213,9 @@ function buildDailyTracker() {
         function(employee, index) {
 
             const row =
-                document.createElement("tr");
+                document.createElement(
+                    "tr"
+                );
 
 
             row.dataset.employeeIndex =
@@ -2279,11 +2229,15 @@ function buildDailyTracker() {
             row.innerHTML = `
 
                 <td class="employee-name-cell">
-                    ${escapeHtml(employee.employee_name)}
+                    ${escapeHtml(
+                        employee.employee_name
+                    )}
                 </td>
 
                 <td>
-                    ${escapeHtml(employee.employee_code)}
+                    ${escapeHtml(
+                        employee.employee_code
+                    )}
                 </td>
 
                 <td class="project-cell">
@@ -2362,12 +2316,15 @@ function buildDailyTracker() {
             `;
 
 
-            table.appendChild(row);
+            table.appendChild(
+                row
+            );
 
 
             document
                 .getElementById(
-                    "attendance_" + index
+                    "attendance_" +
+                    index
                 )
                 .addEventListener(
                     "change",
@@ -2409,7 +2366,8 @@ function buildDailyTracker() {
 
             document
                 .getElementById(
-                    "break_" + index
+                    "break_" +
+                    index
                 )
                 .addEventListener(
                     "input",
@@ -2423,13 +2381,17 @@ function buildDailyTracker() {
                 );
 
 
-            calculateDailyRow(index);
+            calculateDailyRow(
+                index
+            );
 
         }
     );
 
 
     applyProjectFilter();
+
+    applyDateEditLock();
 
     updateDashboard();
 }
@@ -2473,7 +2435,7 @@ function createHourlyInputs(index) {
 
 
 /* =====================================================
-   CALCULATE ROW
+   CALCULATE DAILY ROW
 ====================================================== */
 
 function calculateDailyRow(index) {
@@ -2482,16 +2444,19 @@ function calculateDailyRow(index) {
         employees[index];
 
 
-    if (!employee) return;
+    if (!employee)
+        return;
 
 
     const attendanceElement =
         document.getElementById(
-            "attendance_" + index
+            "attendance_" +
+            index
         );
 
 
-    if (!attendanceElement) return;
+    if (!attendanceElement)
+        return;
 
 
     const attendance =
@@ -2506,7 +2471,8 @@ function calculateDailyRow(index) {
 
 
     document.getElementById(
-        "dailyTarget_" + index
+        "dailyTarget_" +
+        index
     ).textContent =
         target;
 
@@ -2535,7 +2501,9 @@ function calculateDailyRow(index) {
         ) {
 
             achieved +=
-                Number(input.value) || 0;
+                Number(
+                    input.value
+                ) || 0;
         }
 
 
@@ -2544,8 +2512,10 @@ function calculateDailyRow(index) {
             attendance === "Absent"
         ) {
 
-            input.value = 0;
+            input.value =
+                0;
         }
+
     }
 
 
@@ -2553,13 +2523,15 @@ function calculateDailyRow(index) {
         attendance === "Absent"
     ) {
 
-        achieved = 0;
+        achieved =
+            0;
     }
 
 
     const breakInput =
         document.getElementById(
-            "break_" + index
+            "break_" +
+            index
         );
 
 
@@ -2590,7 +2562,8 @@ function calculateDailyRow(index) {
 
     const breakStatus =
         document.getElementById(
-            "breakStatus_" + index
+            "breakStatus_" +
+            index
         );
 
 
@@ -2610,7 +2583,8 @@ function calculateDailyRow(index) {
 
     const remaining =
         Math.max(
-            target - achieved,
+            target -
+            achieved,
             0
         );
 
@@ -2618,26 +2592,30 @@ function calculateDailyRow(index) {
     const percentage =
         target > 0
         ? (
-            achieved / target
+            achieved /
+            target
         ) * 100
         : 0;
 
 
     document.getElementById(
-        "achieved_" + index
+        "achieved_" +
+        index
     ).textContent =
         achieved;
 
 
     document.getElementById(
-        "remaining_" + index
+        "remaining_" +
+        index
     ).textContent =
         remaining;
 
 
     const percentageCell =
         document.getElementById(
-            "percentage_" + index
+            "percentage_" +
+            index
         );
 
 
@@ -2672,7 +2650,7 @@ function calculateDailyRow(index) {
 
 
 /* =====================================================
-   GET EMPLOYEE METRICS
+   EMPLOYEE METRICS
 ====================================================== */
 
 function getEmployeeMetrics(
@@ -2682,7 +2660,8 @@ function getEmployeeMetrics(
 
     const attendanceElement =
         document.getElementById(
-            "attendance_" + index
+            "attendance_" +
+            index
         );
 
 
@@ -2723,14 +2702,17 @@ function getEmployeeMetrics(
         ) {
 
             achieved +=
-                Number(input.value) || 0;
+                Number(
+                    input.value
+                ) || 0;
         }
     }
 
 
     const remaining =
         Math.max(
-            target - achieved,
+            target -
+            achieved,
             0
         );
 
@@ -2738,7 +2720,8 @@ function getEmployeeMetrics(
     const percentage =
         target > 0
         ? (
-            achieved / target
+            achieved /
+            target
         ) * 100
         : 0;
 
@@ -2767,20 +2750,32 @@ function getEmployeeMetrics(
 
 function getDashboardMetrics() {
 
-    let teamEmployees = 0;
+    let teamEmployees =
+        0;
 
-    let totalTarget = 0;
 
-    let totalAchieved = 0;
+    let totalTarget =
+        0;
+
+
+    let totalAchieved =
+        0;
 
 
     employees.forEach(
-        function(employee, index) {
+        function(
+            employee,
+            index
+        ) {
 
             if (
                 selectedProjectId !== null &&
-                String(employee.project_id) !==
-                String(selectedProjectId)
+                String(
+                    employee.project_id
+                ) !==
+                String(
+                    selectedProjectId
+                )
             ) {
 
                 return;
@@ -2937,8 +2932,12 @@ function updateDashboard() {
             projects.find(
                 function(item) {
 
-                    return String(item.id) ===
-                        String(selectedProjectId);
+                    return (
+                        String(item.id) ===
+                        String(
+                            selectedProjectId
+                        )
+                    );
 
                 }
             );
@@ -2956,6 +2955,105 @@ function updateDashboard() {
 
 
 /* =====================================================
+   PROJECT METRICS
+====================================================== */
+
+function getProjectMetrics(
+    projectId
+) {
+
+    let employeeCount =
+        0;
+
+
+    let target =
+        0;
+
+
+    let achieved =
+        0;
+
+
+    employees.forEach(
+        function(
+            employee,
+            index
+        ) {
+
+            if (
+                projectId !== null &&
+                String(
+                    employee.project_id
+                ) !==
+                String(
+                    projectId
+                )
+            ) {
+
+                return;
+            }
+
+
+            employeeCount++;
+
+
+            const metrics =
+                getEmployeeMetrics(
+                    employee,
+                    index
+                );
+
+
+            target +=
+                metrics.target;
+
+
+            achieved +=
+                metrics.achieved;
+
+        }
+    );
+
+
+    const remaining =
+        Math.max(
+            target -
+            achieved,
+            0
+        );
+
+
+    const percentage =
+        target > 0
+        ? (
+            achieved /
+            target
+        ) * 100
+        : 0;
+
+
+    return {
+
+        employeeCount:
+            employeeCount,
+
+        target:
+            target,
+
+        achieved:
+            achieved,
+
+        remaining:
+            remaining,
+
+        percentage:
+            percentage
+
+    };
+}
+
+
+/* =====================================================
    PROJECT DASHBOARD
 ====================================================== */
 
@@ -2967,16 +3065,17 @@ function renderProjectDashboard() {
         );
 
 
-    if (!container) return;
+    if (!container)
+        return;
 
 
     container.innerHTML = "";
 
 
-    /* ALL PROJECTS */
-
     const allMetrics =
-        getProjectMetrics(null);
+        getProjectMetrics(
+            null
+        );
 
 
     container.appendChild(
@@ -3012,89 +3111,6 @@ function renderProjectDashboard() {
 
 
     applyProjectActiveState();
-}
-
-
-/* =====================================================
-   PROJECT METRICS
-====================================================== */
-
-function getProjectMetrics(projectId) {
-
-    let employeeCount = 0;
-
-    let target = 0;
-
-    let achieved = 0;
-
-
-    employees.forEach(
-        function(employee, index) {
-
-            if (
-                projectId !== null &&
-                String(employee.project_id) !==
-                String(projectId)
-            ) {
-
-                return;
-            }
-
-
-            employeeCount++;
-
-
-            const metrics =
-                getEmployeeMetrics(
-                    employee,
-                    index
-                );
-
-
-            target +=
-                metrics.target;
-
-
-            achieved +=
-                metrics.achieved;
-
-        }
-    );
-
-
-    const remaining =
-        Math.max(
-            target - achieved,
-            0
-        );
-
-
-    const percentage =
-        target > 0
-        ? (
-            achieved / target
-        ) * 100
-        : 0;
-
-
-    return {
-
-        employeeCount:
-            employeeCount,
-
-        target:
-            target,
-
-        achieved:
-            achieved,
-
-        remaining:
-            remaining,
-
-        percentage:
-            percentage
-
-    };
 }
 
 
@@ -3257,21 +3273,26 @@ function createProjectCard(
             selectedProjectId =
                 projectId;
 
+
             applyProjectFilter();
 
             updateDashboard();
 
-            window.scrollTo({
 
-                top:
-                    document.querySelector(
-                        ".tracker-section"
-                    ).offsetTop - 20,
+            const tracker =
+                document.querySelector(
+                    ".tracker-section"
+                );
 
-                behavior:
-                    "smooth"
 
-            });
+            if (tracker) {
+
+                tracker.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+            }
 
         }
     );
@@ -3282,7 +3303,7 @@ function createProjectCard(
 
 
 /* =====================================================
-   ACTIVE PROJECT CARD
+   PROJECT ACTIVE STATE
 ====================================================== */
 
 function applyProjectActiveState() {
@@ -3320,7 +3341,7 @@ function applyProjectActiveState() {
 
 
 /* =====================================================
-   TRACKER FILTER
+   PROJECT FILTER
 ====================================================== */
 
 function applyProjectFilter() {
@@ -3348,8 +3369,12 @@ function applyProjectFilter() {
             } else {
 
                 row.style.display =
-                    String(projectId) ===
-                    String(selectedProjectId)
+                    String(
+                        projectId
+                    ) ===
+                    String(
+                        selectedProjectId
+                    )
                     ? ""
                     : "none";
             }
@@ -3363,7 +3388,7 @@ function applyProjectFilter() {
 
 
 /* =====================================================
-   ALL PROJECTS BUTTON
+   ALL PROJECTS
 ====================================================== */
 
 function selectAllProjects() {
@@ -3391,6 +3416,27 @@ function selectAllProjects() {
 ====================================================== */
 
 async function saveDailyTracker() {
+
+    /*
+       IMPORTANT:
+       Never allow previous dates to be saved
+       through this page.
+    */
+
+    if (
+        isPreviousDate()
+    ) {
+
+        showTrackerMessage(
+            "🔒 Previous day data is locked and cannot be edited.",
+            true
+        );
+
+        applyDateEditLock();
+
+        return;
+    }
+
 
     const trackerDate =
         document.getElementById(
@@ -3433,7 +3479,10 @@ async function saveDailyTracker() {
 
 
         employees.forEach(
-            function(employee, index) {
+            function(
+                employee,
+                index
+            ) {
 
                 const attendance =
                     document.getElementById(
@@ -3517,7 +3566,8 @@ async function saveDailyTracker() {
                     "Absent"
                 ) {
 
-                    achieved = 0;
+                    achieved =
+                        0;
                 }
 
 
@@ -3690,7 +3740,10 @@ async function loadDailyTracker() {
 
 
         employees.forEach(
-            function(employee, index) {
+            function(
+                employee,
+                index
+            ) {
 
                 const record =
                     records.find(
@@ -3751,7 +3804,8 @@ async function loadDailyTracker() {
                                 index +
                                 "_" +
                                 (
-                                    hourIndex + 1
+                                    hourIndex +
+                                    1
                                 )
                             );
 
@@ -3760,6 +3814,7 @@ async function loadDailyTracker() {
 
                             input.value =
                                 value || 0;
+
                         }
 
                     }
@@ -3791,6 +3846,8 @@ async function loadDailyTracker() {
 
         applyProjectFilter();
 
+        applyDateEditLock();
+
         updateDashboard();
 
 
@@ -3798,15 +3855,43 @@ async function loadDailyTracker() {
             records.length > 0
         ) {
 
-            showTrackerMessage(
-                "Saved data loaded for " +
-                trackerDate
-            );
+            if (
+                isPreviousDate()
+            ) {
+
+                showTrackerMessage(
+                    "🔒 Saved data loaded. This previous date is locked.",
+                    false
+                );
+
+                const message =
+                    document.getElementById(
+                        "trackerMessage"
+                    );
+
+                if (message) {
+
+                    message.style.color =
+                        "#dc2626";
+                }
+
+            } else {
+
+                showTrackerMessage(
+                    "Saved data loaded for " +
+                    trackerDate
+                );
+
+            }
+
         }
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "LOAD TRACKER ERROR:",
+            error
+        );
 
     }
 }
@@ -3828,22 +3913,27 @@ function escapeHtml(value) {
 
 
     return String(value)
+
         .replace(
             /&/g,
             "&amp;"
         )
+
         .replace(
             /</g,
             "&lt;"
         )
+
         .replace(
             />/g,
             "&gt;"
         )
+
         .replace(
             /"/g,
             "&quot;"
         )
+
         .replace(
             /'/g,
             "&#039;"
@@ -3859,60 +3949,99 @@ document.addEventListener(
     "DOMContentLoaded",
     function() {
 
-        document
-            .getElementById(
+
+        const addProjectButton =
+            document.getElementById(
                 "addProjectButton"
-            )
-            .addEventListener(
+            );
+
+
+        if (addProjectButton) {
+
+            addProjectButton.addEventListener(
                 "click",
                 addProject
             );
 
+        }
 
-        document
-            .getElementById(
+
+        const addEmployeeButton =
+            document.getElementById(
                 "addEmployeeButton"
-            )
-            .addEventListener(
+            );
+
+
+        if (addEmployeeButton) {
+
+            addEmployeeButton.addEventListener(
                 "click",
                 addEmployee
             );
 
+        }
 
-        document
-            .getElementById(
+
+        const saveDailyTrackerButton =
+            document.getElementById(
                 "saveDailyTrackerButton"
-            )
-            .addEventListener(
+            );
+
+
+        if (saveDailyTrackerButton) {
+
+            saveDailyTrackerButton.addEventListener(
                 "click",
                 saveDailyTracker
             );
 
+        }
 
-        document
-            .getElementById(
+
+        const allProjectsButton =
+            document.getElementById(
                 "allProjectsButton"
-            )
-            .addEventListener(
+            );
+
+
+        if (allProjectsButton) {
+
+            allProjectsButton.addEventListener(
                 "click",
                 selectAllProjects
             );
 
+        }
 
-        document
-            .getElementById(
+
+        const trackerDate =
+            document.getElementById(
                 "trackerDate"
-            )
-            .addEventListener(
+            );
+
+
+        if (trackerDate) {
+
+            trackerDate.addEventListener(
                 "change",
                 async function() {
+
+                    /*
+                       Rebuild the table first,
+                       then load the selected date,
+                       then apply the lock.
+                    */
 
                     buildDailyTracker();
 
                     await loadDailyTracker();
 
+                    applyDateEditLock();
+
                 }
             );
+
+        }
 
     }
 );
@@ -3941,11 +4070,14 @@ async function startApplication() {
     await loadDailyTracker();
 
 
+    applyDateEditLock();
+
+
     updateDashboard();
 
 
     console.log(
-        "Hourly Production Dashboard loaded."
+        "Hourly Production Dashboard loaded successfully."
     );
 }
 
