@@ -911,7 +911,81 @@
             font-size: 11px;
         }
 
-    </style>
+    
+        /* =========================================================
+           HOURLY UPDATE REMINDER
+        ========================================================= */
+
+        .hourly-reminder-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+            border-left: 4px solid #f59e0b;
+        }
+
+        .hourly-reminder-card.reminder-active {
+            border-left-color: #dc3545;
+            background: #fffaf5;
+        }
+
+        .hourly-reminder-row {
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            flex-wrap:wrap;
+        }
+
+        .hourly-reminder-title {
+            font-size:15px;
+            font-weight:700;
+            color:#173b5e;
+        }
+
+        .hourly-reminder-text {
+            font-size:12px;
+            color:#64748b;
+            margin-top:4px;
+        }
+
+        .hourly-reminder-badge {
+            display:inline-block;
+            padding:6px 10px;
+            border-radius:999px;
+            font-size:11px;
+            font-weight:700;
+            background:#fef3c7;
+            color:#92400e;
+        }
+
+        .hourly-reminder-badge.due {
+            background:#fee2e2;
+            color:#991b1b;
+        }
+
+        .hourly-reminder-badge.updated {
+            background:#dcfce7;
+            color:#166534;
+        }
+
+        .reminder-enable-btn {
+            border:0;
+            border-radius:7px;
+            padding:9px 13px;
+            cursor:pointer;
+            font-weight:700;
+            font-size:12px;
+            background:#173b5e;
+            color:white;
+        }
+
+        .reminder-enable-btn:hover {
+            opacity:.9;
+        }
+
+</style>
 
 </head>
 
@@ -1237,6 +1311,38 @@
 
     </div>
 
+
+
+    <!-- =====================================================
+         HOURLY UPDATE REMINDER
+    ====================================================== -->
+
+    <div class="section" id="hourlyReminderSection" style="display:none;">
+
+        <div class="section-title">
+            Hourly Update Reminder
+        </div>
+
+        <div class="hourly-reminder-card" id="hourlyReminderCard">
+            <div class="hourly-reminder-row">
+                <div>
+                    <div class="hourly-reminder-title" id="hourlyReminderTitle">
+                        Hourly update reminder
+                    </div>
+                    <div class="hourly-reminder-text" id="hourlyReminderText">
+                        Reminder status will appear here.
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span class="hourly-reminder-badge" id="hourlyReminderBadge">Waiting</span>
+                    <button type="button" class="reminder-enable-btn" id="enableReminderBtn" onclick="enableHourlyNotifications()">
+                        Enable Browser Reminder
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
 
     <!-- =====================================================
          HOURLY PRODUCTION
@@ -1815,6 +1921,178 @@ function showMessage(
 
 
 /* =========================================================
+   HOURLY UPDATE REMINDERS
+
+   Team Leads receive a reminder 10 minutes before the current
+   hourly slot closes. Example: 8:50 PM for the 8–9 PM slot.
+
+   Browser notifications require the user to grant permission.
+   The dashboard banner works even if browser notifications are
+   not enabled.
+========================================================= */
+
+function isTeamLeadUser() {
+    return currentRole === "team_lead";
+}
+
+function getCurrentShiftHourIndex() {
+
+    const now = new Date();
+    const hour = now.getHours();
+
+    if (hour >= 18 && hour <= 23) {
+        return hour - 18;
+    }
+
+    if (hour >= 0 && hour < 3) {
+        return hour + 6;
+    }
+
+    return -1;
+}
+
+function getReminderStateKey(trackerDate, hourIndex) {
+    return `hourlyReminder_${trackerDate}_${hourIndex}`;
+}
+
+function isHourlySlotUpdated(hourIndex) {
+
+    const field = hourFields[hourIndex];
+
+    if (!field) return false;
+
+    const filtered = getFilteredEmployees();
+
+    if (!filtered.length) return false;
+
+    return filtered.every(employee => {
+
+        const record = getProductionRecord(employee.id);
+
+        if (!record) return false;
+
+        const value = record[field];
+
+        return value !== null &&
+               value !== undefined &&
+               value !== "";
+    });
+}
+
+function updateHourlyReminder() {
+
+    const section = document.getElementById("hourlyReminderSection");
+    const card = document.getElementById("hourlyReminderCard");
+    const title = document.getElementById("hourlyReminderTitle");
+    const text = document.getElementById("hourlyReminderText");
+    const badge = document.getElementById("hourlyReminderBadge");
+    const enableBtn = document.getElementById("enableReminderBtn");
+
+    if (!section) return;
+
+    if (!isTeamLeadUser()) {
+        section.style.display = "none";
+        return;
+    }
+
+    section.style.display = "block";
+
+    const trackerDate = document.getElementById("trackerDate")?.value;
+    const currentIndex = getCurrentShiftHourIndex();
+
+    // Outside the 6 PM–3 AM shift.
+    if (!trackerDate || currentIndex < 0 || trackerDate !== getCurrentShiftDateString()) {
+
+        card.classList.remove("reminder-active");
+        title.textContent = "Hourly update reminder";
+        text.textContent = "Reminders will appear 10 minutes before each hour closes during the 6 PM–3 AM shift.";
+        badge.className = "hourly-reminder-badge";
+        badge.textContent = "Waiting";
+        return;
+    }
+
+    const now = new Date();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+    const minutesRemaining = 59 - minutes + (60 - seconds) / 60;
+    const label = hourLabels[currentIndex];
+    const updated = isHourlySlotUpdated(currentIndex);
+
+    if (updated) {
+        card.classList.remove("reminder-active");
+        title.textContent = `Hourly update completed: ${label}`;
+        text.textContent = "The current hourly count has been updated. No reminder is required.";
+        badge.className = "hourly-reminder-badge updated";
+        badge.textContent = "Updated ✓";
+        return;
+    }
+
+    card.classList.remove("reminder-active");
+
+    if (minutesRemaining <= 10 && minutesRemaining > 0) {
+
+        card.classList.add("reminder-active");
+        title.textContent = `🔔 Update due: ${label}`;
+        text.textContent = `Please update the production count for ${label}. This hour closes in ${Math.max(1, Math.ceil(minutesRemaining))} minute(s).`;
+        badge.className = "hourly-reminder-badge due";
+        badge.textContent = "UPDATE NOW";
+
+        const key = getReminderStateKey(trackerDate, currentIndex);
+        const alreadyNotified = localStorage.getItem(key) === "sent";
+
+        if (!alreadyNotified) {
+            localStorage.setItem(key, "sent");
+            sendHourlyBrowserNotification(label, trackerDate);
+        }
+
+        return;
+    }
+
+    title.textContent = `Current hour: ${label}`;
+    text.textContent = `Please keep the hourly count updated. A reminder will appear 10 minutes before ${label} closes.`;
+    badge.className = "hourly-reminder-badge";
+    badge.textContent = "Monitoring";
+}
+
+function sendHourlyBrowserNotification(label, trackerDate) {
+
+    if (typeof Notification === "undefined") return;
+
+    if (Notification.permission === "granted") {
+        try {
+            new Notification("Hourly Production Update Reminder", {
+                body: `Please update the production count for ${label} before the hour closes.`,
+                tag: `hourly-production-${trackerDate}-${label}`
+            });
+        } catch (error) {
+            console.warn("Browser notification unavailable:", error);
+        }
+    }
+}
+
+async function enableHourlyNotifications() {
+
+    if (typeof Notification === "undefined") {
+        showMessage("Browser notifications are not supported in this browser.", "error");
+        return;
+    }
+
+    try {
+        const permission = await Notification.requestPermission();
+
+        if (permission === "granted") {
+            showMessage("Hourly browser reminders enabled.");
+            updateHourlyReminder();
+        } else {
+            showMessage("Browser reminder permission was not enabled.", "error");
+        }
+    } catch (error) {
+        console.error("Notification permission:", error);
+        showMessage("Unable to enable browser reminders.", "error");
+    }
+}
+
+/* =========================================================
    TODAY
 ========================================================= */
 
@@ -2342,6 +2620,8 @@ async function loadDailyTracker() {
     buildDailyTracker();
 
     applyHourlyLocks();
+
+    updateHourlyReminder();
 
     updateDashboard();
 
@@ -7393,7 +7673,14 @@ document.addEventListener("keydown", function(event) {
 
 setInterval(() => {
     applyHourlyLocks();
-}, 60 * 1000);
+    updateHourlyReminder();
+}, 30 * 1000);
+
+
+/* Keep reminder state synchronized even when no tracker reload occurs. */
+setTimeout(() => {
+    updateHourlyReminder();
+}, 1000);
 
 
 /* =========================================================
