@@ -3030,11 +3030,21 @@ function getRowData(row) {
         ).value;
 
 
-    const target =
+    const calculatedTarget =
         getDailyTarget(
             employee,
             attendance
         );
+
+    // daily_productivity.daily_target is NOT NULL in Supabase.
+    // If a project/sub-project target is not configured, save 0
+    // instead of sending null to Supabase.
+    const target =
+        calculatedTarget === null ||
+        calculatedTarget === undefined ||
+        calculatedTarget === ""
+            ? 0
+            : Number(calculatedTarget);
 
 
     const record = {
