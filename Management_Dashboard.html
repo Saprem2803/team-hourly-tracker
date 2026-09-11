@@ -502,6 +502,17 @@ label{
             Operations Dashboard
         </button>
 
+        <!--
+            The employee self-entry screen. Opening it here is how
+            the URL is obtained to circulate to staff.
+        -->
+        <button
+            class="btn ghost"
+            onclick="openEmployeeEntry()"
+        >
+            Employee Entry Link
+        </button>
+
         <button
             class="btn"
             onclick="logout()"
@@ -1063,6 +1074,10 @@ const supabaseClient =
 /* =========================================================
    OPERATIONS DASHBOARD
 ========================================================= */
+
+// Employee self-entry screen. Must sit in the same folder.
+const EMPLOYEE_ENTRY_URL =
+    "Employee_Hourly_Entry.html";
 
 const OPERATIONS_DASHBOARD_URL =
     "Hourly_Production_Management_Dashboard_HOURLY_REMINDERS.html";
@@ -3564,6 +3579,21 @@ function openOperations(){
 
     window.location.href =
         OPERATIONS_DASHBOARD_URL;
+
+}
+
+
+/*
+   Opens the employee self-entry screen in a new tab. Its address
+   bar holds the exact link to circulate to staff.
+*/
+function openEmployeeEntry(){
+
+    window.open(
+        EMPLOYEE_ENTRY_URL,
+        "_blank",
+        "noopener"
+    );
 
 }
 
