@@ -22,69 +22,61 @@ body {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
     background:
-        linear-gradient(180deg, #eef5fb 0%, #f7f9fc 45%, #eef2f7 100%);
+        linear-gradient(
+            180deg,
+            #eef4fb 0%,
+            #f7f9fc 45%,
+            #ffffff 100%
+        );
     color: #1f2937;
     -webkit-text-size-adjust: 100%;
-    min-height: 100vh;
 }
-
-/* =========================================================
-   HEADER
-========================================================= */
 
 .header {
     background:
-        linear-gradient(135deg, #082f55, #1261a0 65%, #1786c9);
+        linear-gradient(
+            135deg,
+            #0b3155,
+            #1261a0,
+            #1686c9
+        );
     color: #fff;
     padding: 20px;
     box-shadow: 0 4px 18px rgba(0,0,0,.16);
-    position: relative;
-    overflow: hidden;
 }
 
-.header::after {
-    content: "";
-    position: absolute;
-    width: 220px;
-    height: 220px;
-    right: -80px;
-    top: -110px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.08);
+.header-inner {
+    max-width: 640px;
+    margin: auto;
 }
 
 .header h1 {
     margin: 0;
     font-size: 21px;
-    position: relative;
-    z-index: 1;
+    letter-spacing: .2px;
 }
 
 .header p {
-    margin: 5px 0 0;
-    opacity: .85;
+    margin: 6px 0 0;
+    opacity: .88;
     font-size: 13px;
-    position: relative;
-    z-index: 1;
 }
-
-/* =========================================================
-   LAYOUT
-========================================================= */
 
 .container {
     padding: 16px;
-    max-width: 680px;
+    max-width: 640px;
     margin: auto;
 }
 
 .card {
     background: #fff;
-    border-radius: 15px;
+    border-radius: 14px;
     padding: 17px;
     margin-bottom: 16px;
-    box-shadow: 0 3px 14px rgba(15,61,104,.08);
-    border: 1px solid rgba(203,213,225,.65);
+    box-shadow:
+        0 3px 14px rgba(15,61,104,.08),
+        0 1px 2px rgba(0,0,0,.04);
+    border: 1px solid #edf1f6;
 }
 
 .card h2 {
@@ -97,11 +89,12 @@ body {
     color: #6b7280;
     font-size: 13px;
     margin: 0 0 14px;
+    line-height: 1.45;
 }
 
-/* =========================================================
-   LOGIN
-========================================================= */
+.field {
+    margin-bottom: 14px;
+}
 
 label {
     display: block;
@@ -124,31 +117,23 @@ select {
     color: #1f2937;
 }
 
+select {
+    appearance: auto;
+}
+
 input:focus,
 select:focus {
     outline: none;
     border-color: #1261a0;
-    box-shadow: 0 0 0 3px rgba(18,97,160,.15);
+    box-shadow:
+        0 0 0 3px rgba(18,97,160,.14);
 }
 
-.field {
-    margin-bottom: 14px;
+input[type="number"].locked-input {
+    background: #eef2f7;
+    color: #7c8798;
+    border-color: #dde5ee;
 }
-
-.login-info {
-    background: #eef7ff;
-    border: 1px solid #cfe4f7;
-    color: #14507f;
-    border-radius: 9px;
-    padding: 12px 13px;
-    font-size: 13px;
-    margin-bottom: 15px;
-    line-height: 1.5;
-}
-
-/* =========================================================
-   BUTTONS
-========================================================= */
 
 .btn {
     display: inline-block;
@@ -161,7 +146,7 @@ select:focus {
     background: #1261a0;
     color: #fff;
     cursor: pointer;
-    transition: .2s ease;
+    transition: .15s ease;
 }
 
 .btn:hover {
@@ -185,39 +170,70 @@ select:focus {
     background: #eef4fa;
 }
 
-.btn-danger {
-    background: #fff;
-    color: #a11;
-    border: 1px solid #e5bcbc;
+.login-info {
+    background: #eef4fa;
+    border: 1px solid #cfe0ef;
+    color: #14507f;
+    border-radius: 9px;
+    padding: 12px 13px;
+    font-size: 13px;
+    margin-bottom: 15px;
+    line-height: 1.45;
 }
 
+.banner {
+    padding: 12px 14px;
+    border-radius: 9px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    border: 1px solid transparent;
+    line-height: 1.4;
+}
+
+.banner.error {
+    background: #fdecec;
+    border-color: #f5c2c2;
+    color: #9b1c1c;
+}
+
+.banner.warn {
+    background: #fff8e6;
+    border-color: #f5e2b3;
+    color: #7a5c06;
+}
+
+.banner.info {
+    background: #eef4fa;
+    border-color: #cfe0ef;
+    color: #14507f;
+}
+
+.hidden {
+    display: none !important;
+}
+
+
 /* =========================================================
-   WHO AM I
+   EMPLOYEE IDENTITY
 ========================================================= */
 
 .whoami {
     background:
-        linear-gradient(135deg, #0b355c, #1261a0 70%, #1689ce);
+        linear-gradient(
+            135deg,
+            #0b3155,
+            #1261a0
+        );
     color: #fff;
     border-radius: 15px;
     padding: 17px;
     margin-bottom: 16px;
-    box-shadow: 0 5px 18px rgba(15,61,104,.18);
-    position: relative;
-    overflow: hidden;
-}
-
-.whoami::after {
-    content: "⚡";
-    position: absolute;
-    right: 16px;
-    top: 13px;
-    font-size: 42px;
-    opacity: .13;
+    box-shadow:
+        0 7px 20px rgba(15,61,104,.18);
 }
 
 .whoami-name {
-    font-size: 20px;
+    font-size: 21px;
     font-weight: bold;
 }
 
@@ -230,9 +246,10 @@ select:focus {
 .whoami-date {
     font-size: 13px;
     margin-top: 11px;
-    padding-top: 11px;
+    padding-top: 10px;
     border-top: 1px solid rgba(255,255,255,.22);
 }
+
 
 /* =========================================================
    PERFORMANCE CARD
@@ -241,127 +258,107 @@ select:focus {
 .performance-card {
     position: relative;
     overflow: hidden;
-}
-
-.performance-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-}
-
-.performance-title {
-    font-size: 14px;
-    font-weight: bold;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-}
-
-.performance-percent {
-    font-size: 32px;
-    font-weight: 900;
-    color: #1261a0;
-    line-height: 1;
-}
-
-.progress-track {
-    height: 13px;
-    background: #e8eef5;
-    border-radius: 999px;
-    overflow: hidden;
-    margin-top: 16px;
-}
-
-.progress-bar {
-    height: 100%;
-    width: 0%;
-    border-radius: 999px;
-    background:
-        linear-gradient(90deg, #1261a0, #24a0e6);
-    transition: width .45s ease;
-}
-
-.performance-message {
-    margin-top: 14px;
-    border-radius: 11px;
-    padding: 13px;
-    font-size: 14px;
-    font-weight: bold;
     text-align: center;
-    line-height: 1.45;
-    background: #f1f5f9;
-    color: #475569;
-    border: 1px solid #e2e8f0;
+    padding: 20px 17px;
 }
 
-.performance-message.above {
-    background: linear-gradient(135deg, #fff7d6, #fff0a8);
-    color: #7a5600;
-    border-color: #f2d675;
-}
-
-.performance-message.target {
-    background: #eaf7ef;
-    color: #14683c;
-    border-color: #bfe4ce;
-}
-
-.performance-message.below {
-    background: #fff3e8;
-    color: #9a4b00;
-    border-color: #f1c79e;
-}
-
-.performance-message.no-target {
-    background: #eef4fa;
-    color: #14507f;
-    border-color: #cfe0ef;
+.performance-card::before {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    right: -80px;
+    top: -90px;
+    background: rgba(18,97,160,.06);
 }
 
 .performance-emoji {
-    font-size: 24px;
-    display: block;
-    margin-bottom: 4px;
+    font-size: 42px;
+    line-height: 1;
+    margin-bottom: 8px;
 }
 
-/* =========================================================
-   STAT CARDS
-========================================================= */
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 9px;
-    margin-bottom: 16px;
-}
-
-.stat-box {
-    background: #fff;
-    border: 1px solid #e1e8f0;
-    border-radius: 12px;
-    padding: 12px 8px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(15,61,104,.05);
-}
-
-.stat-label {
-    color: #64748b;
-    font-size: 10px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-}
-
-.stat-value {
-    color: #173b5e;
+.performance-title {
     font-size: 20px;
-    font-weight: 900;
-    margin-top: 5px;
+    font-weight: 800;
+    color: #173b5e;
 }
 
+.performance-message {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.45;
+}
+
+.performance-score {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.score-pill {
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: bold;
+    background: #eef4fa;
+    color: #14507f;
+    border: 1px solid #d7e5f1;
+}
+
+.performance-card.above {
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff,
+            #f0fff5
+        );
+    border-color: #bfe6cd;
+}
+
+.performance-card.above .performance-title {
+    color: #11733f;
+}
+
+.performance-card.on-target {
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff,
+            #f4f9ff
+        );
+    border-color: #bfd8ed;
+}
+
+.performance-card.on-target .performance-title {
+    color: #1261a0;
+}
+
+.performance-card.below {
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff,
+            #fff9ed
+        );
+    border-color: #ead8a6;
+}
+
+.performance-card.below .performance-title {
+    color: #8b6700;
+}
+
+.performance-card.no-target {
+    background: #fff;
+}
+
+
 /* =========================================================
-   HOURLY ROWS
+   HOURS
 ========================================================= */
 
 .hour-row {
@@ -390,11 +387,10 @@ select:focus {
     font-weight: normal;
     color: #94a3b8;
     margin-top: 2px;
-    letter-spacing: .04em;
 }
 
 .hour-input {
-    flex: 0 0 90px;
+    flex: 0 0 92px;
     text-align: center;
     font-weight: bold;
 }
@@ -413,17 +409,13 @@ select:focus {
     flex: 0 0 auto;
     font-size: 9px;
     font-weight: bold;
-    letter-spacing: .06em;
+    letter-spacing: .05em;
     color: #64748b;
     background: #eef2f7;
     border: 1px solid #dde5ee;
     border-radius: 999px;
     padding: 3px 7px;
 }
-
-/* =========================================================
-   TOTAL
-========================================================= */
 
 .total-line {
     display: flex;
@@ -440,6 +432,43 @@ select:focus {
 .total-value {
     font-size: 23px;
 }
+
+
+/* =========================================================
+   TARGET SUMMARY
+========================================================= */
+
+.target-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(3, 1fr);
+    gap: 9px;
+    margin-top: 14px;
+}
+
+.target-box {
+    background: #f7f9fc;
+    border: 1px solid #e6ebf1;
+    border-radius: 10px;
+    padding: 11px 8px;
+    text-align: center;
+}
+
+.target-label {
+    font-size: 10px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: bold;
+}
+
+.target-number {
+    margin-top: 4px;
+    font-size: 20px;
+    font-weight: 800;
+    color: #173b5e;
+}
+
 
 /* =========================================================
    AUTOSAVE
@@ -472,7 +501,8 @@ select:focus {
     color: #92700e;
 }
 
-.autosave[data-state="saving"] .autosave-dot {
+.autosave[data-state="saving"]
+.autosave-dot {
     background: #d99f0b;
     animation: pulse 1s ease-in-out infinite;
 }
@@ -483,7 +513,8 @@ select:focus {
     color: #14683c;
 }
 
-.autosave[data-state="saved"] .autosave-dot {
+.autosave[data-state="saved"]
+.autosave-dot {
     background: #198754;
 }
 
@@ -493,11 +524,13 @@ select:focus {
     color: #9b1c1c;
 }
 
-.autosave[data-state="error"] .autosave-dot {
+.autosave[data-state="error"]
+.autosave-dot {
     background: #dc3545;
 }
 
 @keyframes pulse {
+
     0%,100% {
         opacity: 1;
     }
@@ -505,118 +538,38 @@ select:focus {
     50% {
         opacity: .35;
     }
+
 }
+
 
 /* =========================================================
-   BANNERS
-========================================================= */
-
-.banner {
-    padding: 12px 14px;
-    border-radius: 9px;
-    font-size: 14px;
-    margin-bottom: 16px;
-    border: 1px solid transparent;
-}
-
-.banner.error {
-    background: #fdecec;
-    border-color: #f5c2c2;
-    color: #9b1c1c;
-}
-
-.banner.warn {
-    background: #fff8e6;
-    border-color: #f5e2b3;
-    color: #7a5c06;
-}
-
-.banner.info {
-    background: #eef4fa;
-    border-color: #cfe0ef;
-    color: #14507f;
-}
-
-/* =========================================================
-   CELEBRATION OVERLAY
+   CELEBRATION
 ========================================================= */
 
 .celebration {
     position: fixed;
     inset: 0;
-    background: rgba(4,27,48,.78);
     z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    opacity: 0;
     pointer-events: none;
-    transition: opacity .3s ease;
-}
-
-.celebration.show {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.celebration-card {
-    width: min(430px, 100%);
-    background: #fff;
-    border-radius: 24px;
-    padding: 30px 22px;
-    text-align: center;
-    box-shadow: 0 25px 70px rgba(0,0,0,.35);
-    transform: scale(.8);
-    transition: transform .35s ease;
-    position: relative;
     overflow: hidden;
 }
 
-.celebration.show .celebration-card {
-    transform: scale(1);
-}
-
-.celebration-icon {
-    font-size: 70px;
-    animation: trophyBounce 1s infinite alternate;
-}
-
-@keyframes trophyBounce {
-    from {
-        transform: translateY(0) rotate(-3deg);
-    }
-
-    to {
-        transform: translateY(-8px) rotate(3deg);
-    }
-}
-
-.celebration-card h2 {
-    margin: 10px 0 6px;
-    font-size: 28px;
-    color: #173b5e;
-}
-
-.celebration-card p {
-    margin: 0 0 20px;
-    color: #64748b;
-    line-height: 1.5;
-}
-
 .confetti {
-    position: fixed;
-    width: 9px;
-    height: 15px;
+    position: absolute;
     top: -20px;
-    z-index: 10000;
-    animation: confettiFall 2.8s linear forwards;
+    font-size: 22px;
+    animation:
+        confettiFall
+        2.5s
+        linear
+        forwards;
 }
 
 @keyframes confettiFall {
+
     0% {
         transform:
-            translateY(-20px)
+            translateY(0)
             rotate(0deg);
         opacity: 1;
     }
@@ -627,22 +580,20 @@ select:focus {
             rotate(720deg);
         opacity: 0;
     }
+
 }
+
 
 /* =========================================================
-   FOOTER / LOADING
+   FOOTER
 ========================================================= */
-
-.hidden {
-    display: none !important;
-}
 
 .footer {
     text-align: center;
     color: #94a3b8;
     font-size: 12px;
     padding: 4px 0 26px;
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .spinner {
@@ -656,19 +607,8 @@ select:focus {
     margin-top: 12px;
 }
 
-/* =========================================================
-   RESPONSIVE
-========================================================= */
 
-@media (max-width: 420px) {
-
-    .stats-grid {
-        gap: 6px;
-    }
-
-    .stat-value {
-        font-size: 18px;
-    }
+@media (max-width: 380px) {
 
     .hour-input {
         flex: 0 0 78px;
@@ -678,8 +618,12 @@ select:focus {
         font-size: 14px;
     }
 
-    .performance-percent {
-        font-size: 28px;
+    .target-grid {
+        gap: 6px;
+    }
+
+    .target-number {
+        font-size: 18px;
     }
 
 }
@@ -692,17 +636,19 @@ select:focus {
 <body>
 
 
-<!-- =========================================================
-     HEADER
-========================================================= -->
-
 <div class="header">
 
-    <h1>My Hourly Production</h1>
+    <div class="header-inner">
 
-    <p id="headerSubtitle">
-        Secure employee production entry
-    </p>
+        <h1>
+            My Hourly Production
+        </h1>
+
+        <p id="headerSubtitle">
+            Secure employee production entry
+        </p>
+
+    </div>
 
 </div>
 
@@ -731,23 +677,26 @@ select:focus {
 <div id="loginCard"
      class="card hidden">
 
-    <h2>Employee Login</h2>
+    <h2>
+        Employee Login
+    </h2>
 
     <p class="muted">
-        Sign in to update your own hourly production.
+        Sign in with your employee account to update
+        your own hourly production.
     </p>
 
     <div class="login-info">
 
-        🔐 Your account is securely connected to your
-        employee record. You can only access your own
-        production data.
+        Your account is securely connected to your
+        employee record. You will only be able to
+        access your own production data.
 
     </div>
 
     <div id="loginBanner"
-         class="banner error hidden"></div>
-
+         class="banner error hidden">
+    </div>
 
     <div class="field">
 
@@ -755,13 +704,13 @@ select:focus {
             Email
         </label>
 
-        <input type="email"
-               id="loginEmail"
-               autocomplete="username"
-               placeholder="Enter your company email">
+        <input
+            type="email"
+            id="loginEmail"
+            autocomplete="username"
+            placeholder="Enter your company email">
 
     </div>
-
 
     <div class="field">
 
@@ -769,17 +718,18 @@ select:focus {
             Password
         </label>
 
-        <input type="password"
-               id="loginPassword"
-               autocomplete="current-password"
-               placeholder="Enter your password">
+        <input
+            type="password"
+            id="loginPassword"
+            autocomplete="current-password"
+            placeholder="Enter your password">
 
     </div>
 
-
-    <button class="btn"
-            id="loginBtn"
-            onclick="loginEmployee()">
+    <button
+        class="btn"
+        id="loginBtn"
+        onclick="loginEmployee()">
 
         Login
 
@@ -795,15 +745,19 @@ select:focus {
 <div id="fatalCard"
      class="card hidden">
 
-    <h2>Cannot load portal</h2>
+    <h2>
+        Cannot load
+    </h2>
 
     <div id="fatalText"
-         class="banner error"></div>
+         class="banner error">
+    </div>
 
-    <button class="btn"
-            onclick="location.reload()">
+    <button
+        class="btn"
+        onclick="location.reload()">
 
-        Try Again
+        Try again
 
     </button>
 
@@ -818,118 +772,66 @@ select:focus {
      class="hidden">
 
 
-    <!-- EMPLOYEE IDENTITY -->
-
+    <!-- EMPLOYEE -->
     <div class="whoami">
 
         <div class="whoami-name"
-             id="whoName"></div>
+             id="whoName">
+        </div>
 
         <div class="whoami-meta"
-             id="whoMeta"></div>
+             id="whoMeta">
+        </div>
 
         <div class="whoami-date"
-             id="whoDate"></div>
+             id="whoDate">
+        </div>
 
     </div>
 
 
-    <!-- ENTRY BANNER -->
+    <!-- PERFORMANCE -->
+    <div id="performanceCard"
+         class="card performance-card">
 
-    <div id="entryBanner"
-         class="banner info hidden"></div>
-
-
-    <!-- =====================================================
-         PERFORMANCE
-    ====================================================== -->
-
-    <div class="card performance-card">
-
-        <div class="performance-top">
-
-            <div>
-
-                <div class="performance-title">
-                    Today's Performance
-                </div>
-
-            </div>
-
-            <div class="performance-percent"
-                 id="performancePercent">
-                0%
-            </div>
-
+        <div class="performance-emoji"
+             id="performanceEmoji">
+            🚀
         </div>
 
+        <div class="performance-title"
+             id="performanceTitle">
 
-        <div class="progress-track">
-
-            <div class="progress-bar"
-                 id="progressBar">
-            </div>
+            Let's get started!
 
         </div>
-
 
         <div class="performance-message"
              id="performanceMessage">
 
-            <span class="performance-emoji">
-                🚀
-            </span>
-
-            Keep going — let's get that production moving!
+            Enter your hourly production and keep
+            an eye on your target.
 
         </div>
 
-    </div>
+        <div class="performance-score">
 
+            <div class="score-pill">
 
-    <!-- =====================================================
-         LIVE STATS
-    ====================================================== -->
+                Achievement:
+                <span id="achievementDisplay">
+                    0%
+                </span>
 
-    <div class="stats-grid">
-
-        <div class="stat-box">
-
-            <div class="stat-label">
-                Target
             </div>
 
-            <div class="stat-value"
-                 id="targetValue">
-                0
-            </div>
+            <div class="score-pill">
 
-        </div>
+                Target:
+                <span id="targetDisplay">
+                    0
+                </span>
 
-
-        <div class="stat-box">
-
-            <div class="stat-label">
-                Done
-            </div>
-
-            <div class="stat-value"
-                 id="achievedValue">
-                0
-            </div>
-
-        </div>
-
-
-        <div class="stat-box">
-
-            <div class="stat-label">
-                Remaining
-            </div>
-
-            <div class="stat-value"
-                 id="remainingValue">
-                0
             </div>
 
         </div>
@@ -937,20 +839,26 @@ select:focus {
     </div>
 
 
-    <!-- =====================================================
-         ATTENDANCE
-    ====================================================== -->
+    <!-- BANNER -->
+    <div id="entryBanner"
+         class="banner info hidden">
+    </div>
 
+
+    <!-- ATTENDANCE -->
     <div class="card">
 
-        <h2>Attendance</h2>
+        <h2>
+            Attendance
+        </h2>
 
         <p class="muted">
             Set this before entering your counts.
         </p>
 
-        <select id="attendance"
-                onchange="onAttendanceChange()">
+        <select
+            id="attendance"
+            onchange="onAttendanceChange()">
 
             <option value="Present">
                 Present
@@ -969,21 +877,83 @@ select:focus {
     </div>
 
 
-    <!-- =====================================================
-         HOURLY PRODUCTION
-    ====================================================== -->
-
+    <!-- TARGET SUMMARY -->
     <div class="card">
 
-        <h2>Hourly Production</h2>
+        <h2>
+            Today's Numbers
+        </h2>
+
+        <div class="target-grid">
+
+            <div class="target-box">
+
+                <div class="target-label">
+                    Target
+                </div>
+
+                <div
+                    class="target-number"
+                    id="summaryTarget">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+            <div class="target-box">
+
+                <div class="target-label">
+                    Achieved
+                </div>
+
+                <div
+                    class="target-number"
+                    id="summaryAchieved">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+            <div class="target-box">
+
+                <div class="target-label">
+                    Remaining
+                </div>
+
+                <div
+                    class="target-number"
+                    id="summaryRemaining">
+
+                    0
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- HOURLY ENTRY -->
+    <div class="card">
+
+        <h2>
+            Hourly Count
+        </h2>
 
         <p class="muted">
             Enter how many you completed in each hour.
-            Your entries save automatically.
+            Saving happens automatically.
         </p>
 
         <div id="hourRows"></div>
-
 
         <div class="total-line">
 
@@ -991,9 +961,12 @@ select:focus {
                 Total entered
             </span>
 
-            <span class="total-value"
-                  id="totalEntered">
+            <span
+                class="total-value"
+                id="totalEntered">
+
                 0
+
             </span>
 
         </div>
@@ -1001,15 +974,13 @@ select:focus {
     </div>
 
 
-    <!-- =====================================================
-         AUTOSAVE / LOGOUT
-    ====================================================== -->
-
+    <!-- AUTOSAVE -->
     <div class="card">
 
-        <div class="autosave"
-             id="saveState"
-             data-state="idle">
+        <div
+            class="autosave"
+            id="saveState"
+            data-state="idle">
 
             <span class="autosave-dot"></span>
 
@@ -1022,8 +993,9 @@ select:focus {
 
         <div class="logout-row">
 
-            <button class="btn btn-quiet"
-                    onclick="logoutEmployee()">
+            <button
+                class="btn btn-quiet"
+                onclick="logoutEmployee()">
 
                 Logout
 
@@ -1037,54 +1009,24 @@ select:focus {
 </div>
 
 
-<div class="footer">
+<div
+    class="footer"
+    id="footerNote">
 
-    Entries automatically feed the Hourly Production
-    Tracker and RCM Management Dashboard.
+    Entries feed the Hourly Production Tracker
+    and the RCM Management Dashboard automatically.
 
 </div>
 
-
-</div>
-
-
-<!-- =========================================================
-     CELEBRATION OVERLAY
-========================================================= -->
-
-<div id="celebrationOverlay"
-     class="celebration">
-
-    <div class="celebration-card">
-
-        <div class="celebration-icon">
-            🏆
-        </div>
-
-        <h2 id="celebrationTitle">
-            AMAZING!
-        </h2>
-
-        <p id="celebrationText">
-            You crushed today's target!
-        </p>
-
-        <button class="btn"
-                onclick="closeCelebration()">
-
-            Keep Going 🚀
-
-        </button>
-
-    </div>
 
 </div>
 
 
 <script>
 
+
 /* =========================================================
-   SUPABASE CONFIGURATION
+   SUPABASE
 ========================================================= */
 
 const SUPABASE_URL =
@@ -1092,7 +1034,7 @@ const SUPABASE_URL =
 
 
 const SUPABASE_KEY =
-    "sb_publishable_fiXzds8sZeg1f5CcnzhlQ_Gm_x71af";
+    "sb_publishable_fiXzds8sZeg1f5cCnzhlQ_Gm_x71af";
 
 
 const supabaseClient =
@@ -1100,13 +1042,6 @@ const supabaseClient =
         SUPABASE_URL,
         SUPABASE_KEY
     );
-
-
-/* =========================================================
-   EMPLOYEE MOTIVATION SETTINGS
-========================================================= */
-
-const MANAGER_NAME = "Andy";
 
 
 /* =========================================================
@@ -1147,25 +1082,31 @@ const hourLabels = [
    STATE
 ========================================================= */
 
-let projects = [];
-let subProjects = [];
-
 let me = null;
+
 let trackerDate = null;
+
 let myRecord = null;
 
 let currentAuthUser = null;
 
+let projects = [];
+
+let subProjects = [];
+
 let dateLockOverride = null;
+
 let dateLockTableAvailable = true;
 
 let lockTicker = null;
 
 let saveTimer = null;
+
 let saveInFlight = false;
+
 let savePending = false;
 
-let celebrationAlreadyShown = false;
+const SAVE_DEBOUNCE_MS = 900;
 
 
 /* =========================================================
@@ -1316,10 +1257,9 @@ function getCurrentShiftDateString() {
     const shiftDate =
         new Date(now);
 
-
     /*
-       Midnight–2:59 AM belongs to previous
-       day's 6 PM–3 AM shift.
+       12 AM – 2:59 AM belongs to the previous
+       day's 6 PM – 3 AM shift.
     */
 
     if (
@@ -1332,7 +1272,6 @@ function getCurrentShiftDateString() {
 
     }
 
-
     return formatLocalDate(
         shiftDate
     );
@@ -1341,7 +1280,7 @@ function getCurrentShiftDateString() {
 
 
 /* =========================================================
-   HOUR LOCKING
+   HOUR LOCK
 ========================================================= */
 
 function getShiftHourIndexForDate(date) {
@@ -1349,7 +1288,6 @@ function getShiftHourIndexForDate(date) {
     if (!date) {
         return -1;
     }
-
 
     const now =
         new Date();
@@ -1380,13 +1318,6 @@ function getShiftHourIndexForDate(date) {
         now.getHours();
 
 
-    /*
-       6 PM = 0
-       7 PM = 1
-       ...
-       11 PM = 5
-    */
-
     if (
         hour >= 18
     ) {
@@ -1398,12 +1329,6 @@ function getShiftHourIndexForDate(date) {
 
     }
 
-
-    /*
-       Midnight = 6
-       1 AM = 7
-       2 AM = 8
-    */
 
     if (
         hour < 3
@@ -1422,7 +1347,10 @@ function getShiftHourIndexForDate(date) {
 }
 
 
-function isHourLocked(index, date) {
+function isHourLocked(
+    index,
+    date
+) {
 
     if (
         dateLockOverride !== null
@@ -1434,12 +1362,10 @@ function isHourLocked(index, date) {
 
     }
 
-
     const currentIndex =
         getShiftHourIndexForDate(
             date
         );
-
 
     return (
         currentIndex >= 0 &&
@@ -1461,7 +1387,6 @@ function isDateFullyLocked(date) {
 
     }
 
-
     return (
         getShiftHourIndexForDate(date) >=
         hourFields.length
@@ -1478,7 +1403,6 @@ async function loadDateLockState(date) {
 
     dateLockOverride = null;
 
-
     if (
         !date ||
         !dateLockTableAvailable
@@ -1494,7 +1418,9 @@ async function loadDateLockState(date) {
         error
     } =
         await supabaseClient
-            .from("tracker_date_locks")
+            .from(
+                "tracker_date_locks"
+            )
             .select(
                 "tracker_date,is_locked"
             )
@@ -1542,7 +1468,7 @@ async function loadDateLockState(date) {
 
 
 /* =========================================================
-   REFERENCE DATA
+   PROJECT / SUB-PROJECT
 ========================================================= */
 
 function getProjectById(id) {
@@ -1579,7 +1505,7 @@ function getEmployeeSubProject(employee) {
 
 
     /*
-       Employee's direct sub-project.
+       Direct employee sub-project mapping.
     */
 
     if (
@@ -1588,38 +1514,35 @@ function getEmployeeSubProject(employee) {
         employee.sub_project_id !== ""
     ) {
 
-        const direct =
-            getSubProjectById(
-                employee.sub_project_id
-            );
-
-
-        if (direct) {
-            return direct;
-        }
+        return getSubProjectById(
+            employee.sub_project_id
+        );
 
     }
 
 
     /*
-       If there is only one active sub-project
-       under the employee's project, use it.
+       Fallback:
+       if there is exactly one sub-project under
+       the employee's project, use it.
+
+       NOTE:
+       No "active" column is assumed.
     */
 
-    const projectSubProjects =
+    const matches =
         subProjects.filter(
             sp =>
                 Number(sp.project_id) ===
-                    Number(employee.project_id) &&
-                sp.active === true
+                Number(employee.project_id)
         );
 
 
     if (
-        projectSubProjects.length === 1
+        matches.length === 1
     ) {
 
-        return projectSubProjects[0];
+        return matches[0];
 
     }
 
@@ -1633,7 +1556,9 @@ function getEmployeeSubProject(employee) {
    TARGET
 ========================================================= */
 
-function getEmployeeBaseTarget(employee) {
+function getEmployeeBaseTarget(
+    employee
+) {
 
     const subProject =
         getEmployeeSubProject(
@@ -1663,9 +1588,15 @@ function getEmployeeBaseTarget(employee) {
         }
 
 
-        return Number(
-            subProject.daily_target
-        );
+        const value =
+            Number(
+                subProject.daily_target
+            );
+
+
+        return Number.isFinite(value)
+            ? value
+            : null;
 
     }
 
@@ -1677,7 +1608,9 @@ function getEmployeeBaseTarget(employee) {
 
 
     if (!project) {
+
         return null;
+
     }
 
 
@@ -1692,9 +1625,15 @@ function getEmployeeBaseTarget(employee) {
     }
 
 
-    return Number(
-        project.daily_target
-    );
+    const value =
+        Number(
+            project.daily_target
+        );
+
+
+    return Number.isFinite(value)
+        ? value
+        : null;
 
 }
 
@@ -1711,14 +1650,10 @@ function getDailyTarget(
 
 
     if (
-        target === null ||
-        target === undefined ||
-        Number.isNaN(
-            Number(target)
-        )
+        target === null
     ) {
 
-        return null;
+        return 0;
 
     }
 
@@ -1737,13 +1672,13 @@ function getDailyTarget(
     ) {
 
         return Math.ceil(
-            Number(target) / 2
+            target / 2
         );
 
     }
 
 
-    return Number(target);
+    return target;
 
 }
 
@@ -1754,12 +1689,10 @@ function computeAchievementPercent(
 ) {
 
     if (
-        target === null ||
-        target === undefined ||
         Number(target) <= 0
     ) {
 
-        return null;
+        return 0;
 
     }
 
@@ -1782,7 +1715,8 @@ async function checkExistingSession() {
         data,
         error
     } =
-        await supabaseClient.auth.getSession();
+        await supabaseClient.auth
+            .getSession();
 
 
     if (error) {
@@ -1813,7 +1747,7 @@ async function checkExistingSession() {
 
 
 /* =========================================================
-   LOAD CURRENT EMPLOYEE
+   CURRENT EMPLOYEE
 ========================================================= */
 
 async function loadCurrentEmployee() {
@@ -1949,17 +1883,6 @@ async function loginEmployee() {
         }
 
 
-        if (
-            !data?.user
-        ) {
-
-            throw new Error(
-                "Login completed but no user session was returned."
-            );
-
-        }
-
-
         currentAuthUser =
             data.user;
 
@@ -1970,14 +1893,14 @@ async function loginEmployee() {
     catch (error) {
 
         console.error(
-            "Login error:",
+            "Login:",
             error
         );
 
 
         setLoginBanner(
             error.message ||
-            "Login failed. Please check your email and password."
+            "Login failed."
         );
 
 
@@ -2011,13 +1934,14 @@ async function logoutEmployee() {
 
     try {
 
-        await supabaseClient.auth.signOut();
+        await supabaseClient.auth
+            .signOut();
 
     }
     catch (error) {
 
         console.error(
-            "Logout error:",
+            "Logout:",
             error
         );
 
@@ -2025,7 +1949,9 @@ async function logoutEmployee() {
 
 
     currentAuthUser = null;
+
     me = null;
+
     myRecord = null;
 
 
@@ -2050,14 +1976,11 @@ async function logoutEmployee() {
     $("headerSubtitle").textContent =
         "Secure employee production entry";
 
-
-    setLoginBanner("");
-
 }
 
 
 /* =========================================================
-   OPEN AUTHENTICATED PORTAL
+   AUTHENTICATED PORTAL
 ========================================================= */
 
 async function openAuthenticatedPortal() {
@@ -2093,7 +2016,7 @@ async function openAuthenticatedPortal() {
     catch (error) {
 
         console.error(
-            "Portal loading error:",
+            "Portal loading:",
             error
         );
 
@@ -2168,6 +2091,7 @@ async function loadReferenceData() {
     ) {
 
         projects = [];
+
         subProjects = [];
 
         return;
@@ -2175,65 +2099,88 @@ async function loadReferenceData() {
     }
 
 
+    /*
+       IMPORTANT:
+
+       We intentionally DO NOT use:
+
+           .eq("active", true)
+
+       on projects or sub_projects because your current
+       schema does not contain projects.active.
+
+       Only rows belonging to this employee's project
+       are requested.
+    */
+
+    const projectPromise =
+        supabaseClient
+            .from("projects")
+            .select("*")
+            .eq(
+                "id",
+                projectId
+            )
+            .maybeSingle();
+
+
+    const subProjectPromise =
+        supabaseClient
+            .from("sub_projects")
+            .select("*")
+            .eq(
+                "project_id",
+                projectId
+            );
+
+
     const [
         projectRes,
-        subProjectsRes
+        subProjectRes
     ] =
         await Promise.all([
-
-            supabaseClient
-                .from("projects")
-                .select("*")
-                .eq(
-                    "id",
-                    projectId
-                )
-                .maybeSingle(),
-
-
-            supabaseClient
-                .from("sub_projects")
-                .select("*")
-                .eq(
-                    "project_id",
-                    projectId
-                )
-                .eq(
-                    "active",
-                    true
-                )
-                .order(
-                    "sub_project_name"
-                )
-
+            projectPromise,
+            subProjectPromise
         ]);
 
 
-    if (projectRes.error) {
+    if (
+        projectRes.error
+    ) {
 
-        console.warn(
-            "Project information unavailable:",
+        console.error(
+            "Project load:",
+            projectRes.error
+        );
+
+
+        throw new Error(
+            "Projects could not be loaded. " +
             projectRes.error.message
         );
 
-        projects = [];
-
-    }
-    else {
-
-        projects =
-            projectRes.data
-                ? [projectRes.data]
-                : [];
-
     }
 
 
-    if (subProjectsRes.error) {
+    projects =
+        projectRes.data
+            ? [projectRes.data]
+            : [];
+
+
+    /*
+       Sub-project information is optional.
+       If the table/query is unavailable, the project target
+       can still be used.
+    */
+
+    if (
+        subProjectRes.error
+    ) {
 
         console.warn(
-            "Sub-project information unavailable:",
-            subProjectsRes.error.message
+            "Sub-projects could not be loaded:",
+            subProjectRes.error.message
         );
 
         subProjects = [];
@@ -2242,7 +2189,7 @@ async function loadReferenceData() {
     else {
 
         subProjects =
-            subProjectsRes.data || [];
+            subProjectRes.data || [];
 
     }
 
@@ -2250,10 +2197,12 @@ async function loadReferenceData() {
 
 
 /* =========================================================
-   OPEN EMPLOYEE ENTRY
+   OPEN ENTRY
 ========================================================= */
 
-async function openEntryFor(employee) {
+async function openEntryFor(
+    employee
+) {
 
     me =
         employee;
@@ -2278,13 +2227,16 @@ async function openEntryFor(employee) {
 
 
     $("whoName").textContent =
-        me.employee_name || "";
+        me.employee_name ||
+        "Employee";
 
 
     const bits = [];
 
 
-    if (me.employee_code) {
+    if (
+        me.employee_code
+    ) {
 
         bits.push(
             me.employee_code
@@ -2354,7 +2306,9 @@ async function loadMyRecord() {
         error
     } =
         await supabaseClient
-            .from("daily_productivity")
+            .from(
+                "daily_productivity"
+            )
             .select("*")
             .eq(
                 "tracker_date",
@@ -2424,21 +2378,28 @@ function renderHourRows() {
 
             rows.push(`
 
-                <div class="hour-row"
-                     data-index="${index}">
+                <div
+                    class="hour-row"
+                    data-index="${index}">
 
                     <div class="hour-label">
 
                         ${hourLabels[index]}
 
-                        <span class="hour-note">
-                            Hour ${index + 1}
+                        <span
+                            class="hour-note">
+
+                            Hourly production
+
                         </span>
 
                     </div>
 
-                    <span class="locked-tag hidden">
+                    <span
+                        class="locked-tag hidden">
+
                         LOCKED
+
                     </span>
 
                     <input
@@ -2533,8 +2494,7 @@ function applyLocks() {
 
 
                 tag.textContent =
-                    dateLockOverride !== null &&
-                    dateLockOverride.locked
+                    dateLockOverride?.locked
                         ? "CLOSED"
                         : "LOCKED";
 
@@ -2550,13 +2510,11 @@ function applyLocks() {
 
         setBanner(
             "warn",
+            dateLockOverride?.locked
 
-            dateLockOverride !== null &&
-            dateLockOverride.locked
+                ? "This shift has been closed by management."
 
-                ? "This shift has been closed by management. Contact your Team Lead if something needs changing."
-
-                : "This shift has finished, so it is now read-only."
+                : "This shift has finished and is now read-only."
         );
 
     }
@@ -2585,14 +2543,14 @@ function startLockTicker() {
 
     lockTicker =
         setInterval(
-            () => {
+            async () => {
 
-                const nowShiftDate =
+                const newDate =
                     getCurrentShiftDateString();
 
 
                 if (
-                    nowShiftDate !==
+                    newDate !==
                     trackerDate
                 ) {
 
@@ -2601,6 +2559,11 @@ function startLockTicker() {
                     return;
 
                 }
+
+
+                await loadDateLockState(
+                    trackerDate
+                );
 
 
                 applyLocks();
@@ -2643,10 +2606,323 @@ function recalcTotal() {
         total.toLocaleString();
 
 
-    updatePerformance();
-
-
     return total;
+
+}
+
+
+/* =========================================================
+   PERFORMANCE MESSAGE
+========================================================= */
+
+function updatePerformance() {
+
+    if (!me) {
+        return;
+    }
+
+
+    const attendance =
+        $("attendance").value;
+
+
+    const target =
+        getDailyTarget(
+            me,
+            attendance
+        );
+
+
+    const achieved =
+        recalcTotal();
+
+
+    const pct =
+        computeAchievementPercent(
+            achieved,
+            target
+        );
+
+
+    const remaining =
+        Math.max(
+            Number(target || 0) -
+            achieved,
+            0
+        );
+
+
+    $("achievementDisplay").textContent =
+        `${pct.toFixed(1)}%`;
+
+
+    $("targetDisplay").textContent =
+        Number(target || 0)
+            .toLocaleString();
+
+
+    $("summaryTarget").textContent =
+        Number(target || 0)
+            .toLocaleString();
+
+
+    $("summaryAchieved").textContent =
+        Number(achieved)
+            .toLocaleString();
+
+
+    $("summaryRemaining").textContent =
+        Number(remaining)
+            .toLocaleString();
+
+
+    const card =
+        $("performanceCard");
+
+
+    card.classList.remove(
+        "above",
+        "on-target",
+        "below",
+        "no-target"
+    );
+
+
+    /*
+       Absent
+    */
+
+    if (
+        attendance === "Absent"
+    ) {
+
+        card.classList.add(
+            "no-target"
+        );
+
+
+        $("performanceEmoji").textContent =
+            "😴";
+
+
+        $("performanceTitle").textContent =
+            "Enjoy your day off!";
+
+
+        $("performanceMessage").textContent =
+            "Attendance is marked absent, so no production target is assigned.";
+
+        return;
+
+    }
+
+
+    /*
+       No target
+    */
+
+    if (
+        Number(target) <= 0
+    ) {
+
+        card.classList.add(
+            "no-target"
+        );
+
+
+        $("performanceEmoji").textContent =
+            "👍";
+
+
+        $("performanceTitle").textContent =
+            "Keep it going!";
+
+
+        $("performanceMessage").textContent =
+            "Your process currently has no production target configured.";
+
+        return;
+
+    }
+
+
+    /*
+       Above target
+    */
+
+    if (
+        achieved > target
+    ) {
+
+        card.classList.add(
+            "above"
+        );
+
+
+        $("performanceEmoji").textContent =
+            "🎉";
+
+
+        $("performanceTitle").textContent =
+            "Target smashed! 🚀";
+
+
+        $("performanceMessage").textContent =
+            "Outstanding work! You are above target. Keep that momentum going!";
+
+        return;
+
+    }
+
+
+    /*
+       Exactly on target
+    */
+
+    if (
+        achieved === target
+    ) {
+
+        card.classList.add(
+            "on-target"
+        );
+
+
+        $("performanceEmoji").textContent =
+            "👏";
+
+
+        $("performanceTitle").textContent =
+            "Good Job!";
+
+
+        $("performanceMessage").textContent =
+            "You hit the target exactly. That's the standard — well done!";
+
+        return;
+
+    }
+
+
+    /*
+       Below target
+    */
+
+    card.classList.add(
+        "below"
+    );
+
+
+    $("performanceEmoji").textContent =
+        "👀";
+
+
+    $("performanceTitle").textContent =
+        "Andy is watching you… 👀";
+
+
+    if (
+        achieved === 0
+    ) {
+
+        $("performanceMessage").textContent =
+            "The shift has started. Time to get those numbers moving!";
+
+    }
+    else {
+
+        $("performanceMessage").textContent =
+            `You are ${remaining.toLocaleString()} away from target. Come on — you can catch it! 💪`;
+
+    }
+
+}
+
+
+/* =========================================================
+   CELEBRATION
+========================================================= */
+
+function celebrate() {
+
+    const container =
+        document.createElement(
+            "div"
+        );
+
+
+    container.className =
+        "celebration";
+
+
+    const emojis = [
+        "🎉",
+        "🥳",
+        "⭐",
+        "🏆",
+        "👏",
+        "🚀",
+        "✨"
+    ];
+
+
+    for (
+        let i = 0;
+        i < 35;
+        i++
+    ) {
+
+        const item =
+            document.createElement(
+                "div"
+            );
+
+
+        item.className =
+            "confetti";
+
+
+        item.textContent =
+            emojis[
+                Math.floor(
+                    Math.random() *
+                    emojis.length
+                )
+            ];
+
+
+        item.style.left =
+            `${Math.random() * 100}%`;
+
+
+        item.style.animationDelay =
+            `${Math.random() * .8}s`;
+
+
+        item.style.fontSize =
+            `${16 + Math.random() * 18}px`;
+
+
+        container.appendChild(
+            item
+        );
+
+    }
+
+
+    document.body.appendChild(
+        container
+    );
+
+
+    setTimeout(
+        () => {
+
+            container.remove();
+
+        },
+        3500
+    );
 
 }
 
@@ -2676,6 +2952,8 @@ function onHourInput(input) {
 
 
     recalcTotal();
+
+    updatePerformance();
 
     queueSave();
 
@@ -2722,477 +3000,16 @@ function onAttendanceChange() {
 
     recalcTotal();
 
+    updatePerformance();
+
     queueSave();
 
 }
 
 
 /* =========================================================
-   PERFORMANCE DISPLAY
+   SAVE STATE
 ========================================================= */
-
-function getCurrentEnteredTotal() {
-
-    let total = 0;
-
-
-    document
-        .querySelectorAll(
-            "#hourRows .hour-input"
-        )
-        .forEach(
-            input => {
-
-                total += Math.max(
-                    Number(
-                        input.value || 0
-                    ),
-                    0
-                );
-
-            }
-        );
-
-
-    return total;
-
-}
-
-
-function updatePerformance() {
-
-    if (
-        !me ||
-        !$("attendance") ||
-        !$("hourRows")
-    ) {
-
-        return;
-
-    }
-
-
-    const attendance =
-        $("attendance").value;
-
-
-    const target =
-        getDailyTarget(
-            me,
-            attendance
-        );
-
-
-    const achieved =
-        getCurrentEnteredTotal();
-
-
-    const targetValue =
-        target === null
-            ? 0
-            : Number(target);
-
-
-    let remaining = 0;
-    let percent = 0;
-
-
-    if (
-        targetValue > 0
-    ) {
-
-        remaining =
-            Math.max(
-                targetValue - achieved,
-                0
-            );
-
-
-        percent =
-            (
-                achieved /
-                targetValue
-            ) * 100;
-
-    }
-
-
-    const displayPercent =
-        Math.round(percent);
-
-
-    $("targetValue").textContent =
-        targetValue.toLocaleString();
-
-
-    $("achievedValue").textContent =
-        achieved.toLocaleString();
-
-
-    $("remainingValue").textContent =
-        remaining.toLocaleString();
-
-
-    $("performancePercent").textContent =
-        targetValue > 0
-            ? `${displayPercent}%`
-            : "—";
-
-
-    const progress =
-        targetValue > 0
-            ? Math.min(
-                percent,
-                100
-              )
-            : 0;
-
-
-    $("progressBar").style.width =
-        `${progress}%`;
-
-
-    const message =
-        $("performanceMessage");
-
-
-    /*
-       Non-target process
-    */
-
-    if (
-        target === null ||
-        targetValue <= 0
-    ) {
-
-        message.className =
-            "performance-message no-target";
-
-
-        message.innerHTML = `
-
-            <span class="performance-emoji">
-                🚀
-            </span>
-
-            Production mode is on —
-            keep the numbers coming!
-
-        `;
-
-        return;
-
-    }
-
-
-    /*
-       ABOVE TARGET
-    */
-
-    if (
-        percent > 100
-    ) {
-
-        message.className =
-            "performance-message above";
-
-
-        const extra =
-            achieved -
-            targetValue;
-
-
-        message.innerHTML = `
-
-            <span class="performance-emoji">
-                🏆🎉
-            </span>
-
-            <strong>
-                YOU CRUSHED THE TARGET!
-            </strong>
-
-            <br>
-
-            You're ${extra.toLocaleString()}
-            above target. Keep going —
-            you're on fire! 🔥
-
-        `;
-
-
-        /*
-           Celebrate only when the employee
-           crosses the target for the first time
-           during the current page session.
-        */
-
-        if (
-            !celebrationAlreadyShown &&
-            percent > 100
-        ) {
-
-            celebrationAlreadyShown =
-                true;
-
-            showCelebration(
-                percent,
-                achieved,
-                targetValue
-            );
-
-        }
-
-
-        return;
-
-    }
-
-
-    /*
-       EXACTLY ON TARGET
-    */
-
-    if (
-        achieved === targetValue
-    ) {
-
-        message.className =
-            "performance-message target";
-
-
-        message.innerHTML = `
-
-            <span class="performance-emoji">
-                🎯👏
-            </span>
-
-            <strong>
-                GOOD JOB!
-            </strong>
-
-            <br>
-
-            Target achieved. That's exactly
-            where you need to be!
-
-        `;
-
-
-        return;
-
-    }
-
-
-    /*
-       BELOW TARGET
-    */
-
-    message.className =
-        "performance-message below";
-
-
-    const gap =
-        Math.max(
-            targetValue - achieved,
-            0
-        );
-
-
-    let funnyMessage = "";
-
-
-    if (
-        percent >= 90
-    ) {
-
-        funnyMessage = `
-
-            Almost there! Only
-            ${gap.toLocaleString()}
-            more to go. 👀
-
-        `;
-
-    }
-    else if (
-        percent >= 75
-    ) {
-
-        funnyMessage = `
-
-            You're getting close…
-            ${gap.toLocaleString()}
-            left. ${MANAGER_NAME} is watching you 👀
-
-        `;
-
-    }
-    else if (
-        percent >= 50
-    ) {
-
-        funnyMessage = `
-
-            Halfway there! But
-            ${MANAGER_NAME} has entered the chat 👀😂
-
-        `;
-
-    }
-    else {
-
-        funnyMessage = `
-
-            <strong>
-                ${MANAGER_NAME} is watching you 👀
-            </strong>
-
-            <br>
-
-            Let's pick up the pace —
-            ${gap.toLocaleString()} still to go! 😄
-
-        `;
-
-    }
-
-
-    message.innerHTML = `
-
-        <span class="performance-emoji">
-            😅
-        </span>
-
-        ${funnyMessage}
-
-    `;
-
-}
-
-
-/* =========================================================
-   CELEBRATION
-========================================================= */
-
-function showCelebration(
-    percent,
-    achieved,
-    target
-) {
-
-    $("celebrationTitle").textContent =
-        percent >= 120
-            ? "ABSOLUTELY CRUSHING IT! 🔥"
-            : "TARGET CRUSHED! 🏆";
-
-
-    $("celebrationText").textContent =
-        `You reached ${achieved.toLocaleString()} ` +
-        `against a target of ${target.toLocaleString()}. ` +
-        `That's ${Math.round(percent)}%!`;
-
-
-    $("celebrationOverlay")
-        .classList.add("show");
-
-
-    createConfetti();
-
-}
-
-
-function closeCelebration() {
-
-    $("celebrationOverlay")
-        .classList.remove("show");
-
-}
-
-
-function createConfetti() {
-
-    const symbols = [
-        "★",
-        "◆",
-        "●",
-        "■",
-        "✦"
-    ];
-
-
-    for (
-        let i = 0;
-        i < 80;
-        i++
-    ) {
-
-        const piece =
-            document.createElement(
-                "div"
-            );
-
-
-        piece.className =
-            "confetti";
-
-
-        piece.textContent =
-            symbols[
-                Math.floor(
-                    Math.random() *
-                    symbols.length
-                )
-            ];
-
-
-        piece.style.left =
-            `${Math.random() * 100}%`;
-
-
-        piece.style.fontSize =
-            `${8 + Math.random() * 12}px`;
-
-
-        piece.style.animationDelay =
-            `${Math.random() * .8}s`;
-
-
-        piece.style.animationDuration =
-            `${2 + Math.random() * 2}s`;
-
-
-        /*
-           Let the browser choose the default
-           text rendering color rather than hardcoding
-           a single visual style.
-        */
-
-        document.body
-            .appendChild(piece);
-
-
-        setTimeout(
-            () => {
-
-                piece.remove();
-
-            },
-            5000
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   AUTOSAVE
-========================================================= */
-
-const SAVE_DEBOUNCE_MS =
-    900;
-
 
 function setSaveState(
     state,
@@ -3211,6 +3028,10 @@ function setSaveState(
 }
 
 
+/* =========================================================
+   QUEUE SAVE
+========================================================= */
+
 function queueSave() {
 
     if (
@@ -3221,7 +3042,7 @@ function queueSave() {
 
         setSaveState(
             "error",
-            "This shift is closed — nothing was saved"
+            "Shift closed — nothing was saved"
         );
 
         return;
@@ -3260,9 +3081,7 @@ function queueSave() {
 
 
 /* =========================================================
-   BUILD DATABASE RECORD
-   IMPORTANT:
-   remaining is NEVER NULL.
+   BUILD RECORD
 ========================================================= */
 
 function buildRecord() {
@@ -3271,6 +3090,15 @@ function buildRecord() {
         $("attendance").value;
 
 
+    /*
+       IMPORTANT:
+
+       daily_target is NOT NULL.
+
+       Therefore targetless processes use 0,
+       not null.
+    */
+
     const target =
         getDailyTarget(
             me,
@@ -3278,19 +3106,12 @@ function buildRecord() {
         );
 
 
-    /*
-       daily_target is NOT NULL.
-       Target-less processes use 0.
-    */
-
     const safeTarget =
-        target === null ||
-        target === undefined ||
-        Number.isNaN(
+        Number.isFinite(
             Number(target)
         )
-            ? 0
-            : Number(target);
+            ? Number(target)
+            : 0;
 
 
     const record = {
@@ -3309,7 +3130,7 @@ function buildRecord() {
 
         break_minutes:
             Number(
-                myRecord?.break_minutes ?? 0
+                myRecord?.break_minutes || 0
             ),
 
         achieved:
@@ -3317,7 +3138,10 @@ function buildRecord() {
 
         /*
            IMPORTANT:
-           Never NULL.
+
+           remaining is also NOT NULL.
+
+           Therefore it is ALWAYS a number.
         */
 
         remaining:
@@ -3349,7 +3173,8 @@ function buildRecord() {
 
 
             /*
-               Locked hours use the database value.
+               Locked hour:
+               use the existing database value.
             */
 
             const raw =
@@ -3382,103 +3207,26 @@ function buildRecord() {
         achieved;
 
 
-    /*
-       Target-based process
-    */
+    record.remaining =
+        Math.max(
+            safeTarget -
+            achieved,
+            0
+        );
 
-    if (
+
+    record.achievement_percentage =
         safeTarget > 0
-    ) {
 
-        record.remaining =
-            Math.max(
-                safeTarget -
-                achieved,
-                0
-            );
+            ? Number(
+                (
+                    achieved /
+                    safeTarget *
+                    100
+                ).toFixed(2)
+              )
 
-
-        const pct =
-            computeAchievementPercent(
-                achieved,
-                safeTarget
-            );
-
-
-        record.achievement_percentage =
-            pct === null
-                ? 0
-                : Number(
-                    pct.toFixed(2)
-                  );
-
-    }
-
-
-    /*
-       Non-target process
-    */
-
-    else {
-
-        record.daily_target =
-            0;
-
-        record.remaining =
-            0;
-
-        record.achievement_percentage =
-            0;
-
-    }
-
-
-    /*
-       Final safety protection.
-    */
-
-    if (
-        record.remaining === null ||
-        record.remaining === undefined ||
-        Number.isNaN(
-            Number(record.remaining)
-        )
-    ) {
-
-        record.remaining =
-            0;
-
-    }
-
-
-    if (
-        record.daily_target === null ||
-        record.daily_target === undefined ||
-        Number.isNaN(
-            Number(record.daily_target)
-        )
-    ) {
-
-        record.daily_target =
-            0;
-
-    }
-
-
-    if (
-        record.achievement_percentage === null ||
-        record.achievement_percentage === undefined ||
-        Number.isNaN(
-            Number(
-                record.achievement_percentage
-            )
-        )
-    ) {
-
-        record.achievement_percentage =
-            0;
-
-    }
+            : 0;
 
 
     return record;
@@ -3496,8 +3244,7 @@ async function flushSave() {
         saveInFlight
     ) {
 
-        savePending =
-            true;
+        savePending = true;
 
         return;
 
@@ -3527,8 +3274,7 @@ async function flushSave() {
     }
 
 
-    saveInFlight =
-        true;
+    saveInFlight = true;
 
 
     const record =
@@ -3536,32 +3282,66 @@ async function flushSave() {
 
 
     /*
-       Final NOT NULL protection.
+       Final safety normalization.
+
+       These fields are NOT NULL in your database.
     */
 
     record.daily_target =
-        Number(
-            record.daily_target || 0
-        );
+        Number.isFinite(
+            Number(
+                record.daily_target
+            )
+        )
+            ? Number(
+                record.daily_target
+            )
+            : 0;
 
 
     record.remaining =
-        Number(
-            record.remaining || 0
-        );
+        Number.isFinite(
+            Number(
+                record.remaining
+            )
+        )
+            ? Number(
+                record.remaining
+            )
+            : 0;
+
+
+    record.achieved =
+        Number.isFinite(
+            Number(
+                record.achieved
+            )
+        )
+            ? Number(
+                record.achieved
+            )
+            : 0;
 
 
     record.achievement_percentage =
-        Number(
-            record.achievement_percentage || 0
-        );
+        Number.isFinite(
+            Number(
+                record.achievement_percentage
+            )
+        )
+            ? Number(
+                record.achievement_percentage
+            )
+            : 0;
 
 
     const {
         error
     } =
         await supabaseClient
-            .from("daily_productivity")
+            .from(
+                "daily_productivity"
+            )
             .upsert(
                 record,
                 {
@@ -3571,14 +3351,13 @@ async function flushSave() {
             );
 
 
-    saveInFlight =
-        false;
+    saveInFlight = false;
 
 
     if (error) {
 
         console.error(
-            "Autosave:",
+            "Autosave error:",
             error
         );
 
@@ -3620,14 +3399,33 @@ async function flushSave() {
     );
 
 
+    /*
+       If another edit happened while save was running,
+       save it again.
+    */
+
     if (
         savePending
     ) {
 
-        savePending =
-            false;
+        savePending = false;
 
         flushSave();
+
+    }
+
+
+    /*
+       Celebration only when employee crosses target.
+    */
+
+    if (
+        Number(record.daily_target) > 0 &&
+        Number(record.achieved) >
+        Number(record.daily_target)
+    ) {
+
+        celebrate();
 
     }
 
@@ -3658,7 +3456,7 @@ window.addEventListener(
 
 
 /* =========================================================
-   VISIBILITY CHANGE
+   TAB RETURN
 ========================================================= */
 
 document.addEventListener(
@@ -3692,7 +3490,17 @@ document.addEventListener(
         }
 
 
-        applyLocks();
+        loadDateLockState(
+            trackerDate
+        )
+        .then(
+            () => {
+
+                applyLocks();
+
+            }
+        );
+
 
         updatePerformance();
 
@@ -3714,7 +3522,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   LOGIN ENTER KEY
+   ENTER KEY LOGIN
 ========================================================= */
 
 $("loginPassword")
@@ -3757,39 +3565,44 @@ $("loginEmail")
    AUTH STATE
 ========================================================= */
 
-supabaseClient.auth.onAuthStateChange(
-    (event, session) => {
+supabaseClient.auth
+    .onAuthStateChange(
+        (event, session) => {
 
-        console.log(
-            "Auth event:",
-            event
-        );
-
-
-        if (
-            event ===
-            "SIGNED_OUT"
-        ) {
-
-            currentAuthUser =
-                null;
-
-            me = null;
-
-            hide("entryScreen");
-            hide("fatalCard");
-            hide("loadingCard");
-
-            show("loginCard");
+            console.log(
+                "Auth event:",
+                event
+            );
 
 
-            $("headerSubtitle").textContent =
-                "Secure employee production entry";
+            if (
+                event ===
+                "SIGNED_OUT"
+            ) {
+
+                currentAuthUser =
+                    null;
+
+                me = null;
+
+                myRecord = null;
+
+
+                hide("entryScreen");
+                hide("fatalCard");
+                hide("loadingCard");
+
+                show("loginCard");
+
+
+                $("headerSubtitle")
+                    .textContent =
+                    "Secure employee production entry";
+
+            }
 
         }
-
-    }
-);
+    );
 
 
 /* =========================================================
@@ -3815,10 +3628,9 @@ async function start() {
 
             show("loginCard");
 
-
-            $("headerSubtitle").textContent =
+            $("headerSubtitle")
+                .textContent =
                 "Secure employee production entry";
-
 
             return;
 
@@ -3831,7 +3643,7 @@ async function start() {
     catch (error) {
 
         console.error(
-            "Startup error:",
+            "Startup:",
             error
         );
 
@@ -3844,7 +3656,8 @@ async function start() {
         show("fatalCard");
 
 
-        $("fatalText").textContent =
+        $("fatalText")
+            .textContent =
             error.message ||
             "Could not start the employee portal.";
 
@@ -3854,7 +3667,7 @@ async function start() {
 
 
 /* =========================================================
-   START APPLICATION
+   START PORTAL
 ========================================================= */
 
 start();
@@ -3862,4 +3675,5 @@ start();
 </script>
 
 </body>
+
 </html>
