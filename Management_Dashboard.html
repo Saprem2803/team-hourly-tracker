@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -474,15 +473,18 @@ label{
             id="email"
             type="email"
             placeholder="Email address"
+            autocomplete="username"
         >
 
         <input
             id="password"
             type="password"
             placeholder="Password"
+            autocomplete="current-password"
         >
 
         <button
+            id="loginButton"
             class="btn primary"
             onclick="login()"
         >
@@ -1101,6 +1103,8 @@ let employeeProjects = [];
 
 let hasAllProjectsGrant = false;
 
+let initializationInProgress = false;
+
 
 /* =========================================================
    DOM
@@ -1181,8 +1185,12 @@ function setMTD(){
 
 function setStatus(text){
 
-    $("status").textContent =
-        text;
+    if($("status")){
+
+        $("status").textContent =
+            text;
+
+    }
 
 }
 
@@ -1194,13 +1202,18 @@ function setStatus(text){
 async function login(){
 
     const email =
-        $("email").value.trim();
+        $("email")
+            .value
+            .trim();
 
     const password =
-        $("password").value;
+        $("password")
+            .value;
+
 
     $("authError").textContent =
         "";
+
 
     if(!email || !password){
 
@@ -1211,28 +1224,69 @@ async function login(){
 
     }
 
+
+    const loginButton =
+        $("loginButton");
+
+
+    if(loginButton){
+
+        loginButton.disabled =
+            true;
+
+        loginButton.textContent =
+            "Signing In...";
+
+    }
+
+
     try{
 
         const {
             data,
             error
         } =
-        await supabaseClient.auth.signInWithPassword({
+        await supabaseClient
+            .auth
+            .signInWithPassword({
 
-            email,
-            password
+                email,
+                password
 
-        });
+            });
 
 
         if(error){
 
+            console.error(
+                "Supabase login error:",
+                error
+            );
+
             $("authError").textContent =
-                error.message;
+                error.message ||
+                "Invalid email or password.";
 
             return;
 
         }
+
+
+        if(
+            !data ||
+            !data.user
+        ){
+
+            $("authError").textContent =
+                "Login did not return a valid user session.";
+
+            return;
+
+        }
+
+
+        $("authError").textContent =
+            "";
 
 
         await initialize(
@@ -1243,12 +1297,26 @@ async function login(){
     catch(error){
 
         console.error(
+            "Login exception:",
             error
         );
 
         $("authError").textContent =
             error.message ||
             "Login failed.";
+
+    }
+    finally{
+
+        if(loginButton){
+
+            loginButton.disabled =
+                false;
+
+            loginButton.textContent =
+                "Sign In";
+
+        }
 
     }
 
@@ -1261,15 +1329,46 @@ async function login(){
 
 async function initialize(user){
 
+    if(!user){
+
+        return;
+
+    }
+
+
+    /*
+       Prevent duplicate initialization.
+    */
+
+    if(initializationInProgress){
+
+        return;
+
+    }
+
+
+    initializationInProgress =
+        true;
+
+
     try{
 
         currentUser =
             user;
 
+
+        $("authError").textContent =
+            "";
+
+
         setStatus(
             "Checking management access..."
         );
 
+
+        /* =====================================================
+           ACCESS CHECK
+        ===================================================== */
 
         const {
             data,
@@ -1284,44 +1383,82 @@ async function initialize(user){
             );
 
 
+        /*
+           IMPORTANT:
+
+           Do NOT sign the user out if this query fails.
+
+           Authentication and authorization are separate.
+        */
+
         if(error){
 
             console.error(
-                "Access error:",
+                "user_project_access error:",
                 error
             );
 
-            $("authError").textContent =
-                "Unable to verify dashboard access: " +
-                error.message;
 
-            await supabaseClient
-                .auth
-                .signOut();
+            $("authError").textContent =
+                "Login successful, but management access " +
+                "could not be verified. " +
+                "Please check user_project_access permissions.";
+
+
+            $("authScreen")
+                .classList
+                .remove("hidden");
+
+
+            $("app")
+                .classList
+                .add("hidden");
+
 
             return;
 
         }
 
 
-        if(!data || !data.length){
+        /*
+           Authenticated user but no access row.
+        */
+
+        if(
+            !data ||
+            !data.length
+        ){
 
             $("authError").textContent =
-                "No dashboard access is assigned to this account.";
+                "Login successful, but no management access " +
+                "is assigned to this account.";
 
-            await supabaseClient
-                .auth
-                .signOut();
+
+            $("authScreen")
+                .classList
+                .remove("hidden");
+
+
+            $("app")
+                .classList
+                .add("hidden");
+
 
             return;
 
         }
 
+
+        /* =====================================================
+           MANAGEMENT ROLE
+        ===================================================== */
 
         const managementAccess =
             data.some(
                 x =>
-                String(x.role)
+                    String(
+                        x.role || ""
+                    )
                     .trim()
                     .toLowerCase()
                     ===
@@ -1332,45 +1469,84 @@ async function initialize(user){
         if(!managementAccess){
 
             $("authError").textContent =
-                "Management access is required for this dashboard.";
+                "This account is authenticated but does not " +
+                "have Management access.";
 
-            await supabaseClient
-                .auth
-                .signOut();
+
+            $("authScreen")
+                .classList
+                .remove("hidden");
+
+
+            $("app")
+                .classList
+                .add("hidden");
+
 
             return;
 
         }
 
 
+        /* =====================================================
+           PROJECT ACCESS
+        ===================================================== */
+
         accessProjects =
             data
                 .filter(
                     x =>
-                    x.project_id !== null &&
-                    x.project_id !== undefined
+                        x.project_id !== null &&
+                        x.project_id !== undefined &&
+                        x.project_id !== ""
                 )
                 .map(
                     x =>
-                    Number(x.project_id)
+                        Number(x.project_id)
+                )
+                .filter(
+                    x =>
+                        Number.isFinite(x)
                 );
 
 
+        /* =====================================================
+           ALL PROJECTS
+        ===================================================== */
+
         hasAllProjectsGrant =
             data.some(
-                x =>
-                String(x.role)
-                    .trim()
-                    .toLowerCase()
-                    ===
-                    "management"
-                &&
-                (
-                    x.project_id === null ||
-                    x.project_id === undefined
-                )
+                x => {
+
+                    const role =
+                        String(
+                            x.role || ""
+                        )
+                        .trim()
+                        .toLowerCase();
+
+
+                    return (
+                        role === "management"
+                        &&
+                        (
+                            x.project_id === null ||
+                            x.project_id === undefined ||
+                            x.project_id === ""
+                        )
+                    );
+
+                }
             );
 
+
+        /*
+           Management user must have either:
+
+           1. All Projects management access
+           OR
+           2. One or more assigned projects.
+        */
 
         if(
             !hasAllProjectsGrant &&
@@ -1378,33 +1554,75 @@ async function initialize(user){
         ){
 
             $("authError").textContent =
-                "This management account has no projects assigned " +
-                "and no All Projects authorization.";
+                "Management access exists, but no projects " +
+                "are assigned to this account.";
 
-            await supabaseClient
-                .auth
-                .signOut();
+
+            $("authScreen")
+                .classList
+                .remove("hidden");
+
+
+            $("app")
+                .classList
+                .add("hidden");
+
 
             return;
 
         }
 
 
+        /* =====================================================
+           SHOW APPLICATION
+        ===================================================== */
+
         $("authScreen")
             .classList
             .add("hidden");
+
 
         $("app")
             .classList
             .remove("hidden");
 
+
         $("userLabel").textContent =
             user.email || "";
 
 
+        /* =====================================================
+           LOAD REFERENCE DATA
+        ===================================================== */
+
         await loadReferenceData();
 
-        setMTD();
+
+        /* =====================================================
+           SET CURRENT MTD
+        ===================================================== */
+
+        const now =
+            new Date();
+
+
+        const firstDay =
+            new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                1
+            );
+
+
+        $("fromDate").value =
+            localDate(firstDay);
+
+
+        $("toDate").value =
+            localDate(now);
+
+
+        await refreshDashboard();
 
     }
     catch(error){
@@ -1414,9 +1632,26 @@ async function initialize(user){
             error
         );
 
+
         $("authError").textContent =
             error.message ||
             "Unable to initialize dashboard.";
+
+
+        $("authScreen")
+            .classList
+            .remove("hidden");
+
+
+        $("app")
+            .classList
+            .add("hidden");
+
+    }
+    finally{
+
+        initializationInProgress =
+            false;
 
     }
 
@@ -1460,11 +1695,6 @@ async function loadReferenceData(){
 
     /* =========================
        EMPLOYEES
-
-       IMPORTANT:
-       Do NOT use .eq("active",true)
-       because the current employees table
-       may not contain an active column.
     ========================= */
 
     const employeeQuery =
@@ -1556,18 +1786,18 @@ async function loadReferenceData(){
         employees =
             employees.filter(
                 e =>
-                accessProjects.includes(
-                    Number(e.project_id)
-                )
+                    accessProjects.includes(
+                        Number(e.project_id)
+                    )
             );
 
 
         projects =
             projects.filter(
                 p =>
-                accessProjects.includes(
-                    Number(p.id)
-                )
+                    accessProjects.includes(
+                        Number(p.id)
+                    )
             );
 
     }
@@ -1645,6 +1875,7 @@ async function fetchAll(
 
     let from = 0;
 
+
     while(true){
 
         const {
@@ -1670,7 +1901,10 @@ async function fetchAll(
         }
 
 
-        if(data && data.length){
+        if(
+            data &&
+            data.length
+        ){
 
             out =
                 out.concat(data);
@@ -1793,6 +2027,7 @@ async function refreshDashboard(){
                                 r
                             );
 
+
                         return (
                             employee &&
                             Number(
@@ -1850,9 +2085,11 @@ async function refreshDashboard(){
             error
         );
 
+
         setStatus(
             "Unable to load data"
         );
+
 
         alert(
             "Dashboard data could not be loaded.\n\n" +
@@ -1875,8 +2112,8 @@ function projectById(id){
 
     return projects.find(
         p =>
-        Number(p.id) ===
-        Number(id)
+            Number(p.id) ===
+            Number(id)
     ) || null;
 
 }
@@ -1886,6 +2123,7 @@ function projectName(id){
 
     const p =
         projectById(id);
+
 
     return p
         ?.project_name ||
@@ -1902,8 +2140,8 @@ function employeeForLoadedRecord(record){
 
     return employees.find(
         e =>
-        Number(e.id) ===
-        Number(record.employee_id)
+            Number(e.id) ===
+            Number(record.employee_id)
     ) || null;
 
 }
@@ -1937,8 +2175,8 @@ function subProjectById(id){
 
     return subProjects.find(
         sp =>
-        Number(sp.id) ===
-        Number(id)
+            Number(sp.id) ===
+            Number(id)
     ) || null;
 
 }
@@ -1972,6 +2210,7 @@ function employeeSubProject(employee){
                 employee.sub_project_id
             );
 
+
         if(direct){
 
             return direct;
@@ -1988,8 +2227,8 @@ function employeeSubProject(employee){
     const mappings =
         employeeProjects.filter(
             ep =>
-            Number(ep.employee_id) ===
-            Number(employee.id)
+                Number(ep.employee_id) ===
+                Number(employee.id)
         );
 
 
@@ -2022,20 +2261,15 @@ function employeeSubProject(employee){
 
     /* =========================
        SINGLE SUB-PROJECT FALLBACK
-
-       IMPORTANT:
-       Do NOT require an "active" column.
-       If there is exactly one sub-project
-       under the project, use it.
     ========================= */
 
     const projectSubProjects =
         subProjects.filter(
             sp =>
-            Number(sp.project_id) ===
-            Number(employee.project_id)
-            &&
-            sp.active !== false
+                Number(sp.project_id) ===
+                Number(employee.project_id)
+                &&
+                sp.active !== false
         );
 
 
@@ -2056,26 +2290,6 @@ function employeeSubProject(employee){
 /* =========================================================
    TARGET RESOLUTION
 ========================================================= */
-
-/*
-   IMPORTANT MANAGEMENT TARGET RULE:
-
-   ACTUAL productivity records:
-       Use daily_productivity.daily_target.
-
-   This guarantees historical Management
-   calculations match the target actually
-   stored by the Employee / Operations tracker.
-
-   SYNTHETIC roster records:
-       Resolve target from the current
-       employee/sub-project configuration.
-
-   NON-TARGET:
-       target_based = false
-       ALWAYS returns zero.
-*/
-
 
 function employeeBaseTarget(employee){
 
@@ -2210,16 +2424,12 @@ function resolveDailyTarget(
 ){
 
     /*
-       =====================================================
-       ACTUAL PRODUCTIVITY RECORD
-       =====================================================
+       EXISTING PRODUCTIVITY RECORD
 
-       The saved daily_target is authoritative.
+       The stored daily_target is authoritative.
 
-       This is what makes Management match
-       Operations / Employee tracking.
-
-       We only bypass this for synthetic rows.
+       This keeps Management aligned with
+       Employee / Operations historical data.
     */
 
     if(
@@ -2249,9 +2459,7 @@ function resolveDailyTarget(
 
 
     /*
-       =====================================================
        SYNTHETIC / BACKFILL RECORD
-       =====================================================
     */
 
     if(!employee){
@@ -2368,9 +2576,9 @@ function backfillMissingRoster(
                 rows
                     .map(
                         r =>
-                        String(
-                            r.tracker_date
-                        )
+                            String(
+                                r.tracker_date
+                            )
                     )
                     .filter(Boolean)
             )
@@ -2390,15 +2598,15 @@ function backfillMissingRoster(
         new Set(
             rows.map(
                 r =>
-                String(
-                    r.tracker_date
-                )
-                +
-                "|"
-                +
-                Number(
-                    r.employee_id
-                )
+                    String(
+                        r.tracker_date
+                    )
+                    +
+                    "|"
+                    +
+                    Number(
+                        r.employee_id
+                    )
             )
         );
 
@@ -2689,9 +2897,9 @@ function dayRows(){
             a,
             b
         ) =>
-        a.date.localeCompare(
-            b.date
-        )
+            a.date.localeCompare(
+                b.date
+            )
     );
 
 }
@@ -2744,12 +2952,24 @@ function renderAll(){
     /* =========================
        FTE
 
-       Use scoped employee roster,
-       not only employees with records.
+       Use scoped employee roster.
     ========================= */
 
+    const selectedProjectId =
+        $("projectFilter").value;
+
+
+    const scopedEmployees =
+        employees.filter(
+            e =>
+                !selectedProjectId ||
+                Number(e.project_id) ===
+                Number(selectedProjectId)
+        );
+
+
     const totalFte =
-        employees.length;
+        scopedEmployees.length;
 
 
     /* =========================
@@ -2774,7 +2994,7 @@ function renderAll(){
                 sum,
                 d
             ) =>
-            sum + d.present,
+                sum + d.present,
             0
         )
         /
@@ -2793,13 +3013,13 @@ function renderAll(){
                 sum,
                 d
             ) =>
-            sum
-            +
-            d.present
-            +
-            d.half
-            +
-            d.absent,
+                sum
+                +
+                d.present
+                +
+                d.half
+                +
+                d.absent,
             0
         );
 
@@ -2810,11 +3030,11 @@ function renderAll(){
                 sum,
                 d
             ) =>
-            sum
-            +
-            d.absent
-            +
-            d.half * 0.5,
+                sum
+                +
+                d.absent
+                +
+                d.half * 0.5,
             0
         );
 
@@ -2834,10 +3054,6 @@ function renderAll(){
 
     /* =========================
        ACHIEVEMENT
-
-       IMPORTANT:
-       Uses the exact same target
-       used for Management target.
     ========================= */
 
     const achievement =
@@ -3011,22 +3227,22 @@ function renderInsights(
         [...er]
             .filter(
                 x =>
-                x.target > 0
+                    x.target > 0
             )
             .sort(
                 (
                     a,
                     b
                 ) =>
-                (
-                    b.achieved /
-                    b.target
-                )
-                -
-                (
-                    a.achieved /
-                    a.target
-                )
+                    (
+                        b.achieved /
+                        b.target
+                    )
+                    -
+                    (
+                        a.achieved /
+                        a.target
+                    )
             );
 
 
@@ -3122,7 +3338,7 @@ function renderInsights(
                     sum,
                     x
                 ) =>
-                sum + x.achieved,
+                    sum + x.achieved,
                 0
             )
             /
@@ -3139,7 +3355,7 @@ function renderInsights(
                     sum,
                     x
                 ) =>
-                sum + x.achieved,
+                    sum + x.achieved,
                 0
             )
             /
@@ -3192,13 +3408,13 @@ function renderInsights(
                 sum,
                 d
             ) =>
-            sum
-            +
-            d.present
-            +
-            d.half
-            +
-            d.absent,
+                sum
+                +
+                d.present
+                +
+                d.half
+                +
+                d.absent,
             0
         );
 
@@ -3212,11 +3428,11 @@ function renderInsights(
                     sum,
                     d
                 ) =>
-                sum
-                +
-                d.absent
-                +
-                d.half * 0.5,
+                    sum
+                    +
+                    d.absent
+                    +
+                    d.half * 0.5,
                 0
             )
             /
@@ -3276,7 +3492,7 @@ function renderCharts(
     const labels =
         dr.map(
             x =>
-            x.date.slice(5)
+                x.date.slice(5)
         );
 
 
@@ -3303,7 +3519,7 @@ function renderCharts(
                             data:
                                 dr.map(
                                     x =>
-                                    x.target
+                                        x.target
                                 ),
 
                             tension:.25
@@ -3316,7 +3532,7 @@ function renderCharts(
                             data:
                                 dr.map(
                                     x =>
-                                    x.achieved
+                                        x.achieved
                                 ),
 
                             tension:.25
@@ -3363,13 +3579,13 @@ function renderCharts(
                             data:
                                 dr.map(
                                     x =>
-                                    x.target
-                                    ?
-                                    x.achieved /
-                                    x.target *
-                                    100
-                                    :
-                                    0
+                                        x.target
+                                        ?
+                                        x.achieved /
+                                        x.target *
+                                        100
+                                        :
+                                        0
                                 )
 
                         }
@@ -3464,7 +3680,7 @@ function renderCharts(
                                 Object.values(pm)
                                     .map(
                                         x =>
-                                        x.achieved
+                                            x.achieved
                                     )
 
                         },
@@ -3477,7 +3693,7 @@ function renderCharts(
                                 Object.values(pm)
                                     .map(
                                         x =>
-                                        x.target
+                                            x.target
                                     )
 
                         }
@@ -3524,7 +3740,7 @@ function renderCharts(
                             data:
                                 dr.map(
                                     x =>
-                                    x.present
+                                        x.present
                                 ),
 
                             tension:.2
@@ -3537,7 +3753,7 @@ function renderCharts(
                             data:
                                 dr.map(
                                     x =>
-                                    x.half
+                                        x.half
                                 ),
 
                             tension:.2
@@ -3550,7 +3766,7 @@ function renderCharts(
                             data:
                                 dr.map(
                                     x =>
-                                    x.absent
+                                        x.absent
                                 ),
 
                             tension:.2
@@ -3859,9 +4075,9 @@ function renderSubProcessTable(){
                 a,
                 b
             ) =>
-            a[0].localeCompare(
-                b[0]
-            )
+                a[0].localeCompare(
+                    b[0]
+                )
         )
         .map(
             (
@@ -3993,9 +4209,24 @@ function openEmployeeEntry(){
 
 async function logout(){
 
-    await supabaseClient
-        .auth
-        .signOut();
+    try{
+
+        await supabaseClient
+            .auth
+            .signOut();
+
+    }
+    catch(error){
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+    }
+
+
+    currentUser = null;
 
     location.reload();
 
@@ -4041,24 +4272,52 @@ $("password")
 
 
 /* =========================================================
-   EXISTING SESSION
+   AUTH STATE
 ========================================================= */
 
 supabaseClient
     .auth
-    .getSession()
-    .then(
-        async ({
-            data
-        }) => {
+    .onAuthStateChange(
+        (
+            event,
+            session
+        ) => {
+
+            console.log(
+                "Auth event:",
+                event
+            );
+
+
+            /*
+               Only react to an actual sign-out.
+
+               We intentionally do NOT call initialize()
+               here because login() and getSession()
+               handle initialization.
+
+               This prevents duplicate dashboard loading.
+            */
 
             if(
-                data.session
+                event === "SIGNED_OUT"
             ){
 
-                await initialize(
-                    data.session.user
-                );
+                currentUser = null;
+
+
+                $("authScreen")
+                    .classList
+                    .remove("hidden");
+
+
+                $("app")
+                    .classList
+                    .add("hidden");
+
+
+                $("authError").textContent =
+                    "";
 
             }
 
@@ -4067,39 +4326,66 @@ supabaseClient
 
 
 /* =========================================================
-   AUTH STATE
+   EXISTING SESSION
 ========================================================= */
 
-supabaseClient
-    .auth
-    .onAuthStateChange(
-        (
-            _event,
-            session
-        ) => {
+async function checkExistingSession(){
 
-            if(!session){
+    try{
 
-                $("authScreen")
-                    .classList
-                    .remove(
-                        "hidden"
-                    );
+        const {
+            data,
+            error
+        } =
+        await supabaseClient
+            .auth
+            .getSession();
 
 
-                $("app")
-                    .classList
-                    .add(
-                        "hidden"
-                    );
+        if(error){
 
-            }
+            console.error(
+                "Session check error:",
+                error
+            );
+
+            return;
 
         }
-    );
+
+
+        if(
+            data &&
+            data.session &&
+            data.session.user
+        ){
+
+            await initialize(
+                data.session.user
+            );
+
+        }
+
+    }
+    catch(error){
+
+        console.error(
+            "Existing session error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   START SESSION CHECK
+========================================================= */
+
+checkExistingSession();
 
 </script>
 
 </body>
 </html>
-```
