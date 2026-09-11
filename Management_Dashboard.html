@@ -2573,10 +2573,36 @@ function renderAll(){
     );
 
 
-    renderCharts(
-        dr,
-        er
-    );
+    /*
+       Charts are drawn before the tables, so anything that
+       throws in here used to abandon the whole render and
+       leave the page showing "Unable to load data" even
+       though every number had already been loaded. The
+       usual cause is the Chart.js CDN being unreachable on
+       a restricted office network.
+
+       The tables are the part management actually needs, so
+       a chart failure is contained here and reported in
+       place of the charts instead of taking the page down.
+    */
+    try {
+
+        renderCharts(
+            dr,
+            er
+        );
+
+    }
+    catch (chartError) {
+
+        console.error(
+            "Charts unavailable:",
+            chartError
+        );
+
+        reportChartsUnavailable();
+
+    }
 
 
     renderEmployeeTable(
@@ -2585,6 +2611,54 @@ function renderAll(){
 
 
     renderSubProcessTable();
+
+}
+
+
+/*
+   Replaces each chart canvas with a short explanation so the
+   gap is not mistaken for missing data.
+*/
+function reportChartsUnavailable(){
+
+    document
+        .querySelectorAll("canvas")
+        .forEach(
+            canvas => {
+
+                const holder =
+                    canvas.parentElement;
+
+                if(
+                    !holder ||
+                    holder.dataset.chartFallback === "1"
+                ){
+                    return;
+                }
+
+
+                holder.dataset.chartFallback = "1";
+
+                const note =
+                    document.createElement("div");
+
+                note.style.cssText =
+                    "display:flex;align-items:center;" +
+                    "justify-content:center;height:100%;" +
+                    "min-height:180px;padding:16px;" +
+                    "text-align:center;color:#6b7280;" +
+                    "font-size:13px;line-height:1.5;";
+
+                note.textContent =
+                    "Charts could not be loaded. " +
+                    "All figures in the tables below are " +
+                    "correct and up to date.";
+
+                canvas.style.display = "none";
+                holder.appendChild(note);
+
+            }
+        );
 
 }
 
