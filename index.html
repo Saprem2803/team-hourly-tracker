@@ -1150,6 +1150,24 @@
             font-size: 11px;
         }
 
+        /* Link handed to employees for their own entry screen. */
+        .btn-employee-link {
+            display: inline-block;
+            background: rgba(255,255,255,.14);
+            border: 1px solid rgba(255,255,255,.45);
+            color: #fff;
+            text-decoration: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .btn-employee-link:hover {
+            background: rgba(255,255,255,.26);
+        }
+
     
         /* =========================================================
            HOURLY UPDATE REMINDER
@@ -1281,6 +1299,18 @@
     <div class="user-bar">
         <span id="userEmail" class="user-email"></span>
         <span id="userRole" class="role-badge"></span>
+
+        <!--
+            The employee self-entry screen. Opening it here is how a
+            team lead gets hold of the URL to pass on to their team.
+        -->
+        <a class="btn-employee-link"
+           href="Employee_Hourly_Entry.html"
+           target="_blank"
+           rel="noopener">
+            Employee Entry Link
+        </a>
+
         <button class="btn-logout" onclick="logoutUser()">Logout</button>
     </div>
 
