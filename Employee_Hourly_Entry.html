@@ -412,6 +412,193 @@
         }
 
         /* =====================================================
+           PASSWORD LINKS / FIRST LOGIN
+        ===================================================== */
+
+        .forgot-password-wrap {
+
+            text-align: right;
+
+            margin-top: -8px;
+
+            margin-bottom: 15px;
+        }
+
+        .forgot-password-button {
+
+            background: none;
+
+            border: none;
+
+            color: #2868b7;
+
+            cursor: pointer;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            padding: 0;
+        }
+
+        .forgot-password-button:hover {
+
+            text-decoration: underline;
+
+        }
+
+        .password-screen {
+
+            min-height: 100vh;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 25px;
+
+        }
+
+        .password-card {
+
+            width: 100%;
+
+            max-width: 470px;
+
+            background: white;
+
+            border-radius: 22px;
+
+            padding: 34px;
+
+            box-shadow:
+                0 18px 55px rgba(18, 46, 88, 0.15);
+
+            border: 1px solid #e4ebf5;
+        }
+
+        .password-icon {
+
+            width: 65px;
+            height: 65px;
+
+            border-radius: 18px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0b1f44,
+                    #2868b7
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: white;
+
+            font-size: 28px;
+
+            margin-bottom: 18px;
+        }
+
+        .password-title {
+
+            font-size: 25px;
+
+            font-weight: 850;
+
+            color: #14284b;
+
+            margin-bottom: 7px;
+        }
+
+        .password-subtitle {
+
+            color: #68768c;
+
+            font-size: 14px;
+
+            line-height: 1.55;
+
+            margin-bottom: 24px;
+        }
+
+        .password-requirements {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f3f7fc,
+                    #f9fbff
+                );
+
+            border: 1px solid #dce6f2;
+
+            border-radius: 11px;
+
+            padding: 13px 15px;
+
+            margin-top: -2px;
+
+            margin-bottom: 18px;
+
+            color: #607089;
+
+            font-size: 12px;
+
+            line-height: 1.65;
+        }
+
+        .password-requirements strong {
+
+            color: #334c6d;
+
+        }
+
+        .password-error {
+
+            background: #fff0f0;
+
+            border: 1px solid #f0caca;
+
+            color: #a32626;
+
+            padding: 11px 13px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+
+            margin-bottom: 15px;
+
+            line-height: 1.45;
+        }
+
+        .password-success {
+
+            background: #eefbf3;
+
+            border: 1px solid #b9e5c9;
+
+            color: #216b3d;
+
+            padding: 11px 13px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+
+            margin-bottom: 15px;
+
+            line-height: 1.45;
+        }
+
+        /* =====================================================
            IDENTITY
         ===================================================== */
 
@@ -862,7 +1049,6 @@
             color: #7c899c;
 
             font-weight: 800;
-
         }
 
         .metric-value {
@@ -1365,7 +1551,8 @@
                 padding: 17px;
             }
 
-            .login-card {
+            .login-card,
+            .password-card {
 
                 padding: 25px;
             }
@@ -1436,12 +1623,236 @@
         </div>
 
 
+        <!-- FORGOT PASSWORD -->
+
+        <div class="forgot-password-wrap">
+
+            <button
+                type="button"
+                class="forgot-password-button"
+                onclick="forgotPassword()">
+
+                Forgot Password?
+
+            </button>
+
+        </div>
+
+
         <button
             id="loginButton"
             class="login-button"
             onclick="loginEmployee()">
 
             Sign In
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     FIRST LOGIN / PASSWORD CHANGE
+========================================================= -->
+
+<div id="setPasswordScreen"
+     class="password-screen hidden">
+
+    <div class="password-card">
+
+        <div class="password-icon">
+            🔐
+        </div>
+
+        <div class="password-title">
+            Set Your New Password
+        </div>
+
+        <div class="password-subtitle">
+
+            This is your first login.
+            For security, you must create your personal password
+            before accessing the Hourly Production Tracker.
+
+        </div>
+
+
+        <div id="setPasswordError"
+             class="password-error hidden">
+        </div>
+
+
+        <div id="setPasswordSuccess"
+             class="password-success hidden">
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                New Password
+            </label>
+
+            <input
+                id="newPassword"
+                type="password"
+                autocomplete="new-password"
+                placeholder="Enter your new password">
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Confirm New Password
+            </label>
+
+            <input
+                id="confirmNewPassword"
+                type="password"
+                autocomplete="new-password"
+                placeholder="Re-enter your new password">
+
+        </div>
+
+
+        <div class="password-requirements">
+
+            <strong>
+                Password requirements:
+            </strong>
+
+            <br>
+
+            • Minimum 8 characters
+
+            <br>
+
+            • At least one uppercase letter
+
+            <br>
+
+            • At least one lowercase letter
+
+            <br>
+
+            • At least one number
+
+        </div>
+
+
+        <button
+            id="setPasswordButton"
+            class="login-button"
+            onclick="setFirstPassword()">
+
+            Set New Password
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     PASSWORD RECOVERY SCREEN
+========================================================= -->
+
+<div id="passwordResetScreen"
+     class="password-screen hidden">
+
+    <div class="password-card">
+
+        <div class="password-icon">
+            🔑
+        </div>
+
+        <div class="password-title">
+            Reset Your Password
+        </div>
+
+        <div class="password-subtitle">
+
+            Enter a new password for your employee account.
+
+        </div>
+
+
+        <div id="resetPasswordError"
+             class="password-error hidden">
+        </div>
+
+
+        <div id="resetPasswordSuccess"
+             class="password-success hidden">
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                New Password
+            </label>
+
+            <input
+                id="resetNewPassword"
+                type="password"
+                autocomplete="new-password"
+                placeholder="Enter your new password">
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Confirm New Password
+            </label>
+
+            <input
+                id="resetConfirmPassword"
+                type="password"
+                autocomplete="new-password"
+                placeholder="Re-enter your new password">
+
+        </div>
+
+
+        <div class="password-requirements">
+
+            <strong>
+                Password requirements:
+            </strong>
+
+            <br>
+
+            • Minimum 8 characters
+
+            <br>
+
+            • At least one uppercase letter
+
+            <br>
+
+            • At least one lowercase letter
+
+            <br>
+
+            • At least one number
+
+        </div>
+
+
+        <button
+            id="resetPasswordButton"
+            class="login-button"
+            onclick="resetPassword()">
+
+            Update Password
 
         </button>
 
@@ -2063,6 +2474,10 @@ const HOUR_LABELS = [
 const AUTO_SAVE_DELAY = 700;
 
 
+const PASSWORD_RECOVERY_REDIRECT =
+    "https://saprem2803.github.io/team-hourly-tracker/Employee_Hourly_Entry.html";
+
+
 let currentAuthUser = null;
 
 let me = null;
@@ -2087,6 +2502,12 @@ let lastPerformanceState = "";
 
 let celebrationTimer = null;
 
+let passwordChangeRequired = false;
+
+let passwordRecoveryMode = false;
+
+let lockTickerStarted = false;
+
 
 /* =========================================================
    DOM HELPER
@@ -2105,14 +2526,26 @@ function $(id) {
 
 function show(id) {
 
-    $(id).classList.remove("hidden");
+    const element = $(id);
+
+    if (element) {
+
+        element.classList.remove("hidden");
+
+    }
 
 }
 
 
 function hide(id) {
 
-    $(id).classList.add("hidden");
+    const element = $(id);
+
+    if (element) {
+
+        element.classList.add("hidden");
+
+    }
 
 }
 
@@ -2140,9 +2573,11 @@ function showFatal(title, message) {
 
 function showLoginError(message) {
 
-    const box = $("loginError");
+    const box =
+        $("loginError");
 
-    box.textContent = message;
+    box.textContent =
+        message;
 
     show("loginError");
 
@@ -2158,6 +2593,801 @@ function clearLoginError() {
 }
 
 
+function showSetPasswordError(message) {
+
+    const box =
+        $("setPasswordError");
+
+    box.textContent =
+        message;
+
+    show("setPasswordError");
+
+}
+
+
+function clearSetPasswordMessages() {
+
+    hide("setPasswordError");
+
+    hide("setPasswordSuccess");
+
+    $("setPasswordError").textContent = "";
+
+    $("setPasswordSuccess").textContent = "";
+
+}
+
+
+function showResetPasswordError(message) {
+
+    const box =
+        $("resetPasswordError");
+
+    box.textContent =
+        message;
+
+    show("resetPasswordError");
+
+}
+
+
+function clearResetPasswordMessages() {
+
+    hide("resetPasswordError");
+
+    hide("resetPasswordSuccess");
+
+    $("resetPasswordError").textContent = "";
+
+    $("resetPasswordSuccess").textContent = "";
+
+}
+
+
+/* =========================================================
+   FRIENDLY SUPABASE ERRORS
+========================================================= */
+
+function friendlySupabaseError(error) {
+
+    const message =
+        String(
+            error?.message ||
+            error ||
+            ""
+        );
+
+
+    const lower =
+        message.toLowerCase();
+
+
+    if (
+        lower.includes(
+            "invalid login credentials"
+        )
+    ) {
+
+        return "Invalid email or password.";
+
+    }
+
+
+    if (
+        lower.includes(
+            "invalid api key"
+        )
+    ) {
+
+        return "Invalid Supabase API key. Please verify the Publishable key in the HTML.";
+
+    }
+
+
+    if (
+        lower.includes(
+            "email not confirmed"
+        )
+    ) {
+
+        return "Your email address has not been confirmed in Supabase.";
+
+    }
+
+
+    if (
+        lower.includes(
+            "network"
+        )
+    ) {
+
+        return "Network error. Please check your internet connection.";
+
+    }
+
+
+    if (
+        lower.includes(
+            "row-level security"
+        )
+    ) {
+
+        return "Supabase security policy blocked this action. Please contact your administrator.";
+
+    }
+
+
+    if (
+        lower.includes(
+            "permission denied"
+        )
+    ) {
+
+        return "Permission denied by the database security policy. Please contact your administrator.";
+
+    }
+
+
+    return (
+        message ||
+        "An unexpected error occurred."
+    );
+
+}
+
+
+/* =========================================================
+   PASSWORD VALIDATION
+========================================================= */
+
+function validatePassword(password) {
+
+    if (!password) {
+
+        return "Please enter a new password.";
+
+    }
+
+
+    if (password.length < 8) {
+
+        return "Password must contain at least 8 characters.";
+
+    }
+
+
+    if (!/[A-Z]/.test(password)) {
+
+        return "Password must contain at least one uppercase letter.";
+
+    }
+
+
+    if (!/[a-z]/.test(password)) {
+
+        return "Password must contain at least one lowercase letter.";
+
+    }
+
+
+    if (!/[0-9]/.test(password)) {
+
+        return "Password must contain at least one number.";
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =========================================================
+   PASSWORD RECOVERY URL
+========================================================= */
+
+function isPasswordRecoveryUrl() {
+
+    const hash =
+        window.location.hash
+            .replace(/^#/, "");
+
+
+    if (!hash) {
+
+        return false;
+
+    }
+
+
+    const params =
+        new URLSearchParams(hash);
+
+
+    return (
+        params.get("type") === "recovery"
+    );
+
+}
+
+
+/* =========================================================
+   SHOW FIRST PASSWORD SCREEN
+========================================================= */
+
+function showFirstPasswordScreen() {
+
+    passwordChangeRequired = true;
+
+    passwordRecoveryMode = false;
+
+    hide("loginScreen");
+
+    hide("appScreen");
+
+    hide("loadingCard");
+
+    hide("fatalCard");
+
+    hide("entryScreen");
+
+    hide("passwordResetScreen");
+
+    show("setPasswordScreen");
+
+    clearSetPasswordMessages();
+
+    $("newPassword").value = "";
+
+    $("confirmNewPassword").value = "";
+
+    setTimeout(
+        () => {
+
+            $("newPassword").focus();
+
+        },
+        100
+    );
+
+}
+
+
+/* =========================================================
+   SHOW PASSWORD RESET SCREEN
+========================================================= */
+
+function showPasswordResetScreen() {
+
+    passwordRecoveryMode = true;
+
+    passwordChangeRequired = false;
+
+    hide("loginScreen");
+
+    hide("appScreen");
+
+    hide("loadingCard");
+
+    hide("fatalCard");
+
+    hide("entryScreen");
+
+    hide("setPasswordScreen");
+
+    show("passwordResetScreen");
+
+    clearResetPasswordMessages();
+
+    $("resetNewPassword").value = "";
+
+    $("resetConfirmPassword").value = "";
+
+    setTimeout(
+        () => {
+
+            $("resetNewPassword").focus();
+
+        },
+        100
+    );
+
+}
+
+
+/* =========================================================
+   FIRST LOGIN PASSWORD CHANGE
+========================================================= */
+
+async function setFirstPassword() {
+
+    clearSetPasswordMessages();
+
+    const newPassword =
+        $("newPassword").value;
+
+    const confirmPassword =
+        $("confirmNewPassword").value;
+
+
+    const validationError =
+        validatePassword(
+            newPassword
+        );
+
+
+    if (validationError) {
+
+        showSetPasswordError(
+            validationError
+        );
+
+        return;
+
+    }
+
+
+    if (
+        newPassword !==
+        confirmPassword
+    ) {
+
+        showSetPasswordError(
+            "The passwords do not match."
+        );
+
+        return;
+
+    }
+
+
+    if (!currentAuthUser) {
+
+        showSetPasswordError(
+            "Your login session has expired. Please log in again."
+        );
+
+        return;
+
+    }
+
+
+    if (!me) {
+
+        showSetPasswordError(
+            "Employee profile could not be found. Please log in again."
+        );
+
+        return;
+
+    }
+
+
+    const button =
+        $("setPasswordButton");
+
+
+    button.disabled = true;
+
+    button.textContent =
+        "Updating Password...";
+
+
+    try {
+
+        /*
+           STEP 1:
+           Change the Supabase Auth password.
+        */
+
+        const {
+            error: passwordError
+        } =
+            await supabaseClient.auth.updateUser({
+
+                password:
+                    newPassword
+
+            });
+
+
+        if (passwordError) {
+
+            throw passwordError;
+
+        }
+
+
+        /*
+           STEP 2:
+           Mark the employee password as changed.
+        */
+
+        const {
+            data: employeeUpdateData,
+            error: employeeError
+        } =
+            await supabaseClient
+                .from("employees")
+                .update({
+
+                    password_changed:
+                        true
+
+                })
+                .eq(
+                    "id",
+                    me.id
+                )
+                .select("id,password_changed")
+                .maybeSingle();
+
+
+        if (employeeError) {
+
+            console.error(
+                "PASSWORD STATUS UPDATE ERROR:",
+                employeeError
+            );
+
+
+            throw new Error(
+                "Your password was changed successfully, but the employee profile could not be updated. Please contact your administrator before trying again."
+            );
+
+        }
+
+
+        /*
+           If RLS allows the update but returns no row,
+           treat it as a failed status update.
+        */
+
+        if (
+            !employeeUpdateData
+        ) {
+
+            throw new Error(
+                "Your password was changed, but the employee profile could not be updated. Please contact your administrator."
+            );
+
+        }
+
+
+        /*
+           STEP 3:
+           Update local employee object.
+        */
+
+        me.password_changed =
+            true;
+
+        passwordChangeRequired =
+            false;
+
+
+        $("newPassword").value = "";
+
+        $("confirmNewPassword").value = "";
+
+
+        /*
+           Continue directly into the portal.
+        */
+
+        hide("setPasswordScreen");
+
+        show("appScreen");
+
+        show("loadingCard");
+
+        hide("fatalCard");
+
+        hide("entryScreen");
+
+
+        await openAuthenticatedPortal();
+
+    }
+    catch (error) {
+
+        console.error(
+            "SET PASSWORD ERROR:",
+            error
+        );
+
+
+        showSetPasswordError(
+            friendlySupabaseError(error)
+        );
+
+    }
+    finally {
+
+        button.disabled = false;
+
+        button.textContent =
+            "Set New Password";
+
+    }
+
+}
+
+
+/* =========================================================
+   FORGOT PASSWORD
+========================================================= */
+
+async function forgotPassword() {
+
+    clearLoginError();
+
+
+    const email =
+        $("loginEmail").value.trim();
+
+
+    if (!email) {
+
+        showLoginError(
+            "Please enter your work email address first."
+        );
+
+        $("loginEmail").focus();
+
+        return;
+
+    }
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient.auth
+                .resetPasswordForEmail(
+                    email,
+                    {
+                        redirectTo:
+                            PASSWORD_RECOVERY_REDIRECT
+                    }
+                );
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        alert(
+            "Password reset instructions have been sent to your email."
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "FORGOT PASSWORD ERROR:",
+            error
+        );
+
+
+        showLoginError(
+            friendlySupabaseError(error)
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PASSWORD RECOVERY
+========================================================= */
+
+async function resetPassword() {
+
+    clearResetPasswordMessages();
+
+
+    const newPassword =
+        $("resetNewPassword").value;
+
+    const confirmPassword =
+        $("resetConfirmPassword").value;
+
+
+    const validationError =
+        validatePassword(
+            newPassword
+        );
+
+
+    if (validationError) {
+
+        showResetPasswordError(
+            validationError
+        );
+
+        return;
+
+    }
+
+
+    if (
+        newPassword !==
+        confirmPassword
+    ) {
+
+        showResetPasswordError(
+            "The passwords do not match."
+        );
+
+        return;
+
+    }
+
+
+    const button =
+        $("resetPasswordButton");
+
+
+    button.disabled = true;
+
+    button.textContent =
+        "Updating Password...";
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient.auth
+                .updateUser({
+
+                    password:
+                        newPassword
+
+                });
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        /*
+           Password recovery is complete.
+           Update password_changed when possible.
+        */
+
+        if (currentAuthUser) {
+
+            const {
+                error: employeeError
+            } =
+                await supabaseClient
+                    .from("employees")
+                    .update({
+
+                        password_changed:
+                            true
+
+                    })
+                    .eq(
+                        "auth_user_id",
+                        currentAuthUser.id
+                    );
+
+
+            if (employeeError) {
+
+                console.warn(
+                    "Could not update password_changed after recovery:",
+                    employeeError
+                );
+
+            }
+
+        }
+
+
+        hide("passwordResetScreen");
+
+        hide("appScreen");
+
+        show("loginScreen");
+
+        clearLoginError();
+
+        $("loginPassword").value = "";
+
+        $("resetNewPassword").value = "";
+
+        $("resetConfirmPassword").value = "";
+
+
+        alert(
+            "Your password has been updated successfully. Please sign in with your new password."
+        );
+
+
+        /*
+           Clear recovery information from URL.
+        */
+
+        if (
+            window.history &&
+            window.history.replaceState
+        ) {
+
+            window.history.replaceState(
+                {},
+                document.title,
+                PASSWORD_RECOVERY_REDIRECT
+            );
+
+        }
+
+
+        /*
+           Sign out the recovery session so the employee
+           must authenticate normally.
+        */
+
+        try {
+
+            await supabaseClient.auth.signOut();
+
+        }
+        catch (signOutError) {
+
+            console.warn(
+                "Recovery sign-out warning:",
+                signOutError
+            );
+
+        }
+
+        currentAuthUser = null;
+
+        me = null;
+
+        passwordRecoveryMode = false;
+
+    }
+    catch (error) {
+
+        console.error(
+            "RESET PASSWORD ERROR:",
+            error
+        );
+
+
+        showResetPasswordError(
+            friendlySupabaseError(error)
+        );
+
+    }
+    finally {
+
+        button.disabled = false;
+
+        button.textContent =
+            "Update Password";
+
+    }
+
+}
+
+
 /* =========================================================
    LOGIN
 ========================================================= */
@@ -2166,11 +3396,13 @@ async function loginEmployee() {
 
     clearLoginError();
 
+
     const email =
         $("loginEmail").value.trim();
 
     const password =
         $("loginPassword").value;
+
 
     if (!email || !password) {
 
@@ -2186,6 +3418,7 @@ async function loginEmployee() {
     const button =
         $("loginButton");
 
+
     button.disabled = true;
 
     button.textContent =
@@ -2198,12 +3431,13 @@ async function loginEmployee() {
             data,
             error
         } =
-            await supabaseClient.auth.signInWithPassword({
+            await supabaseClient.auth
+                .signInWithPassword({
 
-                email,
-                password
+                    email,
+                    password
 
-            });
+                });
 
 
         if (error) {
@@ -2213,7 +3447,10 @@ async function loginEmployee() {
         }
 
 
-        if (!data || !data.user) {
+        if (
+            !data ||
+            !data.user
+        ) {
 
             throw new Error(
                 "Login succeeded, but no authenticated user was returned."
@@ -2224,6 +3461,42 @@ async function loginEmployee() {
 
         currentAuthUser =
             data.user;
+
+
+        /*
+           Load employee profile BEFORE opening
+           the production portal.
+        */
+
+        await loadEmployee();
+
+
+        /*
+           FIRST LOGIN CHECK
+        */
+
+        if (
+            me.password_changed === false ||
+            me.password_changed === null ||
+            typeof me.password_changed === "undefined"
+        ) {
+
+            showFirstPasswordScreen();
+
+            return;
+
+        }
+
+
+        /*
+           NORMAL LOGIN
+        */
+
+        passwordChangeRequired =
+            false;
+
+        passwordRecoveryMode =
+            false;
 
 
         hide("loginScreen");
@@ -2238,7 +3511,6 @@ async function loginEmployee() {
 
 
         await openAuthenticatedPortal();
-
 
     }
     catch (error) {
@@ -2267,67 +3539,14 @@ async function loginEmployee() {
 
 
 /* =========================================================
-   FRIENDLY SUPABASE ERRORS
-========================================================= */
-
-function friendlySupabaseError(error) {
-
-    const message =
-        String(error?.message || error || "");
-
-
-    if (
-        message.toLowerCase()
-            .includes("invalid login credentials")
-    ) {
-
-        return "Invalid email or password.";
-
-    }
-
-
-    if (
-        message.toLowerCase()
-            .includes("invalid api key")
-    ) {
-
-        return "Invalid Supabase API key. Please verify the Publishable key in the HTML.";
-
-    }
-
-
-    if (
-        message.toLowerCase()
-            .includes("email not confirmed")
-    ) {
-
-        return "Your email address has not been confirmed in Supabase.";
-
-    }
-
-
-    if (
-        message.toLowerCase()
-            .includes("network")
-    ) {
-
-        return "Network error. Please check your internet connection.";
-
-    }
-
-
-    return message || "An unexpected error occurred.";
-
-}
-
-
-/* =========================================================
    LOGOUT
 ========================================================= */
 
 async function logoutEmployee() {
 
-    clearTimeout(saveTimer);
+    clearTimeout(
+        saveTimer
+    );
 
     saveTimer = null;
 
@@ -2350,6 +3569,10 @@ async function logoutEmployee() {
     currentDateLocked = false;
 
     lastPerformanceState = "";
+
+    passwordChangeRequired = false;
+
+    passwordRecoveryMode = false;
 
 
     try {
@@ -2375,11 +3598,29 @@ async function logoutEmployee() {
 
     hide("entryScreen");
 
+    hide("setPasswordScreen");
+
+    hide("passwordResetScreen");
+
     show("loginScreen");
+
 
     $("loginPassword").value = "";
 
+    $("newPassword").value = "";
+
+    $("confirmNewPassword").value = "";
+
+    $("resetNewPassword").value = "";
+
+    $("resetConfirmPassword").value = "";
+
+
     clearLoginError();
+
+    clearSetPasswordMessages();
+
+    clearResetPasswordMessages();
 
 }
 
@@ -2391,6 +3632,48 @@ async function logoutEmployee() {
 async function checkExistingSession() {
 
     try {
+
+        /*
+           Check whether this is a password recovery
+           redirect BEFORE normal session processing.
+        */
+
+        if (
+            isPasswordRecoveryUrl()
+        ) {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient.auth.getSession();
+
+
+            if (error) {
+
+                throw error;
+
+            }
+
+
+            if (
+                data &&
+                data.session &&
+                data.session.user
+            ) {
+
+                currentAuthUser =
+                    data.session.user;
+
+            }
+
+
+            showPasswordResetScreen();
+
+            return;
+
+        }
+
 
         const {
             data,
@@ -2415,11 +3698,46 @@ async function checkExistingSession() {
             currentAuthUser =
                 data.session.user;
 
+
+            /*
+               Load employee before deciding
+               whether to open the portal.
+            */
+
+            await loadEmployee();
+
+
+            /*
+               First-login password check.
+            */
+
+            if (
+                me.password_changed === false ||
+                me.password_changed === null ||
+                typeof me.password_changed === "undefined"
+            ) {
+
+                showFirstPasswordScreen();
+
+                return;
+
+            }
+
+
+            /*
+               Normal existing session.
+            */
+
             hide("loginScreen");
 
             show("appScreen");
 
             show("loadingCard");
+
+            hide("fatalCard");
+
+            hide("entryScreen");
+
 
             await openAuthenticatedPortal();
 
@@ -2438,11 +3756,34 @@ async function checkExistingSession() {
             error
         );
 
+
+        /*
+           If the session is invalid or the employee
+           profile is unavailable, return to login.
+        */
+
+        currentAuthUser = null;
+
+        me = null;
+
+
+        hide("appScreen");
+
+        hide("loadingCard");
+
+        hide("entryScreen");
+
+        hide("setPasswordScreen");
+
+        hide("passwordResetScreen");
+
+
+        show("loginScreen");
+
+
         showLoginError(
             friendlySupabaseError(error)
         );
-
-        show("loginScreen");
 
     }
 
@@ -2484,7 +3825,9 @@ async function openAuthenticatedPortal() {
 
 
         $("headerDate").textContent =
-            formatShiftDate(currentShiftDate);
+            formatShiftDate(
+                currentShiftDate
+            );
 
 
         await loadDateLock();
@@ -2518,7 +3861,6 @@ async function openAuthenticatedPortal() {
 
         startLockTicker();
 
-
     }
     catch (error) {
 
@@ -2546,6 +3888,15 @@ async function openAuthenticatedPortal() {
 ========================================================= */
 
 async function loadEmployee() {
+
+    if (!currentAuthUser) {
+
+        throw new Error(
+            "No authenticated employee was found."
+        );
+
+    }
+
 
     const {
         data,
@@ -3078,9 +4429,6 @@ function getCurrentHourIndex() {
     const hour =
         now.getHours();
 
-    const minute =
-        now.getMinutes();
-
 
     /*
        6 PM = index 0
@@ -3226,7 +4574,8 @@ async function loadDailyRecord() {
     if (currentRecord) {
 
         setAttendance(
-            currentRecord.attendance || "Present"
+            currentRecord.attendance ||
+            "Present"
         );
 
     }
@@ -4734,7 +6083,8 @@ async function checkShiftDateChange() {
 
     if (
         currentShiftDate &&
-        newShiftDate !== currentShiftDate
+        newShiftDate !==
+        currentShiftDate
     ) {
 
         location.reload();
@@ -4747,9 +6097,6 @@ async function checkShiftDateChange() {
 /* =========================================================
    LOCK TICKER
 ========================================================= */
-
-let lockTickerStarted = false;
-
 
 function startLockTicker() {
 
@@ -4858,6 +6205,48 @@ $("loginEmail")
 
 
 /* =========================================================
+   ENTER KEY - FIRST PASSWORD
+========================================================= */
+
+$("confirmNewPassword")
+    .addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                setFirstPassword();
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
+   ENTER KEY - PASSWORD RECOVERY
+========================================================= */
+
+$("resetConfirmPassword")
+    .addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                resetPassword();
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
    AUTH STATE LISTENER
 ========================================================= */
 
@@ -4866,6 +6255,55 @@ supabaseClient.auth.onAuthStateChange(
         event,
         session
     ) => {
+
+        console.log(
+            "AUTH EVENT:",
+            event
+        );
+
+
+        if (
+            event === "PASSWORD_RECOVERY"
+        ) {
+
+            passwordRecoveryMode =
+                true;
+
+
+            if (
+                session &&
+                session.user
+            ) {
+
+                currentAuthUser =
+                    session.user;
+
+            }
+
+
+            showPasswordResetScreen();
+
+            return;
+
+        }
+
+
+        if (
+            event === "SIGNED_IN"
+        ) {
+
+            if (
+                session &&
+                session.user
+            ) {
+
+                currentAuthUser =
+                    session.user;
+
+            }
+
+        }
+
 
         if (
             event === "SIGNED_OUT"
@@ -4877,7 +6315,26 @@ supabaseClient.auth.onAuthStateChange(
 
             currentRecord = null;
 
+            currentProject = null;
+
+            currentSubProject = null;
+
+            currentShiftDate = null;
+
+            currentDateLocked = false;
+
+            passwordChangeRequired =
+                false;
+
+            passwordRecoveryMode =
+                false;
+
+
             hide("appScreen");
+
+            hide("setPasswordScreen");
+
+            hide("passwordResetScreen");
 
             show("loginScreen");
 
