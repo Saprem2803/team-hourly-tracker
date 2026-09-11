@@ -6,428 +6,1166 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RCM Management Dashboard</title>
+<title>AMI | RCM Management Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
 <style>
 
+/* =========================================================
+   GLOBAL
+========================================================= */
+
 *{
     box-sizing:border-box;
 }
 
-html,
-body{
-    margin:0;
-    padding:0;
-    width:100%;
-    max-width:100%;
-    overflow-x:hidden;
+:root{
+    --navy:#0b1730;
+    --navy2:#13264a;
+    --blue:#1d4ed8;
+    --blue2:#3b82f6;
+    --gold:#c9a227;
+    --gold2:#e2bd42;
+
+    --green:#0f9f6e;
+    --green-bg:#eaf8f2;
+
+    --red:#dc4c4c;
+    --red-bg:#fff0f0;
+
+    --orange:#d97706;
+    --orange-bg:#fff7e8;
+
+    --purple:#7654d6;
+    --purple-bg:#f3efff;
+
+    --text:#172033;
+    --muted:#667085;
+    --light:#f5f7fb;
+    --border:#e6eaf0;
+    --white:#ffffff;
+
+    --shadow:0 8px 28px rgba(16,24,40,.07);
+    --shadow-lg:0 16px 45px rgba(16,24,40,.11);
+}
+
+html{
+    scroll-behavior:smooth;
 }
 
 body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:#f4f7fb;
-    color:#172033;
-}
-
-.hidden{
-    display:none!important;
-}
-
-/* =========================
-   TOP BAR
-========================= */
-
-.topbar{
-    background:#101828;
-    color:#fff;
-    padding:18px 28px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:18px;
-    position:sticky;
-    top:0;
-    z-index:20;
-    flex-wrap:wrap;
-}
-
-.brand h1{
     margin:0;
-    font-size:22px;
+    font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        Helvetica,
+        sans-serif;
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(29,78,216,.05),
+            transparent 30%
+        ),
+        #f4f6fa;
+    color:var(--text);
 }
 
-.brand p{
-    margin:5px 0 0;
-    color:#aeb8c8;
-    font-size:12px;
+button,
+input,
+select{
+    font:inherit;
 }
 
-.top-actions{
-    display:flex;
-    gap:9px;
-    align-items:center;
-    flex-wrap:wrap;
-    min-width:0;
-}
-
-.btn{
-    border:0;
-    border-radius:8px;
-    padding:10px 14px;
-    font-weight:700;
+button{
     cursor:pointer;
-    background:#fff;
-    color:#172033;
 }
 
-.btn.primary{
-    background:#2563eb;
-    color:#fff;
-}
+/* =========================================================
+   AUTH
+========================================================= */
 
-.btn.ghost{
-    background:#243044;
-    color:#fff;
-}
-
-.btn:hover{
-    opacity:.9;
-}
-
-/* =========================
-   CONTAINER
-========================= */
-
-.container{
-    max-width:1500px;
-    margin:auto;
-    padding:24px;
-}
-
-/* =========================
-   FILTERS
-========================= */
-
-.filters{
-    background:#fff;
-    border:1px solid #e4e9f1;
-    border-radius:14px;
-    padding:16px;
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px;
-    align-items:end;
-    box-shadow:0 3px 14px rgba(16,24,40,.05);
-}
-
-label{
-    font-size:11px;
-    font-weight:700;
-    color:#667085;
-    display:block;
-    margin-bottom:6px;
-}
-
-.field{
-    min-width:165px;
-}
-
-.field select,
-.field input{
-    width:100%;
-    height:40px;
-    border:1px solid #d7dee9;
-    border-radius:8px;
-    padding:0 10px;
-    background:#fff;
-}
-
-.status{
-    margin-left:auto;
-    font-size:12px;
-    color:#667085;
-}
-
-/* =========================
-   KPI
-========================= */
-
-.kpis{
-    display:grid;
-    grid-template-columns:repeat(6,1fr);
-    gap:14px;
-    margin:18px 0;
-}
-
-.kpi{
-    background:#fff;
-    border:1px solid #e4e9f1;
-    border-radius:14px;
-    padding:17px;
-    box-shadow:0 3px 14px rgba(16,24,40,.05);
-}
-
-.kpi .label{
-    font-size:11px;
-    color:#667085;
-    font-weight:700;
-    text-transform:uppercase;
-}
-
-.kpi .value{
-    font-size:27px;
-    font-weight:800;
-    margin-top:7px;
-}
-
-.kpi .sub{
-    font-size:11px;
-    color:#98a2b3;
-    margin-top:5px;
-}
-
-/* =========================
-   CARDS
-========================= */
-
-.grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:16px;
-    margin-bottom:16px;
-}
-
-.card{
-    background:#fff;
-    border:1px solid #e4e9f1;
-    border-radius:14px;
-    padding:18px;
-    box-shadow:0 3px 14px rgba(16,24,40,.05);
-    min-width:0;
-}
-
-.card h2{
-    font-size:15px;
-    margin:0 0 4px;
-}
-
-.card .muted{
-    font-size:11px;
-    color:#98a2b3;
-    margin-bottom:12px;
-}
-
-.chart-wrap{
-    height:300px;
-    position:relative;
-}
-
-.full{
-    grid-column:1/-1;
-}
-
-/* =========================
-   INSIGHTS
-========================= */
-
-.insights{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:12px;
-}
-
-.insight{
-    padding:14px;
-    border-radius:10px;
-    background:#f8fafc;
-    border:1px solid #e7ebf2;
-}
-
-.insight strong{
-    display:block;
-    font-size:13px;
-    margin-bottom:6px;
-}
-
-.insight span{
-    font-size:12px;
-    color:#667085;
-}
-
-/* =========================
-   TABLE
-========================= */
-
-.table-wrap{
-    overflow:auto;
-    max-height:460px;
-    max-width:100%;
-}
-
-.table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:12px;
-}
-
-.table th,
-.table td{
-    padding:10px;
-    border-bottom:1px solid #edf0f5;
-    text-align:left;
-    white-space:nowrap;
-}
-
-.table th{
-    font-size:10px;
-    text-transform:uppercase;
-    color:#667085;
-    background:#f8fafc;
-    position:sticky;
-    top:0;
-}
-
-/* =========================
-   STATUS PILLS
-========================= */
-
-.pill{
-    padding:4px 8px;
-    border-radius:20px;
-    font-weight:700;
-    font-size:10px;
-}
-
-.good{
-    background:#dcfce7;
-    color:#166534;
-}
-
-.warn{
-    background:#fef3c7;
-    color:#92400e;
-}
-
-.bad{
-    background:#fee2e2;
-    color:#991b1b;
-}
-
-/* =========================
-   LOGIN
-========================= */
-
-.auth{
+.auth-screen{
     min-height:100vh;
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:20px;
-    background:#eef3f9;
-}
-
-.login{
-    width:390px;
-    max-width:100%;
-    background:#fff;
     padding:30px;
-    border-radius:16px;
-    box-shadow:0 15px 50px rgba(16,24,40,.12);
+
+    background:
+        radial-gradient(
+            circle at 15% 20%,
+            rgba(59,130,246,.20),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 85% 80%,
+            rgba(201,162,39,.14),
+            transparent 28%
+        ),
+        linear-gradient(
+            135deg,
+            #071126,
+            #102348 55%,
+            #0a1832
+        );
 }
 
-.login h1{
+.login-shell{
+    width:100%;
+    max-width:470px;
+}
+
+.login-card{
+    background:rgba(255,255,255,.98);
+    border-radius:24px;
+    padding:40px;
+    box-shadow:
+        0 30px 80px rgba(0,0,0,.28);
+    border:1px solid rgba(255,255,255,.4);
+}
+
+.brand-mark{
+    width:58px;
+    height:58px;
+    border-radius:17px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:
+        linear-gradient(
+            145deg,
+            var(--gold2),
+            var(--gold)
+        );
+
+    color:var(--navy);
+    font-size:22px;
+    font-weight:900;
+
+    box-shadow:
+        0 10px 25px rgba(201,162,39,.30);
+
+    margin-bottom:22px;
+}
+
+.login-title{
+    font-size:28px;
+    font-weight:800;
     margin:0 0 8px;
+    color:var(--navy);
 }
 
-.login p{
-    color:#667085;
+.login-subtitle{
+    color:var(--muted);
+    margin:0 0 28px;
+    line-height:1.6;
+}
+
+.login-field{
+    margin-bottom:17px;
+}
+
+.login-field label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    color:#344054;
+    margin-bottom:7px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+}
+
+.login-field input{
+    width:100%;
+    padding:13px 14px;
+    border:1px solid #d8dde7;
+    border-radius:11px;
+    outline:none;
+    background:#fff;
+    transition:.2s;
+}
+
+.login-field input:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 0 4px rgba(59,130,246,.10);
+}
+
+.login-button{
+    width:100%;
+    border:0;
+    border-radius:11px;
+    padding:14px;
+    margin-top:8px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--navy),
+            #1b376b
+        );
+
+    color:white;
+    font-weight:800;
+    letter-spacing:.02em;
+
+    box-shadow:
+        0 10px 22px rgba(11,23,48,.20);
+
+    transition:.2s;
+}
+
+.login-button:hover{
+    transform:translateY(-1px);
+    box-shadow:
+        0 14px 28px rgba(11,23,48,.25);
+}
+
+.auth-error{
+    display:none;
+    margin-top:15px;
+    padding:11px 13px;
+    border-radius:10px;
+    background:var(--red-bg);
+    color:#a72f2f;
+    font-size:13px;
+    line-height:1.5;
+}
+
+/* =========================================================
+   APPLICATION
+========================================================= */
+
+.app{
+    display:none;
+    min-height:100vh;
+}
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+
+    min-height:78px;
+    padding:0 30px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    background:
+        linear-gradient(
+            110deg,
+            #08142b,
+            #102348 65%,
+            #132b59
+        );
+
+    color:#fff;
+
+    box-shadow:
+        0 8px 30px rgba(4,12,28,.20);
+}
+
+.topbar-left{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.logo-box{
+    width:42px;
+    height:42px;
+
+    border-radius:12px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:
+        linear-gradient(
+            145deg,
+            var(--gold2),
+            var(--gold)
+        );
+
+    color:var(--navy);
+    font-weight:900;
+    font-size:15px;
+
+    box-shadow:
+        0 6px 18px rgba(201,162,39,.25);
+}
+
+.top-title{
+    display:flex;
+    flex-direction:column;
+}
+
+.top-title strong{
+    font-size:17px;
+    letter-spacing:.01em;
+}
+
+.top-title span{
+    margin-top:2px;
+    color:#b9c6df;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.09em;
+}
+
+.topbar-right{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.user-pill{
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    padding:8px 12px;
+
+    border:1px solid rgba(255,255,255,.13);
+    border-radius:30px;
+
+    background:rgba(255,255,255,.07);
+}
+
+.user-avatar{
+    width:30px;
+    height:30px;
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:rgba(255,255,255,.13);
+    font-size:12px;
+    font-weight:800;
+}
+
+.user-info{
+    display:flex;
+    flex-direction:column;
+}
+
+.user-info strong{
+    font-size:12px;
+}
+
+.user-info span{
+    font-size:10px;
+    color:#b9c6df;
+}
+
+.logout-top{
+    border:1px solid rgba(255,255,255,.16);
+    background:rgba(255,255,255,.07);
+    color:white;
+    padding:9px 13px;
+    border-radius:9px;
+    font-weight:700;
+}
+
+.logout-top:hover{
+    background:rgba(255,255,255,.13);
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.container{
+    max-width:1600px;
+    margin:0 auto;
+    padding:28px 30px 50px;
+}
+
+/* =========================================================
+   PAGE HERO
+========================================================= */
+
+.page-hero{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:20px;
+
+    margin-bottom:22px;
+}
+
+.hero-title h1{
+    margin:0;
+    color:var(--navy);
+    font-size:28px;
+    letter-spacing:-.025em;
+}
+
+.hero-title p{
+    margin:7px 0 0;
+    color:var(--muted);
     font-size:13px;
 }
 
-.login input{
-    width:100%;
-    height:44px;
-    margin:7px 0;
-    border:1px solid #d7dee9;
-    border-radius:8px;
-    padding:0 12px;
-}
+.period-badge{
+    display:flex;
+    align-items:center;
+    gap:8px;
 
-.login button{
-    width:100%;
-    height:44px;
-    margin-top:8px;
-}
+    background:white;
+    border:1px solid var(--border);
 
-.error{
-    color:#b42318;
+    padding:10px 14px;
+    border-radius:11px;
+
+    box-shadow:0 4px 15px rgba(16,24,40,.04);
+
     font-size:12px;
-    margin-top:10px;
+    font-weight:700;
+    color:#344054;
 }
 
-.footer{
-    text-align:center;
+.period-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 0 4px rgba(15,159,110,.10);
+}
+
+/* =========================================================
+   FILTER BAR
+========================================================= */
+
+.filter-card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:17px;
+    box-shadow:var(--shadow);
+
+    padding:17px;
+
+    display:grid;
+    grid-template-columns:
+        1fr
+        1fr
+        1.5fr
+        auto
+        auto
+        auto;
+
+    gap:12px;
+    align-items:end;
+
+    margin-bottom:22px;
+}
+
+.filter-group{
+    min-width:0;
+}
+
+.filter-group label{
+    display:block;
+    margin-bottom:6px;
+
+    color:#667085;
+    font-size:10px;
+    font-weight:800;
+
+    text-transform:uppercase;
+    letter-spacing:.07em;
+}
+
+.filter-group input,
+.filter-group select{
+    width:100%;
+
+    padding:11px 12px;
+
+    border:1px solid #dfe3ea;
+    border-radius:9px;
+
+    background:#fff;
+    color:#1d2939;
+
+    outline:none;
+}
+
+.filter-group input:focus,
+.filter-group select:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px rgba(59,130,246,.08);
+}
+
+.btn{
+    border:0;
+    border-radius:9px;
+    padding:11px 15px;
+
+    font-weight:800;
+    font-size:12px;
+
+    transition:.2s;
+}
+
+.btn-primary{
+    color:white;
+    background:var(--navy);
+}
+
+.btn-primary:hover{
+    background:#162f5d;
+    transform:translateY(-1px);
+}
+
+.btn-secondary{
+    color:#344054;
+    background:#f2f4f7;
+    border:1px solid #e4e7ec;
+}
+
+.btn-secondary:hover{
+    background:#e9edf3;
+}
+
+.status-text{
+    align-self:center;
+    font-size:11px;
+    color:var(--muted);
+    white-space:nowrap;
+}
+
+/* =========================================================
+   KPI CARDS
+========================================================= */
+
+.kpi-grid{
+    display:grid;
+    grid-template-columns:
+        repeat(6, minmax(0,1fr));
+
+    gap:14px;
+    margin-bottom:22px;
+}
+
+.kpi{
+    position:relative;
+    overflow:hidden;
+
+    background:white;
+
+    border:1px solid var(--border);
+    border-radius:17px;
+
+    padding:19px;
+
+    box-shadow:var(--shadow);
+
+    min-height:142px;
+}
+
+.kpi::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--navy),
+            var(--blue2)
+        );
+}
+
+.kpi.gold::before{
+    background:
+        linear-gradient(
+            90deg,
+            var(--gold),
+            var(--gold2)
+        );
+}
+
+.kpi.green::before{
+    background:
+        linear-gradient(
+            90deg,
+            #0f9f6e,
+            #32c58b
+        );
+}
+
+.kpi.red::before{
+    background:
+        linear-gradient(
+            90deg,
+            #c73737,
+            #ef6b6b
+        );
+}
+
+.kpi-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.kpi-label{
+    color:#667085;
+    font-size:10px;
+    font-weight:800;
+
+    text-transform:uppercase;
+    letter-spacing:.08em;
+}
+
+.kpi-icon{
+    width:32px;
+    height:32px;
+
+    border-radius:9px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#eef3fb;
+    color:var(--navy);
+
+    font-size:14px;
+    font-weight:900;
+}
+
+.kpi-value{
+    margin-top:14px;
+
+    color:var(--navy);
+
+    font-size:28px;
+    font-weight:850;
+
+    letter-spacing:-.035em;
+}
+
+.kpi-sub{
+    margin-top:5px;
+    color:#98a2b3;
+    font-size:10px;
+}
+
+.kpi-progress{
+    margin-top:13px;
+    height:6px;
+    background:#edf0f5;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.kpi-progress span{
+    display:block;
+    height:100%;
+    width:0;
+
+    border-radius:20px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--blue),
+            #61a4ff
+        );
+}
+
+/* =========================================================
+   INSIGHTS
+========================================================= */
+
+.section-heading{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    margin:26px 0 12px;
+}
+
+.section-heading h2{
+    margin:0;
+
+    font-size:15px;
+    color:var(--navy);
+}
+
+.section-heading span{
     color:#98a2b3;
     font-size:11px;
-    padding:10px 0 20px;
 }
 
-/* =========================
-   MOBILE
-========================= */
+.insights{
+    display:grid;
+    grid-template-columns:
+        repeat(4,minmax(0,1fr));
 
-@media(max-width:1200px){
+    gap:14px;
+    margin-bottom:22px;
+}
 
-    .kpis{
-        grid-template-columns:repeat(3,1fr);
+.insight{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:15px;
+
+    padding:16px;
+
+    box-shadow:var(--shadow);
+}
+
+.insight-label{
+    font-size:10px;
+    font-weight:800;
+    color:#98a2b3;
+
+    text-transform:uppercase;
+    letter-spacing:.08em;
+}
+
+.insight-value{
+    margin-top:8px;
+
+    font-size:17px;
+    font-weight:800;
+    color:var(--navy);
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.insight-meta{
+    margin-top:5px;
+    font-size:11px;
+    color:var(--muted);
+}
+
+/* =========================================================
+   CHART GRID
+========================================================= */
+
+.chart-grid{
+    display:grid;
+    grid-template-columns:
+        1.5fr 1fr;
+
+    gap:16px;
+
+    margin-bottom:18px;
+}
+
+.chart-card{
+    background:white;
+
+    border:1px solid var(--border);
+    border-radius:17px;
+
+    padding:18px;
+
+    box-shadow:var(--shadow);
+}
+
+.chart-header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+
+    margin-bottom:14px;
+}
+
+.chart-title{
+    font-size:14px;
+    font-weight:800;
+    color:var(--navy);
+}
+
+.chart-subtitle{
+    margin-top:4px;
+    font-size:10px;
+    color:#98a2b3;
+}
+
+.chart-wrap{
+    position:relative;
+    height:290px;
+}
+
+.chart-wrap.tall{
+    height:320px;
+}
+
+/* =========================================================
+   TABLE CARDS
+========================================================= */
+
+.table-card{
+    background:white;
+
+    border:1px solid var(--border);
+    border-radius:17px;
+
+    box-shadow:var(--shadow);
+
+    overflow:hidden;
+    margin-top:18px;
+}
+
+.table-header{
+    padding:18px 20px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    border-bottom:1px solid var(--border);
+}
+
+.table-title{
+    font-size:14px;
+    font-weight:800;
+    color:var(--navy);
+}
+
+.table-subtitle{
+    color:#98a2b3;
+    font-size:10px;
+    margin-top:3px;
+}
+
+.table-scroll{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+thead{
+    background:#f8f9fb;
+}
+
+th{
+    padding:12px 14px;
+
+    text-align:left;
+
+    color:#667085;
+
+    font-size:9px;
+    font-weight:850;
+
+    text-transform:uppercase;
+    letter-spacing:.07em;
+
+    white-space:nowrap;
+}
+
+td{
+    padding:13px 14px;
+
+    border-top:1px solid #eef0f3;
+
+    font-size:11px;
+    color:#344054;
+
+    white-space:nowrap;
+}
+
+tbody tr:hover{
+    background:#fbfcfe;
+}
+
+.employee-name{
+    font-weight:800;
+    color:#172033;
+}
+
+.employee-id{
+    font-size:10px;
+    color:#98a2b3;
+    margin-top:2px;
+}
+
+.project-name{
+    font-weight:700;
+    color:#344054;
+}
+
+.number{
+    font-variant-numeric:tabular-nums;
+    font-weight:700;
+}
+
+.achievement-cell{
+    min-width:145px;
+}
+
+.achievement-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+}
+
+.achievement-percent{
+    font-weight:850;
+    color:var(--navy);
+}
+
+.mini-progress{
+    height:5px;
+    margin-top:6px;
+
+    background:#edf0f5;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.mini-progress span{
+    display:block;
+    height:100%;
+    border-radius:20px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--blue),
+            #65a6ff
+        );
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:5px 8px;
+
+    border-radius:20px;
+
+    font-size:9px;
+    font-weight:850;
+}
+
+.badge-good{
+    background:var(--green-bg);
+    color:#08734f;
+}
+
+.badge-warning{
+    background:var(--orange-bg);
+    color:#9a5b00;
+}
+
+.badge-danger{
+    background:var(--red-bg);
+    color:#a72f2f;
+}
+
+.badge-neutral{
+    background:#f2f4f7;
+    color:#667085;
+}
+
+/* =========================================================
+   EMPTY / LOADING
+========================================================= */
+
+.empty-state{
+    padding:45px 20px;
+    text-align:center;
+    color:#98a2b3;
+}
+
+.empty-icon{
+    width:48px;
+    height:48px;
+
+    margin:0 auto 12px;
+
+    border-radius:14px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#f2f4f7;
+    color:#667085;
+
+    font-weight:900;
+}
+
+.empty-state strong{
+    display:block;
+    color:#475467;
+    margin-bottom:5px;
+}
+
+.loading{
+    position:fixed;
+    inset:0;
+
+    z-index:999;
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    background:rgba(7,17,38,.30);
+    backdrop-filter:blur(4px);
+}
+
+.loading-card{
+    background:white;
+    border-radius:16px;
+    padding:22px 28px;
+
+    box-shadow:var(--shadow-lg);
+
+    display:flex;
+    align-items:center;
+    gap:13px;
+
+    font-size:13px;
+    font-weight:700;
+    color:var(--navy);
+}
+
+.spinner{
+    width:22px;
+    height:22px;
+
+    border:3px solid #e4e7ec;
+    border-top-color:var(--blue);
+
+    border-radius:50%;
+
+    animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+/* =========================================================
+   FOOTER ACTIONS
+========================================================= */
+
+.bottom-actions{
+    margin-top:24px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding-top:20px;
+    border-top:1px solid var(--border);
+}
+
+.action-group{
+    display:flex;
+    gap:9px;
+    flex-wrap:wrap;
+}
+
+.footer-note{
+    font-size:10px;
+    color:#98a2b3;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1250px){
+
+    .kpi-grid{
+        grid-template-columns:
+            repeat(3,minmax(0,1fr));
     }
 
-    .insights{
-        grid-template-columns:repeat(2,1fr);
+    .filter-card{
+        grid-template-columns:
+            repeat(3,minmax(0,1fr));
     }
 
 }
 
-@media(max-width:800px){
+@media(max-width:900px){
 
-    .grid{
-        grid-template-columns:1fr;
-    }
-
-    .kpis{
-        grid-template-columns:repeat(2,1fr);
+    .container{
+        padding:22px 18px 40px;
     }
 
     .topbar{
-        padding:15px;
+        padding:0 18px;
+    }
+
+    .top-title span{
+        display:none;
+    }
+
+    .page-hero{
         align-items:flex-start;
+        flex-direction:column;
     }
 
-    .top-actions{
-        width:100%;
+    .insights{
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
     }
 
-    .top-actions .who{
-        flex:1 1 100%;
-    }
-
-    .container{
-        padding:14px;
-    }
-
-    .status{
-        width:100%;
-        margin-left:0;
+    .chart-grid{
+        grid-template-columns:1fr;
     }
 
 }
 
-@media(max-width:500px){
+@media(max-width:650px){
 
-    .kpis{
+    .topbar{
+        min-height:70px;
+    }
+
+    .user-info{
+        display:none;
+    }
+
+    .logout-top{
+        padding:8px 10px;
+    }
+
+    .kpi-grid{
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+    }
+
+    .filter-card{
         grid-template-columns:1fr;
     }
 
@@ -435,12 +1173,26 @@ label{
         grid-template-columns:1fr;
     }
 
-    .brand h1{
-        font-size:18px;
+    .bottom-actions{
+        align-items:flex-start;
+        flex-direction:column;
+        gap:15px;
     }
 
-    .top-actions .btn{
-        width:100%;
+    .hero-title h1{
+        font-size:23px;
+    }
+
+}
+
+@media(max-width:430px){
+
+    .kpi-grid{
+        grid-template-columns:1fr;
+    }
+
+    .login-card{
+        padding:28px 22px;
     }
 
 }
@@ -451,50 +1203,70 @@ label{
 
 <body>
 
-
 <!-- =========================================================
-     LOGIN
+     AUTH SCREEN
 ========================================================= -->
 
-<div id="authScreen" class="auth">
+<div id="authScreen" class="auth-screen">
 
-    <div class="login">
+    <div class="login-shell">
 
-        <h1>
-            RCM Management Dashboard
-        </h1>
+        <div class="login-card">
 
-        <p>
-            Management-only executive view for production,
-            workforce and performance trends.
-        </p>
+            <div class="brand-mark">
+                AMI
+            </div>
 
-        <input
-            id="email"
-            type="email"
-            placeholder="Email address"
-            autocomplete="username"
-        >
+            <h1 class="login-title">
+                Management Dashboard
+            </h1>
 
-        <input
-            id="password"
-            type="password"
-            placeholder="Password"
-            autocomplete="current-password"
-        >
+            <p class="login-subtitle">
+                Executive visibility into RCM production,
+                achievement, workforce utilization and
+                shrinkage performance.
+            </p>
 
-        <button
-            id="loginButton"
-            class="btn primary"
-            onclick="login()"
-        >
-            Sign In
-        </button>
+            <div class="login-field">
 
-        <div
-            id="authError"
-            class="error"
-        ></div>
+                <label>Email</label>
+
+                <input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    autocomplete="username"
+                >
+
+            </div>
+
+            <div class="login-field">
+
+                <label>Password</label>
+
+                <input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                >
+
+            </div>
+
+            <button
+                id="loginButton"
+                class="login-button"
+                onclick="login()"
+            >
+                Sign In
+            </button>
+
+            <div
+                id="authError"
+                class="auth-error"
+            ></div>
+
+        </div>
 
     </div>
 
@@ -505,529 +1277,818 @@ label{
      APPLICATION
 ========================================================= -->
 
-<div id="app" class="hidden">
+<div id="app" class="app">
 
+    <!-- TOPBAR -->
 
-<header class="topbar">
+    <div class="topbar">
 
-    <div class="brand">
+        <div class="topbar-left">
 
-        <h1>
-            RCM Management Dashboard
-        </h1>
+            <div class="logo-box">
+                AMI
+            </div>
 
-        <p>
-            Executive Performance • Production • Workforce • Shrinkage
-        </p>
+            <div class="top-title">
 
-    </div>
+                <strong>
+                    RCM Management Dashboard
+                </strong>
 
+                <span>
+                    Revenue Cycle Management • Operations Intelligence
+                </span>
 
-    <div class="top-actions">
+            </div>
 
-        <span
-            id="userLabel"
-            style="font-size:11px;color:#aeb8c8"
-        ></span>
-
-        <button
-            class="btn ghost"
-            onclick="openOperations()"
-        >
-            Operations Dashboard
-        </button>
-
-        <button
-            class="btn ghost"
-            onclick="openEmployeeEntry()"
-        >
-            Employee Entry Link
-        </button>
-
-        <button
-            class="btn"
-            onclick="logout()"
-        >
-            Logout
-        </button>
-
-    </div>
-
-</header>
-
-
-<main class="container">
-
-
-<!-- =========================================================
-     FILTERS
-========================================================= -->
-
-<section class="filters">
-
-    <div class="field">
-
-        <label>
-            From Date
-        </label>
-
-        <input
-            id="fromDate"
-            type="date"
-        >
-
-    </div>
-
-
-    <div class="field">
-
-        <label>
-            To Date
-        </label>
-
-        <input
-            id="toDate"
-            type="date"
-        >
-
-    </div>
-
-
-    <div class="field">
-
-        <label>
-            Project
-        </label>
-
-        <select id="projectFilter">
-
-            <option value="">
-                All Projects
-            </option>
-
-        </select>
-
-    </div>
-
-
-    <button
-        class="btn primary"
-        onclick="refreshDashboard()"
-    >
-        Refresh Dashboard
-    </button>
-
-
-    <button
-        class="btn"
-        onclick="setMTD()"
-    >
-        Current MTD
-    </button>
-
-
-    <div
-        id="status"
-        class="status"
-    >
-        Ready
-    </div>
-
-</section>
-
-
-<!-- =========================================================
-     KPI
-========================================================= -->
-
-<section class="kpis">
-
-
-    <div class="kpi">
-
-        <div class="label">
-            Total FTE
         </div>
 
-        <div
-            id="kpiFte"
-            class="value"
-        >
-            0
-        </div>
+        <div class="topbar-right">
 
-        <div class="sub">
-            Active workforce
+            <div class="user-pill">
+
+                <div
+                    id="userAvatar"
+                    class="user-avatar"
+                >
+                    AM
+                </div>
+
+                <div class="user-info">
+
+                    <strong id="userLabel">
+                        Management
+                    </strong>
+
+                    <span>
+                        Authorized Access
+                    </span>
+
+                </div>
+
+            </div>
+
+            <button
+                class="logout-top"
+                onclick="logout()"
+            >
+                Logout
+            </button>
+
         </div>
 
     </div>
 
 
-    <div class="kpi">
+    <!-- MAIN -->
 
-        <div class="label">
-            Present
+    <main class="container">
+
+        <!-- HERO -->
+
+        <div class="page-hero">
+
+            <div class="hero-title">
+
+                <h1>
+                    Executive Performance Overview
+                </h1>
+
+                <p>
+                    Monitor production, achievement,
+                    workforce presence and operational efficiency.
+                </p>
+
+            </div>
+
+            <div class="period-badge">
+
+                <span class="period-dot"></span>
+
+                <span id="periodLabel">
+                    Current Month
+                </span>
+
+            </div>
+
         </div>
 
-        <div
-            id="kpiPresent"
-            class="value"
-        >
-            0
+
+        <!-- FILTERS -->
+
+        <div class="filter-card">
+
+            <div class="filter-group">
+
+                <label>
+                    From Date
+                </label>
+
+                <input
+                    type="date"
+                    id="fromDate"
+                >
+
+            </div>
+
+            <div class="filter-group">
+
+                <label>
+                    To Date
+                </label>
+
+                <input
+                    type="date"
+                    id="toDate"
+                >
+
+            </div>
+
+            <div class="filter-group">
+
+                <label>
+                    Project
+                </label>
+
+                <select id="projectFilter">
+
+                    <option value="">
+                        All Projects
+                    </option>
+
+                </select>
+
+            </div>
+
+            <button
+                class="btn btn-primary"
+                onclick="refreshDashboard()"
+            >
+                Refresh
+            </button>
+
+            <button
+                class="btn btn-secondary"
+                onclick="setCurrentMonth()"
+            >
+                Current MTD
+            </button>
+
+            <div
+                id="status"
+                class="status-text"
+            >
+                Ready
+            </div>
+
         </div>
 
-        <div class="sub">
-            Average daily full-day presence
+
+        <!-- KPI -->
+
+        <div class="kpi-grid">
+
+            <div class="kpi">
+
+                <div class="kpi-head">
+
+                    <div class="kpi-label">
+                        Total FTE
+                    </div>
+
+                    <div class="kpi-icon">
+                        👥
+                    </div>
+
+                </div>
+
+                <div
+                    id="kpiFte"
+                    class="kpi-value"
+                >
+                    0
+                </div>
+
+                <div class="kpi-sub">
+                    Active scoped workforce
+                </div>
+
+            </div>
+
+
+            <div class="kpi green">
+
+                <div class="kpi-head">
+
+                    <div class="kpi-label">
+                        Present
+                    </div>
+
+                    <div class="kpi-icon">
+                        ✓
+                    </div>
+
+                </div>
+
+                <div
+                    id="kpiPresent"
+                    class="kpi-value"
+                >
+                    0
+                </div>
+
+                <div class="kpi-sub">
+                    Average daily full-day presence
+                </div>
+
+            </div>
+
+
+            <div class="kpi gold">
+
+                <div class="kpi-head">
+
+                    <div class="kpi-label">
+                        MTD Target
+                    </div>
+
+                    <div class="kpi-icon">
+                        🎯
+                    </div>
+
+                </div>
+
+                <div
+                    id="kpiTarget"
+                    class="kpi-value"
+                >
+                    0
+                </div>
+
+                <div class="kpi-sub">
+                    Period production target
+                </div>
+
+            </div>
+
+
+            <div class="kpi">
+
+                <div class="kpi-head">
+
+                    <div class="kpi-label">
+                        MTD Achieved
+                    </div>
+
+                    <div class="kpi-icon">
+                        ↑
+                    </div>
+
+                </div>
+
+                <div
+                    id="kpiAchieved"
+                    class="kpi-value"
+                >
+                    0
+                </div>
+
+                <div class="kpi-sub">
+                    Actual production completed
+                </div>
+
+            </div>
+
+
+            <div class="kpi">
+
+                <div class="kpi-head">
+
+                    <div class="kpi-label">
+                        Achievement
+                    </div>
+
+                    <div class="kpi-icon">
+                        %
+                    </div>
+
+                </div>
+
+                <div
+                    id="kpiAchievement"
+                    class="kpi-value"
+                >
+                    0.0%
+                </div>
+
+                <div class="kpi-progress">
+
+                    <span
+                        id="achievementProgress"
+                    ></span>
+
+                </div>
+
+                <div class="kpi-sub">
+                    Achieved vs target
+                </div>
+
+            </div>
+
+
+            <div class="kpi red">
+
+                <div class="kpi-head">
+
+                    <div class="kpi-label">
+                        Shrinkage
+                    </div>
+
+                    <div class="kpi-icon">
+                        ↓
+                    </div>
+
+                </div>
+
+                <div
+                    id="kpiShrinkage"
+                    class="kpi-value"
+                >
+                    0.0%
+                </div>
+
+                <div class="kpi-sub">
+                    Absence + half-day impact
+                </div>
+
+            </div>
+
         </div>
 
-    </div>
 
+        <!-- INSIGHTS -->
 
-    <div class="kpi">
+        <div class="section-heading">
 
-        <div class="label">
-            MTD Target
-        </div>
+            <h2>
+                Management Insights
+            </h2>
 
-        <div
-            id="kpiTarget"
-            class="value"
-        >
-            0
-        </div>
-
-        <div class="sub">
-            Scheduled production
-        </div>
-
-    </div>
-
-
-    <div class="kpi">
-
-        <div class="label">
-            MTD Achieved
-        </div>
-
-        <div
-            id="kpiAchieved"
-            class="value"
-        >
-            0
-        </div>
-
-        <div class="sub">
-            Total production
-        </div>
-
-    </div>
-
-
-    <div class="kpi">
-
-        <div class="label">
-            Achievement
-        </div>
-
-        <div
-            id="kpiAchievement"
-            class="value"
-        >
-            0%
-        </div>
-
-        <div class="sub">
-            Achieved ÷ target
-        </div>
-
-    </div>
-
-
-    <div class="kpi">
-
-        <div class="label">
-            Shrinkage
-        </div>
-
-        <div
-            id="kpiShrinkage"
-            class="value"
-        >
-            0%
-        </div>
-
-        <div class="sub">
-            Absence + half day
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =========================================================
-     INSIGHTS
-========================================================= -->
-
-<section
-    class="card full"
-    style="margin-bottom:16px"
->
-
-    <h2>
-        Management Insights
-    </h2>
-
-    <div class="muted">
-        Automatically generated from the selected period.
-    </div>
-
-    <div class="insights">
-
-
-        <div class="insight">
-
-            <strong>
-                Top Performer
-            </strong>
-
-            <span id="insight1">
-                -
+            <span>
+                Selected reporting period
             </span>
 
         </div>
 
+        <div class="insights">
 
-        <div class="insight">
+            <div class="insight">
 
-            <strong>
-                Needs Attention
-            </strong>
+                <div class="insight-label">
+                    Top Performer
+                </div>
 
-            <span id="insight2">
-                -
-            </span>
+                <div
+                    id="insight1"
+                    class="insight-value"
+                >
+                    —
+                </div>
+
+                <div
+                    id="insight1Meta"
+                    class="insight-meta"
+                >
+                    Highest achievement
+                </div>
+
+            </div>
+
+
+            <div class="insight">
+
+                <div class="insight-label">
+                    Needs Attention
+                </div>
+
+                <div
+                    id="insight2"
+                    class="insight-value"
+                >
+                    —
+                </div>
+
+                <div
+                    id="insight2Meta"
+                    class="insight-meta"
+                >
+                    Lowest achievement
+                </div>
+
+            </div>
+
+
+            <div class="insight">
+
+                <div class="insight-label">
+                    Trend
+                </div>
+
+                <div
+                    id="insight3"
+                    class="insight-value"
+                >
+                    —
+                </div>
+
+                <div
+                    id="insight3Meta"
+                    class="insight-meta"
+                >
+                    Daily performance trend
+                </div>
+
+            </div>
+
+
+            <div class="insight">
+
+                <div class="insight-label">
+                    Workforce
+                </div>
+
+                <div
+                    id="insight4"
+                    class="insight-value"
+                >
+                    —
+                </div>
+
+                <div
+                    id="insight4Meta"
+                    class="insight-meta"
+                >
+                    Attendance overview
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CHARTS -->
+
+        <div class="chart-grid">
+
+            <div class="chart-card">
+
+                <div class="chart-header">
+
+                    <div>
+
+                        <div class="chart-title">
+                            Daily Target vs Achieved
+                        </div>
+
+                        <div class="chart-subtitle">
+                            Production performance by day
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="chart-wrap tall">
+
+                    <canvas id="dailyChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <div class="chart-card">
+
+                <div class="chart-header">
+
+                    <div>
+
+                        <div class="chart-title">
+                            Daily Achievement
+                        </div>
+
+                        <div class="chart-subtitle">
+                            Percentage of target achieved
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="chart-wrap">
+
+                    <canvas id="achievementChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <div class="chart-card">
+
+                <div class="chart-header">
+
+                    <div>
+
+                        <div class="chart-title">
+                            Project Performance
+                        </div>
+
+                        <div class="chart-subtitle">
+                            Achievement comparison by project
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="chart-wrap">
+
+                    <canvas id="projectChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <div class="chart-card">
+
+                <div class="chart-header">
+
+                    <div>
+
+                        <div class="chart-title">
+                            Workforce / Shrinkage Trend
+                        </div>
+
+                        <div class="chart-subtitle">
+                            Presence and shrinkage by day
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="chart-wrap">
+
+                    <canvas id="shrinkageChart"></canvas>
+
+                </div>
+
+            </div>
 
         </div>
 
 
-        <div class="insight">
+        <!-- EMPLOYEE TABLE -->
 
-            <strong>
-                Trend
-            </strong>
+        <div class="table-card">
 
-            <span id="insight3">
-                -
-            </span>
+            <div class="table-header">
+
+                <div>
+
+                    <div class="table-title">
+                        Employee Performance
+                    </div>
+
+                    <div class="table-subtitle">
+                        Individual production ranking for the selected period
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="table-scroll">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Rank
+                            </th>
+
+                            <th>
+                                Employee
+                            </th>
+
+                            <th>
+                                EMP ID
+                            </th>
+
+                            <th>
+                                Project
+                            </th>
+
+                            <th>
+                                Target
+                            </th>
+
+                            <th>
+                                Achieved
+                            </th>
+
+                            <th>
+                                Achievement
+                            </th>
+
+                            <th>
+                                Deficit
+                            </th>
+
+                            <th>
+                                Days
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="employeeTable">
+
+                        <tr>
+
+                            <td colspan="10">
+
+                                <div class="empty-state">
+
+                                    <div class="empty-icon">
+                                        —
+                                    </div>
+
+                                    <strong>
+                                        No data available
+                                    </strong>
+
+                                    Select a reporting period to view employee performance.
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- SUB PROCESS -->
+
+        <div class="table-card">
+
+            <div class="table-header">
+
+                <div>
+
+                    <div class="table-title">
+                        Sub Process Summary
+                    </div>
+
+                    <div class="table-subtitle">
+                        Production performance by process / sub-process
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="table-scroll">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Sub Process
+                            </th>
+
+                            <th>
+                                FTE
+                            </th>
+
+                            <th>
+                                Target
+                            </th>
+
+                            <th>
+                                Achieved
+                            </th>
+
+                            <th>
+                                Achievement
+                            </th>
+
+                            <th>
+                                Deficit
+                            </th>
+
+                            <th>
+                                Avg / FTE Day
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="subProcessTable">
+
+                        <tr>
+
+                            <td colspan="7">
+
+                                <div class="empty-state">
+
+                                    No sub-process data available.
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
 
         </div>
 
 
-        <div class="insight">
+        <!-- ACTIONS -->
 
-            <strong>
-                Workforce
-            </strong>
+        <div class="bottom-actions">
 
-            <span id="insight4">
-                -
-            </span>
+            <div class="action-group">
 
-        </div>
+                <button
+                    class="btn btn-primary"
+                    onclick="openOperationsDashboard()"
+                >
+                    Operations Dashboard
+                </button>
 
-    </div>
+                <button
+                    class="btn btn-secondary"
+                    onclick="openEmployeeEntry()"
+                >
+                    Employee Entry
+                </button>
 
-</section>
+            </div>
 
-
-<!-- =========================================================
-     CHARTS
-========================================================= -->
-
-<section class="grid">
-
-
-    <div class="card">
-
-        <h2>
-            Daily Target vs Achieved
-        </h2>
-
-        <div class="muted">
-            Production trend across the selected period.
-        </div>
-
-        <div class="chart-wrap">
-
-            <canvas id="dailyChart"></canvas>
+            <div class="footer-note">
+                AMI RCM Management Intelligence
+            </div>
 
         </div>
 
-    </div>
-
-
-    <div class="card">
-
-        <h2>
-            Daily Achievement %
-        </h2>
-
-        <div class="muted">
-            Day-by-day team achievement.
-        </div>
-
-        <div class="chart-wrap">
-
-            <canvas id="achievementChart"></canvas>
-
-        </div>
-
-    </div>
-
-
-    <div class="card">
-
-        <h2>
-            Project Performance
-        </h2>
-
-        <div class="muted">
-            Achieved production by project.
-        </div>
-
-        <div class="chart-wrap">
-
-            <canvas id="projectChart"></canvas>
-
-        </div>
-
-    </div>
-
-
-    <div class="card">
-
-        <h2>
-            Workforce / Shrinkage Trend
-        </h2>
-
-        <div class="muted">
-            Present, half day and absent trend.
-        </div>
-
-        <div class="chart-wrap">
-
-            <canvas id="shrinkageChart"></canvas>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =========================================================
-     EMPLOYEE PERFORMANCE
-========================================================= -->
-
-<section
-    class="card full"
-    style="margin-bottom:16px"
->
-
-    <h2>
-        Employee Performance
-    </h2>
-
-    <div class="muted">
-        Selected-period ranking. Historical targets use the
-        target stored with each productivity record.
-    </div>
-
-    <div class="table-wrap">
-
-        <table class="table">
-
-            <thead>
-
-                <tr>
-
-                    <th>Rank</th>
-                    <th>Employee</th>
-                    <th>EMP ID</th>
-                    <th>Project</th>
-                    <th>Target</th>
-                    <th>Achieved</th>
-                    <th>Achievement</th>
-                    <th>Deficit</th>
-                    <th>Days</th>
-                    <th>Status</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody id="employeeTable"></tbody>
-
-        </table>
-
-    </div>
-
-</section>
-
-
-<!-- =========================================================
-     SUB PROCESS
-========================================================= -->
-
-<section class="card full">
-
-    <h2>
-        Sub Process Summary
-    </h2>
-
-    <div class="muted">
-        Period-level management view, broken down by sub process.
-    </div>
-
-    <div class="table-wrap">
-
-        <table class="table">
-
-            <thead>
-
-                <tr>
-
-                    <th>Sub Process</th>
-                    <th>FTE</th>
-                    <th>Target</th>
-                    <th>Achieved</th>
-                    <th>Achievement</th>
-                    <th>Deficit</th>
-                    <th>Avg / FTE Day</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody id="subProcessTable"></tbody>
-
-        </table>
-
-    </div>
-
-</section>
-
-
-<div class="footer">
-
-    RCM Management Dashboard • Data sourced from the existing
-    Supabase productivity system
+    </main>
 
 </div>
 
 
-</main>
+<!-- LOADING -->
+
+<div
+    id="loading"
+    class="loading"
+>
+
+    <div class="loading-card">
+
+        <div class="spinner"></div>
+
+        <span>
+            Loading management dashboard...
+        </span>
+
+    </div>
 
 </div>
 
@@ -1063,7 +2124,7 @@ const OPERATIONS_DASHBOARD_URL =
 
 
 /* =========================================================
-   HOURLY FIELDS
+   HOURS
 ========================================================= */
 
 const hourFields = [
@@ -1090,15 +2151,11 @@ let currentUser = null;
 let charts = {};
 
 let projects = [];
-
 let employees = [];
-
 let records = [];
 
 let accessProjects = [];
-
 let subProjects = [];
-
 let employeeProjects = [];
 
 let hasAllProjectsGrant = false;
@@ -1107,74 +2164,1016 @@ let initializationInProgress = false;
 
 
 /* =========================================================
-   DOM
+   HELPERS
 ========================================================= */
 
-const $ = id =>
-    document.getElementById(id);
+function escapeHtml(value){
+
+    if(value === null || value === undefined){
+        return "";
+    }
+
+    return String(value)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
 
 
-/* =========================================================
-   ESCAPE
-========================================================= */
+function numberValue(value){
 
-function esc(v){
+    const n = Number(value);
 
-    return String(v ?? "")
-        .replace(
-            /[&<>'"]/g,
-            c => ({
-                '&':'&amp;',
-                '<':'&lt;',
-                '>':'&gt;',
-                "'":'&#39;',
-                '"':'&quot;'
-            }[c])
-        );
+    return Number.isFinite(n)
+        ? n
+        : 0;
+}
 
+
+function formatNumber(value){
+
+    return numberValue(value).toLocaleString(
+        "en-US",
+        {
+            maximumFractionDigits:0
+        }
+    );
+}
+
+
+function formatPercent(value){
+
+    return `${numberValue(value).toFixed(1)}%`;
+}
+
+
+function showLoading(show){
+
+    const el =
+        document.getElementById("loading");
+
+    if(el){
+        el.style.display =
+            show ? "flex" : "none";
+    }
+}
+
+
+function setStatus(message){
+
+    const el =
+        document.getElementById("status");
+
+    if(el){
+        el.textContent = message || "";
+    }
+}
+
+
+function todayISO(){
+
+    const d = new Date();
+
+    const year =
+        d.getFullYear();
+
+    const month =
+        String(d.getMonth()+1)
+        .padStart(2,"0");
+
+    const day =
+        String(d.getDate())
+        .padStart(2,"0");
+
+    return `${year}-${month}-${day}`;
+}
+
+
+function monthStartISO(){
+
+    const d = new Date();
+
+    const year =
+        d.getFullYear();
+
+    const month =
+        String(d.getMonth()+1)
+        .padStart(2,"0");
+
+    return `${year}-${month}-01`;
 }
 
 
 /* =========================================================
-   LOCAL DATE
+   CURRENT MONTH
 ========================================================= */
 
-function localDate(d = new Date()){
+function setCurrentMonth(){
 
-    const x =
-        new Date(
-            d.getTime() -
-            d.getTimezoneOffset() * 60000
-        );
+    document.getElementById("fromDate").value =
+        monthStartISO();
 
-    return x.toISOString().slice(0,10);
-
-}
-
-
-/* =========================================================
-   MTD
-========================================================= */
-
-function setMTD(){
-
-    const now =
-        new Date();
-
-    const firstDay =
-        new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            1
-        );
-
-    $("fromDate").value =
-        localDate(firstDay);
-
-    $("toDate").value =
-        localDate(now);
+    document.getElementById("toDate").value =
+        todayISO();
 
     refreshDashboard();
+}
+
+
+/* =========================================================
+   DATE FORMAT
+========================================================= */
+
+function formatDate(date){
+
+    if(!date){
+        return "";
+    }
+
+    const d =
+        new Date(`${date}T00:00:00`);
+
+    return d.toLocaleDateString(
+        "en-IN",
+        {
+            day:"2-digit",
+            month:"short"
+        }
+    );
+}
+
+
+/* =========================================================
+   FETCH ALL
+========================================================= */
+
+async function fetchAll(
+    table,
+    select = "*",
+    filters = []
+){
+
+    let all = [];
+
+    let from = 0;
+
+    const pageSize = 1000;
+
+    while(true){
+
+        let query =
+            supabaseClient
+                .from(table)
+                .select(select)
+                .range(
+                    from,
+                    from + pageSize - 1
+                );
+
+        for(const filter of filters){
+
+            if(filter.type === "eq"){
+
+                query =
+                    query.eq(
+                        filter.column,
+                        filter.value
+                    );
+
+            }
+
+        }
+
+        const {
+            data,
+            error
+        } = await query;
+
+        if(error){
+            throw error;
+        }
+
+        if(!data || data.length === 0){
+            break;
+        }
+
+        all =
+            all.concat(data);
+
+        if(data.length < pageSize){
+            break;
+        }
+
+        from += pageSize;
+
+    }
+
+    return all;
+}
+
+
+/* =========================================================
+   EMPLOYEE / PROJECT LOOKUPS
+========================================================= */
+
+function getProject(projectId){
+
+    return projects.find(
+        p => String(p.id) === String(projectId)
+    ) || null;
+}
+
+
+function getSubProjectForEmployee(employee){
+
+    if(!employee){
+        return null;
+    }
+
+    const direct =
+        employee.sub_project_id ||
+        employee.subProjectId;
+
+    if(direct){
+
+        const found =
+            subProjects.find(
+                s =>
+                    String(s.id) ===
+                    String(direct)
+            );
+
+        if(found){
+            return found;
+        }
+
+    }
+
+    const mapping =
+        employeeProjects.find(
+            ep =>
+                String(ep.employee_id) ===
+                String(employee.id)
+        );
+
+    if(mapping){
+
+        const found =
+            subProjects.find(
+                s =>
+                    String(s.id) ===
+                    String(mapping.sub_project_id)
+            );
+
+        if(found){
+            return found;
+        }
+
+    }
+
+    return null;
+}
+
+
+/* =========================================================
+   EMPLOYEE BASE TARGET
+========================================================= */
+
+function employeeBaseTarget(employee){
+
+    if(!employee){
+        return 0;
+    }
+
+    const sub =
+        getSubProjectForEmployee(employee);
+
+    if(
+        sub &&
+        sub.target_based === false
+    ){
+        return null;
+    }
+
+    if(
+        sub &&
+        sub.daily_target !== null &&
+        sub.daily_target !== undefined &&
+        sub.daily_target !== ""
+    ){
+
+        const target =
+            Number(sub.daily_target);
+
+        if(
+            Number.isFinite(target) &&
+            target >= 0
+        ){
+            return target;
+        }
+
+    }
+
+    const project =
+        getProject(employee.project_id);
+
+    if(
+        project &&
+        project.daily_target !== null &&
+        project.daily_target !== undefined &&
+        project.daily_target !== ""
+    ){
+
+        const target =
+            Number(project.daily_target);
+
+        if(
+            Number.isFinite(target) &&
+            target >= 0
+        ){
+            return target;
+        }
+
+    }
+
+    return 0;
+}
+
+
+/* =========================================================
+   ATTENDANCE
+========================================================= */
+
+function attendanceType(value){
+
+    const v =
+        String(value || "")
+        .trim()
+        .toLowerCase();
+
+    if(
+        v === "absent" ||
+        v === "a"
+    ){
+        return "absent";
+    }
+
+    if(
+        v === "half day" ||
+        v === "half-day" ||
+        v === "halfday" ||
+        v === "half" ||
+        v === "hd"
+    ){
+        return "half";
+    }
+
+    return "present";
+}
+
+
+/* =========================================================
+   HISTORICAL TARGET RESOLUTION
+   IMPORTANT:
+   Uses stored daily_target whenever available.
+========================================================= */
+
+function resolveDailyTarget(
+    record,
+    employee
+){
+
+    if(
+        record &&
+        record._synthetic !== true &&
+        record.daily_target !== null &&
+        record.daily_target !== undefined &&
+        record.daily_target !== ""
+    ){
+
+        const storedTarget =
+            Number(record.daily_target);
+
+        if(
+            Number.isFinite(storedTarget) &&
+            storedTarget >= 0
+        ){
+            return storedTarget;
+        }
+
+    }
+
+    if(!employee){
+        return 0;
+    }
+
+    const baseTarget =
+        employeeBaseTarget(employee);
+
+    if(
+        baseTarget === null ||
+        baseTarget === undefined
+    ){
+        return 0;
+    }
+
+    const attendance =
+        attendanceType(
+            record?.attendance
+        );
+
+    if(attendance === "absent"){
+        return 0;
+    }
+
+    if(attendance === "half"){
+        return Math.ceil(
+            baseTarget / 2
+        );
+    }
+
+    return baseTarget;
+}
+
+
+/* =========================================================
+   ACHIEVED
+========================================================= */
+
+function calculateAchieved(record){
+
+    if(!record){
+        return 0;
+    }
+
+    return hourFields.reduce(
+        (sum, field) =>
+            sum + numberValue(record[field]),
+        0
+    );
+}
+
+
+/* =========================================================
+   EMPLOYEE LOOKUP
+========================================================= */
+
+function employeeForRecord(record){
+
+    if(!record){
+        return null;
+    }
+
+    return employees.find(
+        e =>
+            String(e.id) ===
+            String(record.employee_id)
+    ) || null;
+}
+
+
+/* =========================================================
+   PROJECT SCOPE
+========================================================= */
+
+function projectIsAllowed(projectId){
+
+    if(hasAllProjectsGrant){
+        return true;
+    }
+
+    return accessProjects.some(
+        id =>
+            String(id) ===
+            String(projectId)
+    );
+}
+
+
+/* =========================================================
+   LOAD REFERENCE DATA
+========================================================= */
+
+async function loadReferenceData(){
+
+    projects =
+        await fetchAll(
+            "projects",
+            "*"
+        );
+
+    employees =
+        await fetchAll(
+            "employees",
+            "*"
+        );
+
+    subProjects =
+        await fetchAll(
+            "sub_projects",
+            "*"
+        );
+
+    employeeProjects =
+        await fetchAll(
+            "employee_projects",
+            "*"
+        );
+
+
+    /*
+       Some environments do not contain
+       an active column.
+
+       Therefore do not query
+       .eq("active",true).
+    */
+
+    employees =
+        employees.filter(
+            e => e.active !== false
+        );
+
+    subProjects =
+        subProjects.filter(
+            s => s.active !== false
+        );
+
+
+    if(!hasAllProjectsGrant){
+
+        projects =
+            projects.filter(
+                p =>
+                    projectIsAllowed(p.id)
+            );
+
+        employees =
+            employees.filter(
+                e =>
+                    projectIsAllowed(
+                        e.project_id
+                    )
+            );
+
+    }
+
+}
+
+
+/* =========================================================
+   PROJECT FILTER
+========================================================= */
+
+function populateProjectFilter(){
+
+    const select =
+        document.getElementById(
+            "projectFilter"
+        );
+
+    if(!select){
+        return;
+    }
+
+    select.innerHTML = "";
+
+    if(hasAllProjectsGrant){
+
+        const option =
+            document.createElement("option");
+
+        option.value = "";
+
+        option.textContent =
+            "All Projects";
+
+        select.appendChild(option);
+
+    }
+
+    projects
+        .sort(
+            (a,b) =>
+                String(a.project_name || "")
+                .localeCompare(
+                    String(b.project_name || "")
+                )
+        )
+        .forEach(project => {
+
+            const option =
+                document.createElement("option");
+
+            option.value =
+                project.id;
+
+            option.textContent =
+                project.project_name ||
+                "Unnamed Project";
+
+            select.appendChild(option);
+
+        });
+
+}
+
+
+/* =========================================================
+   FETCH PRODUCTIVITY
+========================================================= */
+
+async function fetchProductivity(){
+
+    const from =
+        document.getElementById(
+            "fromDate"
+        ).value;
+
+    const to =
+        document.getElementById(
+            "toDate"
+        ).value;
+
+    if(!from || !to){
+        return [];
+    }
+
+    const projectId =
+        document.getElementById(
+            "projectFilter"
+        ).value;
+
+
+    const data =
+        await fetchAll(
+            "daily_productivity",
+            "*",
+            []
+        );
+
+
+    return data.filter(record => {
+
+        if(
+            record.tracker_date < from ||
+            record.tracker_date > to
+        ){
+            return false;
+        }
+
+        if(projectId){
+
+            const employee =
+                employeeForRecord(record);
+
+            if(!employee){
+                return false;
+            }
+
+            return String(
+                employee.project_id
+            ) === String(projectId);
+
+        }
+
+        return projectIsAllowed(
+            employeeForRecord(record)?.project_id
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   BACKFILL MISSING ROSTER
+========================================================= */
+
+function backfillMissingRoster(){
+
+    if(!records.length){
+        return;
+    }
+
+    const dates =
+        [
+            ...new Set(
+                records
+                    .map(
+                        r =>
+                            r.tracker_date
+                    )
+                    .filter(Boolean)
+            )
+        ];
+
+    const existing =
+        new Set(
+            records.map(
+                r =>
+                    `${r.tracker_date}|${r.employee_id}`
+            )
+        );
+
+    const projectId =
+        document.getElementById(
+            "projectFilter"
+        ).value;
+
+
+    const synthetic = [];
+
+    dates.forEach(date => {
+
+        employees.forEach(employee => {
+
+            if(
+                projectId &&
+                String(employee.project_id) !==
+                String(projectId)
+            ){
+                return;
+            }
+
+            const key =
+                `${date}|${employee.id}`;
+
+            if(existing.has(key)){
+                return;
+            }
+
+            const target =
+                resolveDailyTarget(
+                    {
+                        _synthetic:true,
+                        attendance:"Present"
+                    },
+                    employee
+                );
+
+            synthetic.push({
+
+                tracker_date:date,
+
+                employee_id:
+                    employee.id,
+
+                attendance:"Present",
+
+                daily_target:target,
+
+                _synthetic:true
+
+            });
+
+        });
+
+    });
+
+    records =
+        records.concat(synthetic);
+
+}
+
+
+/* =========================================================
+   EMPLOYEE ROWS
+========================================================= */
+
+function employeeRows(){
+
+    const map = {};
+
+    records.forEach(record => {
+
+        const employee =
+            employeeForRecord(record);
+
+        if(!employee){
+            return;
+        }
+
+        const id =
+            employee.id;
+
+        if(!map[id]){
+
+            const project =
+                getProject(
+                    employee.project_id
+                );
+
+            map[id] = {
+
+                employee,
+
+                project,
+
+                target:0,
+                achieved:0,
+
+                days:new Set(),
+
+                present:0,
+                half:0,
+                absent:0
+
+            };
+
+        }
+
+        const row =
+            map[id];
+
+        row.target +=
+            resolveDailyTarget(
+                record,
+                employee
+            );
+
+        row.achieved +=
+            calculateAchieved(record);
+
+        if(record.tracker_date){
+            row.days.add(
+                record.tracker_date
+            );
+        }
+
+        const attendance =
+            attendanceType(
+                record.attendance
+            );
+
+        if(attendance === "absent"){
+            row.absent++;
+        }
+        else if(attendance === "half"){
+            row.half++;
+        }
+        else{
+            row.present++;
+        }
+
+    });
+
+
+    return Object.values(map);
+
+}
+
+
+/* =========================================================
+   DAY ROWS
+========================================================= */
+
+function dayRows(){
+
+    const map = {};
+
+    records.forEach(record => {
+
+        const employee =
+            employeeForRecord(record);
+
+        if(!employee){
+            return;
+        }
+
+        const date =
+            record.tracker_date;
+
+        if(!date){
+            return;
+        }
+
+        if(!map[date]){
+
+            map[date] = {
+
+                date,
+
+                target:0,
+                achieved:0,
+
+                present:0,
+                half:0,
+                absent:0
+
+            };
+
+        }
+
+        const row =
+            map[date];
+
+        row.target +=
+            resolveDailyTarget(
+                record,
+                employee
+            );
+
+        row.achieved +=
+            calculateAchieved(record);
+
+        const attendance =
+            attendanceType(
+                record.attendance
+            );
+
+        if(attendance === "absent"){
+            row.absent++;
+        }
+        else if(attendance === "half"){
+            row.half++;
+        }
+        else{
+            row.present++;
+        }
+
+    });
+
+
+    return Object.values(map)
+        .sort(
+            (a,b) =>
+                a.date.localeCompare(b.date)
+        );
+
+}
+
+
+/* =========================================================
+   SUB PROCESS ROWS
+========================================================= */
+
+function subProcessRows(){
+
+    const map = {};
+
+    records.forEach(record => {
+
+        const employee =
+            employeeForRecord(record);
+
+        if(!employee){
+            return;
+        }
+
+        const sub =
+            getSubProjectForEmployee(
+                employee
+            );
+
+        const name =
+            sub?.sub_project_name ||
+            sub?.name ||
+            getProject(
+                employee.project_id
+            )?.project_name ||
+            "Unassigned";
+
+
+        if(!map[name]){
+
+            map[name] = {
+
+                name,
+
+                employees:new Set(),
+
+                target:0,
+                achieved:0,
+
+                days:0
+
+            };
+
+        }
+
+        const row =
+            map[name];
+
+        row.employees.add(
+            employee.id
+        );
+
+        row.target +=
+            resolveDailyTarget(
+                record,
+                employee
+            );
+
+        row.achieved +=
+            calculateAchieved(record);
+
+    });
+
+
+    return Object.values(map);
 
 }
 
@@ -1183,12 +3182,161 @@ function setMTD(){
    STATUS
 ========================================================= */
 
-function setStatus(text){
+function achievementStatus(percent){
 
-    if($("status")){
+    if(percent >= 100){
+        return {
+            text:"On Target",
+            cls:"badge-good"
+        };
+    }
 
-        $("status").textContent =
-            text;
+    if(percent >= 85){
+        return {
+            text:"Watch",
+            cls:"badge-warning"
+        };
+    }
+
+    return {
+        text:"Needs Attention",
+        cls:"badge-danger"
+    };
+
+}
+
+
+/* =========================================================
+   RENDER KPI
+========================================================= */
+
+function renderKPIs(){
+
+    const dr =
+        dayRows();
+
+    const er =
+        employeeRows();
+
+
+    const target =
+        dr.reduce(
+            (sum,d) =>
+                sum + d.target,
+            0
+        );
+
+    const achieved =
+        dr.reduce(
+            (sum,d) =>
+                sum + d.achieved,
+            0
+        );
+
+
+    const achievement =
+        target
+            ? (achieved / target) * 100
+            : 0;
+
+
+    const present =
+        dr.length
+            ? dr.reduce(
+                (sum,d) =>
+                    sum + d.present,
+                0
+              ) / dr.length
+            : 0;
+
+
+    const totalAttendance =
+        dr.reduce(
+            (sum,d) =>
+                sum +
+                d.present +
+                d.half +
+                d.absent,
+            0
+        );
+
+
+    const shrinkageNumerator =
+        dr.reduce(
+            (sum,d) =>
+                sum +
+                d.absent +
+                d.half * 0.5,
+            0
+        );
+
+
+    const shrinkage =
+        totalAttendance
+            ? (
+                shrinkageNumerator /
+                totalAttendance
+              ) * 100
+            : 0;
+
+
+    document.getElementById(
+        "kpiFte"
+    ).textContent =
+        formatNumber(
+            er.length
+        );
+
+
+    document.getElementById(
+        "kpiPresent"
+    ).textContent =
+        present.toFixed(1);
+
+
+    document.getElementById(
+        "kpiTarget"
+    ).textContent =
+        formatNumber(target);
+
+
+    document.getElementById(
+        "kpiAchieved"
+    ).textContent =
+        formatNumber(achieved);
+
+
+    document.getElementById(
+        "kpiAchievement"
+    ).textContent =
+        formatPercent(
+            achievement
+        );
+
+
+    document.getElementById(
+        "kpiShrinkage"
+    ).textContent =
+        formatPercent(
+            shrinkage
+        );
+
+
+    const progress =
+        document.getElementById(
+            "achievementProgress"
+        );
+
+    if(progress){
+
+        progress.style.width =
+            `${Math.min(
+                Math.max(
+                    achievement,
+                    0
+                ),
+                100
+            )}%`;
 
     }
 
@@ -1196,127 +3344,1337 @@ function setStatus(text){
 
 
 /* =========================================================
-   LOGIN
+   RENDER INSIGHTS
 ========================================================= */
 
-async function login(){
+function renderInsights(){
 
-    const email =
-        $("email")
-            .value
-            .trim();
+    const rows =
+        employeeRows()
+            .map(row => {
 
-    const password =
-        $("password")
-            .value;
+                const achievement =
+                    row.target
+                        ? (
+                            row.achieved /
+                            row.target
+                          ) * 100
+                        : 0;
+
+                return {
+                    ...row,
+                    achievement
+                };
+
+            });
 
 
-    $("authError").textContent =
-        "";
+    if(!rows.length){
 
+        document.getElementById(
+            "insight1"
+        ).textContent = "—";
 
-    if(!email || !password){
+        document.getElementById(
+            "insight2"
+        ).textContent = "—";
 
-        $("authError").textContent =
-            "Please enter email and password.";
+        document.getElementById(
+            "insight3"
+        ).textContent = "—";
+
+        document.getElementById(
+            "insight4"
+        ).textContent = "—";
 
         return;
 
     }
 
 
-    const loginButton =
-        $("loginButton");
+    const sorted =
+        [...rows].sort(
+            (a,b) =>
+                b.achievement -
+                a.achievement
+        );
 
 
-    if(loginButton){
+    const top =
+        sorted[0];
 
-        loginButton.disabled =
-            true;
+    const low =
+        sorted[sorted.length - 1];
 
-        loginButton.textContent =
-            "Signing In...";
+
+    const topName =
+        top.employee.employee_name ||
+        "Employee";
+
+
+    const lowName =
+        low.employee.employee_name ||
+        "Employee";
+
+
+    document.getElementById(
+        "insight1"
+    ).textContent =
+        topName;
+
+
+    document.getElementById(
+        "insight1Meta"
+    ).textContent =
+        `${formatPercent(top.achievement)} achievement`;
+
+
+    document.getElementById(
+        "insight2"
+    ).textContent =
+        lowName;
+
+
+    document.getElementById(
+        "insight2Meta"
+    ).textContent =
+        `${formatPercent(low.achievement)} achievement`;
+
+
+    const dr =
+        dayRows();
+
+
+    let trendText =
+        "Stable";
+
+
+    if(dr.length >= 2){
+
+        const first =
+            dr[0].target
+                ? (
+                    dr[0].achieved /
+                    dr[0].target
+                  ) * 100
+                : 0;
+
+        const last =
+            dr[dr.length-1].target
+                ? (
+                    dr[dr.length-1].achieved /
+                    dr[dr.length-1].target
+                  ) * 100
+                : 0;
+
+
+        if(last > first + 5){
+            trendText = "Improving";
+        }
+        else if(last < first - 5){
+            trendText = "Declining";
+        }
 
     }
 
 
-    try{
-
-        const {
-            data,
-            error
-        } =
-        await supabaseClient
-            .auth
-            .signInWithPassword({
-
-                email,
-                password
-
-            });
+    document.getElementById(
+        "insight3"
+    ).textContent =
+        trendText;
 
 
-        if(error){
+    document.getElementById(
+        "insight3Meta"
+    ).textContent =
+        "Based on daily achievement movement";
 
-            console.error(
-                "Supabase login error:",
-                error
+
+    const totalPresent =
+        dr.reduce(
+            (sum,d) =>
+                sum + d.present,
+            0
+        );
+
+
+    const totalHalf =
+        dr.reduce(
+            (sum,d) =>
+                sum + d.half,
+            0
+        );
+
+
+    const totalAbsent =
+        dr.reduce(
+            (sum,d) =>
+                sum + d.absent,
+            0
+        );
+
+
+    document.getElementById(
+        "insight4"
+    ).textContent =
+        `${totalPresent} Present`;
+
+
+    document.getElementById(
+        "insight4Meta"
+    ).textContent =
+        `${totalHalf} Half Day • ${totalAbsent} Absent`;
+
+}
+
+
+/* =========================================================
+   RENDER EMPLOYEE TABLE
+========================================================= */
+
+function renderEmployeeTable(){
+
+    const tbody =
+        document.getElementById(
+            "employeeTable"
+        );
+
+
+    const rows =
+        employeeRows()
+            .map(row => {
+
+                const achievement =
+                    row.target
+                        ? (
+                            row.achieved /
+                            row.target
+                          ) * 100
+                        : 0;
+
+                const deficit =
+                    Math.max(
+                        row.target -
+                        row.achieved,
+                        0
+                    );
+
+                return {
+
+                    ...row,
+
+                    achievement,
+                    deficit,
+
+                    dayCount:
+                        row.days.size
+
+                };
+
+            })
+            .sort(
+                (a,b) =>
+                    b.achievement -
+                    a.achievement
             );
 
-            $("authError").textContent =
-                error.message ||
-                "Invalid email or password.";
 
-            return;
+    if(!rows.length){
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td colspan="10">
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            —
+                        </div>
+
+                        <strong>
+                            No employee data
+                        </strong>
+
+                        No production records found for the selected period.
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        rows.map(
+            (row,index) => {
+
+                const status =
+                    achievementStatus(
+                        row.achievement
+                    );
+
+
+                const employeeName =
+                    row.employee.employee_name ||
+                    "Unnamed";
+
+
+                const employeeCode =
+                    row.employee.employee_code ||
+                    row.employee.emp_id ||
+                    "—";
+
+
+                const projectName =
+                    row.project?.project_name ||
+                    "Unassigned";
+
+
+                const progress =
+                    Math.min(
+                        Math.max(
+                            row.achievement,
+                            0
+                        ),
+                        100
+                    );
+
+
+                return `
+
+                    <tr>
+
+                        <td>
+
+                            <strong>
+                                #${index + 1}
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="employee-name">
+                                ${escapeHtml(employeeName)}
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="employee-id">
+                                ${escapeHtml(employeeCode)}
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="project-name">
+                                ${escapeHtml(projectName)}
+                            </div>
+
+                        </td>
+
+
+                        <td class="number">
+                            ${formatNumber(row.target)}
+                        </td>
+
+
+                        <td class="number">
+                            ${formatNumber(row.achieved)}
+                        </td>
+
+
+                        <td class="achievement-cell">
+
+                            <div class="achievement-top">
+
+                                <span class="achievement-percent">
+                                    ${formatPercent(row.achievement)}
+                                </span>
+
+                            </div>
+
+                            <div class="mini-progress">
+
+                                <span
+                                    style="
+                                        width:${progress}%
+                                    "
+                                ></span>
+
+                            </div>
+
+                        </td>
+
+
+                        <td class="number">
+
+                            ${formatNumber(row.deficit)}
+
+                        </td>
+
+
+                        <td class="number">
+
+                            ${row.dayCount}
+
+                        </td>
+
+
+                        <td>
+
+                            <span
+                                class="badge ${status.cls}"
+                            >
+                                ${status.text}
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        )
+        .join("");
+
+}
+
+
+/* =========================================================
+   RENDER SUB PROCESS
+========================================================= */
+
+function renderSubProcessTable(){
+
+    const tbody =
+        document.getElementById(
+            "subProcessTable"
+        );
+
+
+    const rows =
+        subProcessRows()
+            .map(row => {
+
+                const achievement =
+                    row.target
+                        ? (
+                            row.achieved /
+                            row.target
+                          ) * 100
+                        : 0;
+
+                const deficit =
+                    Math.max(
+                        row.target -
+                        row.achieved,
+                        0
+                    );
+
+
+                return {
+
+                    ...row,
+
+                    achievement,
+                    deficit
+
+                };
+
+            })
+            .sort(
+                (a,b) =>
+                    b.achievement -
+                    a.achievement
+            );
+
+
+    if(!rows.length){
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td colspan="7">
+
+                    <div class="empty-state">
+                        No sub-process data available.
+                    </div>
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        rows.map(
+            row => {
+
+                const fte =
+                    row.employees.size;
+
+                const avg =
+                    fte
+                        ? (
+                            row.achieved /
+                            fte
+                          )
+                        : 0;
+
+
+                return `
+
+                    <tr>
+
+                        <td>
+
+                            <strong>
+                                ${escapeHtml(row.name)}
+                            </strong>
+
+                        </td>
+
+                        <td class="number">
+                            ${fte}
+                        </td>
+
+                        <td class="number">
+                            ${formatNumber(row.target)}
+                        </td>
+
+                        <td class="number">
+                            ${formatNumber(row.achieved)}
+                        </td>
+
+                        <td>
+
+                            <span class="badge ${
+                                achievementStatus(
+                                    row.achievement
+                                ).cls
+                            }">
+
+                                ${formatPercent(
+                                    row.achievement
+                                )}
+
+                            </span>
+
+                        </td>
+
+                        <td class="number">
+                            ${formatNumber(row.deficit)}
+                        </td>
+
+                        <td class="number">
+                            ${avg.toFixed(1)}
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        )
+        .join("");
+
+}
+
+
+/* =========================================================
+   DESTROY CHART
+========================================================= */
+
+function destroyChart(name){
+
+    if(charts[name]){
+
+        charts[name].destroy();
+
+        charts[name] = null;
+
+    }
+
+}
+
+
+/* =========================================================
+   CHART DEFAULTS
+========================================================= */
+
+function chartDefaults(){
+
+    return {
+
+        responsive:true,
+
+        maintainAspectRatio:false,
+
+        plugins:{
+
+            legend:{
+
+                position:"bottom",
+
+                labels:{
+
+                    usePointStyle:true,
+
+                    boxWidth:7,
+
+                    padding:15,
+
+                    font:{
+                        size:10
+                    }
+
+                }
+
+            }
+
+        },
+
+        scales:{
+
+            x:{
+
+                grid:{
+                    display:false
+                },
+
+                ticks:{
+                    font:{
+                        size:9
+                    },
+                    color:"#98a2b3"
+                }
+
+            },
+
+            y:{
+
+                beginAtZero:true,
+
+                grid:{
+                    color:"#eef0f4"
+                },
+
+                ticks:{
+                    font:{
+                        size:9
+                    },
+                    color:"#98a2b3"
+                }
+
+            }
 
         }
 
+    };
 
-        if(
-            !data ||
-            !data.user
-        ){
+}
 
-            $("authError").textContent =
-                "Login did not return a valid user session.";
 
+/* =========================================================
+   DAILY TARGET / ACHIEVED
+========================================================= */
+
+function renderDailyChart(){
+
+    const rows =
+        dayRows();
+
+    destroyChart("daily");
+
+
+    const ctx =
+        document
+            .getElementById("dailyChart")
+            .getContext("2d");
+
+
+    const options =
+        chartDefaults();
+
+
+    charts.daily =
+        new Chart(
+            ctx,
+            {
+
+                type:"bar",
+
+                data:{
+
+                    labels:
+                        rows.map(
+                            r =>
+                                formatDate(
+                                    r.date
+                                )
+                        ),
+
+                    datasets:[
+
+                        {
+
+                            label:"Target",
+
+                            data:
+                                rows.map(
+                                    r =>
+                                        r.target
+                                ),
+
+                            backgroundColor:
+                                "rgba(11,23,48,.18)",
+
+                            borderColor:
+                                "#0b1730",
+
+                            borderWidth:1,
+
+                            borderRadius:5
+
+                        },
+
+                        {
+
+                            label:"Achieved",
+
+                            data:
+                                rows.map(
+                                    r =>
+                                        r.achieved
+                                ),
+
+                            backgroundColor:
+                                "rgba(59,130,246,.78)",
+
+                            borderRadius:5
+
+                        }
+
+                    ]
+
+                },
+
+                options
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   ACHIEVEMENT CHART
+========================================================= */
+
+function renderAchievementChart(){
+
+    const rows =
+        dayRows();
+
+    destroyChart("achievement");
+
+
+    const ctx =
+        document
+            .getElementById(
+                "achievementChart"
+            )
+            .getContext("2d");
+
+
+    const options =
+        chartDefaults();
+
+
+    options.scales.y =
+        {
+
+            beginAtZero:true,
+
+            suggestedMax:120,
+
+            grid:{
+                color:"#eef0f4"
+            },
+
+            ticks:{
+
+                callback:
+                    value =>
+                        `${value}%`,
+
+                font:{
+                    size:9
+                },
+
+                color:"#98a2b3"
+
+            }
+
+        };
+
+
+    charts.achievement =
+        new Chart(
+            ctx,
+            {
+
+                type:"line",
+
+                data:{
+
+                    labels:
+                        rows.map(
+                            r =>
+                                formatDate(
+                                    r.date
+                                )
+                        ),
+
+                    datasets:[
+
+                        {
+
+                            label:
+                                "Achievement",
+
+                            data:
+                                rows.map(
+                                    r =>
+                                        r.target
+                                            ? (
+                                                r.achieved /
+                                                r.target
+                                              ) * 100
+                                            : 0
+                                ),
+
+                            borderColor:
+                                "#1d4ed8",
+
+                            backgroundColor:
+                                "rgba(29,78,216,.10)",
+
+                            fill:true,
+
+                            tension:.35,
+
+                            pointRadius:3,
+
+                            pointHoverRadius:5
+
+                        }
+
+                    ]
+
+                },
+
+                options
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   PROJECT CHART
+========================================================= */
+
+function renderProjectChart(){
+
+    const map = {};
+
+    records.forEach(record => {
+
+        const employee =
+            employeeForRecord(record);
+
+        if(!employee){
             return;
+        }
+
+        const project =
+            getProject(
+                employee.project_id
+            );
+
+        const name =
+            project?.project_name ||
+            "Unassigned";
+
+
+        if(!map[name]){
+
+            map[name] = {
+
+                target:0,
+                achieved:0
+
+            };
 
         }
 
+        map[name].target +=
+            resolveDailyTarget(
+                record,
+                employee
+            );
 
-        $("authError").textContent =
-            "";
+        map[name].achieved +=
+            calculateAchieved(record);
+
+    });
 
 
-        await initialize(
-            data.user
+    const rows =
+        Object.entries(map)
+            .map(
+                ([name,data]) => ({
+
+                    name,
+
+                    achievement:
+                        data.target
+                            ? (
+                                data.achieved /
+                                data.target
+                              ) * 100
+                            : 0
+
+                })
+            );
+
+
+    destroyChart("project");
+
+
+    const ctx =
+        document
+            .getElementById(
+                "projectChart"
+            )
+            .getContext("2d");
+
+
+    const options =
+        chartDefaults();
+
+
+    options.indexAxis = "y";
+
+
+    options.scales.x = {
+
+        beginAtZero:true,
+
+        suggestedMax:120,
+
+        grid:{
+            color:"#eef0f4"
+        },
+
+        ticks:{
+
+            callback:
+                value =>
+                    `${value}%`,
+
+            font:{
+                size:9
+            },
+
+            color:"#98a2b3"
+
+        }
+
+    };
+
+
+    options.scales.y = {
+
+        grid:{
+            display:false
+        },
+
+        ticks:{
+            font:{
+                size:9
+            },
+            color:"#667085"
+        }
+
+    };
+
+
+    charts.project =
+        new Chart(
+            ctx,
+            {
+
+                type:"bar",
+
+                data:{
+
+                    labels:
+                        rows.map(
+                            r =>
+                                r.name
+                        ),
+
+                    datasets:[
+
+                        {
+
+                            label:
+                                "Achievement",
+
+                            data:
+                                rows.map(
+                                    r =>
+                                        r.achievement
+                                ),
+
+                            backgroundColor:
+                                "rgba(29,78,216,.78)",
+
+                            borderRadius:6
+
+                        }
+
+                    ]
+
+                },
+
+                options
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   SHRINKAGE CHART
+========================================================= */
+
+function renderShrinkageChart(){
+
+    const rows =
+        dayRows();
+
+    destroyChart("shrinkage");
+
+
+    const ctx =
+        document
+            .getElementById(
+                "shrinkageChart"
+            )
+            .getContext("2d");
+
+
+    const options =
+        chartDefaults();
+
+
+    options.scales.y = {
+
+        beginAtZero:true,
+
+        suggestedMax:100,
+
+        grid:{
+            color:"#eef0f4"
+        },
+
+        ticks:{
+
+            callback:
+                value =>
+                    `${value}%`,
+
+            font:{
+                size:9
+            },
+
+            color:"#98a2b3"
+
+        }
+
+    };
+
+
+    charts.shrinkage =
+        new Chart(
+            ctx,
+            {
+
+                type:"line",
+
+                data:{
+
+                    labels:
+                        rows.map(
+                            r =>
+                                formatDate(
+                                    r.date
+                                )
+                        ),
+
+                    datasets:[
+
+                        {
+
+                            label:
+                                "Shrinkage",
+
+                            data:
+                                rows.map(
+                                    r => {
+
+                                        const total =
+                                            r.present +
+                                            r.half +
+                                            r.absent;
+
+                                        return total
+                                            ? (
+                                                (
+                                                    r.absent +
+                                                    r.half * .5
+                                                ) /
+                                                total
+                                              ) * 100
+                                            : 0;
+
+                                    }
+                                ),
+
+                            borderColor:
+                                "#dc4c4c",
+
+                            backgroundColor:
+                                "rgba(220,76,76,.08)",
+
+                            fill:true,
+
+                            tension:.35,
+
+                            pointRadius:3
+
+                        },
+
+                        {
+
+                            label:
+                                "Present",
+
+                            data:
+                                rows.map(
+                                    r => {
+
+                                        const total =
+                                            r.present +
+                                            r.half +
+                                            r.absent;
+
+                                        return total
+                                            ? (
+                                                r.present /
+                                                total
+                                              ) * 100
+                                            : 0;
+
+                                    }
+                                ),
+
+                            borderColor:
+                                "#0f9f6e",
+
+                            backgroundColor:
+                                "rgba(15,159,110,.06)",
+
+                            fill:false,
+
+                            tension:.35,
+
+                            pointRadius:3
+
+                        }
+
+                    ]
+
+                },
+
+                options
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   RENDER ALL
+========================================================= */
+
+function renderAll(){
+
+    renderKPIs();
+
+    renderInsights();
+
+    renderEmployeeTable();
+
+    renderSubProcessTable();
+
+    renderDailyChart();
+
+    renderAchievementChart();
+
+    renderProjectChart();
+
+    renderShrinkageChart();
+
+    updatePeriodLabel();
+
+}
+
+
+/* =========================================================
+   PERIOD LABEL
+========================================================= */
+
+function updatePeriodLabel(){
+
+    const from =
+        document.getElementById(
+            "fromDate"
+        ).value;
+
+    const to =
+        document.getElementById(
+            "toDate"
+        ).value;
+
+
+    const projectId =
+        document.getElementById(
+            "projectFilter"
+        ).value;
+
+
+    let text =
+        "Current Month";
+
+
+    if(from && to){
+
+        text =
+            `${formatDate(from)} – ${formatDate(to)}`;
+
+    }
+
+
+    if(projectId){
+
+        const project =
+            getProject(projectId);
+
+        if(project){
+
+            text +=
+                ` • ${project.project_name}`;
+
+        }
+
+    }
+
+
+    document.getElementById(
+        "periodLabel"
+    ).textContent =
+        text;
+
+}
+
+
+/* =========================================================
+   REFRESH
+========================================================= */
+
+async function refreshDashboard(){
+
+    if(!currentUser){
+        return;
+    }
+
+    try{
+
+        showLoading(true);
+
+        setStatus(
+            "Loading dashboard..."
+        );
+
+
+        records =
+            await fetchProductivity();
+
+
+        backfillMissingRoster();
+
+        renderAll();
+
+
+        setStatus(
+            `${records.length.toLocaleString()} records loaded`
         );
 
     }
     catch(error){
 
         console.error(
-            "Login exception:",
+            "Dashboard refresh error:",
             error
         );
 
-        $("authError").textContent =
-            error.message ||
-            "Login failed.";
+        setStatus(
+            "Unable to load dashboard"
+        );
 
     }
     finally{
 
-        if(loginButton){
-
-            loginButton.disabled =
-                false;
-
-            loginButton.textContent =
-                "Sign In";
-
-        }
+        showLoading(false);
 
     }
 
@@ -1329,26 +4687,13 @@ async function login(){
 
 async function initialize(user){
 
-    if(!user){
-
+    if(
+        initializationInProgress
+    ){
         return;
-
     }
 
-
-    /*
-       Prevent duplicate initialization.
-    */
-
-    if(initializationInProgress){
-
-        return;
-
-    }
-
-
-    initializationInProgress =
-        true;
+    initializationInProgress = true;
 
 
     try{
@@ -1357,269 +4702,137 @@ async function initialize(user){
             user;
 
 
-        $("authError").textContent =
-            "";
+        document.getElementById(
+            "authScreen"
+        ).style.display =
+            "none";
 
 
-        setStatus(
-            "Checking management access..."
-        );
+        document.getElementById(
+            "app"
+        ).style.display =
+            "block";
 
 
-        /* =====================================================
-           ACCESS CHECK
-        ===================================================== */
+        const email =
+            user.email ||
+            "Management";
+
+
+        document.getElementById(
+            "userLabel"
+        ).textContent =
+            email;
+
+
+        document.getElementById(
+            "userAvatar"
+        ).textContent =
+            email
+                .substring(0,2)
+                .toUpperCase();
+
+
+        /*
+           Authorization is separate from
+           authentication.
+
+           IMPORTANT:
+           Do not sign the user out merely
+           because access verification
+           fails.
+        */
 
         const {
-            data,
-            error
+            data:accessData,
+            error:accessError
         } =
-        await supabaseClient
-            .from("user_project_access")
-            .select("role,project_id")
-            .eq(
-                "user_id",
-                user.id
-            );
-
-
-        /*
-           IMPORTANT:
-
-           Do NOT sign the user out if this query fails.
-
-           Authentication and authorization are separate.
-        */
-
-        if(error){
-
-            console.error(
-                "user_project_access error:",
-                error
-            );
-
-
-            $("authError").textContent =
-                "Login successful, but management access " +
-                "could not be verified. " +
-                "Please check user_project_access permissions.";
-
-
-            $("authScreen")
-                .classList
-                .remove("hidden");
-
-
-            $("app")
-                .classList
-                .add("hidden");
-
-
-            return;
-
-        }
-
-
-        /*
-           Authenticated user but no access row.
-        */
-
-        if(
-            !data ||
-            !data.length
-        ){
-
-            $("authError").textContent =
-                "Login successful, but no management access " +
-                "is assigned to this account.";
-
-
-            $("authScreen")
-                .classList
-                .remove("hidden");
-
-
-            $("app")
-                .classList
-                .add("hidden");
-
-
-            return;
-
-        }
-
-
-        /* =====================================================
-           MANAGEMENT ROLE
-        ===================================================== */
-
-        const managementAccess =
-            data.some(
-                x =>
-                    String(
-                        x.role || ""
-                    )
-                    .trim()
-                    .toLowerCase()
-                    ===
-                    "management"
-            );
-
-
-        if(!managementAccess){
-
-            $("authError").textContent =
-                "This account is authenticated but does not " +
-                "have Management access.";
-
-
-            $("authScreen")
-                .classList
-                .remove("hidden");
-
-
-            $("app")
-                .classList
-                .add("hidden");
-
-
-            return;
-
-        }
-
-
-        /* =====================================================
-           PROJECT ACCESS
-        ===================================================== */
-
-        accessProjects =
-            data
-                .filter(
-                    x =>
-                        x.project_id !== null &&
-                        x.project_id !== undefined &&
-                        x.project_id !== ""
-                )
-                .map(
-                    x =>
-                        Number(x.project_id)
-                )
-                .filter(
-                    x =>
-                        Number.isFinite(x)
+            await supabaseClient
+                .from("user_project_access")
+                .select("*")
+                .eq(
+                    "user_id",
+                    user.id
                 );
 
 
-        /* =====================================================
-           ALL PROJECTS
-        ===================================================== */
+        if(accessError){
 
-        hasAllProjectsGrant =
-            data.some(
-                x => {
-
-                    const role =
-                        String(
-                            x.role || ""
-                        )
-                        .trim()
-                        .toLowerCase();
-
-
-                    return (
-                        role === "management"
-                        &&
-                        (
-                            x.project_id === null ||
-                            x.project_id === undefined ||
-                            x.project_id === ""
-                        )
-                    );
-
-                }
+            console.error(
+                "Access verification error:",
+                accessError
             );
 
+            setStatus(
+                "Access verification issue"
+            );
 
-        /*
-           Management user must have either:
+            /*
+               Keep authenticated session.
+               Do not sign out here.
+            */
 
-           1. All Projects management access
-           OR
-           2. One or more assigned projects.
-        */
+        }
+        else{
 
-        if(
-            !hasAllProjectsGrant &&
-            !accessProjects.length
-        ){
-
-            $("authError").textContent =
-                "Management access exists, but no projects " +
-                "are assigned to this account.";
+            const rows =
+                accessData || [];
 
 
-            $("authScreen")
-                .classList
-                .remove("hidden");
+            const managementRows =
+                rows.filter(
+                    row =>
+                        String(
+                            row.role || ""
+                        ).toLowerCase()
+                        === "management"
+                );
 
 
-            $("app")
-                .classList
-                .add("hidden");
+            if(managementRows.length){
+
+                hasAllProjectsGrant =
+                    managementRows.some(
+                        row =>
+                            row.project_id === null ||
+                            row.project_id === undefined ||
+                            row.project_id === ""
+                    );
 
 
-            return;
+                accessProjects =
+                    managementRows
+                        .map(
+                            row =>
+                                row.project_id
+                        )
+                        .filter(
+                            id =>
+                                id !== null &&
+                                id !== undefined &&
+                                id !== ""
+                        );
+
+            }
 
         }
 
 
-        /* =====================================================
-           SHOW APPLICATION
-        ===================================================== */
-
-        $("authScreen")
-            .classList
-            .add("hidden");
-
-
-        $("app")
-            .classList
-            .remove("hidden");
-
-
-        $("userLabel").textContent =
-            user.email || "";
-
-
-        /* =====================================================
-           LOAD REFERENCE DATA
-        ===================================================== */
-
         await loadReferenceData();
 
-
-        /* =====================================================
-           SET CURRENT MTD
-        ===================================================== */
-
-        const now =
-            new Date();
+        populateProjectFilter();
 
 
-        const firstDay =
-            new Date(
-                now.getFullYear(),
-                now.getMonth(),
-                1
-            );
+        document.getElementById(
+            "fromDate"
+        ).value =
+            monthStartISO();
 
 
-        $("fromDate").value =
-            localDate(firstDay);
-
-
-        $("toDate").value =
-            localDate(now);
+        document.getElementById(
+            "toDate"
+        ).value =
+            todayISO();
 
 
         await refreshDashboard();
@@ -1632,20 +4845,13 @@ async function initialize(user){
             error
         );
 
+        /*
+           Authentication remains intact.
+        */
 
-        $("authError").textContent =
-            error.message ||
-            "Unable to initialize dashboard.";
-
-
-        $("authScreen")
-            .classList
-            .remove("hidden");
-
-
-        $("app")
-            .classList
-            .add("hidden");
+        setStatus(
+            "Dashboard initialization issue"
+        );
 
     }
     finally{
@@ -1659,2546 +4865,118 @@ async function initialize(user){
 
 
 /* =========================================================
-   LOAD REFERENCE DATA
+   LOGIN
 ========================================================= */
 
-async function loadReferenceData(){
+async function login(){
 
-    setStatus(
-        "Loading projects and employees..."
-    );
+    const email =
+        document.getElementById(
+            "email"
+        ).value.trim();
 
-
-    /* =========================
-       PROJECTS
-    ========================= */
-
-    const projectQuery =
-        await supabaseClient
-            .from("projects")
-            .select("*")
-            .order(
-                "project_name"
-            );
+    const password =
+        document.getElementById(
+            "password"
+        ).value;
 
 
-    if(projectQuery.error){
-
-        throw projectQuery.error;
-
-    }
-
-
-    projects =
-        projectQuery.data || [];
-
-
-    /* =========================
-       EMPLOYEES
-    ========================= */
-
-    const employeeQuery =
-        await supabaseClient
-            .from("employees")
-            .select("*")
-            .order(
-                "employee_name"
-            );
-
-
-    if(employeeQuery.error){
-
-        throw employeeQuery.error;
-
-    }
-
-
-    employees =
-        (employeeQuery.data || [])
-            .filter(
-                e =>
-                    e.active !== false
-            );
-
-
-    /* =========================
-       SUB PROJECTS
-    ========================= */
-
-    const subProjectQuery =
-        await supabaseClient
-            .from("sub_projects")
-            .select("*");
-
-
-    if(subProjectQuery.error){
-
-        console.warn(
-            "Sub-project load failed:",
-            subProjectQuery.error.message
-        );
-
-        subProjects = [];
-
-    }
-    else{
-
-        subProjects =
-            subProjectQuery.data || [];
-
-    }
-
-
-    /* =========================
-       EMPLOYEE PROJECT MAPPING
-    ========================= */
-
-    const employeeProjectQuery =
-        await supabaseClient
-            .from("employee_projects")
-            .select("*");
-
-
-    if(employeeProjectQuery.error){
-
-        console.warn(
-            "Employee mapping load failed:",
-            employeeProjectQuery.error.message
-        );
-
-        employeeProjects = [];
-
-    }
-    else{
-
-        employeeProjects =
-            employeeProjectQuery.data || [];
-
-    }
-
-
-    /* =========================
-       ACCESS SCOPE
-    ========================= */
-
-    if(!hasAllProjectsGrant){
-
-        employees =
-            employees.filter(
-                e =>
-                    accessProjects.includes(
-                        Number(e.project_id)
-                    )
-            );
-
-
-        projects =
-            projects.filter(
-                p =>
-                    accessProjects.includes(
-                        Number(p.id)
-                    )
-            );
-
-    }
-
-
-    /* =========================
-       PROJECT DROPDOWN
-    ========================= */
-
-    const availableProjects =
-        projects.filter(
-            p =>
-                hasAllProjectsGrant ||
-                accessProjects.includes(
-                    Number(p.id)
-                )
+    const errorBox =
+        document.getElementById(
+            "authError"
         );
 
 
-    $("projectFilter").innerHTML =
+    errorBox.style.display =
+        "none";
 
-        (
-            hasAllProjectsGrant
-            ?
-            '<option value="">All Projects</option>'
-            :
-            '<option value="">Select Project</option>'
-        )
-
-        +
-
-        availableProjects
-            .map(
-                p =>
-                `<option value="${esc(p.id)}">
-                    ${esc(p.project_name)}
-                </option>`
-            )
-            .join("");
+    errorBox.textContent =
+        "";
 
 
-    console.log(
-        "Projects:",
-        projects
-    );
+    if(!email || !password){
 
-    console.log(
-        "Employees:",
-        employees
-    );
+        errorBox.textContent =
+            "Please enter your email and password.";
 
-    console.log(
-        "Sub Projects:",
-        subProjects
-    );
+        errorBox.style.display =
+            "block";
 
-    console.log(
-        "Employee Projects:",
-        employeeProjects
-    );
+        return;
 
-}
+    }
 
 
-/* =========================================================
-   FETCH ALL
-========================================================= */
-
-async function fetchAll(
-    table,
-    build
-){
-
-    let out = [];
-
-    let from = 0;
+    const button =
+        document.getElementById(
+            "loginButton"
+        );
 
 
-    while(true){
+    button.disabled = true;
+
+    button.textContent =
+        "Signing In...";
+
+
+    try{
 
         const {
             data,
             error
         } =
-        await build()
-            .range(
-                from,
-                from + 999
-            );
+            await supabaseClient.auth
+                .signInWithPassword({
+
+                    email,
+                    password
+
+                });
 
 
         if(error){
-
-            console.error(
-                `Error loading ${table}:`,
-                error
-            );
-
             throw error;
-
         }
 
 
-        if(
-            data &&
-            data.length
-        ){
+        if(!data?.user){
 
-            out =
-                out.concat(data);
-
-        }
-
-
-        if(
-            !data ||
-            data.length < 1000
-        ){
-
-            break;
-
-        }
-
-
-        from += 1000;
-
-    }
-
-
-    return out;
-
-}
-
-
-/* =========================================================
-   REFRESH
-========================================================= */
-
-async function refreshDashboard(){
-
-    try{
-
-        const from =
-            $("fromDate").value;
-
-        const to =
-            $("toDate").value;
-
-
-        if(!from || !to){
-
-            setStatus(
-                "Please select From Date and To Date."
-            );
-
-            return;
-
-        }
-
-
-        if(from > to){
-
-            setStatus(
-                "From Date cannot be after To Date."
-            );
-
-            return;
-
-        }
-
-
-        setStatus(
-            "Loading productivity data..."
-        );
-
-
-        const projectId =
-            $("projectFilter").value;
-
-
-        /* =========================
-           PRODUCTIVITY
-        ========================= */
-
-        let loadedRecords =
-            await fetchAll(
-                "daily_productivity",
-                () =>
-                    supabaseClient
-                        .from("daily_productivity")
-                        .select("*")
-                        .gte(
-                            "tracker_date",
-                            from
-                        )
-                        .lte(
-                            "tracker_date",
-                            to
-                        )
-                        .order(
-                            "tracker_date",
-                            {
-                                ascending:true
-                            }
-                        )
-            );
-
-
-        console.log(
-            "Raw productivity records:",
-            loadedRecords
-        );
-
-
-        /* =========================
-           PROJECT FILTER
-        ========================= */
-
-        if(projectId){
-
-            loadedRecords =
-                loadedRecords.filter(
-                    r => {
-
-                        const employee =
-                            employeeForLoadedRecord(
-                                r
-                            );
-
-
-                        return (
-                            employee &&
-                            Number(
-                                employee.project_id
-                            )
-                            ===
-                            Number(projectId)
-                        );
-
-                    }
-                );
-
-        }
-
-
-        /* =========================
-           ROSTER BACKFILL
-        ========================= */
-
-        records =
-            backfillMissingRoster(
-                loadedRecords,
-                projectId
-            );
-
-
-        console.log(
-            "Final dashboard records:",
-            records
-        );
-
-
-        renderAll();
-
-
-        setStatus(
-            `Updated ${new Date().toLocaleTimeString()} • ` +
-            `${records.length} records`
-        );
-
-
-        if(!records.length){
-
-            setStatus(
-                `No productivity records found for ${from} to ${to}`
+            throw new Error(
+                "Login succeeded but user session was not returned."
             );
 
         }
 
-    }
-    catch(error){
 
-        console.error(
-            "Dashboard Error:",
-            error
-        );
-
-
-        setStatus(
-            "Unable to load data"
-        );
-
-
-        alert(
-            "Dashboard data could not be loaded.\n\n" +
-            (
-                error.message ||
-                "Unknown error"
-            )
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   PROJECT HELPERS
-========================================================= */
-
-function projectById(id){
-
-    return projects.find(
-        p =>
-            Number(p.id) ===
-            Number(id)
-    ) || null;
-
-}
-
-
-function projectName(id){
-
-    const p =
-        projectById(id);
-
-
-    return p
-        ?.project_name ||
-        "Unassigned";
-
-}
-
-
-/* =========================================================
-   EMPLOYEE LOOKUP
-========================================================= */
-
-function employeeForLoadedRecord(record){
-
-    return employees.find(
-        e =>
-            Number(e.id) ===
-            Number(record.employee_id)
-    ) || null;
-
-}
-
-
-function employeeForRecord(record){
-
-    return employeeForLoadedRecord(
-        record
-    );
-
-}
-
-
-/* =========================================================
-   SUB-PROJECT LOOKUP
-========================================================= */
-
-function subProjectById(id){
-
-    if(
-        id === null ||
-        id === undefined ||
-        id === ""
-    ){
-
-        return null;
-
-    }
-
-
-    return subProjects.find(
-        sp =>
-            Number(sp.id) ===
-            Number(id)
-    ) || null;
-
-}
-
-
-/* =========================================================
-   EMPLOYEE SUB-PROJECT
-========================================================= */
-
-function employeeSubProject(employee){
-
-    if(!employee){
-
-        return null;
-
-    }
-
-
-    /* =========================
-       DIRECT EMPLOYEE VALUE
-    ========================= */
-
-    if(
-        employee.sub_project_id !== null &&
-        employee.sub_project_id !== undefined &&
-        employee.sub_project_id !== ""
-    ){
-
-        const direct =
-            subProjectById(
-                employee.sub_project_id
-            );
-
-
-        if(direct){
-
-            return direct;
-
-        }
-
-    }
-
-
-    /* =========================
-       EMPLOYEE PROJECT MAPPING
-    ========================= */
-
-    const mappings =
-        employeeProjects.filter(
-            ep =>
-                Number(ep.employee_id) ===
-                Number(employee.id)
-        );
-
-
-    for(
-        const mapping of mappings
-    ){
-
-        if(
-            mapping.sub_project_id !== null &&
-            mapping.sub_project_id !== undefined &&
-            mapping.sub_project_id !== ""
-        ){
-
-            const mapped =
-                subProjectById(
-                    mapping.sub_project_id
-                );
-
-
-            if(mapped){
-
-                return mapped;
-
-            }
-
-        }
-
-    }
-
-
-    /* =========================
-       SINGLE SUB-PROJECT FALLBACK
-    ========================= */
-
-    const projectSubProjects =
-        subProjects.filter(
-            sp =>
-                Number(sp.project_id) ===
-                Number(employee.project_id)
-                &&
-                sp.active !== false
-        );
-
-
-    if(
-        projectSubProjects.length === 1
-    ){
-
-        return projectSubProjects[0];
-
-    }
-
-
-    return null;
-
-}
-
-
-/* =========================================================
-   TARGET RESOLUTION
-========================================================= */
-
-function employeeBaseTarget(employee){
-
-    const subProject =
-        employeeSubProject(
-            employee
-        );
-
-
-    /* =========================
-       SUB-PROJECT FOUND
-    ========================= */
-
-    if(subProject){
-
-        if(
-            subProject.target_based === false
-        ){
-
-            return null;
-
-        }
-
-
-        const target =
-            Number(
-                subProject.daily_target
-            );
-
-
-        if(
-            Number.isFinite(target) &&
-            target >= 0
-        ){
-
-            return target;
-
-        }
-
-
-        return null;
-
-    }
-
-
-    /* =========================
-       PROJECT TARGET
-    ========================= */
-
-    const project =
-        projectById(
-            employee.project_id
-        );
-
-
-    if(!project){
-
-        return null;
-
-    }
-
-
-    const target =
-        Number(
-            project.daily_target
-        );
-
-
-    if(
-        Number.isFinite(target) &&
-        target >= 0
-    ){
-
-        return target;
-
-    }
-
-
-    return null;
-
-}
-
-
-/* =========================================================
-   ATTENDANCE
-========================================================= */
-
-function attendanceType(value){
-
-    const at =
-        String(
-            value ||
-            "present"
-        )
-        .trim()
-        .toLowerCase();
-
-
-    if(
-        at === "half day" ||
-        at === "half_day" ||
-        at === "halfday" ||
-        at === "half"
-    ){
-
-        return "half";
-
-    }
-
-
-    if(
-        at === "absent"
-    ){
-
-        return "absent";
-
-    }
-
-
-    return "present";
-
-}
-
-
-/* =========================================================
-   DAILY TARGET
-========================================================= */
-
-function resolveDailyTarget(
-    record,
-    employee
-){
-
-    /*
-       EXISTING PRODUCTIVITY RECORD
-
-       The stored daily_target is authoritative.
-
-       This keeps Management aligned with
-       Employee / Operations historical data.
-    */
-
-    if(
-        record &&
-        record._synthetic !== true &&
-        record.daily_target !== null &&
-        record.daily_target !== undefined &&
-        record.daily_target !== ""
-    ){
-
-        const storedTarget =
-            Number(
-                record.daily_target
-            );
-
-
-        if(
-            Number.isFinite(storedTarget) &&
-            storedTarget >= 0
-        ){
-
-            return storedTarget;
-
-        }
-
-    }
-
-
-    /*
-       SYNTHETIC / BACKFILL RECORD
-    */
-
-    if(!employee){
-
-        return 0;
-
-    }
-
-
-    const baseTarget =
-        employeeBaseTarget(
-            employee
-        );
-
-
-    /*
-       Explicit non-target process.
-    */
-
-    if(
-        baseTarget === null ||
-        baseTarget === undefined
-    ){
-
-        return 0;
-
-    }
-
-
-    const attendance =
-        attendanceType(
-            record?.attendance
-        );
-
-
-    if(
-        attendance === "absent"
-    ){
-
-        return 0;
-
-    }
-
-
-    if(
-        attendance === "half"
-    ){
-
-        return Math.ceil(
-            baseTarget / 2
-        );
-
-    }
-
-
-    return baseTarget;
-
-}
-
-
-/* =========================================================
-   ACHIEVED
-========================================================= */
-
-function calculateAchieved(record){
-
-    return hourFields.reduce(
-        (
-            sum,
-            field
-        ) => {
-
-            const value =
-                Number(
-                    record[field]
-                );
-
-
-            return sum +
-                (
-                    Number.isFinite(value)
-                    ?
-                    value
-                    :
-                    0
-                );
-
-        },
-        0
-    );
-
-}
-
-
-/* =========================================================
-   ROSTER BACKFILL
-========================================================= */
-
-function backfillMissingRoster(
-    rows,
-    projectId
-){
-
-    if(!rows.length){
-
-        return rows;
-
-    }
-
-
-    const activeDates =
-        Array.from(
-            new Set(
-                rows
-                    .map(
-                        r =>
-                            String(
-                                r.tracker_date
-                            )
-                    )
-                    .filter(Boolean)
-            )
-        );
-
-
-    const scopedEmployees =
-        employees.filter(
-            e =>
-                !projectId ||
-                Number(e.project_id) ===
-                Number(projectId)
-        );
-
-
-    const seen =
-        new Set(
-            rows.map(
-                r =>
-                    String(
-                        r.tracker_date
-                    )
-                    +
-                    "|"
-                    +
-                    Number(
-                        r.employee_id
-                    )
-            )
-        );
-
-
-    const filled =
-        rows.slice();
-
-
-    activeDates.forEach(
-        date => {
-
-            scopedEmployees.forEach(
-                employee => {
-
-                    const key =
-                        date
-                        +
-                        "|"
-                        +
-                        Number(
-                            employee.id
-                        );
-
-
-                    if(
-                        seen.has(key)
-                    ){
-
-                        return;
-
-                    }
-
-
-                    const baseTarget =
-                        employeeBaseTarget(
-                            employee
-                        );
-
-
-                    filled.push({
-
-                        tracker_date:
-                            date,
-
-                        employee_id:
-                            employee.id,
-
-                        attendance:
-                            "Present",
-
-                        daily_target:
-                            (
-                                baseTarget === null ||
-                                baseTarget === undefined
-                            )
-                            ?
-                            0
-                            :
-                            baseTarget,
-
-                        break_minutes:
-                            0,
-
-                        _synthetic:
-                            true
-
-                    });
-
-                }
-            );
-
-        }
-    );
-
-
-    return filled;
-
-}
-
-
-/* =========================================================
-   EMPLOYEE ROWS
-========================================================= */
-
-function employeeRows(){
-
-    const map = {};
-
-
-    records.forEach(
-        record => {
-
-            const employee =
-                employeeForRecord(
-                    record
-                );
-
-
-            if(!employee){
-
-                return;
-
-            }
-
-
-            if(!map[employee.id]){
-
-                map[employee.id] = {
-
-                    e:employee,
-
-                    target:0,
-
-                    achieved:0,
-
-                    days:0,
-
-                    present:0,
-
-                    half:0,
-
-                    absent:0
-
-                };
-
-            }
-
-
-            const row =
-                map[employee.id];
-
-
-            row.target +=
-                resolveDailyTarget(
-                    record,
-                    employee
-                );
-
-
-            row.achieved +=
-                calculateAchieved(
-                    record
-                );
-
-
-            row.days++;
-
-
-            const attendance =
-                attendanceType(
-                    record.attendance
-                );
-
-
-            if(
-                attendance === "present"
-            ){
-
-                row.present++;
-
-            }
-            else if(
-                attendance === "half"
-            ){
-
-                row.half++;
-
-            }
-            else{
-
-                row.absent++;
-
-            }
-
-        }
-    );
-
-
-    return Object.values(
-        map
-    );
-
-}
-
-
-/* =========================================================
-   DAILY ROWS
-========================================================= */
-
-function dayRows(){
-
-    const map = {};
-
-
-    records.forEach(
-        record => {
-
-            const date =
-                record.tracker_date;
-
-
-            if(!date){
-
-                return;
-
-            }
-
-
-            if(!map[date]){
-
-                map[date] = {
-
-                    date,
-
-                    target:0,
-
-                    achieved:0,
-
-                    present:0,
-
-                    half:0,
-
-                    absent:0
-
-                };
-
-            }
-
-
-            const row =
-                map[date];
-
-
-            const employee =
-                employeeForRecord(
-                    record
-                );
-
-
-            row.target +=
-                resolveDailyTarget(
-                    record,
-                    employee
-                );
-
-
-            row.achieved +=
-                calculateAchieved(
-                    record
-                );
-
-
-            const attendance =
-                attendanceType(
-                    record.attendance
-                );
-
-
-            if(
-                attendance === "present"
-            ){
-
-                row.present++;
-
-            }
-            else if(
-                attendance === "half"
-            ){
-
-                row.half++;
-
-            }
-            else{
-
-                row.absent++;
-
-            }
-
-        }
-    );
-
-
-    return Object.values(
-        map
-    )
-    .sort(
-        (
-            a,
-            b
-        ) =>
-            a.date.localeCompare(
-                b.date
-            )
-    );
-
-}
-
-
-/* =========================================================
-   RENDER ALL
-========================================================= */
-
-function renderAll(){
-
-    const er =
-        employeeRows();
-
-
-    const dr =
-        dayRows();
-
-
-    let target = 0;
-
-    let achieved = 0;
-
-
-    records.forEach(
-        record => {
-
-            const employee =
-                employeeForRecord(
-                    record
-                );
-
-
-            target +=
-                resolveDailyTarget(
-                    record,
-                    employee
-                );
-
-
-            achieved +=
-                calculateAchieved(
-                    record
-                );
-
-        }
-    );
-
-
-    /* =========================
-       FTE
-
-       Use scoped employee roster.
-    ========================= */
-
-    const selectedProjectId =
-        $("projectFilter").value;
-
-
-    const scopedEmployees =
-        employees.filter(
-            e =>
-                !selectedProjectId ||
-                Number(e.project_id) ===
-                Number(selectedProjectId)
-        );
-
-
-    const totalFte =
-        scopedEmployees.length;
-
-
-    /* =========================
-       PRESENT
-
-       Full-day Present only.
-
-       Example:
-       52 FTE
-       49 Present
-       1 Half Day
-       2 Absent
-
-       KPI = 49
-    ========================= */
-
-    const present =
-        dr.length
-        ?
-        dr.reduce(
-            (
-                sum,
-                d
-            ) =>
-                sum + d.present,
-            0
-        )
-        /
-        dr.length
-        :
-        0;
-
-
-    /* =========================
-       SHRINKAGE
-    ========================= */
-
-    const totalAttendance =
-        dr.reduce(
-            (
-                sum,
-                d
-            ) =>
-                sum
-                +
-                d.present
-                +
-                d.half
-                +
-                d.absent,
-            0
-        );
-
-
-    const shrinkageNumerator =
-        dr.reduce(
-            (
-                sum,
-                d
-            ) =>
-                sum
-                +
-                d.absent
-                +
-                d.half * 0.5,
-            0
-        );
-
-
-    const shrinkage =
-        totalAttendance
-        ?
-        (
-            shrinkageNumerator /
-            totalAttendance
-        )
-        *
-        100
-        :
-        0;
-
-
-    /* =========================
-       ACHIEVEMENT
-    ========================= */
-
-    const achievement =
-        target
-        ?
-        (
-            achieved /
-            target
-        )
-        *
-        100
-        :
-        0;
-
-
-    /* =========================
-       KPIs
-    ========================= */
-
-    $("kpiFte").textContent =
-        totalFte;
-
-
-    $("kpiPresent").textContent =
-        present.toFixed(1);
-
-
-    $("kpiTarget").textContent =
-        Math.round(
-            target
-        ).toLocaleString();
-
-
-    $("kpiAchieved").textContent =
-        Math.round(
-            achieved
-        ).toLocaleString();
-
-
-    $("kpiAchievement").textContent =
-        achievement.toFixed(1)
-        +
-        "%";
-
-
-    $("kpiShrinkage").textContent =
-        shrinkage.toFixed(1)
-        +
-        "%";
-
-
-    /* =========================
-       OTHER SECTIONS
-    ========================= */
-
-    renderInsights(
-        er,
-        dr
-    );
-
-
-    try{
-
-        renderCharts(
-            dr,
-            er
+        await initialize(
+            data.user
         );
 
     }
     catch(error){
 
         console.error(
-            "Chart error:",
+            "Login error:",
             error
         );
 
-        reportChartsUnavailable();
+
+        errorBox.textContent =
+            error.message ||
+            "Unable to sign in.";
+
+        errorBox.style.display =
+            "block";
 
     }
+    finally{
 
+        button.disabled = false;
 
-    renderEmployeeTable(
-        er
-    );
-
-
-    renderSubProcessTable();
-
-}
-
-
-/* =========================================================
-   CHART FALLBACK
-========================================================= */
-
-function reportChartsUnavailable(){
-
-    document
-        .querySelectorAll(
-            "canvas"
-        )
-        .forEach(
-            canvas => {
-
-                const holder =
-                    canvas.parentElement;
-
-
-                if(
-                    !holder ||
-                    holder.dataset.chartFallback === "1"
-                ){
-
-                    return;
-
-                }
-
-
-                holder.dataset.chartFallback =
-                    "1";
-
-
-                const note =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                note.style.cssText =
-                    "display:flex;" +
-                    "align-items:center;" +
-                    "justify-content:center;" +
-                    "height:100%;" +
-                    "min-height:180px;" +
-                    "padding:16px;" +
-                    "text-align:center;" +
-                    "color:#6b7280;" +
-                    "font-size:13px;" +
-                    "line-height:1.5;";
-
-
-                note.textContent =
-                    "Charts could not be loaded. " +
-                    "The tables below contain the current data.";
-
-
-                canvas.style.display =
-                    "none";
-
-
-                holder.appendChild(
-                    note
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   INSIGHTS
-========================================================= */
-
-function renderInsights(
-    er,
-    dr
-){
-
-    const ranked =
-        [...er]
-            .filter(
-                x =>
-                    x.target > 0
-            )
-            .sort(
-                (
-                    a,
-                    b
-                ) =>
-                    (
-                        b.achieved /
-                        b.target
-                    )
-                    -
-                    (
-                        a.achieved /
-                        a.target
-                    )
-            );
-
-
-    /* TOP */
-
-    if(ranked[0]){
-
-        const pct =
-            ranked[0].achieved /
-            ranked[0].target *
-            100;
-
-
-        $("insight1").textContent =
-            `${ranked[0].e.employee_name} — ` +
-            `${pct.toFixed(1)}% achievement.`;
+        button.textContent =
+            "Sign In";
 
     }
-    else{
-
-        $("insight1").textContent =
-            "No production data.";
-
-    }
-
-
-    /* LOW */
-
-    const low =
-        ranked[ranked.length - 1];
-
-
-    if(low){
-
-        const pct =
-            low.achieved /
-            low.target *
-            100;
-
-
-        const deficit =
-            Math.max(
-                0,
-                low.target -
-                low.achieved
-            );
-
-
-        $("insight2").textContent =
-            `${low.e.employee_name} — ` +
-            `${pct.toFixed(1)}% achievement; ` +
-            `${deficit.toLocaleString()} deficit.`;
-
-    }
-    else{
-
-        $("insight2").textContent =
-            "No attention item.";
-
-    }
-
-
-    /* TREND */
-
-    if(
-        dr.length > 1
-    ){
-
-        const mid =
-            Math.floor(
-                dr.length / 2
-            );
-
-
-        const first =
-            dr.slice(
-                0,
-                mid
-            );
-
-
-        const second =
-            dr.slice(
-                mid
-            );
-
-
-        const firstAvg =
-            first.length
-            ?
-            first.reduce(
-                (
-                    sum,
-                    x
-                ) =>
-                    sum + x.achieved,
-                0
-            )
-            /
-            first.length
-            :
-            0;
-
-
-        const secondAvg =
-            second.length
-            ?
-            second.reduce(
-                (
-                    sum,
-                    x
-                ) =>
-                    sum + x.achieved,
-                0
-            )
-            /
-            second.length
-            :
-            0;
-
-
-        const pct =
-            firstAvg
-            ?
-            (
-                secondAvg /
-                firstAvg
-            )
-            -
-            1
-            :
-            0;
-
-
-        $("insight3").textContent =
-            `Production ${
-                pct >= 0
-                ?
-                "improved"
-                :
-                "declined"
-            } ${
-                (
-                    Math.abs(pct) *
-                    100
-                ).toFixed(1)
-            }% in the second half of the period.`;
-
-    }
-    else{
-
-        $("insight3").textContent =
-            "Select a longer period to see trend.";
-
-    }
-
-
-    /* WORKFORCE */
-
-    const total =
-        dr.reduce(
-            (
-                sum,
-                d
-            ) =>
-                sum
-                +
-                d.present
-                +
-                d.half
-                +
-                d.absent,
-            0
-        );
-
-
-    const shrinkage =
-        total
-        ?
-        (
-            dr.reduce(
-                (
-                    sum,
-                    d
-                ) =>
-                    sum
-                    +
-                    d.absent
-                    +
-                    d.half * 0.5,
-                0
-            )
-            /
-            total
-        )
-        *
-        100
-        :
-        0;
-
-
-    $("insight4").textContent =
-        `${er.length} employees with activity. ` +
-        `Shrinkage ${shrinkage.toFixed(1)}%.`;
-
-}
-
-
-/* =========================================================
-   DESTROY CHART
-========================================================= */
-
-function destroy(name){
-
-    if(
-        charts[name]
-    ){
-
-        charts[name].destroy();
-
-        charts[name] =
-            null;
-
-    }
-
-}
-
-
-/* =========================================================
-   CHARTS
-========================================================= */
-
-function renderCharts(
-    dr,
-    er
-){
-
-    destroy("daily");
-
-    destroy("achievement");
-
-    destroy("project");
-
-    destroy("shrinkage");
-
-
-    const labels =
-        dr.map(
-            x =>
-                x.date.slice(5)
-        );
-
-
-    /* =========================
-       DAILY
-    ========================= */
-
-    charts.daily =
-        new Chart(
-            $("dailyChart"),
-            {
-
-                type:"line",
-
-                data:{
-
-                    labels,
-
-                    datasets:[
-
-                        {
-                            label:"Target",
-
-                            data:
-                                dr.map(
-                                    x =>
-                                        x.target
-                                ),
-
-                            tension:.25
-
-                        },
-
-                        {
-                            label:"Achieved",
-
-                            data:
-                                dr.map(
-                                    x =>
-                                        x.achieved
-                                ),
-
-                            tension:.25
-
-                        }
-
-                    ]
-
-                },
-
-                options:{
-
-                    responsive:true,
-
-                    maintainAspectRatio:false
-
-                }
-
-            }
-        );
-
-
-    /* =========================
-       ACHIEVEMENT
-    ========================= */
-
-    charts.achievement =
-        new Chart(
-            $("achievementChart"),
-            {
-
-                type:"bar",
-
-                data:{
-
-                    labels,
-
-                    datasets:[
-
-                        {
-                            label:
-                                "Achievement %",
-
-                            data:
-                                dr.map(
-                                    x =>
-                                        x.target
-                                        ?
-                                        x.achieved /
-                                        x.target *
-                                        100
-                                        :
-                                        0
-                                )
-
-                        }
-
-                    ]
-
-                },
-
-                options:{
-
-                    responsive:true,
-
-                    maintainAspectRatio:false,
-
-                    scales:{
-
-                        y:{
-
-                            beginAtZero:true,
-
-                            max:100
-
-                        }
-
-                    }
-
-                }
-
-            }
-        );
-
-
-    /* =========================
-       PROJECT
-    ========================= */
-
-    const pm = {};
-
-
-    er.forEach(
-        x => {
-
-            const name =
-                projectName(
-                    x.e.project_id
-                );
-
-
-            if(!pm[name]){
-
-                pm[name] = {
-
-                    target:0,
-
-                    achieved:0
-
-                };
-
-            }
-
-
-            pm[name].target +=
-                x.target;
-
-
-            pm[name].achieved +=
-                x.achieved;
-
-        }
-    );
-
-
-    charts.project =
-        new Chart(
-            $("projectChart"),
-            {
-
-                type:"bar",
-
-                data:{
-
-                    labels:
-                        Object.keys(pm),
-
-                    datasets:[
-
-                        {
-                            label:
-                                "Achieved",
-
-                            data:
-                                Object.values(pm)
-                                    .map(
-                                        x =>
-                                            x.achieved
-                                    )
-
-                        },
-
-                        {
-                            label:
-                                "Target",
-
-                            data:
-                                Object.values(pm)
-                                    .map(
-                                        x =>
-                                            x.target
-                                    )
-
-                        }
-
-                    ]
-
-                },
-
-                options:{
-
-                    responsive:true,
-
-                    maintainAspectRatio:false,
-
-                    indexAxis:"y"
-
-                }
-
-            }
-
-        );
-
-
-    /* =========================
-       WORKFORCE
-    ========================= */
-
-    charts.shrinkage =
-        new Chart(
-            $("shrinkageChart"),
-            {
-
-                type:"line",
-
-                data:{
-
-                    labels,
-
-                    datasets:[
-
-                        {
-                            label:"Present",
-
-                            data:
-                                dr.map(
-                                    x =>
-                                        x.present
-                                ),
-
-                            tension:.2
-
-                        },
-
-                        {
-                            label:"Half Day",
-
-                            data:
-                                dr.map(
-                                    x =>
-                                        x.half
-                                ),
-
-                            tension:.2
-
-                        },
-
-                        {
-                            label:"Absent",
-
-                            data:
-                                dr.map(
-                                    x =>
-                                        x.absent
-                                ),
-
-                            tension:.2
-
-                        }
-
-                    ]
-
-                },
-
-                options:{
-
-                    responsive:true,
-
-                    maintainAspectRatio:false
-
-                }
-
-            }
-
-        );
-
-}
-
-
-/* =========================================================
-   EMPLOYEE TABLE
-========================================================= */
-
-function renderEmployeeTable(
-    er
-){
-
-    const sorted =
-        [...er]
-            .sort(
-                (
-                    a,
-                    b
-                ) => {
-
-                    const ap =
-                        a.target
-                        ?
-                        a.achieved /
-                        a.target
-                        :
-                        0;
-
-
-                    const bp =
-                        b.target
-                        ?
-                        b.achieved /
-                        b.target
-                        :
-                        0;
-
-
-                    return bp - ap;
-
-                }
-            );
-
-
-    $("employeeTable").innerHTML =
-
-        sorted
-            .map(
-                (
-                    x,
-                    i
-                ) => {
-
-                    const pct =
-                        x.target
-                        ?
-                        x.achieved /
-                        x.target *
-                        100
-                        :
-                        0;
-
-
-                    const cls =
-                        pct >= 90
-                        ?
-                        "good"
-                        :
-                        pct >= 70
-                        ?
-                        "warn"
-                        :
-                        "bad";
-
-
-                    const status =
-                        pct >= 90
-                        ?
-                        "ON TRACK"
-                        :
-                        pct >= 70
-                        ?
-                        "MONITOR"
-                        :
-                        "ATTENTION";
-
-
-                    const empId =
-                        x.e.employee_code ||
-                        x.e.employee_id ||
-                        x.e.emp_id ||
-                        "";
-
-
-                    return `
-
-                    <tr>
-
-                        <td>
-                            ${i + 1}
-                        </td>
-
-                        <td>
-                            ${esc(
-                                x.e.employee_name
-                            )}
-                        </td>
-
-                        <td>
-                            ${esc(
-                                empId
-                            )}
-                        </td>
-
-                        <td>
-                            ${esc(
-                                projectName(
-                                    x.e.project_id
-                                )
-                            )}
-                        </td>
-
-                        <td>
-                            ${Math.round(
-                                x.target
-                            ).toLocaleString()}
-                        </td>
-
-                        <td>
-                            ${Math.round(
-                                x.achieved
-                            ).toLocaleString()}
-                        </td>
-
-                        <td>
-                            ${pct.toFixed(1)}%
-                        </td>
-
-                        <td>
-                            ${Math.max(
-                                0,
-                                x.target -
-                                x.achieved
-                            ).toLocaleString()}
-                        </td>
-
-                        <td>
-                            ${x.days}
-                        </td>
-
-                        <td>
-
-                            <span
-                                class="pill ${cls}"
-                            >
-                                ${status}
-                            </span>
-
-                        </td>
-
-                    </tr>
-
-                    `;
-
-                }
-            )
-            .join("");
-
-
-    if(
-        !sorted.length
-    ){
-
-        $("employeeTable").innerHTML = `
-
-            <tr>
-
-                <td colspan="10">
-                    No data for selected period.
-                </td>
-
-            </tr>
-
-        `;
-
-    }
-
-}
-
-
-/* =========================================================
-   SUB PROCESS TABLE
-========================================================= */
-
-function renderSubProcessTable(){
-
-    const map = {};
-
-
-    records.forEach(
-        record => {
-
-            const employee =
-                employeeForRecord(
-                    record
-                );
-
-
-            if(!employee){
-
-                return;
-
-            }
-
-
-            const subProject =
-                employeeSubProject(
-                    employee
-                );
-
-
-            const name =
-                subProject
-                ?
-                `${projectName(
-                    employee.project_id
-                )} → ${
-                    subProject.sub_project_name ||
-                    "Unnamed Sub Process"
-                }`
-                :
-                `${projectName(
-                    employee.project_id
-                )} → Not Assigned`;
-
-
-            if(!map[name]){
-
-                map[name] = {
-
-                    ids:new Set(),
-
-                    target:0,
-
-                    achieved:0,
-
-                    days:0
-
-                };
-
-            }
-
-
-            map[name].ids.add(
-                employee.id
-            );
-
-
-            map[name].target +=
-                resolveDailyTarget(
-                    record,
-                    employee
-                );
-
-
-            map[name].achieved +=
-                calculateAchieved(
-                    record
-                );
-
-
-            map[name].days++;
-
-        }
-    );
-
-
-    $("subProcessTable").innerHTML =
-
-        Object.entries(
-            map
-        )
-        .sort(
-            (
-                a,
-                b
-            ) =>
-                a[0].localeCompare(
-                    b[0]
-                )
-        )
-        .map(
-            (
-                [
-                    name,
-                    x
-                ]
-            ) => {
-
-                const pct =
-                    x.target
-                    ?
-                    x.achieved /
-                    x.target *
-                    100
-                    :
-                    0;
-
-
-                const avg =
-                    x.days
-                    ?
-                    x.achieved /
-                    x.days
-                    :
-                    0;
-
-
-                return `
-
-                <tr>
-
-                    <td>
-                        ${esc(name)}
-                    </td>
-
-                    <td>
-                        ${x.ids.size}
-                    </td>
-
-                    <td>
-                        ${Math.round(
-                            x.target
-                        ).toLocaleString()}
-                    </td>
-
-                    <td>
-                        ${Math.round(
-                            x.achieved
-                        ).toLocaleString()}
-                    </td>
-
-                    <td>
-                        ${pct.toFixed(1)}%
-                    </td>
-
-                    <td>
-                        ${Math.max(
-                            0,
-                            x.target -
-                            x.achieved
-                        ).toLocaleString()}
-                    </td>
-
-                    <td>
-                        ${avg.toFixed(1)}
-                    </td>
-
-                </tr>
-
-                `;
-
-            }
-        )
-        .join("");
-
-
-    if(
-        !Object.keys(map).length
-    ){
-
-        $("subProcessTable").innerHTML = `
-
-            <tr>
-
-                <td colspan="7">
-                    No data for selected period.
-                </td>
-
-            </tr>
-
-        `;
-
-    }
-
-}
-
-
-/* =========================================================
-   OPEN OPERATIONS
-========================================================= */
-
-function openOperations(){
-
-    window.location.href =
-        OPERATIONS_DASHBOARD_URL;
-
-}
-
-
-/* =========================================================
-   EMPLOYEE ENTRY
-========================================================= */
-
-function openEmployeeEntry(){
-
-    window.open(
-        EMPLOYEE_ENTRY_URL,
-        "_blank",
-        "noopener"
-    );
 
 }
 
@@ -4211,9 +4989,7 @@ async function logout(){
 
     try{
 
-        await supabaseClient
-            .auth
-            .signOut();
+        await supabaseClient.auth.signOut();
 
     }
     catch(error){
@@ -4225,108 +5001,23 @@ async function logout(){
 
     }
 
-
     currentUser = null;
 
-    location.reload();
+    document.getElementById(
+        "app"
+    ).style.display =
+        "none";
+
+    document.getElementById(
+        "authScreen"
+    ).style.display =
+        "flex";
 
 }
 
 
 /* =========================================================
-   ENTER KEY LOGIN
-========================================================= */
-
-$("email")
-    .addEventListener(
-        "keydown",
-        e => {
-
-            if(
-                e.key === "Enter"
-            ){
-
-                login();
-
-            }
-
-        }
-    );
-
-
-$("password")
-    .addEventListener(
-        "keydown",
-        e => {
-
-            if(
-                e.key === "Enter"
-            ){
-
-                login();
-
-            }
-
-        }
-    );
-
-
-/* =========================================================
-   AUTH STATE
-========================================================= */
-
-supabaseClient
-    .auth
-    .onAuthStateChange(
-        (
-            event,
-            session
-        ) => {
-
-            console.log(
-                "Auth event:",
-                event
-            );
-
-
-            /*
-               Only react to an actual sign-out.
-
-               We intentionally do NOT call initialize()
-               here because login() and getSession()
-               handle initialization.
-
-               This prevents duplicate dashboard loading.
-            */
-
-            if(
-                event === "SIGNED_OUT"
-            ){
-
-                currentUser = null;
-
-
-                $("authScreen")
-                    .classList
-                    .remove("hidden");
-
-
-                $("app")
-                    .classList
-                    .add("hidden");
-
-
-                $("authError").textContent =
-                    "";
-
-            }
-
-        }
-    );
-
-
-/* =========================================================
-   EXISTING SESSION
+   SESSION CHECK
 ========================================================= */
 
 async function checkExistingSession(){
@@ -4334,34 +5025,20 @@ async function checkExistingSession(){
     try{
 
         const {
-            data,
-            error
+            data
         } =
-        await supabaseClient
-            .auth
-            .getSession();
+            await supabaseClient.auth
+                .getSession();
 
 
-        if(error){
-
-            console.error(
-                "Session check error:",
-                error
-            );
-
-            return;
-
-        }
+        const session =
+            data?.session;
 
 
-        if(
-            data &&
-            data.session &&
-            data.session.user
-        ){
+        if(session?.user){
 
             await initialize(
-                data.session.user
+                session.user
             );
 
         }
@@ -4370,7 +5047,7 @@ async function checkExistingSession(){
     catch(error){
 
         console.error(
-            "Existing session error:",
+            "Session check error:",
             error
         );
 
@@ -4380,7 +5057,84 @@ async function checkExistingSession(){
 
 
 /* =========================================================
-   START SESSION CHECK
+   AUTH STATE CHANGE
+========================================================= */
+
+supabaseClient.auth
+    .onAuthStateChange(
+        async (event) => {
+
+            /*
+               Only respond to explicit
+               sign-out.
+
+               SIGNED_IN is intentionally
+               not initialized here because
+               login() already initializes.
+            */
+
+            if(event === "SIGNED_OUT"){
+
+                currentUser = null;
+
+                document.getElementById(
+                    "app"
+                ).style.display =
+                    "none";
+
+                document.getElementById(
+                    "authScreen"
+                ).style.display =
+                    "flex";
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function openOperationsDashboard(){
+
+    window.location.href =
+        OPERATIONS_DASHBOARD_URL;
+
+}
+
+
+function openEmployeeEntry(){
+
+    window.location.href =
+        EMPLOYEE_ENTRY_URL;
+
+}
+
+
+/* =========================================================
+   ENTER KEY LOGIN
+========================================================= */
+
+document
+    .getElementById("password")
+    .addEventListener(
+        "keydown",
+        event => {
+
+            if(event.key === "Enter"){
+
+                login();
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
+   INITIAL LOAD
 ========================================================= */
 
 checkExistingSession();
