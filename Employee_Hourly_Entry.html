@@ -1198,15 +1198,22 @@ async function loadReferenceData() {
     ] =
         await Promise.all([
 
+            /*
+               These queries deliberately mirror the tracker's
+               exactly. `projects` has no `active` column, so
+               filtering on one fails the whole load.
+            */
             supabaseClient
                 .from("projects")
                 .select("*")
-                .eq("active", true)
                 .order("project_name"),
 
             supabaseClient
                 .from("sub_projects")
-                .select("*"),
+                .select("*")
+                .eq("active", true)
+                .order("project_id")
+                .order("sub_project_name"),
 
             supabaseClient
                 .from("employees")
