@@ -3,632 +3,1376 @@
 
 <head>
 
-<meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
-<title>My Hourly Production</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background:
-        linear-gradient(
-            180deg,
-            #eef4fb 0%,
-            #f7f9fc 45%,
-            #ffffff 100%
-        );
-    color: #1f2937;
-    -webkit-text-size-adjust: 100%;
-}
-
-.header {
-    background:
-        linear-gradient(
-            135deg,
-            #0b3155,
-            #1261a0,
-            #1686c9
-        );
-    color: #fff;
-    padding: 20px;
-    box-shadow: 0 4px 18px rgba(0,0,0,.16);
-}
-
-.header-inner {
-    max-width: 640px;
-    margin: auto;
-}
-
-.header h1 {
-    margin: 0;
-    font-size: 21px;
-    letter-spacing: .2px;
-}
-
-.header p {
-    margin: 6px 0 0;
-    opacity: .88;
-    font-size: 13px;
-}
-
-.container {
-    padding: 16px;
-    max-width: 640px;
-    margin: auto;
-}
-
-.card {
-    background: #fff;
-    border-radius: 14px;
-    padding: 17px;
-    margin-bottom: 16px;
-    box-shadow:
-        0 3px 14px rgba(15,61,104,.08),
-        0 1px 2px rgba(0,0,0,.04);
-    border: 1px solid #edf1f6;
-}
-
-.card h2 {
-    margin: 0 0 5px;
-    font-size: 17px;
-    color: #173b5e;
-}
-
-.muted {
-    color: #6b7280;
-    font-size: 13px;
-    margin: 0 0 14px;
-    line-height: 1.45;
-}
-
-.field {
-    margin-bottom: 14px;
-}
-
-label {
-    display: block;
-    font-size: 13px;
-    font-weight: bold;
-    color: #374151;
-    margin-bottom: 6px;
-}
-
-input[type="email"],
-input[type="password"],
-input[type="number"],
-select {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    border: 1px solid #cbd5e1;
-    border-radius: 9px;
-    background: #fff;
-    color: #1f2937;
-}
-
-select {
-    appearance: auto;
-}
-
-input:focus,
-select:focus {
-    outline: none;
-    border-color: #1261a0;
-    box-shadow:
-        0 0 0 3px rgba(18,97,160,.14);
-}
-
-input[type="number"].locked-input {
-    background: #eef2f7;
-    color: #7c8798;
-    border-color: #dde5ee;
-}
-
-.btn {
-    display: inline-block;
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    border-radius: 9px;
-    background: #1261a0;
-    color: #fff;
-    cursor: pointer;
-    transition: .15s ease;
-}
-
-.btn:hover {
-    background: #0f4f84;
-    transform: translateY(-1px);
-}
-
-.btn:disabled {
-    background: #9aa6b2;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.btn-quiet {
-    background: #fff;
-    color: #1261a0;
-    border: 1px solid #c4d3e3;
-}
-
-.btn-quiet:hover {
-    background: #eef4fa;
-}
-
-.login-info {
-    background: #eef4fa;
-    border: 1px solid #cfe0ef;
-    color: #14507f;
-    border-radius: 9px;
-    padding: 12px 13px;
-    font-size: 13px;
-    margin-bottom: 15px;
-    line-height: 1.45;
-}
-
-.banner {
-    padding: 12px 14px;
-    border-radius: 9px;
-    font-size: 14px;
-    margin-bottom: 16px;
-    border: 1px solid transparent;
-    line-height: 1.4;
-}
-
-.banner.error {
-    background: #fdecec;
-    border-color: #f5c2c2;
-    color: #9b1c1c;
-}
-
-.banner.warn {
-    background: #fff8e6;
-    border-color: #f5e2b3;
-    color: #7a5c06;
-}
-
-.banner.info {
-    background: #eef4fa;
-    border-color: #cfe0ef;
-    color: #14507f;
-}
-
-.hidden {
-    display: none !important;
-}
-
-
-/* =========================================================
-   EMPLOYEE IDENTITY
-========================================================= */
-
-.whoami {
-    background:
-        linear-gradient(
-            135deg,
-            #0b3155,
-            #1261a0
-        );
-    color: #fff;
-    border-radius: 15px;
-    padding: 17px;
-    margin-bottom: 16px;
-    box-shadow:
-        0 7px 20px rgba(15,61,104,.18);
-}
-
-.whoami-name {
-    font-size: 21px;
-    font-weight: bold;
-}
-
-.whoami-meta {
-    font-size: 13px;
-    opacity: .9;
-    margin-top: 5px;
-}
-
-.whoami-date {
-    font-size: 13px;
-    margin-top: 11px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255,255,255,.22);
-}
-
-
-/* =========================================================
-   PERFORMANCE CARD
-========================================================= */
-
-.performance-card {
-    position: relative;
-    overflow: hidden;
-    text-align: center;
-    padding: 20px 17px;
-}
-
-.performance-card::before {
-    content: "";
-    position: absolute;
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
-    right: -80px;
-    top: -90px;
-    background: rgba(18,97,160,.06);
-}
-
-.performance-emoji {
-    font-size: 42px;
-    line-height: 1;
-    margin-bottom: 8px;
-}
-
-.performance-title {
-    font-size: 20px;
-    font-weight: 800;
-    color: #173b5e;
-}
-
-.performance-message {
-    margin-top: 6px;
-    font-size: 14px;
-    color: #64748b;
-    line-height: 1.45;
-}
-
-.performance-score {
-    margin-top: 15px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.score-pill {
-    padding: 7px 12px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: bold;
-    background: #eef4fa;
-    color: #14507f;
-    border: 1px solid #d7e5f1;
-}
-
-.performance-card.above {
-    background:
-        linear-gradient(
-            135deg,
-            #ffffff,
-            #f0fff5
-        );
-    border-color: #bfe6cd;
-}
-
-.performance-card.above .performance-title {
-    color: #11733f;
-}
-
-.performance-card.on-target {
-    background:
-        linear-gradient(
-            135deg,
-            #ffffff,
-            #f4f9ff
-        );
-    border-color: #bfd8ed;
-}
-
-.performance-card.on-target .performance-title {
-    color: #1261a0;
-}
-
-.performance-card.below {
-    background:
-        linear-gradient(
-            135deg,
-            #ffffff,
-            #fff9ed
-        );
-    border-color: #ead8a6;
-}
-
-.performance-card.below .performance-title {
-    color: #8b6700;
-}
-
-.performance-card.no-target {
-    background: #fff;
-}
-
-
-/* =========================================================
-   HOURS
-========================================================= */
-
-.hour-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 0;
-    border-bottom: 1px solid #eef2f7;
-}
-
-.hour-row:last-child {
-    border-bottom: none;
-}
-
-.hour-label {
-    flex: 1 1 auto;
-    font-size: 15px;
-    font-weight: bold;
-    color: #173b5e;
-    min-width: 0;
-}
-
-.hour-note {
-    display: block;
-    font-size: 11px;
-    font-weight: normal;
-    color: #94a3b8;
-    margin-top: 2px;
-}
-
-.hour-input {
-    flex: 0 0 92px;
-    text-align: center;
-    font-weight: bold;
-}
-
-.hour-row.is-locked .hour-label {
-    color: #94a3b8;
-}
-
-.hour-row.is-locked .hour-input {
-    background: #eef2f7;
-    color: #7c8798;
-    border-color: #dde5ee;
-}
-
-.locked-tag {
-    flex: 0 0 auto;
-    font-size: 9px;
-    font-weight: bold;
-    letter-spacing: .05em;
-    color: #64748b;
-    background: #eef2f7;
-    border: 1px solid #dde5ee;
-    border-radius: 999px;
-    padding: 3px 7px;
-}
-
-.total-line {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 2px solid #eef2f7;
-    font-size: 15px;
-    font-weight: bold;
-    color: #173b5e;
-}
-
-.total-value {
-    font-size: 23px;
-}
-
-
-/* =========================================================
-   TARGET SUMMARY
-========================================================= */
-
-.target-grid {
-    display: grid;
-    grid-template-columns:
-        repeat(3, 1fr);
-    gap: 9px;
-    margin-top: 14px;
-}
-
-.target-box {
-    background: #f7f9fc;
-    border: 1px solid #e6ebf1;
-    border-radius: 10px;
-    padding: 11px 8px;
-    text-align: center;
-}
-
-.target-label {
-    font-size: 10px;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    font-weight: bold;
-}
-
-.target-number {
-    margin-top: 4px;
-    font-size: 20px;
-    font-weight: 800;
-    color: #173b5e;
-}
-
-
-/* =========================================================
-   AUTOSAVE
-========================================================= */
-
-.autosave {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    font-size: 13px;
-    font-weight: bold;
-    padding: 11px 13px;
-    border-radius: 9px;
-    background: #f1f5f9;
-    color: #64748b;
-    border: 1px solid #e2e8f0;
-}
-
-.autosave-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: #94a3b8;
-    flex: 0 0 auto;
-}
-
-.autosave[data-state="saving"] {
-    background: #fff8e6;
-    border-color: #f5e2b3;
-    color: #92700e;
-}
-
-.autosave[data-state="saving"]
-.autosave-dot {
-    background: #d99f0b;
-    animation: pulse 1s ease-in-out infinite;
-}
-
-.autosave[data-state="saved"] {
-    background: #eaf7ef;
-    border-color: #c3e6d0;
-    color: #14683c;
-}
-
-.autosave[data-state="saved"]
-.autosave-dot {
-    background: #198754;
-}
-
-.autosave[data-state="error"] {
-    background: #fdecec;
-    border-color: #f5c2c2;
-    color: #9b1c1c;
-}
-
-.autosave[data-state="error"]
-.autosave-dot {
-    background: #dc3545;
-}
-
-@keyframes pulse {
-
-    0%,100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: .35;
-    }
-
-}
-
-
-/* =========================================================
-   CELEBRATION
-========================================================= */
-
-.celebration {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.confetti {
-    position: absolute;
-    top: -20px;
-    font-size: 22px;
-    animation:
-        confettiFall
-        2.5s
-        linear
-        forwards;
-}
-
-@keyframes confettiFall {
-
-    0% {
-        transform:
-            translateY(0)
-            rotate(0deg);
-        opacity: 1;
-    }
-
-    100% {
-        transform:
-            translateY(110vh)
-            rotate(720deg);
-        opacity: 0;
-    }
-
-}
-
-
-/* =========================================================
-   FOOTER
-========================================================= */
-
-.footer {
-    text-align: center;
-    color: #94a3b8;
-    font-size: 12px;
-    padding: 4px 0 26px;
-    line-height: 1.4;
-}
-
-.spinner {
-    text-align: center;
-    color: #6b7280;
-    font-size: 14px;
-    padding: 26px 0;
-}
-
-.logout-row {
-    margin-top: 12px;
-}
-
-
-@media (max-width: 380px) {
-
-    .hour-input {
-        flex: 0 0 78px;
-    }
-
-    .hour-label {
-        font-size: 14px;
-    }
-
-    .target-grid {
-        gap: 6px;
-    }
-
-    .target-number {
-        font-size: 18px;
-    }
-
-}
-
-</style>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>My Hourly Production</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
+        body {
+            font-family:
+                Inter,
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #eef4ff 0%,
+                    #f8fbff 45%,
+                    #eef5ff 100%
+                );
+
+            color: #172033;
+        }
+
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .page {
+            min-height: 100vh;
+            padding: 25px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .header {
+            background:
+                linear-gradient(
+                    135deg,
+                    #0b1f44,
+                    #173f78
+                );
+
+            color: white;
+
+            border-radius: 20px;
+
+            padding: 25px 30px;
+
+            box-shadow:
+                0 12px 35px rgba(15, 39, 80, 0.18);
+
+            margin-bottom: 22px;
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: "";
+
+            position: absolute;
+
+            width: 240px;
+            height: 240px;
+
+            border-radius: 50%;
+
+            background: rgba(255,255,255,0.05);
+
+            right: -70px;
+            top: -100px;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-title {
+            margin: 0;
+
+            font-size: 28px;
+
+            font-weight: 800;
+
+            letter-spacing: 0.2px;
+        }
+
+        .header-subtitle {
+            margin-top: 7px;
+
+            font-size: 14px;
+
+            color: #cbdaf2;
+        }
+
+        .header-date {
+            margin-top: 14px;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            background: rgba(255,255,255,0.10);
+
+            border: 1px solid rgba(255,255,255,0.12);
+
+            padding: 8px 12px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+        }
+
+        /* =====================================================
+           CARDS
+        ===================================================== */
+
+        .card {
+            background: white;
+
+            border-radius: 18px;
+
+            padding: 22px;
+
+            margin-bottom: 18px;
+
+            box-shadow:
+                0 8px 28px rgba(24, 55, 99, 0.08);
+
+            border: 1px solid #e6edf7;
+        }
+
+        .card-title {
+            font-size: 17px;
+
+            font-weight: 800;
+
+            margin-bottom: 15px;
+
+            color: #15294b;
+        }
+
+        .loading-card,
+        .fatal-card {
+            text-align: center;
+
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 42px;
+            height: 42px;
+
+            border: 4px solid #dce7f8;
+
+            border-top-color: #1b5db7;
+
+            border-radius: 50%;
+
+            animation: spin 0.8s linear infinite;
+
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+
+            to {
+                transform: rotate(360deg);
+            }
+
+        }
+
+        /* =====================================================
+           LOGIN
+        ===================================================== */
+
+        .login-wrapper {
+            min-height: 100vh;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 25px;
+        }
+
+        .login-card {
+            width: 100%;
+
+            max-width: 440px;
+
+            background: white;
+
+            border-radius: 22px;
+
+            padding: 34px;
+
+            box-shadow:
+                0 18px 55px rgba(18, 46, 88, 0.15);
+
+            border: 1px solid #e4ebf5;
+        }
+
+        .login-logo {
+            width: 65px;
+            height: 65px;
+
+            border-radius: 18px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0b1f44,
+                    #2868b7
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: white;
+
+            font-size: 27px;
+
+            font-weight: 900;
+
+            margin-bottom: 18px;
+        }
+
+        .login-title {
+            font-size: 26px;
+
+            font-weight: 850;
+
+            color: #14284b;
+
+            margin-bottom: 7px;
+        }
+
+        .login-subtitle {
+            color: #68768c;
+
+            font-size: 14px;
+
+            margin-bottom: 25px;
+
+            line-height: 1.5;
+        }
+
+        .field {
+            margin-bottom: 17px;
+        }
+
+        .field label {
+            display: block;
+
+            font-size: 13px;
+
+            font-weight: 750;
+
+            color: #3e4d64;
+
+            margin-bottom: 7px;
+        }
+
+        .field input,
+        .field select {
+
+            width: 100%;
+
+            padding: 13px 14px;
+
+            border: 1px solid #ccd7e7;
+
+            border-radius: 11px;
+
+            outline: none;
+
+            font-size: 14px;
+
+            background: #fbfdff;
+
+            transition: 0.2s;
+        }
+
+        .field input:focus,
+        .field select:focus {
+
+            border-color: #3775c5;
+
+            box-shadow:
+                0 0 0 3px rgba(55,117,197,0.10);
+
+            background: white;
+        }
+
+        .login-button,
+        .logout-button,
+        .primary-button {
+
+            border: none;
+
+            cursor: pointer;
+
+            border-radius: 11px;
+
+            font-weight: 800;
+
+            transition: 0.2s;
+        }
+
+        .login-button {
+
+            width: 100%;
+
+            padding: 14px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #123568,
+                    #2872c8
+                );
+
+            color: white;
+
+            font-size: 15px;
+
+            margin-top: 5px;
+        }
+
+        .login-button:hover {
+
+            transform: translateY(-1px);
+
+            box-shadow:
+                0 8px 20px rgba(28, 90, 166, 0.22);
+        }
+
+        .login-button:disabled {
+
+            opacity: 0.65;
+
+            cursor: not-allowed;
+
+            transform: none;
+
+            box-shadow: none;
+        }
+
+        .error-message {
+
+            background: #fff0f0;
+
+            border: 1px solid #f0caca;
+
+            color: #a32626;
+
+            padding: 11px 13px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+
+            margin-bottom: 15px;
+
+            line-height: 1.45;
+        }
+
+        /* =====================================================
+           IDENTITY
+        ===================================================== */
+
+        .identity-strip {
+
+            display: grid;
+
+            grid-template-columns:
+                1.2fr
+                1fr
+                1fr
+                1fr;
+
+            gap: 12px;
+
+            margin-bottom: 18px;
+        }
+
+        .identity-item {
+
+            background: white;
+
+            border: 1px solid #e3eaf4;
+
+            border-radius: 15px;
+
+            padding: 15px;
+
+            box-shadow:
+                0 5px 18px rgba(30, 62, 106, 0.06);
+        }
+
+        .identity-label {
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.7px;
+
+            color: #8491a4;
+
+            font-weight: 800;
+
+            margin-bottom: 5px;
+        }
+
+        .identity-value {
+
+            font-size: 15px;
+
+            font-weight: 800;
+
+            color: #17335f;
+
+            word-break: break-word;
+        }
+
+        /* =====================================================
+           AVATAR
+        ===================================================== */
+
+        .employee-heading {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 20px;
+        }
+
+        .avatar {
+
+            width: 52px;
+            height: 52px;
+
+            flex-shrink: 0;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #16447e,
+                    #3e81c8
+                );
+
+            font-size: 17px;
+
+            font-weight: 900;
+
+            box-shadow:
+                0 7px 18px rgba(30, 78, 140, 0.2);
+        }
+
+        .employee-name {
+
+            font-size: 20px;
+
+            font-weight: 850;
+
+            color: #152b4f;
+        }
+
+        .employee-email {
+
+            font-size: 12px;
+
+            color: #7a879a;
+
+            margin-top: 3px;
+        }
+
+        /* =====================================================
+           BANNER
+        ===================================================== */
+
+        .entry-banner {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 13px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f1f7ff,
+                    #f9fbff
+                );
+
+            border: 1px solid #d8e7fb;
+
+            border-radius: 15px;
+
+            padding: 15px 17px;
+
+            margin-bottom: 18px;
+        }
+
+        .entry-banner-icon {
+
+            width: 38px;
+            height: 38px;
+
+            border-radius: 10px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: #dcecff;
+
+            color: #1755a0;
+
+            font-size: 19px;
+        }
+
+        .entry-banner-title {
+
+            font-size: 14px;
+
+            font-weight: 850;
+
+            color: #16345e;
+        }
+
+        .entry-banner-text {
+
+            font-size: 12px;
+
+            color: #687991;
+
+            margin-top: 3px;
+
+            line-height: 1.4;
+        }
+
+        /* =====================================================
+           ATTENDANCE
+        ===================================================== */
+
+        .attendance-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 12px;
+        }
+
+        .attendance-option {
+
+            position: relative;
+        }
+
+        .attendance-option input {
+
+            position: absolute;
+
+            opacity: 0;
+
+            pointer-events: none;
+        }
+
+        .attendance-label {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            min-height: 54px;
+
+            border-radius: 12px;
+
+            border: 1px solid #d8e1ed;
+
+            background: #fbfdff;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+            font-weight: 800;
+
+            color: #526078;
+
+            transition: 0.2s;
+        }
+
+        .attendance-label:hover {
+
+            border-color: #8eafd5;
+
+            background: #f5f9ff;
+        }
+
+        .attendance-option input:checked + .attendance-label {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #e8f2ff,
+                    #dcecff
+                );
+
+            border-color: #4d86ca;
+
+            color: #174e91;
+
+            box-shadow:
+                0 5px 14px rgba(44, 105, 174, 0.12);
+        }
+
+        /* =====================================================
+           PERFORMANCE CARD
+        ===================================================== */
+
+        .performance-card {
+
+            position: relative;
+
+            overflow: hidden;
+
+            border-radius: 20px;
+
+            padding: 23px;
+
+            margin-bottom: 18px;
+
+            border: 1px solid;
+
+            transition:
+                transform 0.25s ease,
+                box-shadow 0.25s ease;
+        }
+
+        .performance-card.above {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #effff5,
+                    #f8fffb
+                );
+
+            border-color: #a9e4c0;
+
+            box-shadow:
+                0 10px 30px rgba(39, 145, 84, 0.11);
+        }
+
+        .performance-card.target {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #eef6ff,
+                    #f8fbff
+                );
+
+            border-color: #b8d3f2;
+
+            box-shadow:
+                0 10px 30px rgba(39, 99, 166, 0.10);
+        }
+
+        .performance-card.below {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #fff8eb,
+                    #fffdf8
+                );
+
+            border-color: #efd19b;
+
+            box-shadow:
+                0 10px 30px rgba(177, 122, 32, 0.09);
+        }
+
+        .performance-card.neutral {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f5f7fa,
+                    #fbfcfd
+                );
+
+            border-color: #dce2e9;
+        }
+
+        .performance-card.absent {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #fff2f2,
+                    #fffafa
+                );
+
+            border-color: #eccaca;
+        }
+
+        .performance-top {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 14px;
+
+            margin-bottom: 18px;
+        }
+
+        .performance-icon {
+
+            width: 52px;
+            height: 52px;
+
+            border-radius: 15px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 25px;
+
+            background: rgba(255,255,255,0.75);
+
+            border: 1px solid rgba(0,0,0,0.05);
+
+            flex-shrink: 0;
+        }
+
+        .performance-title {
+
+            font-size: 19px;
+
+            font-weight: 900;
+
+            color: #18304f;
+        }
+
+        .performance-message {
+
+            font-size: 13px;
+
+            color: #64738a;
+
+            margin-top: 4px;
+
+            line-height: 1.45;
+        }
+
+        .performance-metrics {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 10px;
+
+            margin-bottom: 17px;
+        }
+
+        .performance-metric {
+
+            background: rgba(255,255,255,0.78);
+
+            border: 1px solid rgba(40,70,105,0.08);
+
+            border-radius: 12px;
+
+            padding: 12px;
+
+        }
+
+        .metric-label {
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.5px;
+
+            color: #7c899c;
+
+            font-weight: 800;
+
+        }
+
+        .metric-value {
+
+            font-size: 20px;
+
+            font-weight: 900;
+
+            color: #1a3457;
+
+            margin-top: 3px;
+        }
+
+        .progress-track {
+
+            height: 11px;
+
+            background: rgba(40,70,105,0.10);
+
+            border-radius: 20px;
+
+            overflow: hidden;
+        }
+
+        .progress-bar {
+
+            height: 100%;
+
+            width: 0%;
+
+            border-radius: 20px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #2870c1,
+                    #4b9ae7
+                );
+
+            transition:
+                width 0.45s ease;
+        }
+
+        .performance-card.above .progress-bar {
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #1f9d58,
+                    #59c87d
+                );
+        }
+
+        .performance-card.below .progress-bar {
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #d18a1e,
+                    #efb65c
+                );
+        }
+
+        .performance-footnote {
+
+            margin-top: 9px;
+
+            font-size: 11px;
+
+            color: #748197;
+
+            text-align: right;
+        }
+
+        /* =====================================================
+           HOURLY TABLE
+        ===================================================== */
+
+        .hourly-header {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+            margin-bottom: 15px;
+        }
+
+        .hourly-total {
+
+            background: #eef5ff;
+
+            color: #17549b;
+
+            padding: 8px 12px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+
+            font-weight: 850;
+
+            white-space: nowrap;
+        }
+
+        .hour-list {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 12px;
+        }
+
+        .hour-row {
+
+            border: 1px solid #e0e7f0;
+
+            border-radius: 14px;
+
+            padding: 14px;
+
+            background: #fbfdff;
+
+            transition: 0.2s;
+        }
+
+        .hour-row.current {
+
+            border-color: #79a8db;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f0f7ff,
+                    #fbfdff
+                );
+
+            box-shadow:
+                0 5px 16px rgba(49, 105, 170, 0.10);
+        }
+
+        .hour-row.locked {
+
+            background: #f3f5f8;
+
+            border-color: #dce2e9;
+        }
+
+        .hour-label {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 8px;
+
+            margin-bottom: 8px;
+        }
+
+        .hour-time {
+
+            font-size: 13px;
+
+            font-weight: 850;
+
+            color: #314967;
+        }
+
+        .hour-status {
+
+            font-size: 9px;
+
+            font-weight: 900;
+
+            letter-spacing: 0.4px;
+
+            padding: 4px 7px;
+
+            border-radius: 7px;
+
+            background: #e7eef7;
+
+            color: #6d7b8e;
+        }
+
+        .hour-row.current .hour-status {
+
+            background: #d9ebff;
+
+            color: #1d61a5;
+        }
+
+        .hour-row.locked .hour-status {
+
+            background: #e5e8ed;
+
+            color: #7b8490;
+        }
+
+        .hour-input {
+
+            width: 100%;
+
+            padding: 12px;
+
+            border-radius: 10px;
+
+            border: 1px solid #ccd8e7;
+
+            font-size: 18px;
+
+            font-weight: 850;
+
+            text-align: center;
+
+            outline: none;
+
+            background: white;
+
+            color: #183657;
+        }
+
+        .hour-input:focus {
+
+            border-color: #3d7fc5;
+
+            box-shadow:
+                0 0 0 3px rgba(61,127,197,0.10);
+        }
+
+        .hour-input:disabled {
+
+            background: #eef1f5;
+
+            color: #7e8793;
+
+            cursor: not-allowed;
+        }
+
+        /* =====================================================
+           AUTOSAVE
+        ===================================================== */
+
+        .bottom-actions {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+            flex-wrap: wrap;
+        }
+
+        .save-status {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+
+            font-size: 13px;
+
+            color: #66758a;
+        }
+
+        .save-dot {
+
+            width: 9px;
+            height: 9px;
+
+            border-radius: 50%;
+
+            background: #42a568;
+
+            box-shadow:
+                0 0 0 4px rgba(66,165,104,0.10);
+        }
+
+        .save-dot.saving {
+
+            background: #e0a02c;
+
+            box-shadow:
+                0 0 0 4px rgba(224,160,44,0.10);
+
+            animation: pulse 1s infinite;
+        }
+
+        .save-dot.error {
+
+            background: #d74343;
+
+            box-shadow:
+                0 0 0 4px rgba(215,67,67,0.10);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.35;
+            }
+
+        }
+
+        .logout-button {
+
+            padding: 11px 17px;
+
+            background: #f1f4f8;
+
+            border: 1px solid #dce3eb;
+
+            color: #4c5b70;
+        }
+
+        .logout-button:hover {
+
+            background: #e8edf3;
+        }
+
+        /* =====================================================
+           LOCK NOTICE
+        ===================================================== */
+
+        .lock-notice {
+
+            background: #fff8e8;
+
+            border: 1px solid #ecd59f;
+
+            color: #765a20;
+
+            border-radius: 12px;
+
+            padding: 11px 14px;
+
+            font-size: 12px;
+
+            margin-bottom: 15px;
+
+            line-height: 1.45;
+        }
+
+        /* =====================================================
+           CELEBRATION
+        ===================================================== */
+
+        #celebrationLayer {
+
+            position: fixed;
+
+            inset: 0;
+
+            pointer-events: none;
+
+            z-index: 9999;
+
+            overflow: hidden;
+        }
+
+        .confetti {
+
+            position: absolute;
+
+            top: -25px;
+
+            width: 9px;
+            height: 15px;
+
+            border-radius: 2px;
+
+            animation:
+                confettiFall 2.5s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+
+            0% {
+
+                transform:
+                    translateY(-20px)
+                    rotate(0deg);
+
+                opacity: 1;
+            }
+
+            100% {
+
+                transform:
+                    translateY(110vh)
+                    rotate(720deg);
+
+                opacity: 0;
+            }
+
+        }
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+
+        .footer {
+
+            text-align: center;
+
+            color: #8b98aa;
+
+            font-size: 11px;
+
+            padding: 10px 0 25px;
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 900px) {
+
+            .identity-strip {
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .hour-list {
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .performance-metrics {
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .page {
+
+                padding: 12px;
+            }
+
+            .header {
+
+                padding: 21px;
+
+                border-radius: 16px;
+            }
+
+            .header-title {
+
+                font-size: 23px;
+            }
+
+            .identity-strip {
+
+                grid-template-columns:
+                    1fr;
+            }
+
+            .attendance-grid {
+
+                grid-template-columns:
+                    1fr;
+            }
+
+            .hour-list {
+
+                grid-template-columns:
+                    1fr;
+            }
+
+            .performance-metrics {
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .card {
+
+                padding: 17px;
+            }
+
+            .login-card {
+
+                padding: 25px;
+            }
+
+        }
+
+    </style>
 
 </head>
 
@@ -636,397 +1380,632 @@ input[type="number"].locked-input {
 <body>
 
 
-<div class="header">
-
-    <div class="header-inner">
-
-        <h1>
-            My Hourly Production
-        </h1>
-
-        <p id="headerSubtitle">
-            Secure employee production entry
-        </p>
-
-    </div>
-
-</div>
-
-
-<div class="container">
-
-
-<!-- =========================================================
-     LOADING
-========================================================= -->
-
-<div id="loadingCard"
-     class="card">
-
-    <div class="spinner">
-        Loading your production portal…
-    </div>
-
-</div>
-
-
 <!-- =========================================================
      LOGIN
 ========================================================= -->
 
-<div id="loginCard"
-     class="card hidden">
+<div id="loginScreen"
+     class="login-wrapper">
 
-    <h2>
-        Employee Login
-    </h2>
+    <div class="login-card">
 
-    <p class="muted">
-        Sign in with your employee account to update
-        your own hourly production.
-    </p>
+        <div class="login-logo">
+            HP
+        </div>
 
-    <div class="login-info">
+        <div class="login-title">
+            My Hourly Production
+        </div>
 
-        Your account is securely connected to your
-        employee record. You will only be able to
-        access your own production data.
+        <div class="login-subtitle">
+            Sign in with your employee account to enter
+            your hourly production.
+        </div>
+
+        <div id="loginError"
+             class="error-message hidden">
+        </div>
+
+        <div class="field">
+
+            <label>
+                Email
+            </label>
+
+            <input
+                id="loginEmail"
+                type="email"
+                autocomplete="username"
+                placeholder="Enter your work email">
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Password
+            </label>
+
+            <input
+                id="loginPassword"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Enter your password">
+
+        </div>
+
+
+        <button
+            id="loginButton"
+            class="login-button"
+            onclick="loginEmployee()">
+
+            Sign In
+
+        </button>
 
     </div>
-
-    <div id="loginBanner"
-         class="banner error hidden">
-    </div>
-
-    <div class="field">
-
-        <label for="loginEmail">
-            Email
-        </label>
-
-        <input
-            type="email"
-            id="loginEmail"
-            autocomplete="username"
-            placeholder="Enter your company email">
-
-    </div>
-
-    <div class="field">
-
-        <label for="loginPassword">
-            Password
-        </label>
-
-        <input
-            type="password"
-            id="loginPassword"
-            autocomplete="current-password"
-            placeholder="Enter your password">
-
-    </div>
-
-    <button
-        class="btn"
-        id="loginBtn"
-        onclick="loginEmployee()">
-
-        Login
-
-    </button>
 
 </div>
 
 
 <!-- =========================================================
-     FATAL ERROR
+     APPLICATION
 ========================================================= -->
 
-<div id="fatalCard"
-     class="card hidden">
-
-    <h2>
-        Cannot load
-    </h2>
-
-    <div id="fatalText"
-         class="banner error">
-    </div>
-
-    <button
-        class="btn"
-        onclick="location.reload()">
-
-        Try again
-
-    </button>
-
-</div>
-
-
-<!-- =========================================================
-     ENTRY SCREEN
-========================================================= -->
-
-<div id="entryScreen"
+<div id="appScreen"
      class="hidden">
 
+    <div class="page">
 
-    <!-- EMPLOYEE -->
-    <div class="whoami">
-
-        <div class="whoami-name"
-             id="whoName">
-        </div>
-
-        <div class="whoami-meta"
-             id="whoMeta">
-        </div>
-
-        <div class="whoami-date"
-             id="whoDate">
-        </div>
-
-    </div>
+        <div class="container">
 
 
-    <!-- PERFORMANCE -->
-    <div id="performanceCard"
-         class="card performance-card">
+            <!-- HEADER -->
 
-        <div class="performance-emoji"
-             id="performanceEmoji">
-            🚀
-        </div>
+            <div class="header">
 
-        <div class="performance-title"
-             id="performanceTitle">
+                <div class="header-content">
 
-            Let's get started!
+                    <div class="header-title">
+                        My Hourly Production
+                    </div>
 
-        </div>
+                    <div class="header-subtitle">
+                        Enter your production hour by hour.
+                        Your entries are automatically saved.
+                    </div>
 
-        <div class="performance-message"
-             id="performanceMessage">
+                    <div class="header-date">
 
-            Enter your hourly production and keep
-            an eye on your target.
+                        <span>
+                            📅
+                        </span>
 
-        </div>
+                        <span id="headerDate">
+                            Loading...
+                        </span>
 
-        <div class="performance-score">
-
-            <div class="score-pill">
-
-                Achievement:
-                <span id="achievementDisplay">
-                    0%
-                </span>
-
-            </div>
-
-            <div class="score-pill">
-
-                Target:
-                <span id="targetDisplay">
-                    0
-                </span>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- BANNER -->
-    <div id="entryBanner"
-         class="banner info hidden">
-    </div>
-
-
-    <!-- ATTENDANCE -->
-    <div class="card">
-
-        <h2>
-            Attendance
-        </h2>
-
-        <p class="muted">
-            Set this before entering your counts.
-        </p>
-
-        <select
-            id="attendance"
-            onchange="onAttendanceChange()">
-
-            <option value="Present">
-                Present
-            </option>
-
-            <option value="Half Day">
-                Half Day
-            </option>
-
-            <option value="Absent">
-                Absent
-            </option>
-
-        </select>
-
-    </div>
-
-
-    <!-- TARGET SUMMARY -->
-    <div class="card">
-
-        <h2>
-            Today's Numbers
-        </h2>
-
-        <div class="target-grid">
-
-            <div class="target-box">
-
-                <div class="target-label">
-                    Target
-                </div>
-
-                <div
-                    class="target-number"
-                    id="summaryTarget">
-
-                    0
+                    </div>
 
                 </div>
 
             </div>
 
 
-            <div class="target-box">
+            <!-- LOADING -->
 
-                <div class="target-label">
-                    Achieved
+            <div id="loadingCard"
+                 class="card loading-card">
+
+                <div class="spinner"></div>
+
+                <div style="
+                    font-weight:800;
+                    color:#294466;
+                ">
+
+                    Loading your production profile...
+
                 </div>
 
-                <div
-                    class="target-number"
-                    id="summaryAchieved">
+                <div style="
+                    margin-top:7px;
+                    font-size:12px;
+                    color:#8190a4;
+                ">
 
-                    0
-
-                </div>
-
-            </div>
-
-
-            <div class="target-box">
-
-                <div class="target-label">
-                    Remaining
-                </div>
-
-                <div
-                    class="target-number"
-                    id="summaryRemaining">
-
-                    0
+                    Please wait.
 
                 </div>
 
             </div>
 
+
+            <!-- FATAL -->
+
+            <div id="fatalCard"
+                 class="card fatal-card hidden">
+
+                <div style="
+                    font-size:42px;
+                    margin-bottom:10px;
+                ">
+                    ⚠️
+                </div>
+
+                <div id="fatalTitle"
+                     style="
+                        font-size:20px;
+                        font-weight:850;
+                        color:#9b2525;
+                     ">
+
+                    Unable to load
+
+                </div>
+
+                <div id="fatalMessage"
+                     style="
+                        margin-top:8px;
+                        color:#68778c;
+                        font-size:13px;
+                        line-height:1.5;
+                     ">
+
+                </div>
+
+                <button
+                    class="logout-button"
+                    style="margin-top:20px;"
+                    onclick="logoutEmployee()">
+
+                    Back to Login
+
+                </button>
+
+            </div>
+
+
+            <!-- ENTRY -->
+
+            <div id="entryScreen"
+                 class="hidden">
+
+
+                <!-- IDENTITY -->
+
+                <div id="identityStrip"
+                     class="identity-strip">
+
+                    <div class="identity-item">
+
+                        <div class="identity-label">
+                            Employee
+                        </div>
+
+                        <div id="identityEmployee"
+                             class="identity-value">
+
+                            -
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="identity-item">
+
+                        <div class="identity-label">
+                            Project
+                        </div>
+
+                        <div id="identityProject"
+                             class="identity-value">
+
+                            -
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="identity-item">
+
+                        <div class="identity-label">
+                            Sub-Project
+                        </div>
+
+                        <div id="identitySubProject"
+                             class="identity-value">
+
+                            -
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="identity-item">
+
+                        <div class="identity-label">
+                            Shift
+                        </div>
+
+                        <div class="identity-value">
+                            6 PM – 3 AM
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- EMPLOYEE HEADING -->
+
+                <div class="card">
+
+                    <div class="employee-heading">
+
+                        <div id="employeeAvatar"
+                             class="avatar">
+
+                            --
+
+                        </div>
+
+                        <div>
+
+                            <div id="employeeName"
+                                 class="employee-name">
+
+                                Employee
+
+                            </div>
+
+                            <div id="employeeEmail"
+                                 class="employee-email">
+
+                                -
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="entry-banner">
+
+                        <div class="entry-banner-icon">
+                            ⏱️
+                        </div>
+
+                        <div>
+
+                            <div class="entry-banner-title">
+
+                                Hourly Production Entry
+
+                            </div>
+
+                            <div class="entry-banner-text">
+
+                                Past hours are automatically locked.
+                                The current and future hours remain available
+                                according to your shift.
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div id="dateLockNotice"
+                         class="lock-notice hidden">
+
+                        🔒 This shift date has been locked by management.
+                        Your production can still be viewed, but entries
+                        cannot be modified.
+
+                    </div>
+
+                </div>
+
+
+                <!-- PERFORMANCE -->
+
+                <div id="performanceCard"
+                     class="performance-card neutral hidden">
+
+                    <div class="performance-top">
+
+                        <div id="performanceIcon"
+                             class="performance-icon">
+
+                            📊
+
+                        </div>
+
+                        <div>
+
+                            <div id="performanceTitle"
+                                 class="performance-title">
+
+                                Production Status
+
+                            </div>
+
+                            <div id="performanceMessage"
+                                 class="performance-message">
+
+                                Updating your production status...
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="performance-metrics">
+
+                        <div class="performance-metric">
+
+                            <div class="metric-label">
+                                Target
+                            </div>
+
+                            <div id="performanceTarget"
+                                 class="metric-value">
+
+                                0
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="performance-metric">
+
+                            <div class="metric-label">
+                                Achieved
+                            </div>
+
+                            <div id="performanceAchieved"
+                                 class="metric-value">
+
+                                0
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="performance-metric">
+
+                            <div class="metric-label">
+                                Remaining
+                            </div>
+
+                            <div id="performanceRemaining"
+                                 class="metric-value">
+
+                                0
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="performance-metric">
+
+                            <div class="metric-label">
+                                Achievement
+                            </div>
+
+                            <div id="performancePercentage"
+                                 class="metric-value">
+
+                                0%
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="progress-track">
+
+                        <div id="performanceProgress"
+                             class="progress-bar">
+
+                        </div>
+
+                    </div>
+
+
+                    <div id="performanceFootnote"
+                         class="performance-footnote">
+
+                    </div>
+
+                </div>
+
+
+                <!-- ATTENDANCE -->
+
+                <div class="card">
+
+                    <div class="card-title">
+                        Attendance
+                    </div>
+
+                    <div class="attendance-grid">
+
+
+                        <div class="attendance-option">
+
+                            <input
+                                id="attendancePresent"
+                                name="attendance"
+                                type="radio"
+                                value="Present"
+                                checked
+                                onchange="onAttendanceChange()">
+
+                            <label
+                                for="attendancePresent"
+                                class="attendance-label">
+
+                                Present
+
+                            </label>
+
+                        </div>
+
+
+                        <div class="attendance-option">
+
+                            <input
+                                id="attendanceHalf"
+                                name="attendance"
+                                type="radio"
+                                value="Half Day"
+                                onchange="onAttendanceChange()">
+
+                            <label
+                                for="attendanceHalf"
+                                class="attendance-label">
+
+                                Half Day
+
+                            </label>
+
+                        </div>
+
+
+                        <div class="attendance-option">
+
+                            <input
+                                id="attendanceAbsent"
+                                name="attendance"
+                                type="radio"
+                                value="Absent"
+                                onchange="onAttendanceChange()">
+
+                            <label
+                                for="attendanceAbsent"
+                                class="attendance-label">
+
+                                Absent
+
+                            </label>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- HOURLY -->
+
+                <div class="card">
+
+                    <div class="hourly-header">
+
+                        <div class="card-title"
+                             style="margin:0;">
+
+                            Hourly Production
+
+                        </div>
+
+                        <div id="hourlyTotal"
+                             class="hourly-total">
+
+                            Total: 0
+
+                        </div>
+
+                    </div>
+
+
+                    <div id="hourList"
+                         class="hour-list">
+
+                    </div>
+
+                </div>
+
+
+                <!-- AUTOSAVE -->
+
+                <div class="card">
+
+                    <div class="bottom-actions">
+
+                        <div class="save-status">
+
+                            <div id="saveDot"
+                                 class="save-dot">
+
+                            </div>
+
+                            <span id="saveStatusText">
+                                All changes saved
+                            </span>
+
+                        </div>
+
+
+                        <button
+                            class="logout-button"
+                            onclick="logoutEmployee()">
+
+                            Logout
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="footer">
+
+                    Hourly Production Tracker
+                    &nbsp;•&nbsp;
+                    Automatic Save Enabled
+
+                </div>
+
+            </div>
+
         </div>
 
     </div>
-
-
-    <!-- HOURLY ENTRY -->
-    <div class="card">
-
-        <h2>
-            Hourly Count
-        </h2>
-
-        <p class="muted">
-            Enter how many you completed in each hour.
-            Saving happens automatically.
-        </p>
-
-        <div id="hourRows"></div>
-
-        <div class="total-line">
-
-            <span>
-                Total entered
-            </span>
-
-            <span
-                class="total-value"
-                id="totalEntered">
-
-                0
-
-            </span>
-
-        </div>
-
-    </div>
-
-
-    <!-- AUTOSAVE -->
-    <div class="card">
-
-        <div
-            class="autosave"
-            id="saveState"
-            data-state="idle">
-
-            <span class="autosave-dot"></span>
-
-            <span id="saveText">
-                Autosave on
-            </span>
-
-        </div>
-
-
-        <div class="logout-row">
-
-            <button
-                class="btn btn-quiet"
-                onclick="logoutEmployee()">
-
-                Logout
-
-            </button>
-
-        </div>
-
-    </div>
-
 
 </div>
 
 
-<div
-    class="footer"
-    id="footerNote">
+<!-- =========================================================
+     CELEBRATION
+========================================================= -->
 
-    Entries feed the Hourly Production Tracker
-    and the RCM Management Dashboard automatically.
-
-</div>
-
-
-</div>
+<div id="celebrationLayer"></div>
 
 
 <script>
 
 
 /* =========================================================
-   SUPABASE
+   SUPABASE CONFIGURATION
 ========================================================= */
 
 const SUPABASE_URL =
@@ -1034,21 +2013,24 @@ const SUPABASE_URL =
 
 
 const SUPABASE_KEY =
-    "sb_publishable_fiXzds8sZeg1f5cCnzhlQ_Gm_x71af";
+    "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
 
 
 const supabaseClient =
-    supabase.createClient(
+    window.supabase.createClient(
         SUPABASE_URL,
         SUPABASE_KEY
     );
 
 
 /* =========================================================
-   SHIFT
+   SETTINGS
 ========================================================= */
 
-const hourFields = [
+const MANAGER_NAME = "Andy";
+
+
+const HOUR_FIELDS = [
 
     "hour_6_7",
     "hour_7_8",
@@ -1063,7 +2045,7 @@ const hourFields = [
 ];
 
 
-const hourLabels = [
+const HOUR_LABELS = [
 
     "6–7 PM",
     "7–8 PM",
@@ -1078,39 +2060,36 @@ const hourLabels = [
 ];
 
 
-/* =========================================================
-   STATE
-========================================================= */
+const AUTO_SAVE_DELAY = 700;
 
-let me = null;
-
-let trackerDate = null;
-
-let myRecord = null;
 
 let currentAuthUser = null;
 
-let projects = [];
+let me = null;
 
-let subProjects = [];
+let currentProject = null;
 
-let dateLockOverride = null;
+let currentSubProject = null;
 
-let dateLockTableAvailable = true;
+let currentRecord = null;
 
-let lockTicker = null;
+let currentShiftDate = null;
+
+let currentDateLocked = false;
 
 let saveTimer = null;
 
-let saveInFlight = false;
-
 let savePending = false;
 
-const SAVE_DEBOUNCE_MS = 900;
+let saveInFlight = false;
+
+let lastPerformanceState = "";
+
+let celebrationTimer = null;
 
 
 /* =========================================================
-   HELPERS
+   DOM HELPER
 ========================================================= */
 
 function $(id) {
@@ -1120,334 +2099,621 @@ function $(id) {
 }
 
 
+/* =========================================================
+   VISIBILITY HELPERS
+========================================================= */
+
 function show(id) {
 
-    $(id)?.classList.remove("hidden");
+    $(id).classList.remove("hidden");
 
 }
 
 
 function hide(id) {
 
-    $(id)?.classList.add("hidden");
+    $(id).classList.add("hidden");
 
 }
 
 
-function formatLocalDate(date) {
+/* =========================================================
+   ERROR DISPLAY
+========================================================= */
 
-    const yyyy =
-        date.getFullYear();
+function showFatal(title, message) {
 
-    const mm =
-        String(
-            date.getMonth() + 1
-        ).padStart(2, "0");
+    hide("loadingCard");
 
-    const dd =
-        String(
-            date.getDate()
-        ).padStart(2, "0");
+    hide("entryScreen");
 
-    return `${yyyy}-${mm}-${dd}`;
+    show("fatalCard");
+
+    $("fatalTitle").textContent =
+        title || "Unable to load";
+
+    $("fatalMessage").textContent =
+        message || "An unexpected error occurred.";
 
 }
 
 
-function prettyDate(value) {
+function showLoginError(message) {
 
-    if (!value) {
-        return "";
-    }
+    const box = $("loginError");
 
-    const parts =
-        String(value).split("-");
+    box.textContent = message;
 
-    const date =
-        new Date(
-            Number(parts[0]),
-            Number(parts[1]) - 1,
-            Number(parts[2])
+    show("loginError");
+
+}
+
+
+function clearLoginError() {
+
+    hide("loginError");
+
+    $("loginError").textContent = "";
+
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+async function loginEmployee() {
+
+    clearLoginError();
+
+    const email =
+        $("loginEmail").value.trim();
+
+    const password =
+        $("loginPassword").value;
+
+    if (!email || !password) {
+
+        showLoginError(
+            "Please enter both email and password."
         );
 
-    return date.toLocaleDateString(
-        undefined,
-        {
-            weekday: "short",
-            day: "numeric",
-            month: "short",
-            year: "numeric"
+        return;
+
+    }
+
+
+    const button =
+        $("loginButton");
+
+    button.disabled = true;
+
+    button.textContent =
+        "Signing in...";
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth.signInWithPassword({
+
+                email,
+                password
+
+            });
+
+
+        if (error) {
+
+            throw error;
+
         }
-    );
+
+
+        if (!data || !data.user) {
+
+            throw new Error(
+                "Login succeeded, but no authenticated user was returned."
+            );
+
+        }
+
+
+        currentAuthUser =
+            data.user;
+
+
+        hide("loginScreen");
+
+        show("appScreen");
+
+        show("loadingCard");
+
+        hide("fatalCard");
+
+        hide("entryScreen");
+
+
+        await openAuthenticatedPortal();
+
+
+    }
+    catch (error) {
+
+        console.error(
+            "LOGIN ERROR:",
+            error
+        );
+
+
+        showLoginError(
+            friendlySupabaseError(error)
+        );
+
+    }
+    finally {
+
+        button.disabled = false;
+
+        button.textContent =
+            "Sign In";
+
+    }
 
 }
 
 
 /* =========================================================
-   BANNERS
+   FRIENDLY SUPABASE ERRORS
 ========================================================= */
 
-function setBanner(kind, text) {
+function friendlySupabaseError(error) {
 
-    const el =
-        $("entryBanner");
+    const message =
+        String(error?.message || error || "");
 
-    if (!el) {
-        return;
-    }
 
-    if (!text) {
+    if (
+        message.toLowerCase()
+            .includes("invalid login credentials")
+    ) {
 
-        el.className =
-            "banner info hidden";
-
-        el.textContent = "";
-
-        return;
+        return "Invalid email or password.";
 
     }
 
-    el.className =
-        `banner ${kind}`;
 
-    el.textContent =
-        text;
+    if (
+        message.toLowerCase()
+            .includes("invalid api key")
+    ) {
 
-}
-
-
-function setLoginBanner(text) {
-
-    const el =
-        $("loginBanner");
-
-    if (!el) {
-        return;
-    }
-
-    if (!text) {
-
-        el.className =
-            "banner error hidden";
-
-        el.textContent = "";
-
-        return;
+        return "Invalid Supabase API key. Please verify the Publishable key in the HTML.";
 
     }
 
-    el.className =
-        "banner error";
 
-    el.textContent =
-        text;
+    if (
+        message.toLowerCase()
+            .includes("email not confirmed")
+    ) {
+
+        return "Your email address has not been confirmed in Supabase.";
+
+    }
+
+
+    if (
+        message.toLowerCase()
+            .includes("network")
+    ) {
+
+        return "Network error. Please check your internet connection.";
+
+    }
+
+
+    return message || "An unexpected error occurred.";
 
 }
 
 
 /* =========================================================
-   SHIFT DATE
+   LOGOUT
 ========================================================= */
 
-function getCurrentShiftDateString() {
+async function logoutEmployee() {
 
-    const now =
-        new Date();
+    clearTimeout(saveTimer);
 
-    const shiftDate =
-        new Date(now);
+    saveTimer = null;
 
-    /*
-       12 AM – 2:59 AM belongs to the previous
-       day's 6 PM – 3 AM shift.
-    */
+    savePending = false;
 
-    if (
-        now.getHours() < 3
-    ) {
+    saveInFlight = false;
 
-        shiftDate.setDate(
-            shiftDate.getDate() - 1
+    currentAuthUser = null;
+
+    me = null;
+
+    currentProject = null;
+
+    currentSubProject = null;
+
+    currentRecord = null;
+
+    currentShiftDate = null;
+
+    currentDateLocked = false;
+
+    lastPerformanceState = "";
+
+
+    try {
+
+        await supabaseClient.auth.signOut();
+
+    }
+    catch (error) {
+
+        console.error(
+            "Logout error:",
+            error
         );
 
     }
 
-    return formatLocalDate(
-        shiftDate
-    );
+
+    hide("appScreen");
+
+    hide("fatalCard");
+
+    hide("loadingCard");
+
+    hide("entryScreen");
+
+    show("loginScreen");
+
+    $("loginPassword").value = "";
+
+    clearLoginError();
 
 }
 
 
 /* =========================================================
-   HOUR LOCK
+   EXISTING SESSION
 ========================================================= */
 
-function getShiftHourIndexForDate(date) {
+async function checkExistingSession() {
 
-    if (!date) {
-        return -1;
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth.getSession();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        if (
+            data &&
+            data.session &&
+            data.session.user
+        ) {
+
+            currentAuthUser =
+                data.session.user;
+
+            hide("loginScreen");
+
+            show("appScreen");
+
+            show("loadingCard");
+
+            await openAuthenticatedPortal();
+
+        }
+        else {
+
+            show("loginScreen");
+
+        }
+
     }
+    catch (error) {
 
-    const now =
-        new Date();
-
-    const activeShiftDate =
-        getCurrentShiftDateString();
-
-
-    if (
-        date < activeShiftDate
-    ) {
-
-        return hourFields.length;
-
-    }
-
-
-    if (
-        date > activeShiftDate
-    ) {
-
-        return -1;
-
-    }
-
-
-    const hour =
-        now.getHours();
-
-
-    if (
-        hour >= 18
-    ) {
-
-        return Math.min(
-            hour - 18,
-            hourFields.length
+        console.error(
+            "SESSION ERROR:",
+            error
         );
 
-    }
-
-
-    if (
-        hour < 3
-    ) {
-
-        return Math.min(
-            hour + 6,
-            hourFields.length
+        showLoginError(
+            friendlySupabaseError(error)
         );
 
-    }
-
-
-    return -1;
-
-}
-
-
-function isHourLocked(
-    index,
-    date
-) {
-
-    if (
-        dateLockOverride !== null
-    ) {
-
-        return (
-            dateLockOverride.locked === true
-        );
+        show("loginScreen");
 
     }
-
-    const currentIndex =
-        getShiftHourIndexForDate(
-            date
-        );
-
-    return (
-        currentIndex >= 0 &&
-        index < currentIndex
-    );
-
-}
-
-
-function isDateFullyLocked(date) {
-
-    if (
-        dateLockOverride !== null
-    ) {
-
-        return (
-            dateLockOverride.locked === true
-        );
-
-    }
-
-    return (
-        getShiftHourIndexForDate(date) >=
-        hourFields.length
-    );
 
 }
 
 
 /* =========================================================
-   DATE LOCK
+   OPEN PORTAL
 ========================================================= */
 
-async function loadDateLockState(date) {
+async function openAuthenticatedPortal() {
 
-    dateLockOverride = null;
+    hide("fatalCard");
 
-    if (
-        !date ||
-        !dateLockTableAvailable
-    ) {
+    hide("entryScreen");
 
-        return;
+    show("loadingCard");
+
+
+    try {
+
+        if (!currentAuthUser) {
+
+            throw new Error(
+                "No authenticated user found."
+            );
+
+        }
+
+
+        await loadEmployee();
+
+
+        await loadReferenceData();
+
+
+        currentShiftDate =
+            getShiftDate();
+
+
+        $("headerDate").textContent =
+            formatShiftDate(currentShiftDate);
+
+
+        await loadDateLock();
+
+
+        await loadDailyRecord();
+
+
+        renderIdentity();
+
+
+        renderAttendance();
+
+
+        renderHourRows();
+
+
+        applyLocks();
+
+
+        recalcTotal();
+
+
+        updatePerformanceCard();
+
+
+        hide("loadingCard");
+
+        show("entryScreen");
+
+
+        startLockTicker();
+
+
+    }
+    catch (error) {
+
+        console.error(
+            "PORTAL LOAD ERROR:",
+            error
+        );
+
+
+        showFatal(
+            "Cannot load your production page",
+            friendlySupabaseError(error)
+        );
 
     }
 
+}
+
+
+/* =========================================================
+   LOAD EMPLOYEE
+   IMPORTANT:
+   No employees.active filter.
+   Employee is identified by auth_user_id.
+========================================================= */
+
+async function loadEmployee() {
 
     const {
         data,
         error
     } =
         await supabaseClient
-            .from(
-                "tracker_date_locks"
-            )
-            .select(
-                "tracker_date,is_locked"
-            )
+            .from("employees")
+            .select("*")
             .eq(
-                "tracker_date",
-                date
+                "auth_user_id",
+                currentAuthUser.id
             )
             .maybeSingle();
 
 
     if (error) {
 
-        console.warn(
-            "Date lock unavailable:",
-            error.message
+        throw new Error(
+            "Employee profile could not be loaded: "
+            + error.message
         );
 
+    }
 
-        if (
-            error.code === "42P01" ||
-            /does not exist/i.test(
-                error.message || ""
-            )
-        ) {
 
-            dateLockTableAvailable =
-                false;
+    if (!data) {
+
+        throw new Error(
+            "No employee profile is linked to this login."
+        );
+
+    }
+
+
+    if (data.active === false) {
+
+        throw new Error(
+            "Your employee profile is currently inactive."
+        );
+
+    }
+
+
+    me = data;
+
+}
+
+
+/* =========================================================
+   LOAD PROJECT / SUBPROJECT
+   IMPORTANT:
+   We DO NOT use projects.active.
+========================================================= */
+
+async function loadReferenceData() {
+
+    currentProject = null;
+
+    currentSubProject = null;
+
+
+    const projectId =
+        me?.project_id;
+
+
+    if (!projectId) {
+
+        console.warn(
+            "Employee has no project_id."
+        );
+
+        return;
+
+    }
+
+
+    /* -----------------------------------------------------
+       PROJECT
+    ----------------------------------------------------- */
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("projects")
+                .select("*")
+                .eq(
+                    "id",
+                    projectId
+                )
+                .maybeSingle();
+
+
+        if (error) {
+
+            console.warn(
+                "Project could not be loaded:",
+                error.message
+            );
+
+        }
+        else {
+
+            currentProject =
+                data || null;
+
+        }
+
+    }
+    catch (error) {
+
+        console.warn(
+            "Project query failed:",
+            error
+        );
+
+    }
+
+
+    /* -----------------------------------------------------
+       SUBPROJECT
+       If employee has direct sub_project_id,
+       load only that record.
+    ----------------------------------------------------- */
+
+    if (me.sub_project_id) {
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .from("sub_projects")
+                    .select("*")
+                    .eq(
+                        "id",
+                        me.sub_project_id
+                    )
+                    .maybeSingle();
+
+
+            if (error) {
+
+                console.warn(
+                    "Sub-project could not be loaded:",
+                    error.message
+                );
+
+            }
+            else {
+
+                currentSubProject =
+                    data || null;
+
+            }
+
+        }
+        catch (error) {
+
+            console.warn(
+                "Sub-project query failed:",
+                error
+            );
 
         }
 
@@ -1456,93 +2722,85 @@ async function loadDateLockState(date) {
     }
 
 
-    dateLockOverride =
-        data
-            ? {
-                locked:
-                    data.is_locked === true
-              }
-            : null;
+    /* -----------------------------------------------------
+       FALLBACK:
+       If employee has no sub_project_id, look for a
+       single sub-project under the project.
+
+       No active column is assumed.
+    ----------------------------------------------------- */
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("sub_projects")
+                .select("*")
+                .eq(
+                    "project_id",
+                    projectId
+                );
+
+
+        if (error) {
+
+            console.warn(
+                "Sub-project list could not be loaded:",
+                error.message
+            );
+
+            return;
+
+        }
+
+
+        if (
+            Array.isArray(data) &&
+            data.length === 1
+        ) {
+
+            currentSubProject =
+                data[0];
+
+        }
+
+    }
+    catch (error) {
+
+        console.warn(
+            "Sub-project fallback failed:",
+            error
+        );
+
+    }
 
 }
 
 
 /* =========================================================
-   PROJECT / SUB-PROJECT
+   GET EMPLOYEE SUBPROJECT
 ========================================================= */
 
-function getProjectById(id) {
-
-    return (
-        projects.find(
-            p =>
-                Number(p.id) ===
-                Number(id)
-        ) || null
-    );
-
-}
-
-
-function getSubProjectById(id) {
-
-    return (
-        subProjects.find(
-            sp =>
-                Number(sp.id) ===
-                Number(id)
-        ) || null
-    );
-
-}
-
-
-function getEmployeeSubProject(employee) {
-
-    if (!employee) {
-        return null;
-    }
-
-
-    /*
-       Direct employee sub-project mapping.
-    */
+function getEmployeeSubProject() {
 
     if (
-        employee.sub_project_id !== null &&
-        employee.sub_project_id !== undefined &&
-        employee.sub_project_id !== ""
+        currentSubProject &&
+        me.sub_project_id
     ) {
 
-        return getSubProjectById(
-            employee.sub_project_id
-        );
+        return currentSubProject;
 
     }
 
 
-    /*
-       Fallback:
-       if there is exactly one sub-project under
-       the employee's project, use it.
-
-       NOTE:
-       No "active" column is assumed.
-    */
-
-    const matches =
-        subProjects.filter(
-            sp =>
-                Number(sp.project_id) ===
-                Number(employee.project_id)
-        );
-
-
     if (
-        matches.length === 1
+        currentSubProject
     ) {
 
-        return matches[0];
+        return currentSubProject;
 
     }
 
@@ -1553,17 +2811,13 @@ function getEmployeeSubProject(employee) {
 
 
 /* =========================================================
-   TARGET
+   BASE TARGET
 ========================================================= */
 
-function getEmployeeBaseTarget(
-    employee
-) {
+function getEmployeeBaseTarget() {
 
     const subProject =
-        getEmployeeSubProject(
-            employee
-        );
+        getEmployeeSubProject();
 
 
     if (subProject) {
@@ -1577,85 +2831,68 @@ function getEmployeeBaseTarget(
         }
 
 
-        if (
-            subProject.daily_target === null ||
-            subProject.daily_target === undefined ||
-            subProject.daily_target === ""
-        ) {
-
-            return null;
-
-        }
-
-
-        const value =
+        const subTarget =
             Number(
                 subProject.daily_target
             );
 
 
-        return Number.isFinite(value)
-            ? value
-            : null;
+        if (
+            Number.isFinite(subTarget) &&
+            subTarget > 0
+        ) {
+
+            return subTarget;
+
+        }
 
     }
 
 
-    const project =
-        getProjectById(
-            employee.project_id
-        );
+    if (currentProject) {
+
+        const projectTarget =
+            Number(
+                currentProject.daily_target
+            );
 
 
-    if (!project) {
+        if (
+            Number.isFinite(projectTarget) &&
+            projectTarget > 0
+        ) {
 
-        return null;
+            return projectTarget;
 
-    }
-
-
-    if (
-        project.daily_target === null ||
-        project.daily_target === undefined ||
-        project.daily_target === ""
-    ) {
-
-        return null;
+        }
 
     }
 
 
-    const value =
-        Number(
-            project.daily_target
-        );
-
-
-    return Number.isFinite(value)
-        ? value
-        : null;
+    return null;
 
 }
 
 
-function getDailyTarget(
-    employee,
-    attendance
-) {
+/* =========================================================
+   DAILY TARGET
+========================================================= */
 
-    const target =
-        getEmployeeBaseTarget(
-            employee
-        );
+function getDailyTarget() {
+
+    const baseTarget =
+        getEmployeeBaseTarget();
 
 
-    if (
-        target === null
-    ) {
+    if (baseTarget === null) {
 
-        return 0;
+        return null;
 
     }
+
+
+    const attendance =
+        getAttendance();
 
 
     if (
@@ -1672,193 +2909,222 @@ function getDailyTarget(
     ) {
 
         return Math.ceil(
-            target / 2
+            baseTarget / 2
         );
 
     }
 
 
-    return target;
-
-}
-
-
-function computeAchievementPercent(
-    achieved,
-    target
-) {
-
-    if (
-        Number(target) <= 0
-    ) {
-
-        return 0;
-
-    }
-
-
-    return (
-        Number(achieved) /
-        Number(target)
-    ) * 100;
+    return baseTarget;
 
 }
 
 
 /* =========================================================
-   AUTH
+   ATTENDANCE
 ========================================================= */
 
-async function checkExistingSession() {
+function getAttendance() {
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient.auth
-            .getSession();
-
-
-    if (error) {
-
-        throw new Error(
-            "Unable to check your login session. " +
-            error.message
+    const selected =
+        document.querySelector(
+            'input[name="attendance"]:checked'
         );
 
+
+    return selected
+        ? selected.value
+        : "Present";
+
+}
+
+
+function setAttendance(value) {
+
+    const radio =
+        document.querySelector(
+            'input[name="attendance"][value="' +
+            value +
+            '"]'
+        );
+
+
+    if (radio) {
+
+        radio.checked = true;
+
     }
-
-
-    if (
-        data?.session?.user
-    ) {
-
-        currentAuthUser =
-            data.session.user;
-
-        return true;
-
-    }
-
-
-    return false;
 
 }
 
 
 /* =========================================================
-   CURRENT EMPLOYEE
+   SHIFT DATE
+   6 PM – 3 AM
+   Midnight–3 AM belongs to previous date.
 ========================================================= */
 
-async function loadCurrentEmployee() {
+function getShiftDate(date = new Date()) {
 
-    if (!currentAuthUser) {
+    const year =
+        date.getFullYear();
 
-        throw new Error(
-            "Your login session could not be identified."
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
+
+    const hour =
+        date.getHours();
+
+
+    let shiftDate =
+        `${year}-${month}-${day}`;
+
+
+    if (hour < 15) {
+
+        const previous =
+            new Date(date);
+
+        previous.setDate(
+            previous.getDate() - 1
         );
+
+
+        const y =
+            previous.getFullYear();
+
+        const m =
+            String(
+                previous.getMonth() + 1
+            ).padStart(2, "0");
+
+        const d =
+            String(
+                previous.getDate()
+            ).padStart(2, "0");
+
+
+        shiftDate =
+            `${y}-${m}-${d}`;
 
     }
 
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("employees")
-            .select("*")
-            .eq(
-                "auth_user_id",
-                currentAuthUser.id
-            )
-            .eq(
-                "active",
-                true
-            )
-            .maybeSingle();
-
-
-    if (error) {
-
-        console.error(
-            "Employee mapping error:",
-            error
-        );
-
-        throw new Error(
-            "Your employee account could not be verified. " +
-            error.message
-        );
-
-    }
-
-
-    if (!data) {
-
-        throw new Error(
-            "Your login is successful, but your account " +
-            "is not linked to an active employee record. " +
-            "Please contact your Team Lead."
-        );
-
-    }
-
-
-    return data;
+    return shiftDate;
 
 }
 
 
 /* =========================================================
-   LOGIN
+   FORMAT DATE
 ========================================================= */
 
-async function loginEmployee() {
+function formatShiftDate(dateString) {
 
-    const email =
-        $("loginEmail")
-            .value
-            .trim();
+    if (!dateString) {
 
-    const password =
-        $("loginPassword")
-            .value;
+        return "-";
+
+    }
 
 
-    setLoginBanner("");
+    const parts =
+        dateString.split("-");
 
 
-    if (!email) {
+    if (parts.length !== 3) {
 
-        setLoginBanner(
-            "Please enter your email address."
+        return dateString;
+
+    }
+
+
+    const date =
+        new Date(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            Number(parts[2])
         );
+
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CURRENT HOUR INDEX
+========================================================= */
+
+function getCurrentHourIndex() {
+
+    const now =
+        new Date();
+
+    const hour =
+        now.getHours();
+
+    const minute =
+        now.getMinutes();
+
+
+    /*
+       6 PM = index 0
+       7 PM = index 1
+       ...
+       2 AM = index 8
+    */
+
+
+    if (hour >= 18) {
+
+        return hour - 18;
+
+    }
+
+
+    if (hour < 3) {
+
+        return hour + 6;
+
+    }
+
+
+    return -1;
+
+}
+
+
+/* =========================================================
+   LOAD DATE LOCK
+========================================================= */
+
+async function loadDateLock() {
+
+    currentDateLocked = false;
+
+    hide("dateLockNotice");
+
+
+    if (!currentShiftDate) {
 
         return;
 
     }
-
-
-    if (!password) {
-
-        setLoginBanner(
-            "Please enter your password."
-        );
-
-        return;
-
-    }
-
-
-    const button =
-        $("loginBtn");
-
-
-    button.disabled = true;
-
-    button.textContent =
-        "Signing in…";
 
 
     try {
@@ -1867,329 +3133,49 @@ async function loginEmployee() {
             data,
             error
         } =
-            await supabaseClient.auth
-                .signInWithPassword({
-                    email,
-                    password
-                });
+            await supabaseClient
+                .from("tracker_date_locks")
+                .select("*")
+                .eq(
+                    "tracker_date",
+                    currentShiftDate
+                )
+                .maybeSingle();
 
 
         if (error) {
 
-            throw new Error(
+            console.warn(
+                "Date lock check failed:",
                 error.message
             );
 
+            return;
+
         }
 
 
-        currentAuthUser =
-            data.user;
-
-
-        await openAuthenticatedPortal();
-
-    }
-    catch (error) {
-
-        console.error(
-            "Login:",
-            error
-        );
-
-
-        setLoginBanner(
-            error.message ||
-            "Login failed."
-        );
-
-
-        button.disabled =
-            false;
-
-        button.textContent =
-            "Login";
-
-    }
-
-}
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-async function logoutEmployee() {
-
-    if (saveTimer) {
-
-        clearTimeout(
-            saveTimer
-        );
-
-        saveTimer = null;
-
-    }
-
-
-    try {
-
-        await supabaseClient.auth
-            .signOut();
-
-    }
-    catch (error) {
-
-        console.error(
-            "Logout:",
-            error
-        );
-
-    }
-
-
-    currentAuthUser = null;
-
-    me = null;
-
-    myRecord = null;
-
-
-    if (lockTicker) {
-
-        clearInterval(
-            lockTicker
-        );
-
-        lockTicker = null;
-
-    }
-
-
-    hide("entryScreen");
-    hide("fatalCard");
-    hide("loadingCard");
-
-    show("loginCard");
-
-
-    $("headerSubtitle").textContent =
-        "Secure employee production entry";
-
-}
-
-
-/* =========================================================
-   AUTHENTICATED PORTAL
-========================================================= */
-
-async function openAuthenticatedPortal() {
-
-    trackerDate =
-        getCurrentShiftDateString();
-
-
-    try {
-
-        me =
-            await loadCurrentEmployee();
-
-
-        await loadReferenceData();
-
-
-        await loadDateLockState(
-            trackerDate
-        );
-
-
-        hide("loadingCard");
-        hide("loginCard");
-        hide("fatalCard");
-
-
-        await openEntryFor(
-            me
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "Portal loading:",
-            error
-        );
-
-
-        hide("loadingCard");
-        hide("loginCard");
-        hide("entryScreen");
-
-
-        show("fatalCard");
-
-
-        $("fatalText").textContent =
-            error.message ||
-            "Your employee portal could not be loaded.";
-
-
-        let logoutButton =
-            document.getElementById(
-                "fatalLogoutBtn"
-            );
-
-
-        if (!logoutButton) {
-
-            logoutButton =
-                document.createElement(
-                    "button"
-                );
-
-            logoutButton.id =
-                "fatalLogoutBtn";
-
-            logoutButton.className =
-                "btn btn-quiet";
-
-            logoutButton.style.marginTop =
-                "10px";
-
-            logoutButton.textContent =
-                "Logout";
-
-            logoutButton.onclick =
-                logoutEmployee;
-
-            $("fatalCard")
-                .appendChild(
-                    logoutButton
-                );
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   LOAD REFERENCE DATA
-========================================================= */
-
-async function loadReferenceData() {
-
-    const projectId =
-        me?.project_id;
-
-
-    if (
-        projectId === null ||
-        projectId === undefined ||
-        projectId === ""
-    ) {
-
-        projects = [];
-
-        subProjects = [];
-
-        return;
-
-    }
-
-
-    /*
-       IMPORTANT:
-
-       We intentionally DO NOT use:
-
-           .eq("active", true)
-
-       on projects or sub_projects because your current
-       schema does not contain projects.active.
-
-       Only rows belonging to this employee's project
-       are requested.
-    */
-
-    const projectPromise =
-        supabaseClient
-            .from("projects")
-            .select("*")
-            .eq(
-                "id",
-                projectId
+        if (
+            data &&
+            (
+                data.is_locked === true ||
+                data.locked === true
             )
-            .maybeSingle();
+        ) {
 
+            currentDateLocked = true;
 
-    const subProjectPromise =
-        supabaseClient
-            .from("sub_projects")
-            .select("*")
-            .eq(
-                "project_id",
-                projectId
-            );
+            show("dateLockNotice");
 
-
-    const [
-        projectRes,
-        subProjectRes
-    ] =
-        await Promise.all([
-            projectPromise,
-            subProjectPromise
-        ]);
-
-
-    if (
-        projectRes.error
-    ) {
-
-        console.error(
-            "Project load:",
-            projectRes.error
-        );
-
-
-        throw new Error(
-            "Projects could not be loaded. " +
-            projectRes.error.message
-        );
+        }
 
     }
-
-
-    projects =
-        projectRes.data
-            ? [projectRes.data]
-            : [];
-
-
-    /*
-       Sub-project information is optional.
-       If the table/query is unavailable, the project target
-       can still be used.
-    */
-
-    if (
-        subProjectRes.error
-    ) {
+    catch (error) {
 
         console.warn(
-            "Sub-projects could not be loaded:",
-            subProjectRes.error.message
+            "Date lock query failed:",
+            error
         );
-
-        subProjects = [];
-
-    }
-    else {
-
-        subProjects =
-            subProjectRes.data || [];
 
     }
 
@@ -2197,232 +3183,361 @@ async function loadReferenceData() {
 
 
 /* =========================================================
-   OPEN ENTRY
+   LOAD DAILY RECORD
 ========================================================= */
 
-async function openEntryFor(
-    employee
-) {
+async function loadDailyRecord() {
 
-    me =
-        employee;
+    currentRecord = null;
 
-
-    hide("loginCard");
-    hide("fatalCard");
-
-    show("entryScreen");
-
-
-    const subProject =
-        getEmployeeSubProject(
-            me
-        );
-
-
-    const project =
-        getProjectById(
-            me.project_id
-        );
-
-
-    $("whoName").textContent =
-        me.employee_name ||
-        "Employee";
-
-
-    const bits = [];
-
-
-    if (
-        me.employee_code
-    ) {
-
-        bits.push(
-            me.employee_code
-        );
-
-    }
-
-
-    if (project) {
-
-        bits.push(
-            project.project_name
-        );
-
-    }
-
-
-    if (subProject) {
-
-        bits.push(
-            subProject.sub_project_name
-        );
-
-    }
-
-
-    $("whoMeta").textContent =
-        bits.join("  •  ");
-
-
-    $("whoDate").textContent =
-        `Shift date: ${prettyDate(
-            trackerDate
-        )}`;
-
-
-    $("headerSubtitle").textContent =
-        me.employee_name ||
-        "My Hourly Production";
-
-
-    await loadMyRecord();
-
-
-    renderHourRows();
-
-    applyLocks();
-
-    recalcTotal();
-
-    updatePerformance();
-
-
-    startLockTicker();
-
-}
-
-
-/* =========================================================
-   LOAD MY RECORD
-========================================================= */
-
-async function loadMyRecord() {
 
     const {
         data,
         error
     } =
         await supabaseClient
-            .from(
-                "daily_productivity"
-            )
+            .from("daily_productivity")
             .select("*")
-            .eq(
-                "tracker_date",
-                trackerDate
-            )
             .eq(
                 "employee_id",
                 me.id
+            )
+            .eq(
+                "tracker_date",
+                currentShiftDate
             )
             .maybeSingle();
 
 
     if (error) {
 
-        console.error(
-            "Load record:",
-            error
+        throw new Error(
+            "Production record could not be loaded: "
+            + error.message
         );
-
-
-        setBanner(
-            "error",
-            "Your saved counts could not be loaded. " +
-            "Please refresh before entering anything."
-        );
-
-
-        myRecord = null;
-
-        return;
 
     }
 
 
-    myRecord =
+    currentRecord =
         data || null;
 
 
-    $("attendance").value =
-        myRecord?.attendance ||
-        "Present";
+    if (currentRecord) {
+
+        setAttendance(
+            currentRecord.attendance || "Present"
+        );
+
+    }
+    else {
+
+        setAttendance("Present");
+
+    }
 
 }
 
 
 /* =========================================================
-   HOURLY ROWS
+   RENDER IDENTITY
+========================================================= */
+
+function renderIdentity() {
+
+    const name =
+        me.employee_name ||
+        me.name ||
+        "Employee";
+
+
+    $("identityEmployee").textContent =
+        name;
+
+
+    $("identityProject").textContent =
+        currentProject?.project_name ||
+        "Project not assigned";
+
+
+    $("identitySubProject").textContent =
+        currentSubProject?.sub_project_name ||
+        "—";
+
+
+    $("employeeName").textContent =
+        name;
+
+
+    $("employeeEmail").textContent =
+        currentAuthUser?.email ||
+        "—";
+
+
+    $("employeeAvatar").textContent =
+        getInitials(name);
+
+}
+
+
+/* =========================================================
+   INITIALS
+========================================================= */
+
+function getInitials(name) {
+
+    const words =
+        String(name || "")
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
+
+
+    if (!words.length) {
+
+        return "--";
+
+    }
+
+
+    if (words.length === 1) {
+
+        return words[0]
+            .substring(0, 2)
+            .toUpperCase();
+
+    }
+
+
+    return (
+        words[0][0] +
+        words[words.length - 1][0]
+    ).toUpperCase();
+
+}
+
+
+/* =========================================================
+   RENDER ATTENDANCE
+========================================================= */
+
+function renderAttendance() {
+
+    const attendance =
+        currentRecord?.attendance ||
+        "Present";
+
+
+    setAttendance(attendance);
+
+}
+
+
+/* =========================================================
+   GET VALUE FROM RECORD
+========================================================= */
+
+function getHourValue(field) {
+
+    if (!currentRecord) {
+
+        return 0;
+
+    }
+
+
+    const value =
+        Number(
+            currentRecord[field]
+        );
+
+
+    if (
+        !Number.isFinite(value) ||
+        value < 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    return value;
+
+}
+
+
+/* =========================================================
+   RENDER HOUR ROWS
 ========================================================= */
 
 function renderHourRows() {
 
-    const rows = [];
+    const container =
+        $("hourList");
 
 
-    hourFields.forEach(
+    container.innerHTML = "";
+
+
+    const currentIndex =
+        getCurrentHourIndex();
+
+
+    HOUR_FIELDS.forEach(
         (field, index) => {
 
-            const value =
-                myRecord &&
-                myRecord[field] !== null &&
-                myRecord[field] !== undefined
-                    ? Number(
-                        myRecord[field]
-                      )
-                    : 0;
+            const row =
+                document.createElement("div");
+
+            row.className =
+                "hour-row";
 
 
-            rows.push(`
+            const isCurrent =
+                index === currentIndex;
 
-                <div
-                    class="hour-row"
-                    data-index="${index}">
 
-                    <div class="hour-label">
+            const isPast =
+                currentIndex >= 0 &&
+                index < currentIndex;
 
-                        ${hourLabels[index]}
 
-                        <span
-                            class="hour-note">
+            if (isCurrent) {
 
-                            Hourly production
+                row.classList.add(
+                    "current"
+                );
 
-                        </span>
+            }
 
-                    </div>
 
-                    <span
-                        class="locked-tag hidden">
+            if (isPast) {
 
-                        LOCKED
+                row.classList.add(
+                    "locked"
+                );
 
-                    </span>
+            }
 
-                    <input
-                        class="hour-input"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        step="1"
-                        data-field="${field}"
-                        value="${value}"
-                        oninput="onHourInput(this)"
-                    >
 
-                </div>
+            const label =
+                document.createElement("div");
 
-            `);
+            label.className =
+                "hour-label";
+
+
+            const time =
+                document.createElement("div");
+
+            time.className =
+                "hour-time";
+
+            time.textContent =
+                HOUR_LABELS[index];
+
+
+            const status =
+                document.createElement("div");
+
+            status.className =
+                "hour-status";
+
+
+            if (currentDateLocked) {
+
+                status.textContent =
+                    "DATE LOCKED";
+
+            }
+            else if (isPast) {
+
+                status.textContent =
+                    "LOCKED";
+
+            }
+            else if (isCurrent) {
+
+                status.textContent =
+                    "CURRENT";
+
+            }
+            else {
+
+                status.textContent =
+                    "OPEN";
+
+            }
+
+
+            label.appendChild(time);
+
+            label.appendChild(status);
+
+
+            const input =
+                document.createElement("input");
+
+            input.type =
+                "number";
+
+            input.min =
+                "0";
+
+            input.step =
+                "1";
+
+            input.inputMode =
+                "numeric";
+
+            input.className =
+                "hour-input";
+
+            input.dataset.field =
+                field;
+
+            input.value =
+                getHourValue(field);
+
+
+            input.addEventListener(
+                "input",
+                onHourInput
+            );
+
+
+            input.addEventListener(
+                "blur",
+                () => {
+
+                    if (
+                        input.value === "" ||
+                        Number(input.value) < 0
+                    ) {
+
+                        input.value = "0";
+
+                        recalcTotal();
+
+                        updatePerformanceCard();
+
+                        queueSave();
+
+                    }
+
+                }
+            );
+
+
+            row.appendChild(label);
+
+            row.appendChild(input);
+
+            container.appendChild(row);
 
         }
     );
-
-
-    $("hourRows").innerHTML =
-        rows.join("");
 
 }
 
@@ -2433,144 +3548,54 @@ function renderHourRows() {
 
 function applyLocks() {
 
-    const fullyLocked =
-        isDateFullyLocked(
-            trackerDate
+    const inputs =
+        document.querySelectorAll(
+            ".hour-input"
         );
 
 
-    document
-        .querySelectorAll(
-            "#hourRows .hour-row"
-        )
-        .forEach(
-            row => {
-
-                const index =
-                    Number(
-                        row.dataset.index
-                    );
+    const currentIndex =
+        getCurrentHourIndex();
 
 
-                const input =
-                    row.querySelector(
-                        ".hour-input"
-                    );
+    inputs.forEach(
+        (input, index) => {
+
+            const isPast =
+                currentIndex >= 0 &&
+                index < currentIndex;
 
 
-                const tag =
-                    row.querySelector(
-                        ".locked-tag"
-                    );
+            const shouldLock =
+                currentDateLocked ||
+                isPast;
 
 
-                const locked =
-                    isHourLocked(
-                        index,
-                        trackerDate
-                    );
+            input.disabled =
+                shouldLock;
 
 
-                input.readOnly =
-                    locked;
+            const row =
+                input.closest(".hour-row");
 
 
-                input.classList.toggle(
-                    "locked-input",
-                    locked
-                );
+            if (!row) {
 
-
-                row.classList.toggle(
-                    "is-locked",
-                    locked
-                );
-
-
-                tag.classList.toggle(
-                    "hidden",
-                    !locked
-                );
-
-
-                tag.textContent =
-                    dateLockOverride?.locked
-                        ? "CLOSED"
-                        : "LOCKED";
+                return;
 
             }
-        );
 
 
-    $("attendance").disabled =
-        fullyLocked;
+            if (shouldLock) {
 
-
-    if (fullyLocked) {
-
-        setBanner(
-            "warn",
-            dateLockOverride?.locked
-
-                ? "This shift has been closed by management."
-
-                : "This shift has finished and is now read-only."
-        );
-
-    }
-    else {
-
-        setBanner(
-            null,
-            null
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   LOCK TICKER
-========================================================= */
-
-function startLockTicker() {
-
-    if (lockTicker) {
-        return;
-    }
-
-
-    lockTicker =
-        setInterval(
-            async () => {
-
-                const newDate =
-                    getCurrentShiftDateString();
-
-
-                if (
-                    newDate !==
-                    trackerDate
-                ) {
-
-                    location.reload();
-
-                    return;
-
-                }
-
-
-                await loadDateLockState(
-                    trackerDate
+                row.classList.add(
+                    "locked"
                 );
 
+            }
 
-                applyLocks();
-
-            },
-            30000
-        );
+        }
+    );
 
 }
 
@@ -2579,31 +3604,57 @@ function startLockTicker() {
    TOTAL
 ========================================================= */
 
-function recalcTotal() {
+function getEnteredTotal() {
 
     let total = 0;
 
 
-    document
-        .querySelectorAll(
-            "#hourRows .hour-input"
-        )
-        .forEach(
-            input => {
+    HOUR_FIELDS.forEach(
+        field => {
 
-                total += Math.max(
-                    Number(
-                        input.value || 0
-                    ),
-                    0
+            const input =
+                document.querySelector(
+                    `[data-field="${field}"]`
                 );
 
+
+            if (!input) {
+
+                return;
+
             }
-        );
 
 
-    $("totalEntered").textContent =
-        total.toLocaleString();
+            const value =
+                Number(input.value);
+
+
+            if (
+                Number.isFinite(value) &&
+                value > 0
+            ) {
+
+                total += value;
+
+            }
+
+        }
+    );
+
+
+    return total;
+
+}
+
+
+function recalcTotal() {
+
+    const total =
+        getEnteredTotal();
+
+
+    $("hourlyTotal").textContent =
+        "Total: " + total;
 
 
     return total;
@@ -2612,105 +3663,215 @@ function recalcTotal() {
 
 
 /* =========================================================
-   PERFORMANCE MESSAGE
+   HOUR INPUT
 ========================================================= */
 
-function updatePerformance() {
+function onHourInput(event) {
 
-    if (!me) {
-        return;
+    const input =
+        event.target;
+
+
+    let value =
+        Number(input.value);
+
+
+    if (
+        !Number.isFinite(value) ||
+        value < 0
+    ) {
+
+        value = 0;
+
     }
 
 
+    input.value =
+        Math.floor(value);
+
+
+    recalcTotal();
+
+    updatePerformanceCard();
+
+    queueSave();
+
+}
+
+
+/* =========================================================
+   ATTENDANCE CHANGE
+========================================================= */
+
+function onAttendanceChange() {
+
     const attendance =
-        $("attendance").value;
+        getAttendance();
 
 
-    const target =
-        getDailyTarget(
-            me,
-            attendance
+    if (attendance === "Absent") {
+
+        /*
+           Do not overwrite locked historical hours.
+           Only clear editable hours.
+        */
+
+        const currentIndex =
+            getCurrentHourIndex();
+
+
+        HOUR_FIELDS.forEach(
+            (field, index) => {
+
+                const input =
+                    document.querySelector(
+                        `[data-field="${field}"]`
+                    );
+
+
+                if (!input) {
+
+                    return;
+
+                }
+
+
+                const isPast =
+                    currentIndex >= 0 &&
+                    index < currentIndex;
+
+
+                if (
+                    !isPast &&
+                    !currentDateLocked
+                ) {
+
+                    input.value = "0";
+
+                }
+
+            }
         );
 
-
-    const achieved =
-        recalcTotal();
+    }
 
 
-    const pct =
-        computeAchievementPercent(
-            achieved,
-            target
-        );
+    recalcTotal();
+
+    updatePerformanceCard();
+
+    queueSave();
+
+}
 
 
-    const remaining =
-        Math.max(
-            Number(target || 0) -
-            achieved,
-            0
-        );
+/* =========================================================
+   PERFORMANCE CARD
+========================================================= */
 
-
-    $("achievementDisplay").textContent =
-        `${pct.toFixed(1)}%`;
-
-
-    $("targetDisplay").textContent =
-        Number(target || 0)
-            .toLocaleString();
-
-
-    $("summaryTarget").textContent =
-        Number(target || 0)
-            .toLocaleString();
-
-
-    $("summaryAchieved").textContent =
-        Number(achieved)
-            .toLocaleString();
-
-
-    $("summaryRemaining").textContent =
-        Number(remaining)
-            .toLocaleString();
-
+function updatePerformanceCard() {
 
     const card =
         $("performanceCard");
 
 
-    card.classList.remove(
-        "above",
-        "on-target",
-        "below",
-        "no-target"
-    );
+    const title =
+        $("performanceTitle");
+
+    const message =
+        $("performanceMessage");
+
+    const icon =
+        $("performanceIcon");
+
+    const targetElement =
+        $("performanceTarget");
+
+    const achievedElement =
+        $("performanceAchieved");
+
+    const remainingElement =
+        $("performanceRemaining");
+
+    const percentageElement =
+        $("performancePercentage");
+
+    const progress =
+        $("performanceProgress");
+
+    const footnote =
+        $("performanceFootnote");
+
+
+    const attendance =
+        getAttendance();
+
+
+    const baseTarget =
+        getEmployeeBaseTarget();
+
+
+    const achieved =
+        getEnteredTotal();
+
+
+    card.className =
+        "performance-card";
+
+
+    show("performanceCard");
 
 
     /*
-       Absent
+       ABSENT
     */
 
-    if (
-        attendance === "Absent"
-    ) {
+    if (attendance === "Absent") {
 
         card.classList.add(
-            "no-target"
+            "absent"
         );
 
 
-        $("performanceEmoji").textContent =
-            "😴";
+        icon.textContent =
+            "🌙";
 
 
-        $("performanceTitle").textContent =
-            "Enjoy your day off!";
+        title.textContent =
+            "Attendance marked Absent";
 
 
-        $("performanceMessage").textContent =
-            "Attendance is marked absent, so no production target is assigned.";
+        message.textContent =
+            "Hourly production entry is set to zero for the available hours.";
+
+
+        targetElement.textContent =
+            "0";
+
+
+        achievedElement.textContent =
+            achieved;
+
+
+        remainingElement.textContent =
+            "0";
+
+
+        percentageElement.textContent =
+            "0%";
+
+
+        progress.style.width =
+            "0%";
+
+
+        footnote.textContent =
+            "Attendance status is Absent.";
+
+
+        lastPerformanceState =
+            "absent";
+
 
         return;
 
@@ -2718,123 +3879,281 @@ function updatePerformance() {
 
 
     /*
-       No target
+       NON-TARGET PROCESS
     */
 
-    if (
-        Number(target) <= 0
-    ) {
+    if (baseTarget === null) {
 
         card.classList.add(
-            "no-target"
+            "neutral"
         );
 
 
-        $("performanceEmoji").textContent =
-            "👍";
+        icon.textContent =
+            "📋";
 
 
-        $("performanceTitle").textContent =
-            "Keep it going!";
+        title.textContent =
+            "Production tracking is active";
 
 
-        $("performanceMessage").textContent =
-            "Your process currently has no production target configured.";
+        message.textContent =
+            "No daily production target is configured for this process.";
+
+
+        targetElement.textContent =
+            "N/A";
+
+
+        achievedElement.textContent =
+            achieved;
+
+
+        remainingElement.textContent =
+            "N/A";
+
+
+        percentageElement.textContent =
+            "N/A";
+
+
+        progress.style.width =
+            "0%";
+
+
+        footnote.textContent =
+            "Hourly production is still being recorded.";
+
+
+        lastPerformanceState =
+            "neutral";
+
 
         return;
 
     }
 
 
-    /*
-       Above target
-    */
+    const target =
+        getDailyTarget();
+
 
     if (
-        achieved > target
+        !target ||
+        target <= 0
     ) {
+
+        card.classList.add(
+            "neutral"
+        );
+
+
+        icon.textContent =
+            "📊";
+
+
+        title.textContent =
+            "Production tracking is active";
+
+
+        message.textContent =
+            "A valid daily target is not currently configured.";
+
+
+        targetElement.textContent =
+            "0";
+
+
+        achievedElement.textContent =
+            achieved;
+
+
+        remainingElement.textContent =
+            "0";
+
+
+        percentageElement.textContent =
+            "0%";
+
+
+        progress.style.width =
+            "0%";
+
+
+        footnote.textContent =
+            "";
+
+
+        lastPerformanceState =
+            "neutral";
+
+
+        return;
+
+    }
+
+
+    const remaining =
+        Math.max(
+            target - achieved,
+            0
+        );
+
+
+    const percentage =
+        (achieved / target) * 100;
+
+
+    const roundedPercentage =
+        Math.round(
+            percentage * 10
+        ) / 10;
+
+
+    const progressWidth =
+        Math.min(
+            percentage,
+            100
+        );
+
+
+    targetElement.textContent =
+        target;
+
+
+    achievedElement.textContent =
+        achieved;
+
+
+    remainingElement.textContent =
+        remaining;
+
+
+    percentageElement.textContent =
+        roundedPercentage + "%";
+
+
+    progress.style.width =
+        progressWidth + "%";
+
+
+    let state = "";
+
+
+    /*
+       ABOVE TARGET
+    */
+
+    if (achieved > target) {
+
+        state =
+            "above";
+
 
         card.classList.add(
             "above"
         );
 
 
-        $("performanceEmoji").textContent =
+        icon.textContent =
             "🎉";
 
 
-        $("performanceTitle").textContent =
-            "Target smashed! 🚀";
+        title.textContent =
+            "Outstanding! You're above target";
 
 
-        $("performanceMessage").textContent =
-            "Outstanding work! You are above target. Keep that momentum going!";
+        message.textContent =
+            `${MANAGER_NAME} is watching you 👀 — but you're giving him nothing to complain about!`;
 
-        return;
+
+        const extra =
+            achieved - target;
+
+
+        footnote.textContent =
+            `You are ${extra} above target. Keep the momentum going!`;
+
+
+        if (
+            lastPerformanceState !== "above"
+        ) {
+
+            launchCelebration();
+
+        }
 
     }
 
 
     /*
-       Exactly on target
+       EXACTLY ON TARGET
     */
 
-    if (
-        achieved === target
-    ) {
+    else if (achieved === target) {
+
+        state =
+            "target";
+
 
         card.classList.add(
-            "on-target"
+            "target"
         );
 
 
-        $("performanceEmoji").textContent =
-            "👏";
+        icon.textContent =
+            "🎯";
 
 
-        $("performanceTitle").textContent =
-            "Good Job!";
+        title.textContent =
+            "Good job! You're exactly on target";
 
 
-        $("performanceMessage").textContent =
-            "You hit the target exactly. That's the standard — well done!";
+        message.textContent =
+            "You've reached today's production target. Great work!";
 
-        return;
+
+        footnote.textContent =
+            "Target achieved. Keep the consistency going.";
 
     }
 
 
     /*
-       Below target
+       BELOW TARGET
     */
 
-    card.classList.add(
-        "below"
-    );
-
-
-    $("performanceEmoji").textContent =
-        "👀";
-
-
-    $("performanceTitle").textContent =
-        "Andy is watching you… 👀";
-
-
-    if (
-        achieved === 0
-    ) {
-
-        $("performanceMessage").textContent =
-            "The shift has started. Time to get those numbers moving!";
-
-    }
     else {
 
-        $("performanceMessage").textContent =
-            `You are ${remaining.toLocaleString()} away from target. Come on — you can catch it! 💪`;
+        state =
+            "below";
+
+
+        card.classList.add(
+            "below"
+        );
+
+
+        icon.textContent =
+            "👀";
+
+
+        title.textContent =
+            `${MANAGER_NAME} is watching you...`;
+
+
+        message.textContent =
+            `You're ${remaining} away from target. Keep going — you've got this!`;
+
+
+        footnote.textContent =
+            `${roundedPercentage}% of today's target completed.`;
 
     }
+
+
+    lastPerformanceState =
+        state;
 
 }
 
@@ -2843,187 +4162,255 @@ function updatePerformance() {
    CELEBRATION
 ========================================================= */
 
-function celebrate() {
+function launchCelebration() {
 
-    const container =
-        document.createElement(
-            "div"
-        );
+    const layer =
+        $("celebrationLayer");
 
 
-    container.className =
-        "celebration";
+    layer.innerHTML = "";
 
 
-    const emojis = [
+    clearTimeout(
+        celebrationTimer
+    );
+
+
+    const symbols = [
+
         "🎉",
-        "🥳",
+        "✨",
         "⭐",
-        "🏆",
-        "👏",
-        "🚀",
-        "✨"
+        "🎊"
+
     ];
 
 
     for (
         let i = 0;
-        i < 35;
+        i < 30;
         i++
     ) {
 
-        const item =
-            document.createElement(
-                "div"
-            );
+        const piece =
+            document.createElement("div");
 
 
-        item.className =
+        piece.className =
             "confetti";
 
 
-        item.textContent =
-            emojis[
+        piece.textContent =
+            symbols[
                 Math.floor(
                     Math.random() *
-                    emojis.length
+                    symbols.length
                 )
             ];
 
 
-        item.style.left =
-            `${Math.random() * 100}%`;
+        piece.style.left =
+            (
+                Math.random() * 100
+            ) + "%";
 
 
-        item.style.animationDelay =
-            `${Math.random() * .8}s`;
+        piece.style.fontSize =
+            (
+                10 +
+                Math.random() * 13
+            ) + "px";
 
 
-        item.style.fontSize =
-            `${16 + Math.random() * 18}px`;
+        piece.style.animationDelay =
+            (
+                Math.random() * 0.8
+            ) + "s";
 
 
-        container.appendChild(
-            item
+        piece.style.animationDuration =
+            (
+                1.8 +
+                Math.random() * 1.2
+            ) + "s";
+
+
+        layer.appendChild(
+            piece
         );
 
     }
 
 
-    document.body.appendChild(
-        container
-    );
+    celebrationTimer =
+        setTimeout(
+            () => {
 
+                layer.innerHTML = "";
 
-    setTimeout(
-        () => {
-
-            container.remove();
-
-        },
-        3500
-    );
+            },
+            3500
+        );
 
 }
 
 
 /* =========================================================
-   HOURLY INPUT
+   BUILD DATABASE RECORD
+   IMPORTANT:
+   remaining is NEVER NULL.
 ========================================================= */
 
-function onHourInput(input) {
+function buildRecord() {
+
+    const attendance =
+        getAttendance();
+
+
+    const target =
+        getDailyTarget();
+
+
+    const achieved =
+        getEnteredTotal();
+
+
+    let dailyTarget = 0;
+
+    let remaining = 0;
+
+    let achievementPercentage = 0;
+
+
+    /*
+       If the process has no target,
+       all numeric target fields remain 0.
+    */
 
     if (
-        Number(input.value) < 0
+        target !== null &&
+        Number.isFinite(
+            Number(target)
+        ) &&
+        Number(target) > 0
     ) {
 
-        input.value = 0;
-
-    }
-
-
-    if (
-        input.readOnly
-    ) {
-
-        return;
-
-    }
+        dailyTarget =
+            Number(target);
 
 
-    recalcTotal();
-
-    updatePerformance();
-
-    queueSave();
-
-}
-
-
-/* =========================================================
-   ATTENDANCE
-========================================================= */
-
-function onAttendanceChange() {
-
-    if (
-        $("attendance").value ===
-        "Absent"
-    ) {
-
-        document
-            .querySelectorAll(
-                "#hourRows .hour-input"
-            )
-            .forEach(
-                (input, index) => {
-
-                    if (
-                        isHourLocked(
-                            index,
-                            trackerDate
-                        )
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    input.value = 0;
-
-                }
+        remaining =
+            Math.max(
+                dailyTarget - achieved,
+                0
             );
 
+
+        achievementPercentage =
+            (
+                achieved /
+                dailyTarget
+            ) * 100;
+
     }
 
 
-    recalcTotal();
+    const record = {
 
-    updatePerformance();
+        employee_id:
+            me.id,
 
-    queueSave();
+        tracker_date:
+            currentShiftDate,
+
+        daily_target:
+            Number(dailyTarget),
+
+        attendance:
+            attendance,
+
+        hour_6_7:
+            getInputNumber("hour_6_7"),
+
+        hour_7_8:
+            getInputNumber("hour_7_8"),
+
+        hour_8_9:
+            getInputNumber("hour_8_9"),
+
+        hour_9_10:
+            getInputNumber("hour_9_10"),
+
+        hour_10_11:
+            getInputNumber("hour_10_11"),
+
+        hour_11_12:
+            getInputNumber("hour_11_12"),
+
+        hour_12_1:
+            getInputNumber("hour_12_1"),
+
+        hour_1_2:
+            getInputNumber("hour_1_2"),
+
+        hour_2_3:
+            getInputNumber("hour_2_3"),
+
+        break_minutes:
+            Number(
+                currentRecord?.break_minutes || 0
+            ),
+
+        remaining:
+            Number(remaining),
+
+        achievement_percentage:
+            Number(
+                achievementPercentage
+            )
+
+    };
+
+
+    return record;
 
 }
 
 
 /* =========================================================
-   SAVE STATE
+   INPUT NUMBER
 ========================================================= */
 
-function setSaveState(
-    state,
-    text
-) {
+function getInputNumber(field) {
 
-    $("saveState")
-        .dataset.state =
-        state;
+    const input =
+        document.querySelector(
+            `[data-field="${field}"]`
+        );
 
 
-    $("saveText")
-        .textContent =
-        text;
+    if (!input) {
+
+        return 0;
+
+    }
+
+
+    const value =
+        Number(input.value);
+
+
+    if (
+        !Number.isFinite(value) ||
+        value < 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    return Math.floor(value);
 
 }
 
@@ -3034,227 +4421,85 @@ function setSaveState(
 
 function queueSave() {
 
-    if (
-        isDateFullyLocked(
-            trackerDate
-        )
-    ) {
-
-        setSaveState(
-            "error",
-            "Shift closed — nothing was saved"
-        );
-
-        return;
-
-    }
+    savePending = true;
 
 
-    setSaveState(
-        "saving",
-        "Saving…"
+    setSaveStatus(
+        "Saving...",
+        "saving"
     );
 
 
-    if (saveTimer) {
-
-        clearTimeout(
-            saveTimer
-        );
-
-    }
+    clearTimeout(
+        saveTimer
+    );
 
 
     saveTimer =
         setTimeout(
-            () => {
-
-                saveTimer = null;
-
-                flushSave();
-
-            },
-            SAVE_DEBOUNCE_MS
+            flushSave,
+            AUTO_SAVE_DELAY
         );
 
 }
 
 
 /* =========================================================
-   BUILD RECORD
+   SAVE STATUS
 ========================================================= */
 
-function buildRecord() {
+function setSaveStatus(
+    text,
+    state = "saved"
+) {
 
-    const attendance =
-        $("attendance").value;
+    $("saveStatusText").textContent =
+        text;
 
 
-    /*
-       IMPORTANT:
+    const dot =
+        $("saveDot");
 
-       daily_target is NOT NULL.
 
-       Therefore targetless processes use 0,
-       not null.
-    */
+    dot.className =
+        "save-dot";
 
-    const target =
-        getDailyTarget(
-            me,
-            attendance
+
+    if (state === "saving") {
+
+        dot.classList.add(
+            "saving"
         );
 
-
-    const safeTarget =
-        Number.isFinite(
-            Number(target)
-        )
-            ? Number(target)
-            : 0;
+    }
 
 
-    const record = {
+    if (state === "error") {
 
-        tracker_date:
-            trackerDate,
-
-        employee_id:
-            me.id,
-
-        attendance:
-            attendance,
-
-        daily_target:
-            safeTarget,
-
-        break_minutes:
-            Number(
-                myRecord?.break_minutes || 0
-            ),
-
-        achieved:
-            0,
-
-        /*
-           IMPORTANT:
-
-           remaining is also NOT NULL.
-
-           Therefore it is ALWAYS a number.
-        */
-
-        remaining:
-            0,
-
-        achievement_percentage:
-            0
-
-    };
-
-
-    let achieved = 0;
-
-
-    hourFields.forEach(
-        (field, index) => {
-
-            const input =
-                document.querySelector(
-                    `#hourRows [data-field="${field}"]`
-                );
-
-
-            const locked =
-                isHourLocked(
-                    index,
-                    trackerDate
-                );
-
-
-            /*
-               Locked hour:
-               use the existing database value.
-            */
-
-            const raw =
-                locked && myRecord
-                    ? myRecord[field]
-                    : input?.value;
-
-
-            const value =
-                Math.max(
-                    Number(
-                        raw || 0
-                    ),
-                    0
-                );
-
-
-            record[field] =
-                value;
-
-
-            achieved +=
-                value;
-
-        }
-    );
-
-
-    record.achieved =
-        achieved;
-
-
-    record.remaining =
-        Math.max(
-            safeTarget -
-            achieved,
-            0
+        dot.classList.add(
+            "error"
         );
 
-
-    record.achievement_percentage =
-        safeTarget > 0
-
-            ? Number(
-                (
-                    achieved /
-                    safeTarget *
-                    100
-                ).toFixed(2)
-              )
-
-            : 0;
-
-
-    return record;
+    }
 
 }
 
 
 /* =========================================================
-   SAVE
+   FLUSH SAVE
 ========================================================= */
 
 async function flushSave() {
 
-    if (
-        saveInFlight
-    ) {
+    clearTimeout(
+        saveTimer
+    );
 
-        savePending = true;
-
-        return;
-
-    }
+    saveTimer = null;
 
 
     if (
-        isDateFullyLocked(
-            trackerDate
-        )
+        !savePending
     ) {
 
         return;
@@ -3262,12 +4507,32 @@ async function flushSave() {
     }
 
 
-    if (!me) {
+    if (
+        !me ||
+        !currentAuthUser ||
+        !currentShiftDate
+    ) {
 
-        setSaveState(
-            "error",
-            "Not saved — employee session unavailable"
+        return;
+
+    }
+
+
+    if (currentDateLocked) {
+
+        savePending = false;
+
+        setSaveStatus(
+            "Date locked — changes not saved",
+            "error"
         );
+
+        return;
+
+    }
+
+
+    if (saveInFlight) {
 
         return;
 
@@ -3276,156 +4541,140 @@ async function flushSave() {
 
     saveInFlight = true;
 
-
-    const record =
-        buildRecord();
+    savePending = false;
 
 
-    /*
-       Final safety normalization.
+    setSaveStatus(
+        "Saving...",
+        "saving"
+    );
 
-       These fields are NOT NULL in your database.
-    */
 
-    record.daily_target =
-        Number.isFinite(
-            Number(
-                record.daily_target
+    try {
+
+        const record =
+            buildRecord();
+
+
+        /*
+           Explicitly guarantee that these
+           NOT NULL numeric columns never receive null.
+        */
+
+        if (
+            record.daily_target === null ||
+            !Number.isFinite(
+                Number(record.daily_target)
             )
-        )
-            ? Number(
-                record.daily_target
+        ) {
+
+            record.daily_target = 0;
+
+        }
+
+
+        if (
+            record.remaining === null ||
+            !Number.isFinite(
+                Number(record.remaining)
             )
-            : 0;
+        ) {
+
+            record.remaining = 0;
+
+        }
 
 
-    record.remaining =
-        Number.isFinite(
-            Number(
-                record.remaining
+        if (
+            record.achievement_percentage === null ||
+            !Number.isFinite(
+                Number(
+                    record.achievement_percentage
+                )
             )
-        )
-            ? Number(
-                record.remaining
-            )
-            : 0;
+        ) {
+
+            record.achievement_percentage = 0;
+
+        }
 
 
-    record.achieved =
-        Number.isFinite(
-            Number(
-                record.achieved
-            )
-        )
-            ? Number(
-                record.achieved
-            )
-            : 0;
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("daily_productivity")
+                .upsert(
+                    record,
+                    {
+                        onConflict:
+                            "employee_id,tracker_date"
+                    }
+                )
+                .select()
+                .single();
 
 
-    record.achievement_percentage =
-        Number.isFinite(
-            Number(
-                record.achievement_percentage
-            )
-        )
-            ? Number(
-                record.achievement_percentage
-            )
-            : 0;
+        if (error) {
+
+            throw error;
+
+        }
 
 
-    const {
-        error
-    } =
-        await supabaseClient
-            .from(
-                "daily_productivity"
-            )
-            .upsert(
-                record,
-                {
-                    onConflict:
-                        "tracker_date,employee_id"
-                }
-            );
+        currentRecord =
+            data || record;
 
 
-    saveInFlight = false;
+        setSaveStatus(
+            "All changes saved",
+            "saved"
+        );
 
-
-    if (error) {
+    }
+    catch (error) {
 
         console.error(
-            "Autosave error:",
+            "SAVE ERROR:",
             error
         );
 
 
-        setSaveState(
-            "error",
+        savePending = true;
+
+
+        setSaveStatus(
             "Not saved — " +
-            (
-                error.message ||
-                "please retry"
-            )
+            friendlySupabaseError(error),
+            "error"
         );
 
-
-        return;
-
     }
+    finally {
+
+        saveInFlight = false;
 
 
-    myRecord =
-        Object.assign(
-            {},
-            myRecord || {},
-            record
-        );
+        /*
+           If another edit happened while
+           the save was running, save again.
+        */
+
+        if (savePending) {
+
+            clearTimeout(
+                saveTimer
+            );
 
 
-    setSaveState(
-        "saved",
-        "Saved at " +
-        new Date()
-            .toLocaleTimeString(
-                undefined,
-                {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                }
-            )
-    );
+            saveTimer =
+                setTimeout(
+                    flushSave,
+                    AUTO_SAVE_DELAY
+                );
 
-
-    /*
-       If another edit happened while save was running,
-       save it again.
-    */
-
-    if (
-        savePending
-    ) {
-
-        savePending = false;
-
-        flushSave();
-
-    }
-
-
-    /*
-       Celebration only when employee crosses target.
-    */
-
-    if (
-        Number(record.daily_target) > 0 &&
-        Number(record.achieved) >
-        Number(record.daily_target)
-    ) {
-
-        celebrate();
+        }
 
     }
 
@@ -3433,21 +4682,32 @@ async function flushSave() {
 
 
 /* =========================================================
-   BEFORE UNLOAD
+   VISIBILITY CHANGE
 ========================================================= */
 
-window.addEventListener(
-    "beforeunload",
-    event => {
+document.addEventListener(
+    "visibilitychange",
+    async () => {
 
         if (
-            saveTimer ||
-            saveInFlight
+            document.visibilityState ===
+            "hidden"
         ) {
 
-            event.preventDefault();
+            if (savePending) {
 
-            event.returnValue = "";
+                await flushSave();
+
+            }
+
+        }
+        else {
+
+            await checkShiftDateChange();
+
+            await loadDateLock();
+
+            applyLocks();
 
         }
 
@@ -3456,69 +4716,107 @@ window.addEventListener(
 
 
 /* =========================================================
-   TAB RETURN
+   SHIFT DATE CHANGE
 ========================================================= */
 
-document.addEventListener(
-    "visibilitychange",
-    () => {
+async function checkShiftDateChange() {
 
-        if (
-            document.visibilityState !==
-            "visible"
-        ) {
+    if (!me) {
 
-            return;
-
-        }
-
-
-        if (!me) {
-            return;
-        }
-
-
-        if (
-            getCurrentShiftDateString() !==
-            trackerDate
-        ) {
-
-            location.reload();
-
-            return;
-
-        }
-
-
-        loadDateLockState(
-            trackerDate
-        )
-        .then(
-            () => {
-
-                applyLocks();
-
-            }
-        );
-
-
-        updatePerformance();
-
-
-        if (saveTimer) {
-
-            clearTimeout(
-                saveTimer
-            );
-
-            saveTimer = null;
-
-            flushSave();
-
-        }
+        return;
 
     }
-);
+
+
+    const newShiftDate =
+        getShiftDate();
+
+
+    if (
+        currentShiftDate &&
+        newShiftDate !== currentShiftDate
+    ) {
+
+        location.reload();
+
+    }
+
+}
+
+
+/* =========================================================
+   LOCK TICKER
+========================================================= */
+
+let lockTickerStarted = false;
+
+
+function startLockTicker() {
+
+    if (lockTickerStarted) {
+
+        return;
+
+    }
+
+
+    lockTickerStarted = true;
+
+
+    setInterval(
+        async () => {
+
+            if (
+                !me ||
+                !currentShiftDate
+            ) {
+
+                return;
+
+            }
+
+
+            await checkShiftDateChange();
+
+
+            const oldLocked =
+                currentDateLocked;
+
+
+            await loadDateLock();
+
+
+            applyLocks();
+
+
+            /*
+               If the lock state changed,
+               refresh status.
+            */
+
+            if (
+                oldLocked !==
+                currentDateLocked
+            ) {
+
+                if (
+                    currentDateLocked
+                ) {
+
+                    setSaveStatus(
+                        "Date locked",
+                        "error"
+                    );
+
+                }
+
+            }
+
+        },
+        30000
+    );
+
+}
 
 
 /* =========================================================
@@ -3531,8 +4829,7 @@ $("loginPassword")
         event => {
 
             if (
-                event.key ===
-                "Enter"
+                event.key === "Enter"
             ) {
 
                 loginEmployee();
@@ -3549,11 +4846,10 @@ $("loginEmail")
         event => {
 
             if (
-                event.key ===
-                "Enter"
+                event.key === "Enter"
             ) {
 
-                loginEmployee();
+                $("loginPassword").focus();
 
             }
 
@@ -3562,115 +4858,41 @@ $("loginEmail")
 
 
 /* =========================================================
-   AUTH STATE
+   AUTH STATE LISTENER
 ========================================================= */
 
-supabaseClient.auth
-    .onAuthStateChange(
-        (event, session) => {
+supabaseClient.auth.onAuthStateChange(
+    async (
+        event,
+        session
+    ) => {
 
-            console.log(
-                "Auth event:",
-                event
-            );
+        if (
+            event === "SIGNED_OUT"
+        ) {
 
+            currentAuthUser = null;
 
-            if (
-                event ===
-                "SIGNED_OUT"
-            ) {
+            me = null;
 
-                currentAuthUser =
-                    null;
+            currentRecord = null;
 
-                me = null;
+            hide("appScreen");
 
-                myRecord = null;
-
-
-                hide("entryScreen");
-                hide("fatalCard");
-                hide("loadingCard");
-
-                show("loginCard");
-
-
-                $("headerSubtitle")
-                    .textContent =
-                    "Secure employee production entry";
-
-            }
+            show("loginScreen");
 
         }
-    );
+
+    }
+);
 
 
 /* =========================================================
    START
 ========================================================= */
 
-async function start() {
+checkExistingSession();
 
-    trackerDate =
-        getCurrentShiftDateString();
-
-
-    try {
-
-        const hasSession =
-            await checkExistingSession();
-
-
-        hide("loadingCard");
-
-
-        if (!hasSession) {
-
-            show("loginCard");
-
-            $("headerSubtitle")
-                .textContent =
-                "Secure employee production entry";
-
-            return;
-
-        }
-
-
-        await openAuthenticatedPortal();
-
-    }
-    catch (error) {
-
-        console.error(
-            "Startup:",
-            error
-        );
-
-
-        hide("loadingCard");
-        hide("loginCard");
-        hide("entryScreen");
-
-
-        show("fatalCard");
-
-
-        $("fatalText")
-            .textContent =
-            error.message ||
-            "Could not start the employee portal.";
-
-    }
-
-}
-
-
-/* =========================================================
-   START PORTAL
-========================================================= */
-
-start();
 
 </script>
 
