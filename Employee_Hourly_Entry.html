@@ -1,656 +1,648 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
-    <meta charset="UTF-8">
+```
+<meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-    <title>My Hourly Production Entry</title>
+<title>My Hourly Production Entry</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <style>
+<style>
 
-        * {
-            box-sizing: border-box;
-        }
+    * {
+        box-sizing: border-box;
+    }
 
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f4f7fb;
-            color: #1f2937;
-            -webkit-text-size-adjust: 100%;
-        }
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f4f7fb;
+        color: #1f2937;
+        -webkit-text-size-adjust: 100%;
+    }
 
-        /* =========================================================
-           HEADER
-        ========================================================= */
+    .header {
+        background: linear-gradient(135deg, #0f3d68, #1261a0);
+        color: #fff;
+        padding: 18px 20px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.15);
+    }
 
-        .header {
-            background: linear-gradient(135deg, #0f3d68, #1261a0);
-            color: #fff;
-            padding: 18px 20px;
-            box-shadow: 0 3px 12px rgba(0,0,0,.15);
-        }
+    .header h1 {
+        margin: 0;
+        font-size: 20px;
+    }
 
-        .header h1 {
-            margin: 0;
-            font-size: 20px;
-        }
+    .header p {
+        margin: 5px 0 0;
+        opacity: .85;
+        font-size: 13px;
+    }
 
-        .header p {
-            margin: 5px 0 0;
-            opacity: .85;
-            font-size: 13px;
-        }
+    .container {
+        padding: 16px;
+        max-width: 640px;
+        margin: auto;
+    }
 
-        .container {
-            padding: 16px;
-            max-width: 640px;
-            margin: auto;
-        }
+    .card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    }
 
-        .card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 10px rgba(0,0,0,.08);
-        }
+    .card h2 {
+        margin: 0 0 4px;
+        font-size: 17px;
+        color: #173b5e;
+    }
 
-        .card h2 {
-            margin: 0 0 4px;
-            font-size: 17px;
-            color: #173b5e;
-        }
+    .muted {
+        color: #6b7280;
+        font-size: 13px;
+        margin: 0 0 14px;
+    }
 
-        .muted {
-            color: #6b7280;
-            font-size: 13px;
-            margin: 0 0 14px;
-        }
+    label {
+        display: block;
+        font-size: 13px;
+        font-weight: bold;
+        color: #374151;
+        margin-bottom: 6px;
+    }
 
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: bold;
-            color: #374151;
-            margin-bottom: 6px;
-        }
+    input[type="email"],
+    input[type="password"],
+    input[type="number"] {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #fff;
+        color: #1f2937;
+    }
 
-        select,
-        input[type="number"],
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            background: #fff;
-            color: #1f2937;
-        }
+    input:focus {
+        outline: none;
+        border-color: #1261a0;
+        box-shadow: 0 0 0 3px rgba(18,97,160,.15);
+    }
 
-        select:focus,
-        input:focus {
-            outline: none;
-            border-color: #1261a0;
-            box-shadow: 0 0 0 3px rgba(18,97,160,.15);
-        }
+    input[type="number"].locked-input {
+        background: #eef2f7;
+        color: #7c8798;
+        border-color: #dde5ee;
+    }
 
-        /* A closed shift disables attendance, so it has to
-           read as unavailable and not merely unresponsive. */
-        select:disabled {
-            background-color: #eef2f7;
-            border-color: #dde5ee;
-            color: #7c8798;
-            cursor: not-allowed;
-            opacity: 1;
-        }
+    .field {
+        margin-bottom: 14px;
+    }
 
-        /* Native select arrows paint above other content on some
-           browsers, so the arrow is drawn manually instead. */
-        select {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            padding-right: 34px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23475569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 12px 8px;
-        }
+    .btn {
+        display: inline-block;
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        background: #1261a0;
+        color: #fff;
+        cursor: pointer;
+    }
 
-        .field {
-            margin-bottom: 14px;
-        }
+    .btn:hover {
+        background: #0f4f84;
+    }
 
-        .btn {
-            display: inline-block;
-            width: 100%;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            background: #1261a0;
-            color: #fff;
-            cursor: pointer;
-        }
+    .btn:disabled {
+        background: #9aa6b2;
+        cursor: not-allowed;
+    }
 
-        .btn:hover {
-            background: #0f4f84;
-        }
+    .btn-quiet {
+        background: #fff;
+        color: #1261a0;
+        border: 1px solid #c4d3e3;
+        font-weight: bold;
+    }
 
-        .btn:disabled {
-            background: #9aa6b2;
-            cursor: not-allowed;
-        }
+    .btn-quiet:hover {
+        background: #eef4fa;
+    }
 
-        .btn-quiet {
-            background: #fff;
-            color: #1261a0;
-            border: 1px solid #c4d3e3;
-            font-weight: bold;
-        }
+    .btn-danger {
+        background: #fff;
+        color: #a11;
+        border: 1px solid #e5bcbc;
+    }
 
-        .btn-quiet:hover {
-            background: #eef4fa;
-        }
+    .btn-danger:hover {
+        background: #fff1f1;
+    }
 
-        .checkline {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            font-size: 14px;
-            color: #374151;
-            margin-bottom: 14px;
-        }
+    .login-info {
+        background: #eef4fa;
+        border: 1px solid #cfe0ef;
+        color: #14507f;
+        border-radius: 8px;
+        padding: 11px 13px;
+        font-size: 13px;
+        margin-bottom: 15px;
+    }
 
-        .checkline input {
-            width: 18px;
-            height: 18px;
-            margin: 0;
-            flex: 0 0 auto;
-        }
+    .whoami {
+        background: linear-gradient(135deg, #0f3d68, #1261a0);
+        color: #fff;
+        border-radius: 12px;
+        padding: 15px 16px;
+        margin-bottom: 16px;
+    }
 
-        /* =========================================================
-           WHO AM I  (entry screen identity strip)
-        ========================================================= */
+    .whoami-name {
+        font-size: 19px;
+        font-weight: bold;
+    }
 
-        .whoami {
-            background: linear-gradient(135deg, #0f3d68, #1261a0);
-            color: #fff;
-            border-radius: 12px;
-            padding: 15px 16px;
-            margin-bottom: 16px;
-        }
+    .whoami-meta {
+        font-size: 13px;
+        opacity: .88;
+        margin-top: 4px;
+    }
 
-        .whoami-name {
-            font-size: 19px;
-            font-weight: bold;
-        }
+    .whoami-date {
+        font-size: 13px;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255,255,255,.22);
+    }
 
-        .whoami-meta {
-            font-size: 13px;
-            opacity: .88;
-            margin-top: 4px;
-        }
+    .hour-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 0;
+        border-bottom: 1px solid #eef2f7;
+    }
 
-        .whoami-date {
-            font-size: 13px;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255,255,255,.22);
-        }
+    .hour-row:last-child {
+        border-bottom: none;
+    }
 
-        /* =========================================================
-           HOUR ROWS
-        ========================================================= */
+    .hour-label {
+        flex: 1 1 auto;
+        font-size: 15px;
+        font-weight: bold;
+        color: #173b5e;
+        min-width: 0;
+    }
 
-        .hour-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 11px 0;
-            border-bottom: 1px solid #eef2f7;
-        }
+    .hour-note {
+        display: block;
+        font-size: 11px;
+        font-weight: normal;
+        color: #94a3b8;
+        margin-top: 2px;
+        letter-spacing: .04em;
+    }
 
-        .hour-row:last-child {
-            border-bottom: none;
+    .hour-input {
+        flex: 0 0 96px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .hour-row.is-locked .hour-label {
+        color: #94a3b8;
+    }
+
+    .hour-row.is-locked .hour-input {
+        background: #eef2f7;
+        color: #7c8798;
+        border-color: #dde5ee;
+    }
+
+    .locked-tag {
+        flex: 0 0 auto;
+        font-size: 10px;
+        font-weight: bold;
+        letter-spacing: .06em;
+        color: #64748b;
+        background: #eef2f7;
+        border: 1px solid #dde5ee;
+        border-radius: 999px;
+        padding: 3px 8px;
+    }
+
+    .total-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 2px solid #eef2f7;
+        font-size: 15px;
+        font-weight: bold;
+        color: #173b5e;
+    }
+
+    .total-value {
+        font-size: 21px;
+    }
+
+    .autosave {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-size: 13px;
+        font-weight: bold;
+        padding: 11px 13px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+
+    .autosave-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #94a3b8;
+        flex: 0 0 auto;
+    }
+
+    .autosave[data-state="saving"] {
+        background: #fff8e6;
+        border-color: #f5e2b3;
+        color: #92700e;
+    }
+
+    .autosave[data-state="saving"] .autosave-dot {
+        background: #d99f0b;
+        animation: pulse 1s ease-in-out infinite;
+    }
+
+    .autosave[data-state="saved"] {
+        background: #eaf7ef;
+        border-color: #c3e6d0;
+        color: #14683c;
+    }
+
+    .autosave[data-state="saved"] .autosave-dot {
+        background: #198754;
+    }
+
+    .autosave[data-state="error"] {
+        background: #fdecec;
+        border-color: #f5c2c2;
+        color: #9b1c1c;
+    }
+
+    .autosave[data-state="error"] .autosave-dot {
+        background: #dc3545;
+    }
+
+    @keyframes pulse {
+        0%,100% { opacity: 1; }
+        50%     { opacity: .35; }
+    }
+
+    .banner {
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 14px;
+        margin-bottom: 16px;
+        border: 1px solid transparent;
+    }
+
+    .banner.error {
+        background: #fdecec;
+        border-color: #f5c2c2;
+        color: #9b1c1c;
+    }
+
+    .banner.warn {
+        background: #fff8e6;
+        border-color: #f5e2b3;
+        color: #7a5c06;
+    }
+
+    .banner.info {
+        background: #eef4fa;
+        border-color: #cfe0ef;
+        color: #14507f;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    .footer {
+        text-align: center;
+        color: #94a3b8;
+        font-size: 12px;
+        padding: 4px 0 26px;
+    }
+
+    .spinner {
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+        padding: 26px 0;
+    }
+
+    .logout-row {
+        margin-top: 12px;
+    }
+
+    @media (max-width: 380px) {
+
+        .hour-input {
+            flex: 0 0 78px;
         }
 
         .hour-label {
-            flex: 1 1 auto;
-            font-size: 15px;
-            font-weight: bold;
-            color: #173b5e;
-            min-width: 0;
-        }
-
-        .hour-note {
-            display: block;
-            font-size: 11px;
-            font-weight: normal;
-            color: #94a3b8;
-            margin-top: 2px;
-            letter-spacing: .04em;
-        }
-
-        .hour-input {
-            flex: 0 0 96px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .hour-row.is-locked .hour-label {
-            color: #94a3b8;
-        }
-
-        .hour-row.is-locked .hour-input {
-            background: #eef2f7;
-            color: #7c8798;
-            border-color: #dde5ee;
-        }
-
-        .locked-tag {
-            flex: 0 0 auto;
-            font-size: 10px;
-            font-weight: bold;
-            letter-spacing: .06em;
-            color: #64748b;
-            background: #eef2f7;
-            border: 1px solid #dde5ee;
-            border-radius: 999px;
-            padding: 3px 8px;
-        }
-
-        .total-line {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 14px;
-            padding-top: 14px;
-            border-top: 2px solid #eef2f7;
-            font-size: 15px;
-            font-weight: bold;
-            color: #173b5e;
-        }
-
-        .total-value {
-            font-size: 21px;
-        }
-
-        /* =========================================================
-           AUTOSAVE INDICATOR
-        ========================================================= */
-
-        .autosave {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            font-size: 13px;
-            font-weight: bold;
-            padding: 11px 13px;
-            border-radius: 8px;
-            background: #f1f5f9;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-        }
-
-        .autosave-dot {
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            background: #94a3b8;
-            flex: 0 0 auto;
-        }
-
-        .autosave[data-state="saving"] {
-            background: #fff8e6;
-            border-color: #f5e2b3;
-            color: #92700e;
-        }
-
-        .autosave[data-state="saving"] .autosave-dot {
-            background: #d99f0b;
-            animation: pulse 1s ease-in-out infinite;
-        }
-
-        .autosave[data-state="saved"] {
-            background: #eaf7ef;
-            border-color: #c3e6d0;
-            color: #14683c;
-        }
-
-        .autosave[data-state="saved"] .autosave-dot {
-            background: #198754;
-        }
-
-        .autosave[data-state="error"] {
-            background: #fdecec;
-            border-color: #f5c2c2;
-            color: #9b1c1c;
-        }
-
-        .autosave[data-state="error"] .autosave-dot {
-            background: #dc3545;
-        }
-
-        @keyframes pulse {
-            0%,100% { opacity: 1; }
-            50%     { opacity: .35; }
-        }
-
-        /* =========================================================
-           BANNERS
-        ========================================================= */
-
-        .banner {
-            padding: 12px 14px;
-            border-radius: 8px;
             font-size: 14px;
-            margin-bottom: 16px;
-            border: 1px solid transparent;
         }
 
-        .banner.error {
-            background: #fdecec;
-            border-color: #f5c2c2;
-            color: #9b1c1c;
-        }
+    }
 
-        .banner.warn {
-            background: #fff8e6;
-            border-color: #f5e2b3;
-            color: #7a5c06;
-        }
-
-        .banner.info {
-            background: #eef4fa;
-            border-color: #cfe0ef;
-            color: #14507f;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .footer {
-            text-align: center;
-            color: #94a3b8;
-            font-size: 12px;
-            padding: 4px 0 26px;
-        }
-
-        .spinner {
-            text-align: center;
-            color: #6b7280;
-            font-size: 14px;
-            padding: 26px 0;
-        }
-
-        @media (max-width: 380px) {
-
-            .hour-input {
-                flex: 0 0 78px;
-            }
-
-            .hour-label {
-                font-size: 14px;
-            }
-
-        }
-
-    </style>
+</style>
+```
 
 </head>
 
 <body>
 
-
 <div class="header">
 
-    <h1>My Hourly Production</h1>
+```
+<h1>My Hourly Production</h1>
 
-    <p id="headerSubtitle">
-        Update your own hourly count
-    </p>
+<p id="headerSubtitle">
+    Secure employee production entry
+</p>
+```
+
+</div>
+
+<div class="container">
+
+```
+<!-- =========================================================
+     LOADING
+========================================================= -->
+
+<div id="loadingCard"
+     class="card">
+
+    <div class="spinner">
+        Loading…
+    </div>
 
 </div>
 
 
-<div class="container">
+<!-- =========================================================
+     LOGIN
+========================================================= -->
+
+<div id="loginCard"
+     class="card hidden">
+
+    <h2>Employee Login</h2>
+
+    <p class="muted">
+        Sign in with your employee account to update your
+        own hourly production.
+    </p>
+
+    <div class="login-info">
+        Your account is securely connected to your employee
+        record. You will only be able to access your own
+        production data.
+    </div>
+
+    <div id="loginBanner"
+         class="banner error hidden"></div>
+
+    <div class="field">
+
+        <label for="loginEmail">
+            Email
+        </label>
+
+        <input type="email"
+               id="loginEmail"
+               autocomplete="username"
+               placeholder="Enter your company email">
+
+    </div>
+
+    <div class="field">
+
+        <label for="loginPassword">
+            Password
+        </label>
+
+        <input type="password"
+               id="loginPassword"
+               autocomplete="current-password"
+               placeholder="Enter your password">
+
+    </div>
+
+    <button class="btn"
+            id="loginBtn"
+            onclick="loginEmployee()">
+
+        Login
+
+    </button>
+
+</div>
 
 
-    <!-- =========================================================
-         LOADING
-    ========================================================= -->
+<!-- =========================================================
+     FATAL ERROR
+========================================================= -->
 
-    <div id="loadingCard"
-         class="card">
+<div id="fatalCard"
+     class="card hidden">
 
-        <div class="spinner">
-            Loading…
-        </div>
+    <h2>Cannot load</h2>
+
+    <div id="fatalText"
+         class="banner error"></div>
+
+    <button class="btn"
+            onclick="location.reload()">
+
+        Try again
+
+    </button>
+
+</div>
+
+
+<!-- =========================================================
+     ENTRY
+========================================================= -->
+
+<div id="entryScreen"
+     class="hidden">
+
+    <div class="whoami">
+
+        <div class="whoami-name"
+             id="whoName"></div>
+
+        <div class="whoami-meta"
+             id="whoMeta"></div>
+
+        <div class="whoami-date"
+             id="whoDate"></div>
 
     </div>
 
 
-    <!-- =========================================================
-         FATAL ERROR
-    ========================================================= -->
-
-    <div id="fatalCard"
-         class="card hidden">
-
-        <h2>Cannot load</h2>
-
-        <div id="fatalText"
-             class="banner error"></div>
-
-        <button class="btn"
-                onclick="location.reload()">
-            Try again
-        </button>
-
-    </div>
+    <div id="entryBanner"
+         class="banner info hidden"></div>
 
 
-    <!-- =========================================================
-         STEP 1 — WHO ARE YOU
-    ========================================================= -->
+    <div class="card">
 
-    <div id="pickCard"
-         class="card hidden">
-
-        <h2>Who are you?</h2>
+        <h2>Attendance</h2>
 
         <p class="muted">
-            Select your name to open your own hourly entry sheet.
+            Set this before entering your counts.
         </p>
 
-        <div class="field">
+        <select id="attendance"
+                onchange="onAttendanceChange()">
 
-            <label for="pickProject">
-                Project
-            </label>
+            <option value="Present">Present</option>
+            <option value="Half Day">Half Day</option>
+            <option value="Absent">Absent</option>
 
-            <select id="pickProject"
-                    onchange="renderEmployeeOptions()"></select>
-
-        </div>
-
-        <div class="field">
-
-            <label for="pickEmployee">
-                Your name
-            </label>
-
-            <select id="pickEmployee"></select>
-
-        </div>
-
-        <div class="checkline">
-
-            <input type="checkbox"
-                   id="rememberMe"
-                   checked>
-
-            <label for="rememberMe"
-                   style="margin:0;font-weight:normal;">
-                Remember me on this device
-            </label>
-
-        </div>
-
-        <button class="btn"
-                id="continueBtn"
-                onclick="confirmIdentity()">
-            Continue
-        </button>
+        </select>
 
     </div>
 
 
-    <!-- =========================================================
-         STEP 2 — ENTRY
-    ========================================================= -->
+    <div class="card">
 
-    <div id="entryScreen"
-         class="hidden">
+        <h2>Hourly count</h2>
 
-        <div class="whoami">
+        <p class="muted">
+            Enter how many you completed in each hour.
+            Saving happens automatically.
+        </p>
 
-            <div class="whoami-name"
-                 id="whoName"></div>
+        <div id="hourRows"></div>
 
-            <div class="whoami-meta"
-                 id="whoMeta"></div>
+        <div class="total-line">
 
-            <div class="whoami-date"
-                 id="whoDate"></div>
+            <span>Total entered</span>
 
-        </div>
-
-
-        <div id="entryBanner"
-             class="banner info hidden"></div>
-
-
-        <div class="card">
-
-            <h2>Attendance</h2>
-
-            <p class="muted">
-                Set this before entering your counts.
-            </p>
-
-            <select id="attendance"
-                    onchange="onAttendanceChange()">
-
-                <option value="Present">Present</option>
-                <option value="Half Day">Half Day</option>
-                <option value="Absent">Absent</option>
-
-            </select>
+            <span class="total-value"
+                  id="totalEntered">0</span>
 
         </div>
 
+    </div>
 
-        <div class="card">
 
-            <h2>Hourly count</h2>
+    <div class="card">
 
-            <p class="muted">
-                Enter how many you completed in each hour. Saving
-                happens automatically.
-            </p>
+        <div class="autosave"
+             id="saveState"
+             data-state="idle">
 
-            <div id="hourRows"></div>
+            <span class="autosave-dot"></span>
 
-            <div class="total-line">
-
-                <span>Total entered</span>
-
-                <span class="total-value"
-                      id="totalEntered">0</span>
-
-            </div>
+            <span id="saveText">
+                Autosave on
+            </span>
 
         </div>
 
-
-        <div class="card">
-
-            <div class="autosave"
-                 id="saveState"
-                 data-state="idle">
-
-                <span class="autosave-dot"></span>
-
-                <span id="saveText">Autosave on</span>
-
-            </div>
-
-            <div style="height:12px"></div>
+        <div class="logout-row">
 
             <button class="btn btn-quiet"
-                    onclick="switchUser()">
-                Not you? Switch person
+                    onclick="logoutEmployee()">
+
+                Logout
+
             </button>
 
         </div>
 
     </div>
 
-
-    <div class="footer"
-         id="footerNote">
-        Entries feed the Hourly Production Tracker and the
-        RCM Management Dashboard automatically.
-    </div>
-
-
 </div>
 
+
+<div class="footer"
+     id="footerNote">
+
+    Entries feed the Hourly Production Tracker and the
+    RCM Management Dashboard automatically.
+
+</div>
+```
+
+</div>
 
 <script>
 
 /* =========================================================
-   MY HOURLY PRODUCTION ENTRY
+   SECURE EMPLOYEE HOURLY PRODUCTION ENTRY
 
-   A self-service entry screen so each employee can update
-   their own hourly production count. Everything written here
-   goes into the same `daily_productivity` row that the
-   Hourly Production Tracker and the RCM Management Dashboard
-   read, so no syncing step is required — the other two
-   dashboards simply show the new numbers on their next
-   refresh.
+   Authentication:
+       Supabase Auth
 
-   Deliberate design decisions:
+   Employee mapping:
+       auth.users.id
+            ↓
+       employees.auth_user_id
+            ↓
+       employees.id
+            ↓
+       daily_productivity.employee_id
 
-     * No password. The employee selects their own name.
-       This was chosen for ease of rollout; it means anyone
-       holding the link can post numbers as anyone else, so
-       the link should stay internal.
+   Employees NEVER select their own employee record.
 
-     * Hour locking matches the tracker exactly. The same
-       shift-hour maths and the same `tracker_date_locks`
-       override are used, so an employee can never edit an
-       hour that a team lead sees as closed.
+   RLS in Supabase is responsible for enforcing that an
+   authenticated employee can access only their own records.
 
-     * The tracker date is derived, never typed. The shift
-       runs 6 PM to 3 AM, so between midnight and 3 AM the
-       entry still belongs to the previous calendar day.
+   Existing functionality retained:
+       • 6 PM–3 AM shift
+       • midnight shift-date handling
+       • automatic hourly locking
+       • management date-lock override
+       • attendance
+       • daily target
+       • half-day target
+       • achievement %
+       • autosave
+       • existing daily_productivity table
 ========================================================= */
 
 
 const SUPABASE_URL =
     "https://yhoblmvujfqnspaxdfav.supabase.co";
+
 
 const SUPABASE_KEY =
     "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
@@ -665,8 +657,6 @@ const supabaseClient =
 
 /* =========================================================
    SHIFT DEFINITION
-   Identical to the tracker so both agree on which hour is
-   which and when an hour closes.
 ========================================================= */
 
 const hourFields = [
@@ -705,17 +695,15 @@ const hourLabels = [
 
 let projects = [];
 let subProjects = [];
-let employees = [];
-let employeeProjects = [];
 
 let me = null;
 let trackerDate = null;
 let myRecord = null;
 
+let currentAuthUser = null;
+
 let dateLockOverride = null;
 let dateLockTableAvailable = true;
-
-const REMEMBER_KEY = "wrmc-employee-entry-id";
 
 
 /* =========================================================
@@ -737,22 +725,17 @@ function hide(id) {
 }
 
 
-function esc(value) {
-
-    return String(value === null || value === undefined ? "" : value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-}
-
-
 function formatLocalDate(date) {
 
     const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const dd = String(date.getDate()).padStart(2, "0");
+
+    const mm =
+        String(date.getMonth() + 1)
+            .padStart(2, "0");
+
+    const dd =
+        String(date.getDate())
+            .padStart(2, "0");
 
     return `${yyyy}-${mm}-${dd}`;
 }
@@ -764,7 +747,8 @@ function prettyDate(value) {
         return "";
     }
 
-    const parts = String(value).split("-");
+    const parts =
+        String(value).split("-");
 
     const date =
         new Date(
@@ -785,57 +769,6 @@ function prettyDate(value) {
 }
 
 
-/*
-   Device memory for the selected person.
-
-   Wrapped because browser storage throws in some embedded
-   and private-browsing contexts; losing it only means the
-   employee picks their name again.
-*/
-function deviceStore() {
-
-    try {
-        return window[["local", "Storage"].join("")];
-    }
-    catch (error) {
-        return undefined;
-    }
-}
-
-
-function rememberGet() {
-
-    try {
-        return deviceStore()?.getItem(REMEMBER_KEY) || null;
-    }
-    catch (error) {
-        return null;
-    }
-}
-
-
-function rememberSet(value) {
-
-    try {
-        deviceStore()?.setItem(REMEMBER_KEY, value);
-    }
-    catch (error) {
-        /* not fatal */
-    }
-}
-
-
-function rememberClear() {
-
-    try {
-        deviceStore()?.removeItem(REMEMBER_KEY);
-    }
-    catch (error) {
-        /* not fatal */
-    }
-}
-
-
 function setBanner(kind, text) {
 
     const el = $("entryBanner");
@@ -845,34 +778,76 @@ function setBanner(kind, text) {
     }
 
     if (!text) {
-        el.classList.add("hidden");
+
+        el.className =
+            "banner info hidden";
+
+        el.textContent = "";
+
         return;
     }
 
-    el.className = `banner ${kind}`;
+    el.className =
+        `banner ${kind}`;
+
+    el.textContent = text;
+}
+
+
+function setLoginBanner(text) {
+
+    const el = $("loginBanner");
+
+    if (!el) {
+        return;
+    }
+
+    if (!text) {
+
+        el.classList.add("hidden");
+        el.textContent = "";
+
+        return;
+    }
+
+    el.className =
+        "banner error";
+
     el.textContent = text;
 }
 
 
 /* =========================================================
-   SHIFT DATE AND HOUR LOCKING
-   Copied from the tracker so the two never disagree.
+   SHIFT DATE
 ========================================================= */
 
 function getCurrentShiftDateString() {
 
     const now = new Date();
-    const shiftDate = new Date(now);
 
-    // Midnight to 3 AM still belongs to the previous
-    // day's 6 PM shift.
+    const shiftDate =
+        new Date(now);
+
+    /*
+       Midnight through 2:59 AM belongs to the previous
+       day's 6 PM–3 AM shift.
+    */
+
     if (now.getHours() < 3) {
-        shiftDate.setDate(shiftDate.getDate() - 1);
+
+        shiftDate.setDate(
+            shiftDate.getDate() - 1
+        );
+
     }
 
     return formatLocalDate(shiftDate);
 }
 
+
+/* =========================================================
+   HOUR LOCKING
+========================================================= */
 
 function getShiftHourIndexForDate(date) {
 
@@ -881,57 +856,115 @@ function getShiftHourIndexForDate(date) {
     }
 
     const now = new Date();
-    const activeShiftDate = getCurrentShiftDateString();
 
-    // Any shift before the active one is completely locked.
+    const activeShiftDate =
+        getCurrentShiftDateString();
+
+
+    /*
+       Any shift before today's active shift is completely
+       locked.
+    */
+
     if (date < activeShiftDate) {
         return hourFields.length;
     }
 
-    // Any future shift is completely open.
+
+    /*
+       Future shift.
+    */
+
     if (date > activeShiftDate) {
         return -1;
     }
 
-    const hour = now.getHours();
 
-    // 6 PM = index 0, 7 PM = index 1, and so on.
+    const hour =
+        now.getHours();
+
+
+    /*
+       6 PM = index 0
+       7 PM = index 1
+       ...
+       2 AM = index 8
+    */
+
     if (hour >= 18) {
-        return Math.min(hour - 18, hourFields.length);
+
+        return Math.min(
+            hour - 18,
+            hourFields.length
+        );
+
     }
 
-    // 12 AM = index 6, 1 AM = index 7, 2 AM = index 8.
+
+    /*
+       Midnight = index 6
+       1 AM = index 7
+       2 AM = index 8
+    */
+
     if (hour < 3) {
-        return Math.min(hour + 6, hourFields.length);
+
+        return Math.min(
+            hour + 6,
+            hourFields.length
+        );
+
     }
 
-    // Between 3 AM and 6 PM the next shift has not started.
+
+    /*
+       Between 3 AM and 6 PM the next shift has not started.
+    */
+
     return -1;
 }
 
 
 function isHourLocked(index, date) {
 
-    // A management override always wins.
+    /*
+       Management date-lock override always wins.
+    */
+
     if (dateLockOverride !== null) {
+
         return dateLockOverride.locked === true;
+
     }
 
-    const currentIndex = getShiftHourIndexForDate(date);
+    const currentIndex =
+        getShiftHourIndexForDate(date);
 
-    return currentIndex >= 0 && index < currentIndex;
+    return (
+        currentIndex >= 0 &&
+        index < currentIndex
+    );
 }
 
 
 function isDateFullyLocked(date) {
 
     if (dateLockOverride !== null) {
+
         return dateLockOverride.locked === true;
+
     }
 
-    return getShiftHourIndexForDate(date) >= hourFields.length;
+    return (
+        getShiftHourIndexForDate(date) >=
+        hourFields.length
+    );
 }
 
+
+/* =========================================================
+   DATE LOCK
+========================================================= */
 
 async function loadDateLockState(date) {
 
@@ -944,55 +977,81 @@ async function loadDateLockState(date) {
     const { data, error } =
         await supabaseClient
             .from("tracker_date_locks")
-            .select("tracker_date,is_locked")
-            .eq("tracker_date", date)
+            .select(
+                "tracker_date,is_locked"
+            )
+            .eq(
+                "tracker_date",
+                date
+            )
             .maybeSingle();
+
 
     if (error) {
 
-        // A missing table or a permission problem must not
-        // block entry: fall back to automatic locking.
         console.warn(
             "Date lock state unavailable:",
             error.message
         );
 
+
+        /*
+           A missing table or permission issue should not
+           completely prevent the portal from opening.
+
+           Automatic shift locking will still operate.
+        */
+
         if (
             error.code === "42P01" ||
-            /does not exist/i.test(error.message || "")
+            /does not exist/i.test(
+                error.message || ""
+            )
         ) {
+
             dateLockTableAvailable = false;
+
         }
 
         return;
     }
 
+
     dateLockOverride =
         data
-            ? { locked: data.is_locked === true }
+            ? {
+                locked:
+                    data.is_locked === true
+              }
             : null;
 }
 
 
 /* =========================================================
    TARGET RESOLUTION
-   Mirrors the tracker so `daily_target` is stored with the
-   same value the tracker would have written.
 ========================================================= */
 
 function getSubProjectById(id) {
 
-    return subProjects.find(
-        sp => Number(sp.id) === Number(id)
-    ) || null;
+    return (
+        subProjects.find(
+            sp =>
+                Number(sp.id) ===
+                Number(id)
+        ) || null
+    );
 }
 
 
 function getProjectById(id) {
 
-    return projects.find(
-        p => Number(p.id) === Number(id)
-    ) || null;
+    return (
+        projects.find(
+            p =>
+                Number(p.id) ===
+                Number(id)
+        ) || null
+    );
 }
 
 
@@ -1002,6 +1061,12 @@ function getEmployeeSubProject(employee) {
         return null;
     }
 
+
+    /*
+       First preference:
+       employee's own sub_project_id.
+    */
+
     if (
         employee.sub_project_id !== null &&
         employee.sub_project_id !== undefined &&
@@ -1009,7 +1074,9 @@ function getEmployeeSubProject(employee) {
     ) {
 
         const direct =
-            getSubProjectById(employee.sub_project_id);
+            getSubProjectById(
+                employee.sub_project_id
+            );
 
         if (direct) {
             return direct;
@@ -1017,43 +1084,31 @@ function getEmployeeSubProject(employee) {
 
     }
 
-    const mappings =
-        employeeProjects.filter(
-            ep =>
-                Number(ep.employee_id) ===
-                Number(employee.id)
-        );
 
-    for (const mapping of mappings) {
+    /*
+       If no direct sub-project is available, look for
+       a unique active sub-project belonging to the employee's
+       project.
 
-        if (
-            mapping.sub_project_id !== null &&
-            mapping.sub_project_id !== undefined &&
-            mapping.sub_project_id !== ""
-        ) {
-
-            const mapped =
-                getSubProjectById(mapping.sub_project_id);
-
-            if (mapped) {
-                return mapped;
-            }
-
-        }
-
-    }
+       We deliberately do NOT download all employees or all
+       employee-project mappings anymore.
+    */
 
     const projectSubProjects =
         subProjects.filter(
             sp =>
                 Number(sp.project_id) ===
-                Number(employee.project_id) &&
+                    Number(employee.project_id) &&
                 sp.active === true
         );
 
+
     if (projectSubProjects.length === 1) {
+
         return projectSubProjects[0];
+
     }
+
 
     return null;
 }
@@ -1061,13 +1116,18 @@ function getEmployeeSubProject(employee) {
 
 function getEmployeeBaseTarget(employee) {
 
-    const subProject = getEmployeeSubProject(employee);
+    const subProject =
+        getEmployeeSubProject(employee);
+
 
     if (subProject) {
 
-        if (subProject.target_based === false) {
+        if (
+            subProject.target_based === false
+        ) {
             return null;
         }
+
 
         if (
             subProject.daily_target === null ||
@@ -1077,14 +1137,23 @@ function getEmployeeBaseTarget(employee) {
             return null;
         }
 
-        return Number(subProject.daily_target);
+
+        return Number(
+            subProject.daily_target
+        );
     }
 
-    const project = getProjectById(employee.project_id);
+
+    const project =
+        getProjectById(
+            employee.project_id
+        );
+
 
     if (!project) {
         return null;
     }
+
 
     if (
         project.daily_target === null ||
@@ -1094,358 +1163,721 @@ function getEmployeeBaseTarget(employee) {
         return null;
     }
 
-    return Number(project.daily_target);
+
+    return Number(
+        project.daily_target
+    );
 }
 
 
-function getDailyTarget(employee, attendance) {
+function getDailyTarget(
+    employee,
+    attendance
+) {
 
-    const target = getEmployeeBaseTarget(employee);
+    const target =
+        getEmployeeBaseTarget(
+            employee
+        );
 
-    if (target === null || target === undefined) {
+
+    if (
+        target === null ||
+        target === undefined
+    ) {
+
         return null;
+
     }
 
-    if (attendance === "Absent") {
+
+    if (
+        attendance === "Absent"
+    ) {
+
         return 0;
+
     }
 
-    if (attendance === "Half Day") {
-        return Math.ceil(target / 2);
+
+    if (
+        attendance === "Half Day"
+    ) {
+
+        return Math.ceil(
+            target / 2
+        );
+
     }
+
 
     return target;
 }
 
 
-function computeAchievementPercent(achieved, target) {
+function computeAchievementPercent(
+    achieved,
+    target
+) {
 
-    // Same canonical formula the tracker and the management
-    // dashboard use, so all three agree.
     if (
         target === null ||
         target === undefined ||
         Number(target) <= 0
     ) {
+
         return null;
+
     }
 
-    return Number(achieved) / Number(target) * 100;
+
+    return (
+        Number(achieved) /
+        Number(target)
+    ) * 100;
 }
 
 
 /* =========================================================
-   BOOTSTRAP
+   AUTHENTICATION
 ========================================================= */
 
-async function start() {
+async function checkExistingSession() {
 
-    trackerDate = getCurrentShiftDateString();
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.auth.getSession();
 
-    try {
-        await loadReferenceData();
+
+    if (error) {
+
+        throw new Error(
+            "Unable to check your login session. " +
+            error.message
+        );
+
     }
-    catch (error) {
 
-        hide("loadingCard");
-        show("fatalCard");
 
-        $("fatalText").textContent =
-            error.message ||
-            "Could not reach the production database.";
+    if (
+        data &&
+        data.session &&
+        data.session.user
+    ) {
+
+        currentAuthUser =
+            data.session.user;
+
+        return true;
+
+    }
+
+
+    return false;
+}
+
+
+/* =========================================================
+   FIND EMPLOYEE FROM AUTH USER
+========================================================= */
+
+async function loadCurrentEmployee() {
+
+    if (!currentAuthUser) {
+
+        throw new Error(
+            "Your login session could not be identified."
+        );
+
+    }
+
+
+    /*
+       IMPORTANT:
+
+       We do NOT load all employees.
+
+       Supabase Auth identifies the current user and
+       auth_user_id identifies the matching employee.
+    */
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("employees")
+            .select("*")
+            .eq(
+                "auth_user_id",
+                currentAuthUser.id
+            )
+            .eq(
+                "active",
+                true
+            )
+            .maybeSingle();
+
+
+    if (error) {
+
+        console.error(
+            "Employee mapping error:",
+            error
+        );
+
+        throw new Error(
+            "Your employee account could not be verified. " +
+            error.message
+        );
+
+    }
+
+
+    if (!data) {
+
+        throw new Error(
+            "Your login is successful, but your account " +
+            "is not linked to an active employee record. " +
+            "Please contact your Team Lead."
+        );
+
+    }
+
+
+    return data;
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+async function loginEmployee() {
+
+    const email =
+        $("loginEmail").value.trim();
+
+    const password =
+        $("loginPassword").value;
+
+
+    setLoginBanner("");
+
+
+    if (!email) {
+
+        setLoginBanner(
+            "Please enter your email address."
+        );
 
         return;
     }
 
-    await loadDateLockState(trackerDate);
 
-    hide("loadingCard");
+    if (!password) {
 
-    renderProjectOptions();
-    renderEmployeeOptions();
+        setLoginBanner(
+            "Please enter your password."
+        );
 
-    // Jump straight back in if this device already knows
-    // who is using it.
-    const rememberedId = rememberGet();
-
-    if (rememberedId) {
-
-        const found =
-            employees.find(
-                e => String(e.id) === String(rememberedId)
-            );
-
-        if (found) {
-            await openEntryFor(found);
-            return;
-        }
-
-        // The remembered person is no longer active.
-        rememberClear();
+        return;
     }
 
-    show("pickCard");
+
+    const button =
+        $("loginBtn");
+
+    button.disabled = true;
+
+    button.textContent =
+        "Signing in…";
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth
+                .signInWithPassword({
+                    email,
+                    password
+                });
+
+
+        if (error) {
+
+            throw new Error(
+                error.message
+            );
+
+        }
+
+
+        if (
+            !data ||
+            !data.user
+        ) {
+
+            throw new Error(
+                "Login completed but no user session was returned."
+            );
+
+        }
+
+
+        currentAuthUser =
+            data.user;
+
+
+        await openAuthenticatedPortal();
+
+
+    }
+    catch (error) {
+
+        console.error(
+            "Login error:",
+            error
+        );
+
+
+        setLoginBanner(
+            error.message ||
+            "Login failed. Please check your email and password."
+        );
+
+
+        button.disabled = false;
+
+        button.textContent =
+            "Login";
+
+    }
+
 }
 
 
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+async function logoutEmployee() {
+
+    /*
+       Cancel pending autosave first.
+    */
+
+    if (saveTimer) {
+
+        clearTimeout(saveTimer);
+
+        saveTimer = null;
+
+    }
+
+
+    try {
+
+        await supabaseClient.auth.signOut();
+
+    }
+    catch (error) {
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+    }
+
+
+    currentAuthUser = null;
+    me = null;
+    myRecord = null;
+
+
+    if (lockTicker) {
+
+        clearInterval(
+            lockTicker
+        );
+
+        lockTicker = null;
+
+    }
+
+
+    $("loginEmail").value = "";
+    $("loginPassword").value = "";
+
+
+    hide("entryScreen");
+    hide("fatalCard");
+    hide("loginCard");
+
+
+    show("loginCard");
+
+
+    $("headerSubtitle").textContent =
+        "Secure employee production entry";
+
+
+    setLoginBanner("");
+
+}
+
+
+/* =========================================================
+   AUTHENTICATED PORTAL
+========================================================= */
+
+async function openAuthenticatedPortal() {
+
+    trackerDate =
+        getCurrentShiftDateString();
+
+
+    try {
+
+        me =
+            await loadCurrentEmployee();
+
+
+        await loadReferenceData();
+
+
+        await loadDateLockState(
+            trackerDate
+        );
+
+
+        hide("loadingCard");
+        hide("loginCard");
+        hide("fatalCard");
+
+
+        await openEntryFor(
+            me
+        );
+
+
+    }
+    catch (error) {
+
+        console.error(
+            "Portal loading error:",
+            error
+        );
+
+
+        hide("loadingCard");
+        hide("loginCard");
+        hide("entryScreen");
+
+
+        show("fatalCard");
+
+
+        $("fatalText").textContent =
+            error.message ||
+            "Your employee portal could not be loaded.";
+
+
+        /*
+           Give the employee a logout option if the
+           authentication itself succeeded but the employee
+           mapping is wrong.
+        */
+
+        const existingLogout =
+            document.getElementById(
+                "fatalLogoutBtn"
+            );
+
+
+        if (!existingLogout) {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+            button.id =
+                "fatalLogoutBtn";
+
+            button.className =
+                "btn btn-quiet";
+
+            button.style.marginTop =
+                "10px";
+
+            button.textContent =
+                "Logout";
+
+            button.onclick =
+                logoutEmployee;
+
+            $("fatalCard")
+                .appendChild(button);
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD REFERENCE DATA
+========================================================= */
+
 async function loadReferenceData() {
 
+    /*
+       IMPORTANT:
+
+       We no longer query:
+
+           employees.select("*")
+
+       or:
+
+           employee_projects.select("*")
+
+       This prevents the employee portal from downloading
+       other employees' records.
+
+       Only project/sub-project reference information needed
+       by the current employee is loaded.
+    */
+
+
+    const projectId =
+        me?.project_id;
+
+
+    if (
+        projectId === null ||
+        projectId === undefined ||
+        projectId === ""
+    ) {
+
+        projects = [];
+        subProjects = [];
+
+        return;
+
+    }
+
+
     const [
-        projectsRes,
-        subProjectsRes,
-        employeesRes,
-        employeeProjectsRes
+        projectRes,
+        subProjectsRes
     ] =
         await Promise.all([
 
-            /*
-               These queries deliberately mirror the tracker's
-               exactly. `projects` has no `active` column, so
-               filtering on one fails the whole load.
-            */
             supabaseClient
                 .from("projects")
                 .select("*")
-                .order("project_name"),
+                .eq(
+                    "id",
+                    projectId
+                )
+                .maybeSingle(),
+
 
             supabaseClient
                 .from("sub_projects")
                 .select("*")
-                .eq("active", true)
-                .order("project_id")
-                .order("sub_project_name"),
-
-            supabaseClient
-                .from("employees")
-                .select("*")
-                .eq("active", true)
-                .order("employee_name"),
-
-            supabaseClient
-                .from("employee_projects")
-                .select("*")
+                .eq(
+                    "project_id",
+                    projectId
+                )
+                .eq(
+                    "active",
+                    true
+                )
+                .order(
+                    "sub_project_name"
+                )
 
         ]);
 
-    if (projectsRes.error) {
-        throw new Error(
-            "Projects could not be loaded. " +
-            projectsRes.error.message
-        );
-    }
 
-    if (employeesRes.error) {
-        throw new Error(
-            "The employee list could not be loaded. " +
-            employeesRes.error.message
-        );
-    }
+    /*
+       Project reference data is useful for display/target
+       resolution, but the employee's actual employee record
+       remains the source of identity.
+    */
 
-    projects = projectsRes.data || [];
-    employees = employeesRes.data || [];
+    if (projectRes.error) {
 
-    // These two are enrichment only. If they are not
-    // readable the app still works, it just falls back to
-    // project-level targets.
-    if (subProjectsRes.error) {
         console.warn(
-            "Sub-projects unavailable:",
+            "Project information unavailable:",
+            projectRes.error.message
+        );
+
+        projects = [];
+
+    }
+    else {
+
+        projects =
+            projectRes.data
+                ? [projectRes.data]
+                : [];
+
+    }
+
+
+    if (subProjectsRes.error) {
+
+        console.warn(
+            "Sub-project information unavailable:",
             subProjectsRes.error.message
         );
+
         subProjects = [];
+
     }
     else {
-        subProjects = subProjectsRes.data || [];
+
+        subProjects =
+            subProjectsRes.data || [];
+
     }
 
-    if (employeeProjectsRes.error) {
-        console.warn(
-            "Employee project mappings unavailable:",
-            employeeProjectsRes.error.message
-        );
-        employeeProjects = [];
-    }
-    else {
-        employeeProjects = employeeProjectsRes.data || [];
-    }
-
-    if (!employees.length) {
-        throw new Error(
-            "No active employees were found."
-        );
-    }
 }
 
 
 /* =========================================================
-   STEP 1 — PICKER
-========================================================= */
-
-function renderProjectOptions() {
-
-    const select = $("pickProject");
-
-    const options = [
-        `<option value="">All projects</option>`
-    ];
-
-    projects.forEach(
-        p => {
-            options.push(
-                `<option value="${esc(p.id)}">${esc(p.project_name)}</option>`
-            );
-        }
-    );
-
-    select.innerHTML = options.join("");
-}
-
-
-function renderEmployeeOptions() {
-
-    const projectId = $("pickProject").value;
-    const select = $("pickEmployee");
-
-    const list =
-        employees.filter(
-            e =>
-                !projectId ||
-                String(e.project_id) === String(projectId)
-        );
-
-    if (!list.length) {
-
-        select.innerHTML =
-            `<option value="">No employees in this project</option>`;
-
-        $("continueBtn").disabled = true;
-
-        return;
-    }
-
-    $("continueBtn").disabled = false;
-
-    select.innerHTML =
-        list
-            .map(
-                e => {
-
-                    const code =
-                        e.employee_code
-                            ? ` — ${e.employee_code}`
-                            : "";
-
-                    return `<option value="${esc(e.id)}">${esc(e.employee_name)}${esc(code)}</option>`;
-                }
-            )
-            .join("");
-}
-
-
-async function confirmIdentity() {
-
-    const id = $("pickEmployee").value;
-
-    if (!id) {
-        return;
-    }
-
-    const employee =
-        employees.find(
-            e => String(e.id) === String(id)
-        );
-
-    if (!employee) {
-        return;
-    }
-
-    if ($("rememberMe").checked) {
-        rememberSet(String(employee.id));
-    }
-    else {
-        rememberClear();
-    }
-
-    await openEntryFor(employee);
-}
-
-
-function switchUser() {
-
-    rememberClear();
-
-    me = null;
-    myRecord = null;
-
-    hide("entryScreen");
-    show("pickCard");
-
-    $("headerSubtitle").textContent =
-        "Update your own hourly count";
-}
-
-
-/* =========================================================
-   STEP 2 — ENTRY
+   ENTRY SCREEN
 ========================================================= */
 
 async function openEntryFor(employee) {
 
     me = employee;
 
-    hide("pickCard");
+
+    hide("loginCard");
+    hide("fatalCard");
+
     show("entryScreen");
 
-    const subProject = getEmployeeSubProject(me);
-    const project = getProjectById(me.project_id);
 
-    $("whoName").textContent = me.employee_name || "";
+    const subProject =
+        getEmployeeSubProject(
+            me
+        );
+
+
+    const project =
+        getProjectById(
+            me.project_id
+        );
+
+
+    $("whoName").textContent =
+        me.employee_name || "";
+
 
     const bits = [];
 
+
     if (me.employee_code) {
-        bits.push(me.employee_code);
+
+        bits.push(
+            me.employee_code
+        );
+
     }
+
 
     if (project) {
-        bits.push(project.project_name);
+
+        bits.push(
+            project.project_name
+        );
+
     }
+
 
     if (subProject) {
-        bits.push(subProject.sub_project_name);
+
+        bits.push(
+            subProject.sub_project_name
+        );
+
     }
 
-    $("whoMeta").textContent = bits.join("  •  ");
+
+    $("whoMeta").textContent =
+        bits.join("  •  ");
+
 
     $("whoDate").textContent =
-        `Shift date: ${prettyDate(trackerDate)}`;
+        `Shift date: ${prettyDate(
+            trackerDate
+        )}`;
+
 
     $("headerSubtitle").textContent =
-        me.employee_name || "Update your own hourly count";
+        me.employee_name ||
+        "My Hourly Production";
+
 
     await loadMyRecord();
 
+
     renderHourRows();
+
     applyLocks();
+
     recalcTotal();
 
+
     startLockTicker();
+
 }
 
 
+/* =========================================================
+   LOAD MY RECORD
+========================================================= */
+
 async function loadMyRecord() {
 
-    const { data, error } =
+    const {
+        data,
+        error
+    } =
         await supabaseClient
             .from("daily_productivity")
             .select("*")
-            .eq("tracker_date", trackerDate)
-            .eq("employee_id", me.id)
+            .eq(
+                "tracker_date",
+                trackerDate
+            )
+            .eq(
+                "employee_id",
+                me.id
+            )
             .maybeSingle();
+
 
     if (error) {
 
-        console.error("Load record:", error);
+        console.error(
+            "Load record:",
+            error
+        );
+
 
         setBanner(
             "error",
@@ -1454,30 +1886,46 @@ async function loadMyRecord() {
             "otherwise you may overwrite earlier numbers."
         );
 
+
         myRecord = null;
 
         return;
+
     }
 
-    myRecord = data || null;
+
+    myRecord =
+        data || null;
+
 
     $("attendance").value =
-        myRecord?.attendance || "Present";
+        myRecord?.attendance ||
+        "Present";
+
 }
 
+
+/* =========================================================
+   HOURLY ROWS
+========================================================= */
 
 function renderHourRows() {
 
     const rows = [];
 
+
     hourFields.forEach(
         (field, index) => {
 
             const value =
-                myRecord && myRecord[field] !== null &&
+                myRecord &&
+                myRecord[field] !== null &&
                 myRecord[field] !== undefined
-                    ? Number(myRecord[field])
+                    ? Number(
+                        myRecord[field]
+                      )
                     : 0;
+
 
             rows.push(`
 
@@ -1485,87 +1933,160 @@ function renderHourRows() {
                      data-index="${index}">
 
                     <div class="hour-label">
-                        ${esc(hourLabels[index])}
+
+                        ${hourLabels[index]}
+
                         <span class="hour-note hidden"></span>
+
                     </div>
 
-                    <span class="locked-tag hidden">LOCKED</span>
+                    <span class="locked-tag hidden">
+                        LOCKED
+                    </span>
 
-                    <input class="hour-input"
-                           type="number"
-                           inputmode="numeric"
-                           min="0"
-                           step="1"
-                           data-field="${field}"
-                           value="${value}"
-                           oninput="onHourInput(this)">
+                    <input
+                        class="hour-input"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        step="1"
+                        data-field="${field}"
+                        value="${value}"
+                        oninput="onHourInput(this)"
+                    >
 
                 </div>
 
             `);
+
         }
     );
 
-    $("hourRows").innerHTML = rows.join("");
+
+    $("hourRows").innerHTML =
+        rows.join("");
+
 }
 
 
-/*
-   Applies the lock state to every hour row. Runs on load and
-   then on a timer, so an hour visibly closes while the
-   employee has the page open.
-*/
+/* =========================================================
+   APPLY LOCKS
+========================================================= */
+
 function applyLocks() {
 
-    const fullyLocked = isDateFullyLocked(trackerDate);
+    const fullyLocked =
+        isDateFullyLocked(
+            trackerDate
+        );
+
 
     document
-        .querySelectorAll("#hourRows .hour-row")
+        .querySelectorAll(
+            "#hourRows .hour-row"
+        )
         .forEach(
             row => {
 
-                const index = Number(row.dataset.index);
-                const input = row.querySelector(".hour-input");
-                const tag = row.querySelector(".locked-tag");
-                const locked = isHourLocked(index, trackerDate);
+                const index =
+                    Number(
+                        row.dataset.index
+                    );
 
-                input.readOnly = locked;
-                row.classList.toggle("is-locked", locked);
-                tag.classList.toggle("hidden", !locked);
+
+                const input =
+                    row.querySelector(
+                        ".hour-input"
+                    );
+
+
+                const tag =
+                    row.querySelector(
+                        ".locked-tag"
+                    );
+
+
+                const locked =
+                    isHourLocked(
+                        index,
+                        trackerDate
+                    );
+
+
+                /*
+                   readOnly rather than disabled so the value
+                   remains visible and cannot be edited.
+                */
+
+                input.readOnly =
+                    locked;
+
+
+                input.classList.toggle(
+                    "locked-input",
+                    locked
+                );
+
+
+                row.classList.toggle(
+                    "is-locked",
+                    locked
+                );
+
+
+                tag.classList.toggle(
+                    "hidden",
+                    !locked
+                );
+
 
                 tag.textContent =
                     dateLockOverride !== null &&
                     dateLockOverride.locked
                         ? "CLOSED"
                         : "LOCKED";
+
             }
         );
 
-    // Attendance follows the same rule: if the whole date is
-    // closed there is nothing left to change.
-    $("attendance").disabled = fullyLocked;
+
+    $("attendance").disabled =
+        fullyLocked;
+
 
     if (fullyLocked) {
 
         setBanner(
             "warn",
-            dateLockOverride !== null && dateLockOverride.locked
+            dateLockOverride !== null &&
+            dateLockOverride.locked
+
                 ? "This shift has been closed by management. " +
-                  "Contact your team lead if something needs " +
-                  "changing."
-                : "This shift has finished, so it is now " +
-                  "read-only. Contact your team lead if " +
-                  "something needs changing."
+                  "Contact your team lead if something needs changing."
+
+                : "This shift has finished, so it is now read-only. " +
+                  "Contact your team lead if something needs changing."
         );
 
     }
     else {
-        setBanner(null, null);
+
+        setBanner(
+            null,
+            null
+        );
+
     }
+
 }
 
 
+/* =========================================================
+   LOCK TICKER
+========================================================= */
+
 let lockTicker = null;
+
 
 function startLockTicker() {
 
@@ -1573,84 +2094,161 @@ function startLockTicker() {
         return;
     }
 
-    // Re-evaluate every 30 seconds so an hour closes on
-    // screen without needing a refresh.
+
     lockTicker =
         setInterval(
             () => {
 
-                const nowShiftDate = getCurrentShiftDateString();
+                const nowShiftDate =
+                    getCurrentShiftDateString();
 
-                // The shift rolled over while the page was
-                // open. Reload so the employee is not typing
-                // into yesterday.
-                if (nowShiftDate !== trackerDate) {
+
+                /*
+                   Shift rolled over while the page was open.
+                */
+
+                if (
+                    nowShiftDate !==
+                    trackerDate
+                ) {
+
                     location.reload();
+
                     return;
+
                 }
 
+
                 applyLocks();
+
             },
             30000
         );
+
 }
 
+
+/* =========================================================
+   TOTAL
+========================================================= */
 
 function recalcTotal() {
 
     let total = 0;
 
+
     document
-        .querySelectorAll("#hourRows .hour-input")
+        .querySelectorAll(
+            "#hourRows .hour-input"
+        )
         .forEach(
             input => {
-                total += Math.max(Number(input.value || 0), 0);
+
+                total += Math.max(
+                    Number(
+                        input.value || 0
+                    ),
+                    0
+                );
+
             }
         );
+
 
     $("totalEntered").textContent =
         total.toLocaleString();
 
+
     return total;
+
 }
 
+
+/* =========================================================
+   HOURLY INPUT
+========================================================= */
 
 function onHourInput(input) {
 
-    // Negative production is never valid.
-    if (Number(input.value) < 0) {
+    /*
+       Negative production is invalid.
+    */
+
+    if (
+        Number(input.value) < 0
+    ) {
+
         input.value = 0;
+
     }
 
+
+    /*
+       readOnly/locked fields should never be changed.
+    */
+
+    if (
+        input.readOnly
+    ) {
+
+        return;
+
+    }
+
+
     recalcTotal();
+
     queueSave();
+
 }
 
 
+/* =========================================================
+   ATTENDANCE
+========================================================= */
+
 function onAttendanceChange() {
 
-    // Marking yourself absent has to clear the counts,
-    // otherwise the row carries production against a zero
-    // target and the dashboards disagree.
-    if ($("attendance").value === "Absent") {
+    /*
+       Marking Absent clears all unlocked hourly counts.
+    */
+
+    if (
+        $("attendance").value ===
+        "Absent"
+    ) {
 
         document
-            .querySelectorAll("#hourRows .hour-input")
+            .querySelectorAll(
+                "#hourRows .hour-input"
+            )
             .forEach(
                 (input, index) => {
 
-                    if (isHourLocked(index, trackerDate)) {
+                    if (
+                        isHourLocked(
+                            index,
+                            trackerDate
+                        )
+                    ) {
+
                         return;
+
                     }
 
+
                     input.value = 0;
+
                 }
             );
 
     }
 
+
     recalcTotal();
+
     queueSave();
+
 }
 
 
@@ -1660,21 +2258,36 @@ function onAttendanceChange() {
 
 const SAVE_DEBOUNCE_MS = 900;
 
+
 let saveTimer = null;
 let saveInFlight = false;
 let savePending = false;
 
 
-function setSaveState(state, text) {
+function setSaveState(
+    state,
+    text
+) {
 
-    $("saveState").dataset.state = state;
-    $("saveText").textContent = text;
+    $("saveState")
+        .dataset.state =
+        state;
+
+
+    $("saveText")
+        .textContent =
+        text;
+
 }
 
 
 function queueSave() {
 
-    if (isDateFullyLocked(trackerDate)) {
+    if (
+        isDateFullyLocked(
+            trackerDate
+        )
+    ) {
 
         setSaveState(
             "error",
@@ -1682,44 +2295,88 @@ function queueSave() {
         );
 
         return;
+
     }
 
-    setSaveState("saving", "Saving…");
+
+    setSaveState(
+        "saving",
+        "Saving…"
+    );
+
 
     if (saveTimer) {
-        clearTimeout(saveTimer);
+
+        clearTimeout(
+            saveTimer
+        );
+
     }
+
 
     saveTimer =
         setTimeout(
             () => {
+
                 saveTimer = null;
+
                 flushSave();
+
             },
             SAVE_DEBOUNCE_MS
         );
+
 }
 
 
+/* =========================================================
+   BUILD DATABASE RECORD
+========================================================= */
+
 function buildRecord() {
 
-    const attendance = $("attendance").value;
-    const target = getDailyTarget(me, attendance);
+    const attendance =
+        $("attendance").value;
+
+
+    const target =
+        getDailyTarget(
+            me,
+            attendance
+        );
+
 
     const record = {
 
-        tracker_date: trackerDate,
-        employee_id: me.id,
-        attendance: attendance,
-        daily_target: target,
-        break_minutes: myRecord?.break_minutes ?? 0,
-        achieved: 0,
-        remaining: target,
-        achievement_percentage: null
+        tracker_date:
+            trackerDate,
+
+        employee_id:
+            me.id,
+
+        attendance:
+            attendance,
+
+        daily_target:
+            target,
+
+        break_minutes:
+            myRecord?.break_minutes ?? 0,
+
+        achieved:
+            0,
+
+        remaining:
+            target,
+
+        achievement_percentage:
+            null
 
     };
 
+
     let achieved = 0;
+
 
     hourFields.forEach(
         (field, index) => {
@@ -1729,158 +2386,446 @@ function buildRecord() {
                     `#hourRows [data-field="${field}"]`
                 );
 
-            const locked = isHourLocked(index, trackerDate);
+
+            const locked =
+                isHourLocked(
+                    index,
+                    trackerDate
+                );
+
 
             /*
-               A locked hour is never resent from the browser.
-               The value already stored in Supabase is reused,
-               so a stale page cannot rewrite a closed hour.
+               A locked hour uses the value already stored
+               in Supabase.
+
+               This prevents a stale browser page from
+               rewriting a closed hour.
             */
+
             const raw =
                 locked && myRecord
                     ? myRecord[field]
                     : input?.value;
 
-            const value = Math.max(Number(raw || 0), 0);
 
-            record[field] = value;
-            achieved += value;
+            const value =
+                Math.max(
+                    Number(
+                        raw || 0
+                    ),
+                    0
+                );
+
+
+            record[field] =
+                value;
+
+
+            achieved +=
+                value;
+
         }
     );
 
-    record.achieved = achieved;
 
-    if (target === null) {
+    record.achieved =
+        achieved;
 
-        record.remaining = null;
-        record.achievement_percentage = 0;
+
+    if (
+        target === null
+    ) {
+
+        record.remaining =
+            null;
+
+        record.achievement_percentage =
+            0;
 
     }
     else {
 
-        record.remaining = Math.max(target - achieved, 0);
+        record.remaining =
+            Math.max(
+                target - achieved,
+                0
+            );
+
 
         const pct =
-            computeAchievementPercent(achieved, target);
+            computeAchievementPercent(
+                achieved,
+                target
+            );
+
 
         record.achievement_percentage =
             pct === null
                 ? 0
-                : Number(pct.toFixed(2));
+                : Number(
+                    pct.toFixed(2)
+                  );
+
     }
 
+
     return record;
+
 }
 
 
+/* =========================================================
+   SAVE
+========================================================= */
+
 async function flushSave() {
 
-    if (saveInFlight) {
+    if (
+        saveInFlight
+    ) {
+
         savePending = true;
+
         return;
+
     }
 
-    if (isDateFullyLocked(trackerDate)) {
+
+    if (
+        isDateFullyLocked(
+            trackerDate
+        )
+    ) {
+
         return;
+
     }
+
+
+    if (!me) {
+
+        setSaveState(
+            "error",
+            "Not saved — employee session unavailable"
+        );
+
+        return;
+
+    }
+
 
     saveInFlight = true;
 
-    const record = buildRecord();
 
-    // `daily_target` is NOT NULL in the database. A
-    // non-target sub-process resolves to null here, so fall
-    // back to zero rather than failing the write.
+    const record =
+        buildRecord();
+
+
+    /*
+       daily_target is NOT NULL in the current database.
+
+       If the process is non-target based, use zero.
+    */
+
     if (
         record.daily_target === null ||
         record.daily_target === undefined
     ) {
+
         record.daily_target = 0;
+
     }
 
-    const { error } =
+
+    const {
+        error
+    } =
         await supabaseClient
             .from("daily_productivity")
             .upsert(
                 record,
-                { onConflict: "tracker_date,employee_id" }
+                {
+                    onConflict:
+                        "tracker_date,employee_id"
+                }
             );
+
 
     saveInFlight = false;
 
+
     if (error) {
 
-        console.error("Autosave:", error);
+        console.error(
+            "Autosave:",
+            error
+        );
+
 
         setSaveState(
             "error",
-            "Not saved — " + (error.message || "please retry")
+            "Not saved — " +
+            (
+                error.message ||
+                "please retry"
+            )
         );
 
+
         return;
+
     }
 
-    // Keep the local copy in step so locked hours and the
-    // next write are based on what the database now holds.
-    myRecord = Object.assign({}, myRecord || {}, record);
+
+    /*
+       Keep local copy synchronized with the database.
+    */
+
+    myRecord =
+        Object.assign(
+            {},
+            myRecord || {},
+            record
+        );
+
 
     setSaveState(
         "saved",
         "Saved at " +
-        new Date().toLocaleTimeString(
-            undefined,
-            { hour: "2-digit", minute: "2-digit" }
-        )
+        new Date()
+            .toLocaleTimeString(
+                undefined,
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            )
     );
 
+
     if (savePending) {
+
         savePending = false;
+
         flushSave();
+
     }
+
 }
 
 
-/*
-   Warn before leaving with an unsaved edit still pending.
-*/
+/* =========================================================
+   UNSAVED CHANGE WARNING
+========================================================= */
+
 window.addEventListener(
     "beforeunload",
     event => {
 
-        if (saveTimer || saveInFlight) {
+        if (
+            saveTimer ||
+            saveInFlight
+        ) {
+
             event.preventDefault();
+
             event.returnValue = "";
+
         }
+
     }
 );
 
 
-/*
-   A phone browser suspends timers when the tab is
-   backgrounded. Re-check locks and flush on return.
-*/
+/* =========================================================
+   MOBILE / TAB RETURN
+========================================================= */
+
 document.addEventListener(
     "visibilitychange",
     () => {
 
-        if (document.visibilityState !== "visible" || !me) {
+        if (
+            document.visibilityState !==
+            "visible"
+        ) {
+
+            return;
+
+        }
+
+
+        if (!me) {
             return;
         }
 
-        if (getCurrentShiftDateString() !== trackerDate) {
+
+        if (
+            getCurrentShiftDateString() !==
+            trackerDate
+        ) {
+
             location.reload();
+
             return;
+
         }
+
 
         applyLocks();
 
+
         if (saveTimer) {
-            clearTimeout(saveTimer);
+
+            clearTimeout(
+                saveTimer
+            );
+
             saveTimer = null;
+
             flushSave();
+
         }
+
     }
 );
+
+
+/* =========================================================
+   PASSWORD ENTER KEY
+========================================================= */
+
+$("loginPassword")
+    .addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                loginEmployee();
+
+            }
+
+        }
+    );
+
+
+$("loginEmail")
+    .addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                loginEmployee();
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
+   AUTH SESSION CHANGE
+========================================================= */
+
+supabaseClient.auth.onAuthStateChange(
+    (event, session) => {
+
+        console.log(
+            "Auth event:",
+            event
+        );
+
+
+        if (
+            event ===
+            "SIGNED_OUT"
+        ) {
+
+            currentAuthUser =
+                null;
+
+            me = null;
+
+            hide("entryScreen");
+            hide("fatalCard");
+            hide("loadingCard");
+
+            show("loginCard");
+
+            $("headerSubtitle").textContent =
+                "Secure employee production entry";
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   START
+========================================================= */
+
+async function start() {
+
+    trackerDate =
+        getCurrentShiftDateString();
+
+
+    try {
+
+        const hasSession =
+            await checkExistingSession();
+
+
+        hide("loadingCard");
+
+
+        if (!hasSession) {
+
+            show("loginCard");
+
+            $("headerSubtitle").textContent =
+                "Secure employee production entry";
+
+            return;
+
+        }
+
+
+        await openAuthenticatedPortal();
+
+    }
+    catch (error) {
+
+        console.error(
+            "Startup error:",
+            error
+        );
+
+
+        hide("loadingCard");
+        hide("loginCard");
+        hide("entryScreen");
+
+
+        show("fatalCard");
+
+
+        $("fatalText").textContent =
+            error.message ||
+            "Could not start the employee portal.";
+
+    }
+
+}
 
 
 start();
