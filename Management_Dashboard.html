@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>WRMC Management Dashboard</title>
+<title>RCM Management Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
@@ -42,6 +42,9 @@ body{
     position:sticky;
     top:0;
     z-index:20;
+    /* Without wrapping, the email plus the two action buttons are
+       wider than a phone viewport and drag the whole page sideways. */
+    flex-wrap:wrap;
 }
 
 .brand h1{
@@ -59,6 +62,8 @@ body{
     display:flex;
     gap:9px;
     align-items:center;
+    flex-wrap:wrap;
+    min-width:0;
 }
 
 .btn{
@@ -194,6 +199,11 @@ label{
     border-radius:14px;
     padding:18px;
     box-shadow:0 3px 14px rgba(16,24,40,.05);
+    /* Grid and flex items default to min-width:auto, which lets a
+       wide table stretch its track and drag the whole page sideways
+       on mobile. Pinning it to 0 keeps the horizontal scrolling
+       inside .table-wrap where it belongs. */
+    min-width:0;
 }
 
 .card h2{
@@ -251,6 +261,7 @@ label{
 .table-wrap{
     overflow:auto;
     max-height:460px;
+    max-width:100%;
 }
 
 .table{
@@ -387,6 +398,15 @@ label{
 
     .topbar{
         padding:15px;
+        align-items:flex-start;
+    }
+
+    .top-actions{
+        width:100%;
+    }
+
+    .top-actions .who{
+        flex:1 1 100%;
     }
 
     .container{
@@ -412,7 +432,7 @@ label{
 
     <div class="login">
 
-        <h1>Management Dashboard</h1>
+        <h1>RCM Management Dashboard</h1>
 
         <p>
             Management-only executive view for production,
@@ -459,7 +479,7 @@ label{
     <div class="brand">
 
         <h1>
-            WRMC Management Dashboard
+            RCM Management Dashboard
         </h1>
 
         <p>
@@ -944,17 +964,17 @@ label{
 
 
 <!-- =========================================================
-     PROJECT PERFORMANCE
+     SUB PROCESS PERFORMANCE
 ========================================================= -->
 
 <section class="card full">
 
     <h2>
-        Project Performance Summary
+        Sub Process Summary
     </h2>
 
     <div class="muted">
-        Period-level management view.
+        Period-level management view, broken down by sub process.
     </div>
 
     <div class="table-wrap">
@@ -966,7 +986,7 @@ label{
                 <tr>
 
                     <th>
-                        Project
+                        Sub Process
                     </th>
 
                     <th>
@@ -997,7 +1017,7 @@ label{
 
             </thead>
 
-            <tbody id="projectTable">
+            <tbody id="subProcessTable">
 
             </tbody>
 
@@ -1010,7 +1030,7 @@ label{
 
 <div class="footer">
 
-    Management Dashboard • Data sourced from the existing
+    RCM Management Dashboard • Data sourced from the existing
     Supabase productivity system
 
 </div>
@@ -2564,7 +2584,7 @@ function renderAll(){
     );
 
 
-    renderProjectTable();
+    renderSubProcessTable();
 
 }
 
@@ -3287,7 +3307,7 @@ function renderEmployeeTable(er){
    PROJECT TABLE
 ========================================================= */
 
-function renderProjectTable(){
+function renderSubProcessTable(){
 
     const map = {};
 
@@ -3310,10 +3330,24 @@ function renderProjectTable(){
             }
 
 
+            /*
+               Group by SUB PROCESS rather than project.
+
+               The project name is kept as a prefix because two
+               projects can carry similarly named sub processes,
+               and a bare sub process name would be ambiguous.
+
+               Employees with no resolvable sub process are
+               bucketed under their project so their production
+               is never silently dropped from the totals.
+            */
+            const subProject =
+                employeeSubProject(e);
+
             const name =
-                projectName(
-                    e.project_id
-                );
+                subProject
+                ? `${projectName(e.project_id)} → ${subProject.sub_project_name}`
+                : `${projectName(e.project_id)} → Not Assigned`;
 
 
             if(!map[name]){
@@ -3355,9 +3389,13 @@ function renderProjectTable(){
     );
 
 
-    $("projectTable").innerHTML =
+    $("subProcessTable").innerHTML =
 
         Object.entries(map)
+            .sort(
+                (a,b) =>
+                a[0].localeCompare(b[0])
+            )
             .map(
                 ([name,x]) => {
 
@@ -3427,7 +3465,7 @@ function renderProjectTable(){
 
     if(!Object.keys(map).length){
 
-        $("projectTable").innerHTML = `
+        $("subProcessTable").innerHTML = `
 
             <tr>
 
