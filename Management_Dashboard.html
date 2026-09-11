@@ -1083,6 +1083,22 @@ let records = [];
 
 let accessProjects = [];
 
+// Loaded so Management can resolve targets exactly the way
+// the Daily Tracker does, instead of trusting a stored column.
+let subProjects = [];
+let employeeProjects = [];
+
+/*
+   Explicit "All Projects" grant.
+
+   A user_project_access row with role = 'management' and
+   project_id IS NULL is the authorization to view the
+   cross-project aggregate. Management users who are scoped to
+   specific projects only see those projects, and the
+   "All Projects" option is hidden from them.
+*/
+let hasAllProjectsGrant = false;
+
 
 /* =========================================================
    SHORT DOM FUNCTION
@@ -1309,6 +1325,29 @@ async function initialize(user){
                 .map(x => Number(x.project_id));
 
 
+        // Only an explicit management row without a project_id
+        // authorizes the aggregated All Projects view.
+        hasAllProjectsGrant =
+            data.some(
+                x =>
+                String(x.role).toLowerCase() === "management" &&
+                x.project_id == null
+            );
+
+
+        if(!hasAllProjectsGrant && !accessProjects.length){
+
+            $("authError").textContent =
+                "This management account has no projects assigned " +
+                "and no All Projects authorization.";
+
+            await supabaseClient.auth.signOut();
+
+            return;
+
+        }
+
+
         $("authScreen")
             .classList
             .add("hidden");
@@ -1409,16 +1448,84 @@ async function loadReferenceData(){
 
 
     /* =========================
+       SUB-PROJECTS
+       Required to resolve targets the same way the
+       Daily Tracker does.
+    ========================= */
+
+    const subProjectQuery =
+        await supabaseClient
+            .from("sub_projects")
+            .select("*");
+
+
+    if(subProjectQuery.error){
+
+        console.warn(
+            "Sub-project load failed, falling back to stored targets:",
+            subProjectQuery.error.message
+        );
+
+        subProjects = [];
+
+    }
+    else{
+
+        subProjects =
+            subProjectQuery.data || [];
+
+    }
+
+
+    /* =========================
+       EMPLOYEE / SUB-PROJECT MAP
+    ========================= */
+
+    const employeeProjectQuery =
+        await supabaseClient
+            .from("employee_projects")
+            .select("*");
+
+
+    if(employeeProjectQuery.error){
+
+        console.warn(
+            "Employee mapping load failed, falling back to stored targets:",
+            employeeProjectQuery.error.message
+        );
+
+        employeeProjects = [];
+
+    }
+    else{
+
+        employeeProjects =
+            employeeProjectQuery.data || [];
+
+    }
+
+
+    /* =========================
        PROJECT ACCESS FILTER
     ========================= */
 
-    if(accessProjects.length){
+    // Without the explicit All Projects grant the user is
+    // restricted to their assigned projects only.
+    if(!hasAllProjectsGrant){
 
         employees =
             employees.filter(
                 e =>
                 accessProjects.includes(
                     Number(e.project_id)
+                )
+            );
+
+        projects =
+            projects.filter(
+                p =>
+                accessProjects.includes(
+                    Number(p.id)
                 )
             );
 
@@ -1432,7 +1539,7 @@ async function loadReferenceData(){
     const availableProjects =
         projects.filter(
             p =>
-            !accessProjects.length ||
+            hasAllProjectsGrant ||
             accessProjects.includes(
                 Number(p.id)
             )
@@ -1440,7 +1547,11 @@ async function loadReferenceData(){
 
 
     $("projectFilter").innerHTML =
-        '<option value="">All Projects</option>' +
+        (
+            hasAllProjectsGrant
+                ? '<option value="">All Projects</option>'
+                : '<option value="">Select Project</option>'
+        ) +
 
         availableProjects
             .map(
@@ -1657,6 +1768,34 @@ async function refreshDashboard(){
 
 
         /* =========================
+           ROSTER BACKFILL
+
+           The Daily Tracker shows every rostered employee for
+           a date, so an employee with no saved entry still
+           contributes their full target and zero achieved.
+
+           Reading daily_productivity alone silently drops
+           those employees, which inflates Achievement %
+           here relative to the tracker. For every date that
+           has any activity, add a zero row for each in-scope
+           employee who has no record on that date so both
+           apps use the same denominator.
+        ========================= */
+
+        records =
+            backfillMissingRoster(
+                records,
+                projectId
+            );
+
+
+        console.log(
+            "Records after roster backfill:",
+            records.length
+        );
+
+
+        /* =========================
            RENDER
         ========================= */
 
@@ -1744,6 +1883,284 @@ function calculateAchieved(record){
             ),
         0
     );
+
+}
+
+
+/* =========================================================
+   CANONICAL TARGET RESOLUTION
+
+   This mirrors the Daily Tracker exactly so that Management
+   and operational views never disagree.
+
+   Order of precedence for an employee's daily target:
+     1. the employee's sub-project daily_target
+     2. the sub-project mapped via employee_projects
+     3. the only active sub-project of their project
+     4. the project's daily_target
+
+   A sub-project flagged target_based = false has NO target
+   and is excluded from Achievement % entirely.
+
+   The result is then adjusted for attendance:
+     Absent   -> 0
+     Half Day -> ceil(target / 2)
+     Present  -> full target
+
+   The stored daily_productivity.daily_target column is only a
+   fallback, because it goes stale if a project or sub-project
+   target is edited after those records were written.
+========================================================= */
+
+function subProjectById(id){
+
+    return subProjects.find(
+        sp =>
+        Number(sp.id) === Number(id)
+    ) || null;
+
+}
+
+
+function projectById(id){
+
+    return projects.find(
+        p =>
+        Number(p.id) === Number(id)
+    ) || null;
+
+}
+
+
+function employeeSubProject(employee){
+
+    if(!employee) return null;
+
+
+    if(
+        employee.sub_project_id !== null &&
+        employee.sub_project_id !== undefined &&
+        employee.sub_project_id !== ""
+    ){
+
+        const direct =
+            subProjectById(
+                employee.sub_project_id
+            );
+
+        if(direct) return direct;
+
+    }
+
+
+    const mappings =
+        employeeProjects.filter(
+            ep =>
+            Number(ep.employee_id) ===
+            Number(employee.id)
+        );
+
+
+    for(const mapping of mappings){
+
+        if(
+            mapping.sub_project_id !== null &&
+            mapping.sub_project_id !== undefined &&
+            mapping.sub_project_id !== ""
+        ){
+
+            const mapped =
+                subProjectById(
+                    mapping.sub_project_id
+                );
+
+            if(mapped) return mapped;
+
+        }
+
+    }
+
+
+    const projectSubProjects =
+        subProjects.filter(
+            sp =>
+            Number(sp.project_id) ===
+            Number(employee.project_id) &&
+            sp.active === true
+        );
+
+
+    if(projectSubProjects.length === 1){
+        return projectSubProjects[0];
+    }
+
+
+    return null;
+
+}
+
+
+function employeeBaseTarget(employee){
+
+    const subProject =
+        employeeSubProject(employee);
+
+
+    if(subProject){
+
+        if(subProject.target_based === false){
+            return null;
+        }
+
+        if(
+            subProject.daily_target === null ||
+            subProject.daily_target === undefined ||
+            subProject.daily_target === ""
+        ){
+            return null;
+        }
+
+        return Number(subProject.daily_target);
+
+    }
+
+
+    const project =
+        projectById(employee.project_id);
+
+
+    if(!project) return null;
+
+
+    if(
+        project.daily_target === null ||
+        project.daily_target === undefined ||
+        project.daily_target === ""
+    ){
+        return null;
+    }
+
+
+    return Number(project.daily_target);
+
+}
+
+
+function resolveDailyTarget(record, employee){
+
+    const attendance =
+        attendanceType(record.attendance);
+
+
+    const base =
+        employee
+            ? employeeBaseTarget(employee)
+            : null;
+
+
+    const target =
+        base === null || base === undefined
+            ? Number(record.daily_target) || 0
+            : base;
+
+
+    if(attendance === "absent"){
+        return 0;
+    }
+
+
+    if(attendance === "half"){
+        return Math.ceil(target / 2);
+    }
+
+
+    return target;
+
+}
+
+
+function employeeForRecord(record){
+
+    return employees.find(
+        x =>
+        Number(x.id) === Number(record.employee_id)
+    ) || null;
+
+}
+
+
+/* =========================================================
+   ROSTER BACKFILL
+
+   Produces a synthetic zero record for every
+   (date, employee) pair that has no saved entry, limited to
+   the dates that already have activity. This keeps the
+   Achievement % denominator identical to the Daily Tracker.
+========================================================= */
+
+function backfillMissingRoster(rows, projectId){
+
+    if(!rows.length) return rows;
+
+
+    const activeDates =
+        Array.from(
+            new Set(
+                rows.map(r => String(r.tracker_date))
+            )
+        );
+
+
+    const scopedEmployees =
+        employees.filter(
+            e =>
+            !projectId ||
+            Number(e.project_id) === Number(projectId)
+        );
+
+
+    const seen = new Set(
+        rows.map(
+            r =>
+            String(r.tracker_date) + "|" + Number(r.employee_id)
+        )
+    );
+
+
+    const filled = rows.slice();
+
+
+    activeDates.forEach(date => {
+
+        scopedEmployees.forEach(e => {
+
+            const key =
+                date + "|" + Number(e.id);
+
+
+            if(seen.has(key)) return;
+
+
+            // No entry was ever saved for this employee on
+            // this date. Treat them as present with their
+            // full target and nothing produced, exactly as
+            // the tracker displays them.
+            filled.push({
+                tracker_date: date,
+                employee_id: e.id,
+                attendance: "Present",
+                daily_target: employeeBaseTarget(e) || 0,
+                break_minutes: 0,
+                achieved: 0,
+                _synthetic: true
+            });
+
+        });
+
+    });
+
+
+    return filled;
 
 }
 
@@ -1846,9 +2263,7 @@ function employeeRows(){
 
 
             a.target +=
-                Number(
-                    r.daily_target
-                ) || 0;
+                resolveDailyTarget(r, e);
 
 
             a.achieved +=
@@ -1938,9 +2353,10 @@ function dayRows(){
 
 
             d.target +=
-                Number(
-                    r.daily_target
-                ) || 0;
+                resolveDailyTarget(
+                    r,
+                    employeeForRecord(r)
+                );
 
 
             d.achieved +=
@@ -2004,9 +2420,10 @@ function renderAll(){
         r => {
 
             target +=
-                Number(
-                    r.daily_target
-                ) || 0;
+                resolveDailyTarget(
+                    r,
+                    employeeForRecord(r)
+                );
 
 
             achieved +=
@@ -2767,7 +3184,12 @@ function renderEmployeeTable(er){
                     "ATTENTION";
 
 
+                // The employees table stores the code in
+                // employee_code, which is what the Daily
+                // Tracker displays. The older fallbacks are
+                // kept for safety.
                 const empId =
+                    x.e.employee_code ||
                     x.e.employee_id ||
                     x.e.emp_id ||
                     "";
@@ -2917,9 +3339,10 @@ function renderProjectTable(){
 
 
             map[name].target +=
-                Number(
-                    r.daily_target
-                ) || 0;
+                resolveDailyTarget(
+                    r,
+                    employeeForRecord(r)
+                );
 
 
             map[name].achieved +=
