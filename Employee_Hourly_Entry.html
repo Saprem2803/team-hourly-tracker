@@ -1,404 +1,715 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
 
-```
 <meta charset="UTF-8">
 
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0">
 
-<title>My Hourly Production Entry</title>
+<title>My Hourly Production</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 
-    * {
-        box-sizing: border-box;
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        linear-gradient(180deg, #eef5fb 0%, #f7f9fc 45%, #eef2f7 100%);
+    color: #1f2937;
+    -webkit-text-size-adjust: 100%;
+    min-height: 100vh;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header {
+    background:
+        linear-gradient(135deg, #082f55, #1261a0 65%, #1786c9);
+    color: #fff;
+    padding: 20px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.16);
+    position: relative;
+    overflow: hidden;
+}
+
+.header::after {
+    content: "";
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    right: -80px;
+    top: -110px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 21px;
+    position: relative;
+    z-index: 1;
+}
+
+.header p {
+    margin: 5px 0 0;
+    opacity: .85;
+    font-size: 13px;
+    position: relative;
+    z-index: 1;
+}
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+.container {
+    padding: 16px;
+    max-width: 680px;
+    margin: auto;
+}
+
+.card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 17px;
+    margin-bottom: 16px;
+    box-shadow: 0 3px 14px rgba(15,61,104,.08);
+    border: 1px solid rgba(203,213,225,.65);
+}
+
+.card h2 {
+    margin: 0 0 5px;
+    font-size: 17px;
+    color: #173b5e;
+}
+
+.muted {
+    color: #6b7280;
+    font-size: 13px;
+    margin: 0 0 14px;
+}
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: #fff;
+    color: #1f2937;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: #1261a0;
+    box-shadow: 0 0 0 3px rgba(18,97,160,.15);
+}
+
+.field {
+    margin-bottom: 14px;
+}
+
+.login-info {
+    background: #eef7ff;
+    border: 1px solid #cfe4f7;
+    color: #14507f;
+    border-radius: 9px;
+    padding: 12px 13px;
+    font-size: 13px;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.btn {
+    display: inline-block;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 9px;
+    background: #1261a0;
+    color: #fff;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.btn:hover {
+    background: #0f4f84;
+    transform: translateY(-1px);
+}
+
+.btn:disabled {
+    background: #9aa6b2;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-quiet {
+    background: #fff;
+    color: #1261a0;
+    border: 1px solid #c4d3e3;
+}
+
+.btn-quiet:hover {
+    background: #eef4fa;
+}
+
+.btn-danger {
+    background: #fff;
+    color: #a11;
+    border: 1px solid #e5bcbc;
+}
+
+/* =========================================================
+   WHO AM I
+========================================================= */
+
+.whoami {
+    background:
+        linear-gradient(135deg, #0b355c, #1261a0 70%, #1689ce);
+    color: #fff;
+    border-radius: 15px;
+    padding: 17px;
+    margin-bottom: 16px;
+    box-shadow: 0 5px 18px rgba(15,61,104,.18);
+    position: relative;
+    overflow: hidden;
+}
+
+.whoami::after {
+    content: "⚡";
+    position: absolute;
+    right: 16px;
+    top: 13px;
+    font-size: 42px;
+    opacity: .13;
+}
+
+.whoami-name {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.whoami-meta {
+    font-size: 13px;
+    opacity: .9;
+    margin-top: 5px;
+}
+
+.whoami-date {
+    font-size: 13px;
+    margin-top: 11px;
+    padding-top: 11px;
+    border-top: 1px solid rgba(255,255,255,.22);
+}
+
+/* =========================================================
+   PERFORMANCE CARD
+========================================================= */
+
+.performance-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.performance-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.performance-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.performance-percent {
+    font-size: 32px;
+    font-weight: 900;
+    color: #1261a0;
+    line-height: 1;
+}
+
+.progress-track {
+    height: 13px;
+    background: #e8eef5;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 16px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background:
+        linear-gradient(90deg, #1261a0, #24a0e6);
+    transition: width .45s ease;
+}
+
+.performance-message {
+    margin-top: 14px;
+    border-radius: 11px;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.45;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.performance-message.above {
+    background: linear-gradient(135deg, #fff7d6, #fff0a8);
+    color: #7a5600;
+    border-color: #f2d675;
+}
+
+.performance-message.target {
+    background: #eaf7ef;
+    color: #14683c;
+    border-color: #bfe4ce;
+}
+
+.performance-message.below {
+    background: #fff3e8;
+    color: #9a4b00;
+    border-color: #f1c79e;
+}
+
+.performance-message.no-target {
+    background: #eef4fa;
+    color: #14507f;
+    border-color: #cfe0ef;
+}
+
+.performance-emoji {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* =========================================================
+   STAT CARDS
+========================================================= */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 9px;
+    margin-bottom: 16px;
+}
+
+.stat-box {
+    background: #fff;
+    border: 1px solid #e1e8f0;
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(15,61,104,.05);
+}
+
+.stat-label {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.stat-value {
+    color: #173b5e;
+    font-size: 20px;
+    font-weight: 900;
+    margin-top: 5px;
+}
+
+/* =========================================================
+   HOURLY ROWS
+========================================================= */
+
+.hour-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.hour-row:last-child {
+    border-bottom: none;
+}
+
+.hour-label {
+    flex: 1 1 auto;
+    font-size: 15px;
+    font-weight: bold;
+    color: #173b5e;
+    min-width: 0;
+}
+
+.hour-note {
+    display: block;
+    font-size: 11px;
+    font-weight: normal;
+    color: #94a3b8;
+    margin-top: 2px;
+    letter-spacing: .04em;
+}
+
+.hour-input {
+    flex: 0 0 90px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.hour-row.is-locked .hour-label {
+    color: #94a3b8;
+}
+
+.hour-row.is-locked .hour-input {
+    background: #eef2f7;
+    color: #7c8798;
+    border-color: #dde5ee;
+}
+
+.locked-tag {
+    flex: 0 0 auto;
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: .06em;
+    color: #64748b;
+    background: #eef2f7;
+    border: 1px solid #dde5ee;
+    border-radius: 999px;
+    padding: 3px 7px;
+}
+
+/* =========================================================
+   TOTAL
+========================================================= */
+
+.total-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 2px solid #eef2f7;
+    font-size: 15px;
+    font-weight: bold;
+    color: #173b5e;
+}
+
+.total-value {
+    font-size: 23px;
+}
+
+/* =========================================================
+   AUTOSAVE
+========================================================= */
+
+.autosave {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 11px 13px;
+    border-radius: 9px;
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+
+.autosave-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #94a3b8;
+    flex: 0 0 auto;
+}
+
+.autosave[data-state="saving"] {
+    background: #fff8e6;
+    border-color: #f5e2b3;
+    color: #92700e;
+}
+
+.autosave[data-state="saving"] .autosave-dot {
+    background: #d99f0b;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+.autosave[data-state="saved"] {
+    background: #eaf7ef;
+    border-color: #c3e6d0;
+    color: #14683c;
+}
+
+.autosave[data-state="saved"] .autosave-dot {
+    background: #198754;
+}
+
+.autosave[data-state="error"] {
+    background: #fdecec;
+    border-color: #f5c2c2;
+    color: #9b1c1c;
+}
+
+.autosave[data-state="error"] .autosave-dot {
+    background: #dc3545;
+}
+
+@keyframes pulse {
+    0%,100% {
+        opacity: 1;
     }
 
-    body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: #f4f7fb;
-        color: #1f2937;
-        -webkit-text-size-adjust: 100%;
+    50% {
+        opacity: .35;
+    }
+}
+
+/* =========================================================
+   BANNERS
+========================================================= */
+
+.banner {
+    padding: 12px 14px;
+    border-radius: 9px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    border: 1px solid transparent;
+}
+
+.banner.error {
+    background: #fdecec;
+    border-color: #f5c2c2;
+    color: #9b1c1c;
+}
+
+.banner.warn {
+    background: #fff8e6;
+    border-color: #f5e2b3;
+    color: #7a5c06;
+}
+
+.banner.info {
+    background: #eef4fa;
+    border-color: #cfe0ef;
+    color: #14507f;
+}
+
+/* =========================================================
+   CELEBRATION OVERLAY
+========================================================= */
+
+.celebration {
+    position: fixed;
+    inset: 0;
+    background: rgba(4,27,48,.78);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+}
+
+.celebration.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.celebration-card {
+    width: min(430px, 100%);
+    background: #fff;
+    border-radius: 24px;
+    padding: 30px 22px;
+    text-align: center;
+    box-shadow: 0 25px 70px rgba(0,0,0,.35);
+    transform: scale(.8);
+    transition: transform .35s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.celebration.show .celebration-card {
+    transform: scale(1);
+}
+
+.celebration-icon {
+    font-size: 70px;
+    animation: trophyBounce 1s infinite alternate;
+}
+
+@keyframes trophyBounce {
+    from {
+        transform: translateY(0) rotate(-3deg);
     }
 
-    .header {
-        background: linear-gradient(135deg, #0f3d68, #1261a0);
-        color: #fff;
-        padding: 18px 20px;
-        box-shadow: 0 3px 12px rgba(0,0,0,.15);
+    to {
+        transform: translateY(-8px) rotate(3deg);
+    }
+}
+
+.celebration-card h2 {
+    margin: 10px 0 6px;
+    font-size: 28px;
+    color: #173b5e;
+}
+
+.celebration-card p {
+    margin: 0 0 20px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.confetti {
+    position: fixed;
+    width: 9px;
+    height: 15px;
+    top: -20px;
+    z-index: 10000;
+    animation: confettiFall 2.8s linear forwards;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform:
+            translateY(-20px)
+            rotate(0deg);
+        opacity: 1;
     }
 
-    .header h1 {
-        margin: 0;
-        font-size: 20px;
+    100% {
+        transform:
+            translateY(110vh)
+            rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* =========================================================
+   FOOTER / LOADING
+========================================================= */
+
+.hidden {
+    display: none !important;
+}
+
+.footer {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 12px;
+    padding: 4px 0 26px;
+    line-height: 1.5;
+}
+
+.spinner {
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+    padding: 26px 0;
+}
+
+.logout-row {
+    margin-top: 12px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 420px) {
+
+    .stats-grid {
+        gap: 6px;
     }
 
-    .header p {
-        margin: 5px 0 0;
-        opacity: .85;
-        font-size: 13px;
-    }
-
-    .container {
-        padding: 16px;
-        max-width: 640px;
-        margin: auto;
-    }
-
-    .card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 16px;
-        box-shadow: 0 2px 10px rgba(0,0,0,.08);
-    }
-
-    .card h2 {
-        margin: 0 0 4px;
-        font-size: 17px;
-        color: #173b5e;
-    }
-
-    .muted {
-        color: #6b7280;
-        font-size: 13px;
-        margin: 0 0 14px;
-    }
-
-    label {
-        display: block;
-        font-size: 13px;
-        font-weight: bold;
-        color: #374151;
-        margin-bottom: 6px;
-    }
-
-    input[type="email"],
-    input[type="password"],
-    input[type="number"] {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        background: #fff;
-        color: #1f2937;
-    }
-
-    input:focus {
-        outline: none;
-        border-color: #1261a0;
-        box-shadow: 0 0 0 3px rgba(18,97,160,.15);
-    }
-
-    input[type="number"].locked-input {
-        background: #eef2f7;
-        color: #7c8798;
-        border-color: #dde5ee;
-    }
-
-    .field {
-        margin-bottom: 14px;
-    }
-
-    .btn {
-        display: inline-block;
-        width: 100%;
-        padding: 14px;
-        font-size: 16px;
-        font-weight: bold;
-        border: none;
-        border-radius: 8px;
-        background: #1261a0;
-        color: #fff;
-        cursor: pointer;
-    }
-
-    .btn:hover {
-        background: #0f4f84;
-    }
-
-    .btn:disabled {
-        background: #9aa6b2;
-        cursor: not-allowed;
-    }
-
-    .btn-quiet {
-        background: #fff;
-        color: #1261a0;
-        border: 1px solid #c4d3e3;
-        font-weight: bold;
-    }
-
-    .btn-quiet:hover {
-        background: #eef4fa;
-    }
-
-    .btn-danger {
-        background: #fff;
-        color: #a11;
-        border: 1px solid #e5bcbc;
-    }
-
-    .btn-danger:hover {
-        background: #fff1f1;
-    }
-
-    .login-info {
-        background: #eef4fa;
-        border: 1px solid #cfe0ef;
-        color: #14507f;
-        border-radius: 8px;
-        padding: 11px 13px;
-        font-size: 13px;
-        margin-bottom: 15px;
-    }
-
-    .whoami {
-        background: linear-gradient(135deg, #0f3d68, #1261a0);
-        color: #fff;
-        border-radius: 12px;
-        padding: 15px 16px;
-        margin-bottom: 16px;
-    }
-
-    .whoami-name {
-        font-size: 19px;
-        font-weight: bold;
-    }
-
-    .whoami-meta {
-        font-size: 13px;
-        opacity: .88;
-        margin-top: 4px;
-    }
-
-    .whoami-date {
-        font-size: 13px;
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: 1px solid rgba(255,255,255,.22);
-    }
-
-    .hour-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 11px 0;
-        border-bottom: 1px solid #eef2f7;
-    }
-
-    .hour-row:last-child {
-        border-bottom: none;
-    }
-
-    .hour-label {
-        flex: 1 1 auto;
-        font-size: 15px;
-        font-weight: bold;
-        color: #173b5e;
-        min-width: 0;
-    }
-
-    .hour-note {
-        display: block;
-        font-size: 11px;
-        font-weight: normal;
-        color: #94a3b8;
-        margin-top: 2px;
-        letter-spacing: .04em;
+    .stat-value {
+        font-size: 18px;
     }
 
     .hour-input {
-        flex: 0 0 96px;
-        text-align: center;
-        font-weight: bold;
+        flex: 0 0 78px;
     }
 
-    .hour-row.is-locked .hour-label {
-        color: #94a3b8;
-    }
-
-    .hour-row.is-locked .hour-input {
-        background: #eef2f7;
-        color: #7c8798;
-        border-color: #dde5ee;
-    }
-
-    .locked-tag {
-        flex: 0 0 auto;
-        font-size: 10px;
-        font-weight: bold;
-        letter-spacing: .06em;
-        color: #64748b;
-        background: #eef2f7;
-        border: 1px solid #dde5ee;
-        border-radius: 999px;
-        padding: 3px 8px;
-    }
-
-    .total-line {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 14px;
-        padding-top: 14px;
-        border-top: 2px solid #eef2f7;
-        font-size: 15px;
-        font-weight: bold;
-        color: #173b5e;
-    }
-
-    .total-value {
-        font-size: 21px;
-    }
-
-    .autosave {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        font-size: 13px;
-        font-weight: bold;
-        padding: 11px 13px;
-        border-radius: 8px;
-        background: #f1f5f9;
-        color: #64748b;
-        border: 1px solid #e2e8f0;
-    }
-
-    .autosave-dot {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        background: #94a3b8;
-        flex: 0 0 auto;
-    }
-
-    .autosave[data-state="saving"] {
-        background: #fff8e6;
-        border-color: #f5e2b3;
-        color: #92700e;
-    }
-
-    .autosave[data-state="saving"] .autosave-dot {
-        background: #d99f0b;
-        animation: pulse 1s ease-in-out infinite;
-    }
-
-    .autosave[data-state="saved"] {
-        background: #eaf7ef;
-        border-color: #c3e6d0;
-        color: #14683c;
-    }
-
-    .autosave[data-state="saved"] .autosave-dot {
-        background: #198754;
-    }
-
-    .autosave[data-state="error"] {
-        background: #fdecec;
-        border-color: #f5c2c2;
-        color: #9b1c1c;
-    }
-
-    .autosave[data-state="error"] .autosave-dot {
-        background: #dc3545;
-    }
-
-    @keyframes pulse {
-        0%,100% { opacity: 1; }
-        50%     { opacity: .35; }
-    }
-
-    .banner {
-        padding: 12px 14px;
-        border-radius: 8px;
+    .hour-label {
         font-size: 14px;
-        margin-bottom: 16px;
-        border: 1px solid transparent;
     }
 
-    .banner.error {
-        background: #fdecec;
-        border-color: #f5c2c2;
-        color: #9b1c1c;
+    .performance-percent {
+        font-size: 28px;
     }
 
-    .banner.warn {
-        background: #fff8e6;
-        border-color: #f5e2b3;
-        color: #7a5c06;
-    }
-
-    .banner.info {
-        background: #eef4fa;
-        border-color: #cfe0ef;
-        color: #14507f;
-    }
-
-    .hidden {
-        display: none !important;
-    }
-
-    .footer {
-        text-align: center;
-        color: #94a3b8;
-        font-size: 12px;
-        padding: 4px 0 26px;
-    }
-
-    .spinner {
-        text-align: center;
-        color: #6b7280;
-        font-size: 14px;
-        padding: 26px 0;
-    }
-
-    .logout-row {
-        margin-top: 12px;
-    }
-
-    @media (max-width: 380px) {
-
-        .hour-input {
-            flex: 0 0 78px;
-        }
-
-        .hour-label {
-            font-size: 14px;
-        }
-
-    }
+}
 
 </style>
-```
 
 </head>
 
+
 <body>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
 
 <div class="header">
 
-```
-<h1>My Hourly Production</h1>
+    <h1>My Hourly Production</h1>
 
-<p id="headerSubtitle">
-    Secure employee production entry
-</p>
-```
+    <p id="headerSubtitle">
+        Secure employee production entry
+    </p>
 
 </div>
 
+
 <div class="container">
 
-```
+
 <!-- =========================================================
      LOADING
 ========================================================= -->
@@ -407,7 +718,7 @@
      class="card">
 
     <div class="spinner">
-        Loading…
+        Loading your production portal…
     </div>
 
 </div>
@@ -423,18 +734,20 @@
     <h2>Employee Login</h2>
 
     <p class="muted">
-        Sign in with your employee account to update your
-        own hourly production.
+        Sign in to update your own hourly production.
     </p>
 
     <div class="login-info">
-        Your account is securely connected to your employee
-        record. You will only be able to access your own
+
+        🔐 Your account is securely connected to your
+        employee record. You can only access your own
         production data.
+
     </div>
 
     <div id="loginBanner"
          class="banner error hidden"></div>
+
 
     <div class="field">
 
@@ -449,6 +762,7 @@
 
     </div>
 
+
     <div class="field">
 
         <label for="loginPassword">
@@ -461,6 +775,7 @@
                placeholder="Enter your password">
 
     </div>
+
 
     <button class="btn"
             id="loginBtn"
@@ -480,7 +795,7 @@
 <div id="fatalCard"
      class="card hidden">
 
-    <h2>Cannot load</h2>
+    <h2>Cannot load portal</h2>
 
     <div id="fatalText"
          class="banner error"></div>
@@ -488,7 +803,7 @@
     <button class="btn"
             onclick="location.reload()">
 
-        Try again
+        Try Again
 
     </button>
 
@@ -496,11 +811,14 @@
 
 
 <!-- =========================================================
-     ENTRY
+     ENTRY SCREEN
 ========================================================= -->
 
 <div id="entryScreen"
      class="hidden">
+
+
+    <!-- EMPLOYEE IDENTITY -->
 
     <div class="whoami">
 
@@ -516,9 +834,112 @@
     </div>
 
 
+    <!-- ENTRY BANNER -->
+
     <div id="entryBanner"
          class="banner info hidden"></div>
 
+
+    <!-- =====================================================
+         PERFORMANCE
+    ====================================================== -->
+
+    <div class="card performance-card">
+
+        <div class="performance-top">
+
+            <div>
+
+                <div class="performance-title">
+                    Today's Performance
+                </div>
+
+            </div>
+
+            <div class="performance-percent"
+                 id="performancePercent">
+                0%
+            </div>
+
+        </div>
+
+
+        <div class="progress-track">
+
+            <div class="progress-bar"
+                 id="progressBar">
+            </div>
+
+        </div>
+
+
+        <div class="performance-message"
+             id="performanceMessage">
+
+            <span class="performance-emoji">
+                🚀
+            </span>
+
+            Keep going — let's get that production moving!
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         LIVE STATS
+    ====================================================== -->
+
+    <div class="stats-grid">
+
+        <div class="stat-box">
+
+            <div class="stat-label">
+                Target
+            </div>
+
+            <div class="stat-value"
+                 id="targetValue">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat-box">
+
+            <div class="stat-label">
+                Done
+            </div>
+
+            <div class="stat-value"
+                 id="achievedValue">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat-box">
+
+            <div class="stat-label">
+                Remaining
+            </div>
+
+            <div class="stat-value"
+                 id="remainingValue">
+                0
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ATTENDANCE
+    ====================================================== -->
 
     <div class="card">
 
@@ -531,37 +952,58 @@
         <select id="attendance"
                 onchange="onAttendanceChange()">
 
-            <option value="Present">Present</option>
-            <option value="Half Day">Half Day</option>
-            <option value="Absent">Absent</option>
+            <option value="Present">
+                Present
+            </option>
+
+            <option value="Half Day">
+                Half Day
+            </option>
+
+            <option value="Absent">
+                Absent
+            </option>
 
         </select>
 
     </div>
 
 
+    <!-- =====================================================
+         HOURLY PRODUCTION
+    ====================================================== -->
+
     <div class="card">
 
-        <h2>Hourly count</h2>
+        <h2>Hourly Production</h2>
 
         <p class="muted">
             Enter how many you completed in each hour.
-            Saving happens automatically.
+            Your entries save automatically.
         </p>
 
         <div id="hourRows"></div>
 
+
         <div class="total-line">
 
-            <span>Total entered</span>
+            <span>
+                Total entered
+            </span>
 
             <span class="total-value"
-                  id="totalEntered">0</span>
+                  id="totalEntered">
+                0
+            </span>
 
         </div>
 
     </div>
 
+
+    <!-- =====================================================
+         AUTOSAVE / LOGOUT
+    ====================================================== -->
 
     <div class="card">
 
@@ -577,6 +1019,7 @@
 
         </div>
 
+
         <div class="logout-row">
 
             <button class="btn btn-quiet"
@@ -590,62 +1033,66 @@
 
     </div>
 
+
+</div>
+
+
+<div class="footer">
+
+    Entries automatically feed the Hourly Production
+    Tracker and RCM Management Dashboard.
+
 </div>
 
 
-<div class="footer"
-     id="footerNote">
+</div>
 
-    Entries feed the Hourly Production Tracker and the
-    RCM Management Dashboard automatically.
+
+<!-- =========================================================
+     CELEBRATION OVERLAY
+========================================================= -->
+
+<div id="celebrationOverlay"
+     class="celebration">
+
+    <div class="celebration-card">
+
+        <div class="celebration-icon">
+            🏆
+        </div>
+
+        <h2 id="celebrationTitle">
+            AMAZING!
+        </h2>
+
+        <p id="celebrationText">
+            You crushed today's target!
+        </p>
+
+        <button class="btn"
+                onclick="closeCelebration()">
+
+            Keep Going 🚀
+
+        </button>
+
+    </div>
 
 </div>
-```
 
-</div>
 
 <script>
 
 /* =========================================================
-   SECURE EMPLOYEE HOURLY PRODUCTION ENTRY
-
-   Authentication:
-       Supabase Auth
-
-   Employee mapping:
-       auth.users.id
-            ↓
-       employees.auth_user_id
-            ↓
-       employees.id
-            ↓
-       daily_productivity.employee_id
-
-   Employees NEVER select their own employee record.
-
-   RLS in Supabase is responsible for enforcing that an
-   authenticated employee can access only their own records.
-
-   Existing functionality retained:
-       • 6 PM–3 AM shift
-       • midnight shift-date handling
-       • automatic hourly locking
-       • management date-lock override
-       • attendance
-       • daily target
-       • half-day target
-       • achievement %
-       • autosave
-       • existing daily_productivity table
+   SUPABASE CONFIGURATION
 ========================================================= */
-
 
 const SUPABASE_URL =
     "https://yhoblmvujfqnspaxdfav.supabase.co";
 
 
 const SUPABASE_KEY =
-    "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
+    "sb_publishable_fiXzds8sZeg1f5CcnzhlQ_Gm_x71af";
 
 
 const supabaseClient =
@@ -656,7 +1103,14 @@ const supabaseClient =
 
 
 /* =========================================================
-   SHIFT DEFINITION
+   EMPLOYEE MOTIVATION SETTINGS
+========================================================= */
+
+const MANAGER_NAME = "Andy";
+
+
+/* =========================================================
+   SHIFT
 ========================================================= */
 
 const hourFields = [
@@ -705,39 +1159,57 @@ let currentAuthUser = null;
 let dateLockOverride = null;
 let dateLockTableAvailable = true;
 
+let lockTicker = null;
+
+let saveTimer = null;
+let saveInFlight = false;
+let savePending = false;
+
+let celebrationAlreadyShown = false;
+
 
 /* =========================================================
-   SMALL HELPERS
+   HELPERS
 ========================================================= */
 
 function $(id) {
+
     return document.getElementById(id);
+
 }
 
 
 function show(id) {
+
     $(id)?.classList.remove("hidden");
+
 }
 
 
 function hide(id) {
+
     $(id)?.classList.add("hidden");
+
 }
 
 
 function formatLocalDate(date) {
 
-    const yyyy = date.getFullYear();
+    const yyyy =
+        date.getFullYear();
 
     const mm =
-        String(date.getMonth() + 1)
-            .padStart(2, "0");
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
 
     const dd =
-        String(date.getDate())
-            .padStart(2, "0");
+        String(
+            date.getDate()
+        ).padStart(2, "0");
 
     return `${yyyy}-${mm}-${dd}`;
+
 }
 
 
@@ -766,12 +1238,18 @@ function prettyDate(value) {
             year: "numeric"
         }
     );
+
 }
 
 
+/* =========================================================
+   BANNERS
+========================================================= */
+
 function setBanner(kind, text) {
 
-    const el = $("entryBanner");
+    const el =
+        $("entryBanner");
 
     if (!el) {
         return;
@@ -785,18 +1263,22 @@ function setBanner(kind, text) {
         el.textContent = "";
 
         return;
+
     }
 
     el.className =
         `banner ${kind}`;
 
-    el.textContent = text;
+    el.textContent =
+        text;
+
 }
 
 
 function setLoginBanner(text) {
 
-    const el = $("loginBanner");
+    const el =
+        $("loginBanner");
 
     if (!el) {
         return;
@@ -804,16 +1286,21 @@ function setLoginBanner(text) {
 
     if (!text) {
 
-        el.classList.add("hidden");
+        el.className =
+            "banner error hidden";
+
         el.textContent = "";
 
         return;
+
     }
 
     el.className =
         "banner error";
 
-    el.textContent = text;
+    el.textContent =
+        text;
+
 }
 
 
@@ -823,17 +1310,21 @@ function setLoginBanner(text) {
 
 function getCurrentShiftDateString() {
 
-    const now = new Date();
+    const now =
+        new Date();
 
     const shiftDate =
         new Date(now);
 
+
     /*
-       Midnight through 2:59 AM belongs to the previous
+       Midnight–2:59 AM belongs to previous
        day's 6 PM–3 AM shift.
     */
 
-    if (now.getHours() < 3) {
+    if (
+        now.getHours() < 3
+    ) {
 
         shiftDate.setDate(
             shiftDate.getDate() - 1
@@ -841,7 +1332,11 @@ function getCurrentShiftDateString() {
 
     }
 
-    return formatLocalDate(shiftDate);
+
+    return formatLocalDate(
+        shiftDate
+    );
+
 }
 
 
@@ -855,28 +1350,29 @@ function getShiftHourIndexForDate(date) {
         return -1;
     }
 
-    const now = new Date();
+
+    const now =
+        new Date();
 
     const activeShiftDate =
         getCurrentShiftDateString();
 
 
-    /*
-       Any shift before today's active shift is completely
-       locked.
-    */
+    if (
+        date < activeShiftDate
+    ) {
 
-    if (date < activeShiftDate) {
         return hourFields.length;
+
     }
 
 
-    /*
-       Future shift.
-    */
+    if (
+        date > activeShiftDate
+    ) {
 
-    if (date > activeShiftDate) {
         return -1;
+
     }
 
 
@@ -885,13 +1381,15 @@ function getShiftHourIndexForDate(date) {
 
 
     /*
-       6 PM = index 0
-       7 PM = index 1
+       6 PM = 0
+       7 PM = 1
        ...
-       2 AM = index 8
+       11 PM = 5
     */
 
-    if (hour >= 18) {
+    if (
+        hour >= 18
+    ) {
 
         return Math.min(
             hour - 18,
@@ -902,12 +1400,14 @@ function getShiftHourIndexForDate(date) {
 
 
     /*
-       Midnight = index 6
-       1 AM = index 7
-       2 AM = index 8
+       Midnight = 6
+       1 AM = 7
+       2 AM = 8
     */
 
-    if (hour < 3) {
+    if (
+        hour < 3
+    ) {
 
         return Math.min(
             hour + 6,
@@ -917,48 +1417,56 @@ function getShiftHourIndexForDate(date) {
     }
 
 
-    /*
-       Between 3 AM and 6 PM the next shift has not started.
-    */
-
     return -1;
+
 }
 
 
 function isHourLocked(index, date) {
 
-    /*
-       Management date-lock override always wins.
-    */
+    if (
+        dateLockOverride !== null
+    ) {
 
-    if (dateLockOverride !== null) {
-
-        return dateLockOverride.locked === true;
+        return (
+            dateLockOverride.locked === true
+        );
 
     }
 
+
     const currentIndex =
-        getShiftHourIndexForDate(date);
+        getShiftHourIndexForDate(
+            date
+        );
+
 
     return (
         currentIndex >= 0 &&
         index < currentIndex
     );
+
 }
 
 
 function isDateFullyLocked(date) {
 
-    if (dateLockOverride !== null) {
+    if (
+        dateLockOverride !== null
+    ) {
 
-        return dateLockOverride.locked === true;
+        return (
+            dateLockOverride.locked === true
+        );
 
     }
+
 
     return (
         getShiftHourIndexForDate(date) >=
         hourFields.length
     );
+
 }
 
 
@@ -970,11 +1478,21 @@ async function loadDateLockState(date) {
 
     dateLockOverride = null;
 
-    if (!date || !dateLockTableAvailable) {
+
+    if (
+        !date ||
+        !dateLockTableAvailable
+    ) {
+
         return;
+
     }
 
-    const { data, error } =
+
+    const {
+        data,
+        error
+    } =
         await supabaseClient
             .from("tracker_date_locks")
             .select(
@@ -990,17 +1508,10 @@ async function loadDateLockState(date) {
     if (error) {
 
         console.warn(
-            "Date lock state unavailable:",
+            "Date lock unavailable:",
             error.message
         );
 
-
-        /*
-           A missing table or permission issue should not
-           completely prevent the portal from opening.
-
-           Automatic shift locking will still operate.
-        */
 
         if (
             error.code === "42P01" ||
@@ -1009,11 +1520,13 @@ async function loadDateLockState(date) {
             )
         ) {
 
-            dateLockTableAvailable = false;
+            dateLockTableAvailable =
+                false;
 
         }
 
         return;
+
     }
 
 
@@ -1024,24 +1537,13 @@ async function loadDateLockState(date) {
                     data.is_locked === true
               }
             : null;
+
 }
 
 
 /* =========================================================
-   TARGET RESOLUTION
+   REFERENCE DATA
 ========================================================= */
-
-function getSubProjectById(id) {
-
-    return (
-        subProjects.find(
-            sp =>
-                Number(sp.id) ===
-                Number(id)
-        ) || null
-    );
-}
-
 
 function getProjectById(id) {
 
@@ -1052,6 +1554,20 @@ function getProjectById(id) {
                 Number(id)
         ) || null
     );
+
+}
+
+
+function getSubProjectById(id) {
+
+    return (
+        subProjects.find(
+            sp =>
+                Number(sp.id) ===
+                Number(id)
+        ) || null
+    );
+
 }
 
 
@@ -1063,8 +1579,7 @@ function getEmployeeSubProject(employee) {
 
 
     /*
-       First preference:
-       employee's own sub_project_id.
+       Employee's direct sub-project.
     */
 
     if (
@@ -1078,6 +1593,7 @@ function getEmployeeSubProject(employee) {
                 employee.sub_project_id
             );
 
+
         if (direct) {
             return direct;
         }
@@ -1086,12 +1602,8 @@ function getEmployeeSubProject(employee) {
 
 
     /*
-       If no direct sub-project is available, look for
-       a unique active sub-project belonging to the employee's
-       project.
-
-       We deliberately do NOT download all employees or all
-       employee-project mappings anymore.
+       If there is only one active sub-project
+       under the employee's project, use it.
     */
 
     const projectSubProjects =
@@ -1103,7 +1615,9 @@ function getEmployeeSubProject(employee) {
         );
 
 
-    if (projectSubProjects.length === 1) {
+    if (
+        projectSubProjects.length === 1
+    ) {
 
         return projectSubProjects[0];
 
@@ -1111,13 +1625,20 @@ function getEmployeeSubProject(employee) {
 
 
     return null;
+
 }
 
+
+/* =========================================================
+   TARGET
+========================================================= */
 
 function getEmployeeBaseTarget(employee) {
 
     const subProject =
-        getEmployeeSubProject(employee);
+        getEmployeeSubProject(
+            employee
+        );
 
 
     if (subProject) {
@@ -1125,7 +1646,9 @@ function getEmployeeBaseTarget(employee) {
         if (
             subProject.target_based === false
         ) {
+
             return null;
+
         }
 
 
@@ -1134,13 +1657,16 @@ function getEmployeeBaseTarget(employee) {
             subProject.daily_target === undefined ||
             subProject.daily_target === ""
         ) {
+
             return null;
+
         }
 
 
         return Number(
             subProject.daily_target
         );
+
     }
 
 
@@ -1160,13 +1686,16 @@ function getEmployeeBaseTarget(employee) {
         project.daily_target === undefined ||
         project.daily_target === ""
     ) {
+
         return null;
+
     }
 
 
     return Number(
         project.daily_target
     );
+
 }
 
 
@@ -1183,7 +1712,10 @@ function getDailyTarget(
 
     if (
         target === null ||
-        target === undefined
+        target === undefined ||
+        Number.isNaN(
+            Number(target)
+        )
     ) {
 
         return null;
@@ -1205,13 +1737,14 @@ function getDailyTarget(
     ) {
 
         return Math.ceil(
-            target / 2
+            Number(target) / 2
         );
 
     }
 
 
-    return target;
+    return Number(target);
+
 }
 
 
@@ -1235,11 +1768,12 @@ function computeAchievementPercent(
         Number(achieved) /
         Number(target)
     ) * 100;
+
 }
 
 
 /* =========================================================
-   AUTHENTICATION
+   AUTH
 ========================================================= */
 
 async function checkExistingSession() {
@@ -1262,9 +1796,7 @@ async function checkExistingSession() {
 
 
     if (
-        data &&
-        data.session &&
-        data.session.user
+        data?.session?.user
     ) {
 
         currentAuthUser =
@@ -1276,11 +1808,12 @@ async function checkExistingSession() {
 
 
     return false;
+
 }
 
 
 /* =========================================================
-   FIND EMPLOYEE FROM AUTH USER
+   LOAD CURRENT EMPLOYEE
 ========================================================= */
 
 async function loadCurrentEmployee() {
@@ -1293,15 +1826,6 @@ async function loadCurrentEmployee() {
 
     }
 
-
-    /*
-       IMPORTANT:
-
-       We do NOT load all employees.
-
-       Supabase Auth identifies the current user and
-       auth_user_id identifies the matching employee.
-    */
 
     const {
         data,
@@ -1348,6 +1872,7 @@ async function loadCurrentEmployee() {
 
 
     return data;
+
 }
 
 
@@ -1358,10 +1883,13 @@ async function loadCurrentEmployee() {
 async function loginEmployee() {
 
     const email =
-        $("loginEmail").value.trim();
+        $("loginEmail")
+            .value
+            .trim();
 
     const password =
-        $("loginPassword").value;
+        $("loginPassword")
+            .value;
 
 
     setLoginBanner("");
@@ -1374,6 +1902,7 @@ async function loginEmployee() {
         );
 
         return;
+
     }
 
 
@@ -1384,11 +1913,13 @@ async function loginEmployee() {
         );
 
         return;
+
     }
 
 
     const button =
         $("loginBtn");
+
 
     button.disabled = true;
 
@@ -1419,8 +1950,7 @@ async function loginEmployee() {
 
 
         if (
-            !data ||
-            !data.user
+            !data?.user
         ) {
 
             throw new Error(
@@ -1435,7 +1965,6 @@ async function loginEmployee() {
 
 
         await openAuthenticatedPortal();
-
 
     }
     catch (error) {
@@ -1452,7 +1981,8 @@ async function loginEmployee() {
         );
 
 
-        button.disabled = false;
+        button.disabled =
+            false;
 
         button.textContent =
             "Login";
@@ -1468,13 +1998,11 @@ async function loginEmployee() {
 
 async function logoutEmployee() {
 
-    /*
-       Cancel pending autosave first.
-    */
-
     if (saveTimer) {
 
-        clearTimeout(saveTimer);
+        clearTimeout(
+            saveTimer
+        );
 
         saveTimer = null;
 
@@ -1512,14 +2040,9 @@ async function logoutEmployee() {
     }
 
 
-    $("loginEmail").value = "";
-    $("loginPassword").value = "";
-
-
     hide("entryScreen");
     hide("fatalCard");
-    hide("loginCard");
-
+    hide("loadingCard");
 
     show("loginCard");
 
@@ -1534,7 +2057,7 @@ async function logoutEmployee() {
 
 
 /* =========================================================
-   AUTHENTICATED PORTAL
+   OPEN AUTHENTICATED PORTAL
 ========================================================= */
 
 async function openAuthenticatedPortal() {
@@ -1566,7 +2089,6 @@ async function openAuthenticatedPortal() {
             me
         );
 
-
     }
     catch (error) {
 
@@ -1589,42 +2111,38 @@ async function openAuthenticatedPortal() {
             "Your employee portal could not be loaded.";
 
 
-        /*
-           Give the employee a logout option if the
-           authentication itself succeeded but the employee
-           mapping is wrong.
-        */
-
-        const existingLogout =
+        let logoutButton =
             document.getElementById(
                 "fatalLogoutBtn"
             );
 
 
-        if (!existingLogout) {
+        if (!logoutButton) {
 
-            const button =
+            logoutButton =
                 document.createElement(
                     "button"
                 );
 
-            button.id =
+            logoutButton.id =
                 "fatalLogoutBtn";
 
-            button.className =
+            logoutButton.className =
                 "btn btn-quiet";
 
-            button.style.marginTop =
+            logoutButton.style.marginTop =
                 "10px";
 
-            button.textContent =
+            logoutButton.textContent =
                 "Logout";
 
-            button.onclick =
+            logoutButton.onclick =
                 logoutEmployee;
 
             $("fatalCard")
-                .appendChild(button);
+                .appendChild(
+                    logoutButton
+                );
 
         }
 
@@ -1638,25 +2156,6 @@ async function openAuthenticatedPortal() {
 ========================================================= */
 
 async function loadReferenceData() {
-
-    /*
-       IMPORTANT:
-
-       We no longer query:
-
-           employees.select("*")
-
-       or:
-
-           employee_projects.select("*")
-
-       This prevents the employee portal from downloading
-       other employees' records.
-
-       Only project/sub-project reference information needed
-       by the current employee is loaded.
-    */
-
 
     const projectId =
         me?.project_id;
@@ -1710,12 +2209,6 @@ async function loadReferenceData() {
         ]);
 
 
-    /*
-       Project reference data is useful for display/target
-       resolution, but the employee's actual employee record
-       remains the source of identity.
-    */
-
     if (projectRes.error) {
 
         console.warn(
@@ -1757,12 +2250,13 @@ async function loadReferenceData() {
 
 
 /* =========================================================
-   ENTRY SCREEN
+   OPEN EMPLOYEE ENTRY
 ========================================================= */
 
 async function openEntryFor(employee) {
 
-    me = employee;
+    me =
+        employee;
 
 
     hide("loginCard");
@@ -1841,6 +2335,8 @@ async function openEntryFor(employee) {
 
     recalcTotal();
 
+    updatePerformance();
+
 
     startLockTicker();
 
@@ -1882,8 +2378,7 @@ async function loadMyRecord() {
         setBanner(
             "error",
             "Your saved counts could not be loaded. " +
-            "Please refresh before entering anything, " +
-            "otherwise you may overwrite earlier numbers."
+            "Please refresh before entering anything."
         );
 
 
@@ -1936,7 +2431,9 @@ function renderHourRows() {
 
                         ${hourLabels[index]}
 
-                        <span class="hour-note hidden"></span>
+                        <span class="hour-note">
+                            Hour ${index + 1}
+                        </span>
 
                     </div>
 
@@ -2013,11 +2510,6 @@ function applyLocks() {
                     );
 
 
-                /*
-                   readOnly rather than disabled so the value
-                   remains visible and cannot be edited.
-                */
-
                 input.readOnly =
                     locked;
 
@@ -2058,14 +2550,13 @@ function applyLocks() {
 
         setBanner(
             "warn",
+
             dateLockOverride !== null &&
             dateLockOverride.locked
 
-                ? "This shift has been closed by management. " +
-                  "Contact your team lead if something needs changing."
+                ? "This shift has been closed by management. Contact your Team Lead if something needs changing."
 
-                : "This shift has finished, so it is now read-only. " +
-                  "Contact your team lead if something needs changing."
+                : "This shift has finished, so it is now read-only."
         );
 
     }
@@ -2085,9 +2576,6 @@ function applyLocks() {
    LOCK TICKER
 ========================================================= */
 
-let lockTicker = null;
-
-
 function startLockTicker() {
 
     if (lockTicker) {
@@ -2102,10 +2590,6 @@ function startLockTicker() {
                 const nowShiftDate =
                     getCurrentShiftDateString();
 
-
-                /*
-                   Shift rolled over while the page was open.
-                */
 
                 if (
                     nowShiftDate !==
@@ -2159,6 +2643,9 @@ function recalcTotal() {
         total.toLocaleString();
 
 
+    updatePerformance();
+
+
     return total;
 
 }
@@ -2170,10 +2657,6 @@ function recalcTotal() {
 
 function onHourInput(input) {
 
-    /*
-       Negative production is invalid.
-    */
-
     if (
         Number(input.value) < 0
     ) {
@@ -2182,10 +2665,6 @@ function onHourInput(input) {
 
     }
 
-
-    /*
-       readOnly/locked fields should never be changed.
-    */
 
     if (
         input.readOnly
@@ -2208,10 +2687,6 @@ function onHourInput(input) {
 ========================================================= */
 
 function onAttendanceChange() {
-
-    /*
-       Marking Absent clears all unlocked hourly counts.
-    */
 
     if (
         $("attendance").value ===
@@ -2253,15 +2728,470 @@ function onAttendanceChange() {
 
 
 /* =========================================================
+   PERFORMANCE DISPLAY
+========================================================= */
+
+function getCurrentEnteredTotal() {
+
+    let total = 0;
+
+
+    document
+        .querySelectorAll(
+            "#hourRows .hour-input"
+        )
+        .forEach(
+            input => {
+
+                total += Math.max(
+                    Number(
+                        input.value || 0
+                    ),
+                    0
+                );
+
+            }
+        );
+
+
+    return total;
+
+}
+
+
+function updatePerformance() {
+
+    if (
+        !me ||
+        !$("attendance") ||
+        !$("hourRows")
+    ) {
+
+        return;
+
+    }
+
+
+    const attendance =
+        $("attendance").value;
+
+
+    const target =
+        getDailyTarget(
+            me,
+            attendance
+        );
+
+
+    const achieved =
+        getCurrentEnteredTotal();
+
+
+    const targetValue =
+        target === null
+            ? 0
+            : Number(target);
+
+
+    let remaining = 0;
+    let percent = 0;
+
+
+    if (
+        targetValue > 0
+    ) {
+
+        remaining =
+            Math.max(
+                targetValue - achieved,
+                0
+            );
+
+
+        percent =
+            (
+                achieved /
+                targetValue
+            ) * 100;
+
+    }
+
+
+    const displayPercent =
+        Math.round(percent);
+
+
+    $("targetValue").textContent =
+        targetValue.toLocaleString();
+
+
+    $("achievedValue").textContent =
+        achieved.toLocaleString();
+
+
+    $("remainingValue").textContent =
+        remaining.toLocaleString();
+
+
+    $("performancePercent").textContent =
+        targetValue > 0
+            ? `${displayPercent}%`
+            : "—";
+
+
+    const progress =
+        targetValue > 0
+            ? Math.min(
+                percent,
+                100
+              )
+            : 0;
+
+
+    $("progressBar").style.width =
+        `${progress}%`;
+
+
+    const message =
+        $("performanceMessage");
+
+
+    /*
+       Non-target process
+    */
+
+    if (
+        target === null ||
+        targetValue <= 0
+    ) {
+
+        message.className =
+            "performance-message no-target";
+
+
+        message.innerHTML = `
+
+            <span class="performance-emoji">
+                🚀
+            </span>
+
+            Production mode is on —
+            keep the numbers coming!
+
+        `;
+
+        return;
+
+    }
+
+
+    /*
+       ABOVE TARGET
+    */
+
+    if (
+        percent > 100
+    ) {
+
+        message.className =
+            "performance-message above";
+
+
+        const extra =
+            achieved -
+            targetValue;
+
+
+        message.innerHTML = `
+
+            <span class="performance-emoji">
+                🏆🎉
+            </span>
+
+            <strong>
+                YOU CRUSHED THE TARGET!
+            </strong>
+
+            <br>
+
+            You're ${extra.toLocaleString()}
+            above target. Keep going —
+            you're on fire! 🔥
+
+        `;
+
+
+        /*
+           Celebrate only when the employee
+           crosses the target for the first time
+           during the current page session.
+        */
+
+        if (
+            !celebrationAlreadyShown &&
+            percent > 100
+        ) {
+
+            celebrationAlreadyShown =
+                true;
+
+            showCelebration(
+                percent,
+                achieved,
+                targetValue
+            );
+
+        }
+
+
+        return;
+
+    }
+
+
+    /*
+       EXACTLY ON TARGET
+    */
+
+    if (
+        achieved === targetValue
+    ) {
+
+        message.className =
+            "performance-message target";
+
+
+        message.innerHTML = `
+
+            <span class="performance-emoji">
+                🎯👏
+            </span>
+
+            <strong>
+                GOOD JOB!
+            </strong>
+
+            <br>
+
+            Target achieved. That's exactly
+            where you need to be!
+
+        `;
+
+
+        return;
+
+    }
+
+
+    /*
+       BELOW TARGET
+    */
+
+    message.className =
+        "performance-message below";
+
+
+    const gap =
+        Math.max(
+            targetValue - achieved,
+            0
+        );
+
+
+    let funnyMessage = "";
+
+
+    if (
+        percent >= 90
+    ) {
+
+        funnyMessage = `
+
+            Almost there! Only
+            ${gap.toLocaleString()}
+            more to go. 👀
+
+        `;
+
+    }
+    else if (
+        percent >= 75
+    ) {
+
+        funnyMessage = `
+
+            You're getting close…
+            ${gap.toLocaleString()}
+            left. ${MANAGER_NAME} is watching you 👀
+
+        `;
+
+    }
+    else if (
+        percent >= 50
+    ) {
+
+        funnyMessage = `
+
+            Halfway there! But
+            ${MANAGER_NAME} has entered the chat 👀😂
+
+        `;
+
+    }
+    else {
+
+        funnyMessage = `
+
+            <strong>
+                ${MANAGER_NAME} is watching you 👀
+            </strong>
+
+            <br>
+
+            Let's pick up the pace —
+            ${gap.toLocaleString()} still to go! 😄
+
+        `;
+
+    }
+
+
+    message.innerHTML = `
+
+        <span class="performance-emoji">
+            😅
+        </span>
+
+        ${funnyMessage}
+
+    `;
+
+}
+
+
+/* =========================================================
+   CELEBRATION
+========================================================= */
+
+function showCelebration(
+    percent,
+    achieved,
+    target
+) {
+
+    $("celebrationTitle").textContent =
+        percent >= 120
+            ? "ABSOLUTELY CRUSHING IT! 🔥"
+            : "TARGET CRUSHED! 🏆";
+
+
+    $("celebrationText").textContent =
+        `You reached ${achieved.toLocaleString()} ` +
+        `against a target of ${target.toLocaleString()}. ` +
+        `That's ${Math.round(percent)}%!`;
+
+
+    $("celebrationOverlay")
+        .classList.add("show");
+
+
+    createConfetti();
+
+}
+
+
+function closeCelebration() {
+
+    $("celebrationOverlay")
+        .classList.remove("show");
+
+}
+
+
+function createConfetti() {
+
+    const symbols = [
+        "★",
+        "◆",
+        "●",
+        "■",
+        "✦"
+    ];
+
+
+    for (
+        let i = 0;
+        i < 80;
+        i++
+    ) {
+
+        const piece =
+            document.createElement(
+                "div"
+            );
+
+
+        piece.className =
+            "confetti";
+
+
+        piece.textContent =
+            symbols[
+                Math.floor(
+                    Math.random() *
+                    symbols.length
+                )
+            ];
+
+
+        piece.style.left =
+            `${Math.random() * 100}%`;
+
+
+        piece.style.fontSize =
+            `${8 + Math.random() * 12}px`;
+
+
+        piece.style.animationDelay =
+            `${Math.random() * .8}s`;
+
+
+        piece.style.animationDuration =
+            `${2 + Math.random() * 2}s`;
+
+
+        /*
+           Let the browser choose the default
+           text rendering color rather than hardcoding
+           a single visual style.
+        */
+
+        document.body
+            .appendChild(piece);
+
+
+        setTimeout(
+            () => {
+
+                piece.remove();
+
+            },
+            5000
+        );
+
+    }
+
+}
+
+
+/* =========================================================
    AUTOSAVE
 ========================================================= */
 
-const SAVE_DEBOUNCE_MS = 900;
-
-
-let saveTimer = null;
-let saveInFlight = false;
-let savePending = false;
+const SAVE_DEBOUNCE_MS =
+    900;
 
 
 function setSaveState(
@@ -2331,6 +3261,8 @@ function queueSave() {
 
 /* =========================================================
    BUILD DATABASE RECORD
+   IMPORTANT:
+   remaining is NEVER NULL.
 ========================================================= */
 
 function buildRecord() {
@@ -2346,6 +3278,21 @@ function buildRecord() {
         );
 
 
+    /*
+       daily_target is NOT NULL.
+       Target-less processes use 0.
+    */
+
+    const safeTarget =
+        target === null ||
+        target === undefined ||
+        Number.isNaN(
+            Number(target)
+        )
+            ? 0
+            : Number(target);
+
+
     const record = {
 
         tracker_date:
@@ -2358,19 +3305,26 @@ function buildRecord() {
             attendance,
 
         daily_target:
-            target,
+            safeTarget,
 
         break_minutes:
-            myRecord?.break_minutes ?? 0,
+            Number(
+                myRecord?.break_minutes ?? 0
+            ),
 
         achieved:
             0,
 
+        /*
+           IMPORTANT:
+           Never NULL.
+        */
+
         remaining:
-            target,
+            0,
 
         achievement_percentage:
-            null
+            0
 
     };
 
@@ -2395,11 +3349,7 @@ function buildRecord() {
 
 
             /*
-               A locked hour uses the value already stored
-               in Supabase.
-
-               This prevents a stale browser page from
-               rewriting a closed hour.
+               Locked hours use the database value.
             */
 
             const raw =
@@ -2432,22 +3382,18 @@ function buildRecord() {
         achieved;
 
 
+    /*
+       Target-based process
+    */
+
     if (
-        target === null
+        safeTarget > 0
     ) {
 
         record.remaining =
-            null;
-
-        record.achievement_percentage =
-            0;
-
-    }
-    else {
-
-        record.remaining =
             Math.max(
-                target - achieved,
+                safeTarget -
+                achieved,
                 0
             );
 
@@ -2455,7 +3401,7 @@ function buildRecord() {
         const pct =
             computeAchievementPercent(
                 achieved,
-                target
+                safeTarget
             );
 
 
@@ -2465,6 +3411,72 @@ function buildRecord() {
                 : Number(
                     pct.toFixed(2)
                   );
+
+    }
+
+
+    /*
+       Non-target process
+    */
+
+    else {
+
+        record.daily_target =
+            0;
+
+        record.remaining =
+            0;
+
+        record.achievement_percentage =
+            0;
+
+    }
+
+
+    /*
+       Final safety protection.
+    */
+
+    if (
+        record.remaining === null ||
+        record.remaining === undefined ||
+        Number.isNaN(
+            Number(record.remaining)
+        )
+    ) {
+
+        record.remaining =
+            0;
+
+    }
+
+
+    if (
+        record.daily_target === null ||
+        record.daily_target === undefined ||
+        Number.isNaN(
+            Number(record.daily_target)
+        )
+    ) {
+
+        record.daily_target =
+            0;
+
+    }
+
+
+    if (
+        record.achievement_percentage === null ||
+        record.achievement_percentage === undefined ||
+        Number.isNaN(
+            Number(
+                record.achievement_percentage
+            )
+        )
+    ) {
+
+        record.achievement_percentage =
+            0;
 
     }
 
@@ -2484,7 +3496,8 @@ async function flushSave() {
         saveInFlight
     ) {
 
-        savePending = true;
+        savePending =
+            true;
 
         return;
 
@@ -2514,7 +3527,8 @@ async function flushSave() {
     }
 
 
-    saveInFlight = true;
+    saveInFlight =
+        true;
 
 
     const record =
@@ -2522,19 +3536,25 @@ async function flushSave() {
 
 
     /*
-       daily_target is NOT NULL in the current database.
-
-       If the process is non-target based, use zero.
+       Final NOT NULL protection.
     */
 
-    if (
-        record.daily_target === null ||
-        record.daily_target === undefined
-    ) {
+    record.daily_target =
+        Number(
+            record.daily_target || 0
+        );
 
-        record.daily_target = 0;
 
-    }
+    record.remaining =
+        Number(
+            record.remaining || 0
+        );
+
+
+    record.achievement_percentage =
+        Number(
+            record.achievement_percentage || 0
+        );
 
 
     const {
@@ -2551,7 +3571,8 @@ async function flushSave() {
             );
 
 
-    saveInFlight = false;
+    saveInFlight =
+        false;
 
 
     if (error) {
@@ -2577,10 +3598,6 @@ async function flushSave() {
     }
 
 
-    /*
-       Keep local copy synchronized with the database.
-    */
-
     myRecord =
         Object.assign(
             {},
@@ -2603,9 +3620,12 @@ async function flushSave() {
     );
 
 
-    if (savePending) {
+    if (
+        savePending
+    ) {
 
-        savePending = false;
+        savePending =
+            false;
 
         flushSave();
 
@@ -2615,7 +3635,7 @@ async function flushSave() {
 
 
 /* =========================================================
-   UNSAVED CHANGE WARNING
+   BEFORE UNLOAD
 ========================================================= */
 
 window.addEventListener(
@@ -2638,7 +3658,7 @@ window.addEventListener(
 
 
 /* =========================================================
-   MOBILE / TAB RETURN
+   VISIBILITY CHANGE
 ========================================================= */
 
 document.addEventListener(
@@ -2674,6 +3694,8 @@ document.addEventListener(
 
         applyLocks();
 
+        updatePerformance();
+
 
         if (saveTimer) {
 
@@ -2692,7 +3714,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   PASSWORD ENTER KEY
+   LOGIN ENTER KEY
 ========================================================= */
 
 $("loginPassword")
@@ -2732,7 +3754,7 @@ $("loginEmail")
 
 
 /* =========================================================
-   AUTH SESSION CHANGE
+   AUTH STATE
 ========================================================= */
 
 supabaseClient.auth.onAuthStateChange(
@@ -2759,6 +3781,7 @@ supabaseClient.auth.onAuthStateChange(
             hide("loadingCard");
 
             show("loginCard");
+
 
             $("headerSubtitle").textContent =
                 "Secure employee production entry";
@@ -2792,8 +3815,10 @@ async function start() {
 
             show("loginCard");
 
+
             $("headerSubtitle").textContent =
                 "Secure employee production entry";
+
 
             return;
 
@@ -2828,10 +3853,13 @@ async function start() {
 }
 
 
+/* =========================================================
+   START APPLICATION
+========================================================= */
+
 start();
 
 </script>
 
 </body>
-
 </html>
