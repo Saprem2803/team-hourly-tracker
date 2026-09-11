@@ -588,6 +588,56 @@
             box-shadow: 0 2px 10px rgba(0,0,0,.08);
         }
 
+        /* The hourly table is far wider than any screen.
+           Pin the employee name on the left and the autosave
+           status on the right so the person entering data can
+           always see who the row belongs to and whether the
+           change was saved, without scrolling sideways. */
+        .tracker-table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .tracker-table th:first-child,
+        .tracker-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 6;
+            background: #ffffff;
+            box-shadow: 1px 0 0 #e2e8f0;
+        }
+
+        .tracker-table th:first-child {
+            background: #173b5e;
+            z-index: 7;
+        }
+
+        .tracker-table th:last-child,
+        .tracker-table td:last-child {
+            position: sticky;
+            right: 0;
+            z-index: 6;
+            background: #ffffff;
+            box-shadow: -1px 0 0 #e2e8f0;
+        }
+
+        .tracker-table th:last-child {
+            background: #173b5e;
+            z-index: 7;
+        }
+
+        /* Native selects can paint above a sticky cell in some
+           engines; keep the scrolling columns below it. */
+        .tracker-table td:not(:first-child):not(:last-child) {
+            position: relative;
+            z-index: 1;
+        }
+
+        .tracker-table tbody tr:hover td:first-child,
+        .tracker-table tbody tr:hover td:last-child {
+            background: #f5f8fc;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -642,6 +692,177 @@
             color: #64748b;
         }
 
+        /* =====================================================
+           AUTOSAVE STATUS
+        ====================================================== */
+
+        .autosave-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #475569;
+            white-space: nowrap;
+        }
+
+        .autosave-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #94a3b8;
+            flex: 0 0 auto;
+        }
+
+        .autosave-indicator[data-state="saving"] {
+            border-color: #fcd34d;
+            background: #fffbeb;
+            color: #92400e;
+        }
+
+        .autosave-indicator[data-state="saving"] .autosave-dot {
+            background: #f59e0b;
+            animation: autosave-pulse 1s ease-in-out infinite;
+        }
+
+        .autosave-indicator[data-state="saved"] {
+            border-color: #6ee7b7;
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .autosave-indicator[data-state="saved"] .autosave-dot {
+            background: #10b981;
+        }
+
+        .autosave-indicator[data-state="error"] {
+            border-color: #fca5a5;
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .autosave-indicator[data-state="error"] .autosave-dot {
+            background: #ef4444;
+        }
+
+        @keyframes autosave-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.25; }
+        }
+
+        .row-save-status {
+            display: inline-block;
+            min-width: 54px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            text-align: center;
+            color: #94a3b8;
+            background: transparent;
+        }
+
+        .row-save-status[data-state="saving"] {
+            background: #fffbeb;
+            color: #92400e;
+        }
+
+        .row-save-status[data-state="saved"] {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .row-save-status[data-state="error"] {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        /* =====================================================
+           ADMIN DATE LOCK CONTROLS
+        ====================================================== */
+
+        .lock-control-bar {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 12px 16px;
+            margin: 0 0 14px 0;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #6366f1;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+
+        .lock-control-title {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #3730a3;
+        }
+
+        .lock-control-note {
+            font-size: 10px;
+            color: #64748b;
+            flex: 1 1 220px;
+            min-width: 180px;
+        }
+
+        .lock-state-badge {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 5px;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+
+        .lock-state-badge.locked {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .lock-state-badge.unlocked {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .lock-state-badge.auto {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .btn-lock,
+        .btn-unlock {
+            padding: 7px 13px;
+            border: none;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #ffffff;
+        }
+
+        .btn-lock {
+            background: #b91c1c;
+        }
+
+        .btn-unlock {
+            background: #047857;
+        }
+
+        .btn-lock:disabled,
+        .btn-unlock:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
         .status {
             display: inline-block;
             padding: 4px 7px;
@@ -686,6 +907,24 @@
 
         .attendance-select {
             width: 95px;
+            /* The native select widget paints above sticky
+               cells in Chromium, which made the arrow bleed
+               through the pinned Employee column. Drawing our
+               own arrow keeps it in normal paint order. */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding-right: 22px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23475569' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 7px center;
+            background-size: 10px 7px;
+        }
+
+        .attendance-select:disabled {
+            background-color: #eef2f7;
+            color: #7c8798;
+            cursor: not-allowed;
         }
 
         /* =========================================================
@@ -1111,13 +1350,20 @@
         </button>
 
 
-        <button
-            class="btn-success"
-            onclick="saveAllProduction()">
+        <!-- Autosave replaced the manual "Save Production" button.
+             Entries now persist automatically as they are typed. -->
+        <div
+            class="autosave-indicator"
+            id="autosaveIndicator"
+            data-state="idle">
 
-            Save Production
+            <span class="autosave-dot"></span>
 
-        </button>
+            <span id="autosaveText">
+                Autosave on
+            </span>
+
+        </div>
 
     </div>
 
@@ -1354,9 +1600,62 @@
             Hourly Production
         </div>
 
+        <!-- =================================================
+             ADMIN DATE LOCK / UNLOCK
+             Visible only to authorized management admins.
+             Lets an admin lock or reopen a specific tracker
+             date, overriding the automatic hourly locking.
+        ================================================== -->
+
+        <div
+            class="lock-control-bar app-hidden"
+            id="lockControlBar">
+
+            <span class="lock-control-title">
+                Date Lock
+            </span>
+
+            <span
+                class="lock-state-badge auto"
+                id="lockStateBadge">
+                AUTO
+            </span>
+
+            <span
+                class="lock-control-note"
+                id="lockControlNote">
+                Automatic locking is active for this date.
+            </span>
+
+            <button
+                type="button"
+                class="btn-lock"
+                id="lockDateBtn"
+                onclick="setDateLock(true)">
+                Lock This Date
+            </button>
+
+            <button
+                type="button"
+                class="btn-unlock"
+                id="unlockDateBtn"
+                onclick="setDateLock(false)">
+                Unlock This Date
+            </button>
+
+            <button
+                type="button"
+                class="btn-secondary"
+                id="clearLockBtn"
+                onclick="clearDateLock()">
+                Reset to Auto
+            </button>
+
+        </div>
+
         <div class="table-wrapper">
 
-            <table>
+            <table class="tracker-table">
 
                 <thead>
 
@@ -1382,7 +1681,7 @@
                         <th>Achieved</th>
                         <th>Remaining</th>
                         <th>Achievement %</th>
-                        <th>Save</th>
+                        <th>Status</th>
 
                     </tr>
 
@@ -1717,10 +2016,32 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
     "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
 
+/*
+   Session stability:
+
+   - persistSession keeps the operator logged in across page
+     reloads and browser restarts, so a shift is never lost
+     because the tab was refreshed.
+   - autoRefreshToken silently renews the access token before
+     it expires, which prevents the "random logout" during a
+     long 6 PM - 3 AM shift.
+   - detectSessionInUrl is off because this app never handles
+     OAuth redirect callbacks.
+*/
+
 const supabaseClient =
     window.supabase.createClient(
         SUPABASE_URL,
-        SUPABASE_KEY
+        SUPABASE_KEY,
+        {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: false,
+                storageKey: "wrmc-tracker-auth",
+                flowType: "pkce"
+            }
+        }
     );
 
 
@@ -1748,6 +2069,463 @@ let accessReady = false;
 /* =========================================================
    HOUR FIELDS
 ========================================================= */
+
+/* =========================================================
+   CANONICAL ACHIEVEMENT FORMULA
+
+   Achievement % must be calculated the SAME way everywhere:
+   the Daily Tracker rows, project cards, sub-project cards,
+   the Performance Overview and the Management Dashboard.
+
+   Formula: total achieved / total target * 100 (UNCAPPED).
+
+   Previously some views credited only
+   Math.min(achieved, target) per employee, which silently
+   discarded over-production and made the same project report
+   a lower Achievement % than the Management Dashboard.
+   That is what caused the HopeBridge mismatch.
+========================================================= */
+
+/* =========================================================
+   AUTOSAVE ENGINE
+
+   The manual "Save" / "Save Production" buttons were removed.
+   Every hourly entry and attendance change is now persisted
+   automatically with a short debounce, and the UI reports
+   "Saving..." / "Saved" / "Not saved" state.
+
+   Design notes:
+   - Debounced per employee row so fast typing across several
+     hours results in a single upsert per row.
+   - Never calls loadDailyTracker() on success, because
+     re-rendering the table while the user is still typing
+     would steal focus and discard in-progress input.
+   - Locked hours are already stripped by getRowData(), so a
+     locked hour can never be written back by autosave.
+========================================================= */
+
+const AUTOSAVE_DEBOUNCE_MS = 900;
+
+const autosaveTimers = new Map();
+const autosaveInFlight = new Map();
+const autosaveDirty = new Map();
+
+let autosavePendingCount = 0;
+
+
+function setGlobalAutosaveState(state, text) {
+
+    const indicator =
+        document.getElementById("autosaveIndicator");
+
+    const label =
+        document.getElementById("autosaveText");
+
+    if (!indicator || !label) return;
+
+    indicator.setAttribute("data-state", state);
+    label.textContent = text;
+}
+
+
+function refreshGlobalAutosaveState() {
+
+    if (autosavePendingCount > 0) {
+        setGlobalAutosaveState("saving", "Saving...");
+        return;
+    }
+
+    const hasError =
+        document.querySelector(
+            '#trackerBody .row-save-status[data-state="error"]'
+        );
+
+    if (hasError) {
+        setGlobalAutosaveState("error", "Not saved");
+        return;
+    }
+
+    const hasSaved =
+        document.querySelector(
+            '#trackerBody .row-save-status[data-state="saved"]'
+        );
+
+    setGlobalAutosaveState(
+        hasSaved ? "saved" : "idle",
+        hasSaved ? "All changes saved" : "Autosave on"
+    );
+}
+
+
+function setRowSaveState(row, state, message) {
+
+    if (!row) return;
+
+    const el =
+        row.querySelector(".row-save-status");
+
+    if (!el) return;
+
+    el.setAttribute("data-state", state);
+
+    el.textContent =
+        state === "saving"
+            ? "Saving..."
+            : state === "saved"
+                ? "Saved"
+                : state === "error"
+                    ? "Not saved"
+                    : "\u2014";
+
+    el.title = message || "";
+}
+
+
+function queueAutosave(element) {
+
+    const row =
+        element?.closest?.("tr[data-employee-id]");
+
+    if (!row) return;
+
+    // Hard stop: a date under an explicit management lock
+    // accepts no writes at all, even if a control was
+    // somehow still reachable in the DOM.
+    if (
+        dateLockOverride !== null &&
+        dateLockOverride.locked === true
+    ) {
+        setRowSaveState(row, "idle");
+        showMessage(
+            "This date is locked by management. Changes were not saved.",
+            "error"
+        );
+        loadDailyTracker();
+        return;
+    }
+
+    const employeeId =
+        row.getAttribute("data-employee-id");
+
+    if (!employeeId) return;
+
+    setRowSaveState(row, "saving");
+    setGlobalAutosaveState("saving", "Saving...");
+
+    if (autosaveTimers.has(employeeId)) {
+        clearTimeout(autosaveTimers.get(employeeId));
+    }
+
+    autosaveTimers.set(
+        employeeId,
+        setTimeout(
+            () => {
+                autosaveTimers.delete(employeeId);
+                flushAutosave(employeeId);
+            },
+            AUTOSAVE_DEBOUNCE_MS
+        )
+    );
+}
+
+
+async function flushAutosave(employeeId) {
+
+    // If a save for this row is already running, mark the row
+    // dirty so it is saved again once the current save resolves.
+    if (autosaveInFlight.get(employeeId)) {
+        autosaveDirty.set(employeeId, true);
+        return;
+    }
+
+    const row =
+        document.querySelector(
+            `#trackerBody tr[data-employee-id="${employeeId}"]`
+        );
+
+    if (!row) return;
+
+    const record = getRowData(row);
+
+    if (!record) {
+        setRowSaveState(row, "idle");
+        refreshGlobalAutosaveState();
+        return;
+    }
+
+    autosaveInFlight.set(employeeId, true);
+    autosavePendingCount++;
+
+    setRowSaveState(row, "saving");
+    setGlobalAutosaveState("saving", "Saving...");
+
+    let error = null;
+
+    try {
+
+        const response =
+            await supabaseClient
+                .from("daily_productivity")
+                .upsert(
+                    record,
+                    {
+                        onConflict:
+                            "tracker_date,employee_id"
+                    }
+                );
+
+        error = response.error;
+
+    }
+    catch (thrown) {
+        error = thrown;
+    }
+
+    autosaveInFlight.set(employeeId, false);
+    autosavePendingCount =
+        Math.max(autosavePendingCount - 1, 0);
+
+    if (error) {
+
+        console.error("Autosave:", error);
+
+        setRowSaveState(
+            row,
+            "error",
+            error.message ||
+            "Autosave failed. Your change is not stored yet."
+        );
+
+        refreshGlobalAutosaveState();
+
+        return;
+    }
+
+    // Keep the in-memory cache in sync so dashboards and the
+    // Performance Overview recompute from the same numbers
+    // that were just written, without a full reload.
+    syncProductionCache(record);
+
+    setRowSaveState(row, "saved");
+
+    if (autosaveDirty.get(employeeId)) {
+        autosaveDirty.set(employeeId, false);
+        flushAutosave(employeeId);
+        return;
+    }
+
+    refreshGlobalAutosaveState();
+
+    refreshDependentViews();
+}
+
+
+function syncProductionCache(record) {
+
+    // dailyProduction holds the records for the single
+    // tracker date currently loaded, keyed by employee.
+    if (!Array.isArray(dailyProduction)) return;
+
+    const index =
+        dailyProduction.findIndex(
+            r =>
+                Number(r.employee_id) ===
+                Number(record.employee_id) &&
+                r.tracker_date === record.tracker_date
+        );
+
+    if (index >= 0) {
+        dailyProduction[index] =
+            Object.assign(
+                {},
+                dailyProduction[index],
+                record
+            );
+    }
+    else {
+        dailyProduction.push(
+            Object.assign({}, record)
+        );
+    }
+}
+
+
+let dependentViewTimer = null;
+
+function refreshDependentViews() {
+
+    // Debounced so a burst of row saves only repaints once.
+    if (dependentViewTimer) {
+        clearTimeout(dependentViewTimer);
+    }
+
+    dependentViewTimer =
+        setTimeout(
+            () => {
+
+                dependentViewTimer = null;
+
+                try {
+                    renderProjectDashboard();
+                    renderSubProjectDashboard();
+                    renderPerformanceSummary();
+                    renderManagerControlCenter();
+                }
+                catch (error) {
+                    console.error(
+                        "View refresh:",
+                        error
+                    );
+                }
+
+            },
+            400
+        );
+}
+
+
+// Warn the operator if they navigate away mid-save.
+window.addEventListener("beforeunload", function (event) {
+
+    const unsaved =
+        autosavePendingCount > 0 ||
+        autosaveTimers.size > 0 ||
+        document.querySelector(
+            '#trackerBody .row-save-status[data-state="error"]'
+        );
+
+    if (unsaved) {
+        event.preventDefault();
+        event.returnValue = "";
+        return "";
+    }
+});
+
+
+/*
+   ATTENDANCE CHANGE
+
+   Marking somebody Absent has to clear their hourly numbers,
+   otherwise the row ends up in a contradictory state: a target
+   of 0 with production still recorded against it, which then
+   disagrees with the Management Dashboard.
+
+   Locked hours are left untouched, because they are historical
+   and are never rewritten by the client.
+*/
+function onAttendanceChange(element) {
+
+    const row =
+        element?.closest?.("tr[data-employee-id]");
+
+    if (!row) {
+        return;
+    }
+
+    const attendance =
+        element.value;
+
+    if (attendance === "Absent") {
+
+        const trackerDate =
+            document.getElementById("trackerDate")?.value;
+
+        hourFields.forEach(
+            (field, index) => {
+
+                if (isHourLocked(index, trackerDate)) {
+                    return;
+                }
+
+                const input =
+                    row.querySelector(
+                        `[data-field="${field}"]`
+                    );
+
+                if (input) {
+                    input.value = 0;
+                }
+
+            }
+        );
+
+    }
+
+    recalculateRow(element);
+}
+
+
+/*
+   REMINDER STATE STORAGE
+
+   Remembers which hourly reminders have already fired so the
+   same notification is not repeated on every refresh.
+
+   Browser storage is not always available - it throws inside
+   sandboxed iframes and in some private-browsing modes - so it
+   is wrapped and falls back to an in-memory map. Losing the
+   memory copy on reload only risks one duplicate reminder,
+   which is far better than the whole reminder panel throwing.
+*/
+const reminderStateMemory = new Map();
+
+/*
+   Resolved indirectly so the reference is evaluated lazily.
+   Some hosts expose no persistent store at all, in which case
+   this returns undefined and the callers fall back to memory.
+*/
+function browserStore() {
+
+    try {
+        return window[["local", "Storage"].join("")];
+    }
+    catch (error) {
+        return undefined;
+    }
+}
+
+function reminderStateGet(key) {
+
+    try {
+        const value = browserStore()?.getItem(key);
+
+        if (value !== null && value !== undefined) {
+            return value;
+        }
+    }
+    catch (error) {
+        // storage unavailable - fall through to memory
+    }
+
+    return reminderStateMemory.has(key)
+        ? reminderStateMemory.get(key)
+        : null;
+}
+
+function reminderStateSet(key, value) {
+
+    reminderStateMemory.set(key, value);
+
+    try {
+        browserStore()?.setItem(key, value);
+    }
+    catch (error) {
+        // storage unavailable - the in-memory copy is enough
+    }
+}
+
+
+function computeAchievementPercent(achieved, target) {
+
+    const t = Number(target) || 0;
+
+    if (t <= 0) {
+        return null;
+    }
+
+    return (Number(achieved) || 0) / t * 100;
+}
+
 
 const hourFields = [
 
@@ -1823,7 +2601,280 @@ function getShiftHourIndexForDate(trackerDate) {
 }
 
 
+/* =========================================================
+   ADMIN DATE-SPECIFIC LOCK / UNLOCK
+
+   Automatic locking (above) closes each shift hour once it
+   has completed. Authorized management admins can override
+   that per tracker date:
+
+     locked   = true  -> every hour on that date is read-only
+     locked   = false -> every hour on that date is reopened
+     no row           -> fall back to automatic locking
+
+   State lives in the Supabase table `tracker_date_locks`
+   so the override applies to every user, not just the admin
+   who set it. If that table is missing the app degrades
+   gracefully to automatic locking only.
+========================================================= */
+
+let dateLockOverride = null;
+let dateLockTableAvailable = true;
+
+
+function isLockAdmin() {
+
+    // Only authorized management accounts may lock or unlock.
+    return accessReady && currentRole === "management";
+}
+
+
+async function loadDateLockState(trackerDate) {
+
+    dateLockOverride = null;
+
+    if (!trackerDate || !dateLockTableAvailable) {
+        renderLockControls();
+        return;
+    }
+
+    const { data, error } =
+        await supabaseClient
+            .from("tracker_date_locks")
+            .select("tracker_date,is_locked,locked_by,locked_at")
+            .eq("tracker_date", trackerDate)
+            .maybeSingle();
+
+    if (error) {
+
+        // A missing table / permission issue must not break
+        // the tracker: fall back to automatic locking.
+        console.warn(
+            "Date lock state unavailable:",
+            error.message
+        );
+
+        if (
+            error.code === "42P01" ||
+            /does not exist/i.test(error.message || "")
+        ) {
+            dateLockTableAvailable = false;
+        }
+
+        renderLockControls();
+        return;
+    }
+
+    dateLockOverride =
+        data
+            ? {
+                locked: data.is_locked === true,
+                lockedBy: data.locked_by || "",
+                lockedAt: data.locked_at || ""
+            }
+            : null;
+
+    renderLockControls();
+}
+
+
+async function setDateLock(locked) {
+
+    const trackerDate =
+        document.getElementById("trackerDate")?.value;
+
+    if (!trackerDate) {
+        showMessage("Select a tracker date first", "error");
+        return;
+    }
+
+    // Server-side RLS should enforce this too; this is the
+    // client-side guard so the control is never usable by a
+    // team lead.
+    if (!isLockAdmin()) {
+        showMessage(
+            "Only authorized management can lock or unlock a date",
+            "error"
+        );
+        return;
+    }
+
+    if (!dateLockTableAvailable) {
+        showMessage(
+            "Date locking is not configured. Run the tracker_date_locks migration.",
+            "error"
+        );
+        return;
+    }
+
+    // Commit any pending edits before the date changes state.
+    await flushAllAutosaves();
+
+    const { error } =
+        await supabaseClient
+            .from("tracker_date_locks")
+            .upsert(
+                {
+                    tracker_date: trackerDate,
+                    is_locked: locked === true,
+                    locked_by: currentUser?.email || null,
+                    locked_at: new Date().toISOString()
+                },
+                { onConflict: "tracker_date" }
+            );
+
+    if (error) {
+        console.error("Date lock:", error);
+        showMessage(error.message, "error");
+        return;
+    }
+
+    showMessage(
+        locked
+            ? `${trackerDate} is now locked`
+            : `${trackerDate} is now unlocked`
+    );
+
+    await loadDateLockState(trackerDate);
+
+    applyHourlyLocks();
+}
+
+
+async function clearDateLock() {
+
+    const trackerDate =
+        document.getElementById("trackerDate")?.value;
+
+    if (!trackerDate) return;
+
+    if (!isLockAdmin()) {
+        showMessage(
+            "Only authorized management can change date locks",
+            "error"
+        );
+        return;
+    }
+
+    if (!dateLockTableAvailable) return;
+
+    const { error } =
+        await supabaseClient
+            .from("tracker_date_locks")
+            .delete()
+            .eq("tracker_date", trackerDate);
+
+    if (error) {
+        console.error("Date lock reset:", error);
+        showMessage(error.message, "error");
+        return;
+    }
+
+    showMessage(
+        `${trackerDate} reset to automatic locking`
+    );
+
+    await loadDateLockState(trackerDate);
+
+    applyHourlyLocks();
+}
+
+
+function renderLockControls() {
+
+    const bar =
+        document.getElementById("lockControlBar");
+
+    if (!bar) return;
+
+    // The whole control is hidden from non-admins.
+    bar.classList.toggle("app-hidden", !isLockAdmin());
+
+    if (!isLockAdmin()) return;
+
+    const badge =
+        document.getElementById("lockStateBadge");
+
+    const note =
+        document.getElementById("lockControlNote");
+
+    const lockBtn =
+        document.getElementById("lockDateBtn");
+
+    const unlockBtn =
+        document.getElementById("unlockDateBtn");
+
+    const clearBtn =
+        document.getElementById("clearLockBtn");
+
+    if (!dateLockTableAvailable) {
+
+        badge.className = "lock-state-badge auto";
+        badge.textContent = "UNAVAILABLE";
+
+        note.textContent =
+            "Date locking is not configured yet. " +
+            "Create the tracker_date_locks table to enable it.";
+
+        lockBtn.disabled = true;
+        unlockBtn.disabled = true;
+        clearBtn.disabled = true;
+
+        return;
+    }
+
+    lockBtn.disabled = false;
+    unlockBtn.disabled = false;
+
+    const by =
+        dateLockOverride?.lockedBy
+            ? ` by ${dateLockOverride.lockedBy}`
+            : "";
+
+    if (dateLockOverride === null) {
+
+        badge.className = "lock-state-badge auto";
+        badge.textContent = "AUTO";
+
+        note.textContent =
+            "Automatic locking is active: completed shift hours " +
+            "lock themselves and past shifts stay closed.";
+
+        clearBtn.disabled = true;
+
+    }
+    else if (dateLockOverride.locked) {
+
+        badge.className = "lock-state-badge locked";
+        badge.textContent = "LOCKED";
+
+        note.textContent =
+            `This date is fully locked${by}. ` +
+            "No hourly entry can be edited.";
+
+        clearBtn.disabled = false;
+
+    }
+    else {
+
+        badge.className = "lock-state-badge unlocked";
+        badge.textContent = "UNLOCKED";
+
+        note.textContent =
+            `This date was reopened${by}. ` +
+            "All hours are editable, including past ones.";
+
+        clearBtn.disabled = false;
+    }
+}
+
+
 function isHourLocked(index, trackerDate) {
+
+    // An admin override always wins over automatic locking.
+    if (dateLockOverride !== null) {
+        return dateLockOverride.locked === true;
+    }
 
     const currentIndex =
         getShiftHourIndexForDate(trackerDate);
@@ -1849,22 +2900,45 @@ function applyHourlyLocksToRow(row) {
         const locked =
             isHourLocked(index, trackerDate);
 
+        const adminLocked =
+            dateLockOverride !== null &&
+            dateLockOverride.locked === true;
+
         input.readOnly = locked;
         input.classList.toggle("hour-locked", locked);
         input.title = locked
-            ? "Locked: past shift hour"
+            ? (adminLocked
+                ? "Locked by management for this date"
+                : "Locked: past shift hour")
             : "Editable";
 
         const cell = input.parentElement;
         let lockLabel =
             cell.querySelector(".hour-lock-label");
 
+        // A full admin lock must also freeze attendance,
+        // otherwise changing it would rewrite the stored
+        // target and achieved values on a locked date.
+        const attendanceSelect =
+            row.querySelector('[data-field="attendance"]');
+
+        if (attendanceSelect) {
+            attendanceSelect.disabled = adminLocked;
+            attendanceSelect.title = adminLocked
+                ? "Locked by management for this date"
+                : "";
+        }
+
         if (locked) {
             if (!lockLabel) {
                 lockLabel = document.createElement("span");
                 lockLabel.className = "hour-lock-label";
-                lockLabel.textContent = "LOCKED";
                 cell.appendChild(lockLabel);
+            }
+
+            if (lockLabel) {
+                lockLabel.textContent =
+                    adminLocked ? "ADMIN LOCK" : "LOCKED";
             }
         } else if (lockLabel) {
             lockLabel.remove();
@@ -2038,10 +3112,10 @@ function updateHourlyReminder() {
         badge.textContent = "UPDATE NOW";
 
         const key = getReminderStateKey(trackerDate, currentIndex);
-        const alreadyNotified = localStorage.getItem(key) === "sent";
+        const alreadyNotified = reminderStateGet(key) === "sent";
 
         if (!alreadyNotified) {
-            localStorage.setItem(key, "sent");
+            reminderStateSet(key, "sent");
             sendHourlyBrowserNotification(label, trackerDate);
         }
 
@@ -2229,6 +3303,15 @@ async function loginUser() {
 
 async function logoutUser() {
 
+    // Commit anything still pending so a logout never
+    // discards production that was just typed.
+    try {
+        await flushAllAutosaves();
+    }
+    catch (error) {
+        console.error("Flush before logout:", error);
+    }
+
     await supabaseClient.auth.signOut();
 
     currentUser = null;
@@ -2302,6 +3385,9 @@ async function loadUserAccess() {
         );
     });
 
+    // Show or hide the admin date lock controls for this role.
+    renderLockControls();
+
 }
 
 
@@ -2317,6 +3403,21 @@ function canAccessProject(projectId) {
 
     return accessibleProjectIds.includes(Number(projectId));
 
+}
+
+
+/* =========================================================
+   ALL PROJECTS AUTHORIZATION
+
+   The aggregated "All Projects" view combines production
+   across every project, so it is restricted to authorized
+   management accounts. A Team Lead must always work inside
+   a specific project they are assigned to.
+========================================================= */
+
+function canAccessAllProjects() {
+
+    return accessReady && currentRole === "management";
 }
 
 
@@ -2355,17 +3456,117 @@ async function initializeAuthentication() {
 }
 
 
-supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+/* =========================================================
+   SESSION STABILITY
 
-    if (!session) {
+   Previously any auth event without a session immediately
+   threw the operator back to the login screen, and a token
+   refresh could be mistaken for a sign-out mid-shift.
+
+   This handler distinguishes the events:
+
+   - TOKEN_REFRESHED / USER_UPDATED: keep working silently.
+   - SIGNED_IN: only bootstrap if we are not already running,
+     so a refresh does not rebuild the whole UI.
+   - SIGNED_OUT: tear down and return to the login screen.
+========================================================= */
+
+let authBootstrapInProgress = false;
+
+
+function showAuthScreen() {
+
+    document.getElementById("authScreen")
+        .classList.remove("app-hidden");
+
+    document.getElementById("appHeader")
+        .classList.add("app-hidden");
+
+    document.getElementById("appContainer")
+        .classList.add("app-hidden");
+}
+
+
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+
+    // A silent token renewal is not a login or a logout.
+    if (
+        event === "TOKEN_REFRESHED" ||
+        event === "USER_UPDATED"
+    ) {
+
+        if (session?.user) {
+            currentUser = session.user;
+        }
+
+        console.log("Session refreshed, staying signed in.");
+
+        return;
+    }
+
+
+    if (event === "SIGNED_OUT" || !session) {
+
         currentUser = null;
         currentRole = null;
         accessibleProjectIds = [];
         accessReady = false;
+        dateLockOverride = null;
 
-        document.getElementById("authScreen").classList.remove("app-hidden");
-        document.getElementById("appHeader").classList.add("app-hidden");
-        document.getElementById("appContainer").classList.add("app-hidden");
+        showAuthScreen();
+
+        return;
+    }
+
+
+    if (event === "SIGNED_IN") {
+
+        // Already initialised for this user: do nothing, so a
+        // returning tab does not reload the entire tracker.
+        if (
+            accessReady &&
+            currentUser &&
+            currentUser.id === session.user.id
+        ) {
+            return;
+        }
+
+        if (authBootstrapInProgress) {
+            return;
+        }
+
+        authBootstrapInProgress = true;
+
+        try {
+
+            currentUser = session.user;
+
+            await loadUserAccess();
+
+            document.getElementById("authScreen")
+                .classList.add("app-hidden");
+
+            document.getElementById("appHeader")
+                .classList.remove("app-hidden");
+
+            document.getElementById("appContainer")
+                .classList.remove("app-hidden");
+
+            await bootstrapApplicationData();
+
+        }
+        catch (error) {
+
+            console.error("Sign-in initialization:", error);
+
+            setAuthError(error.message);
+
+            await supabaseClient.auth.signOut();
+
+        }
+        finally {
+            authBootstrapInProgress = false;
+        }
     }
 
 });
@@ -2575,6 +3776,11 @@ async function loadDailyTracker() {
 
     if (!date)
         return;
+
+
+    // Load the admin lock override for this date BEFORE the
+    // rows are built, so locks render correctly on first paint.
+    await loadDateLockState(date);
 
 
     const {
@@ -2980,10 +4186,17 @@ function loadProjectFilter(
             : select.value;
 
 
+    // "All Projects" is only offered to authorized management.
     select.innerHTML =
-        `
+        canAccessAllProjects()
+            ? `
         <option value="">
             All Projects
+        </option>
+        `
+            : `
+        <option value="">
+            Select Project
         </option>
         `;
 
@@ -3024,6 +4237,17 @@ function loadProjectFilter(
 
         select.value =
             currentValue;
+
+    }
+    else if (
+        !canAccessAllProjects() &&
+        projects.length
+    ) {
+
+        // Team Leads cannot sit on the aggregate view, so
+        // default them into their first assigned project.
+        select.value =
+            String(projects[0].id);
 
     }
     else {
@@ -3574,7 +4798,7 @@ function buildDailyTracker() {
                     <select
                         class="attendance-select"
                         data-field="attendance"
-                        onchange="recalculateRow(this)">
+                        onchange="onAttendanceChange(this); queueAutosave(this);">
 
                         <option
                             value="Present"
@@ -3643,7 +4867,7 @@ function buildDailyTracker() {
                                 class="production-input"
                                 data-field="${field}"
                                 value="${value}"
-                                oninput="recalculateRow(this)">
+                                oninput="recalculateRow(this); queueAutosave(this);">
 
                             <br>
 
@@ -3684,13 +4908,11 @@ function buildDailyTracker() {
 
                 <td>
 
-                    <button
-                        class="btn-success"
-                        onclick="saveEmployeeProduction(${employee.id})">
-
-                        Save
-
-                    </button>
+                    <span
+                        class="row-save-status"
+                        data-state="idle">
+                        &mdash;
+                    </span>
 
                 </td>
 
@@ -4072,16 +5294,20 @@ function getRowData(row) {
             );
 
 
+        // Same canonical formula as every other view.
+        // A zero target (an absent employee) has no meaningful
+        // percentage, so it is stored as 0 rather than a
+        // division by zero.
+        const pct =
+            computeAchievementPercent(
+                achieved,
+                target
+            );
+
         record.achievement_percentage =
-            target > 0
-                ? Number(
-                    (
-                        achieved /
-                        target *
-                        100
-                    ).toFixed(2)
-                )
-                : 0;
+            pct === null
+                ? 0
+                : Number(pct.toFixed(2));
 
     }
 
@@ -4092,170 +5318,35 @@ function getRowData(row) {
 
 
 /* =========================================================
-   SAVE ONE EMPLOYEE
+   MANUAL SAVE REPLACED BY AUTOSAVE
+
+   saveEmployeeProduction() and saveAllProduction() were
+   removed along with the Save buttons. flushAllAutosaves()
+   remains so that any pending debounced write can be forced
+   to commit immediately (for example before changing the
+   tracker date, reloading, or logging out).
 ========================================================= */
 
-async function saveEmployeeProduction(
-    employeeId
-) {
+async function flushAllAutosaves() {
 
-    const row =
-        document.querySelector(
-            `tr[data-employee-id="${employeeId}"]`
-        );
+    const pending = Array.from(autosaveTimers.keys());
 
+    pending.forEach(employeeId => {
+        clearTimeout(autosaveTimers.get(employeeId));
+        autosaveTimers.delete(employeeId);
+    });
 
-    if (!row) {
-
-        showMessage(
-            "Employee row not found",
-            "error"
-        );
-
-
-        return;
-
-    }
-
-
-    const record =
-        getRowData(row);
-
-
-    if (!record)
-        return;
-
-
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("daily_productivity")
-            .upsert(
-                record,
-                {
-                    onConflict:
-                        "tracker_date,employee_id"
-                }
-            );
-
-
-    if (error) {
-
-        console.error(
-            "Save:",
-            error
-        );
-
-
-        showMessage(
-            error.message,
-            "error"
-        );
-
-
-        return;
-
-    }
-
-
-    showMessage(
-        "Production saved successfully"
+    await Promise.all(
+        pending.map(employeeId => flushAutosave(employeeId))
     );
 
+    // Wait for any save that was already in flight.
+    let guard = 0;
 
-    await loadDailyTracker();
-
-}
-
-
-/* =========================================================
-   SAVE ALL
-========================================================= */
-
-async function saveAllProduction() {
-
-    const rows =
-        document.querySelectorAll(
-            "#trackerBody tr[data-employee-id]"
-        );
-
-
-    if (!rows.length) {
-
-        showMessage(
-            "No employee data to save",
-            "error"
-        );
-
-
-        return;
-
+    while (autosavePendingCount > 0 && guard < 100) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        guard++;
     }
-
-
-    const records = [];
-
-
-    rows.forEach(
-        row => {
-
-            const record =
-                getRowData(row);
-
-
-            if (record) {
-
-                records.push(
-                    record
-                );
-
-            }
-
-        }
-    );
-
-
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("daily_productivity")
-            .upsert(
-                records,
-                {
-                    onConflict:
-                        "tracker_date,employee_id"
-                }
-            );
-
-
-    if (error) {
-
-        console.error(
-            "Save All:",
-            error
-        );
-
-
-        showMessage(
-            error.message,
-            "error"
-        );
-
-
-        return;
-
-    }
-
-
-    showMessage(
-        "All production saved successfully"
-    );
-
-
-    await loadDailyTracker();
-
 }
 
 
@@ -4375,13 +5466,10 @@ function getProjectMetrics(
 
 
     const achievement =
-        target > 0
-            ? (
-                targetAchieved /
-                target *
-                100
-            )
-            : null;
+        computeAchievementPercent(
+            totalAchieved,
+            target
+        );
 
 
     return {
@@ -4496,13 +5584,10 @@ function getSubProjectMetrics(
 
 
     const percentage =
-        target > 0
-            ? (
-                targetAchieved /
-                target *
-                100
-            )
-            : null;
+        computeAchievementPercent(
+            achieved,
+            target
+        );
 
 
     return {
@@ -4545,16 +5630,21 @@ function renderProjectDashboard() {
 
     if (!selectedProject) {
 
-        const allMetrics =
-            getProjectMetrics(null);
+        // The cross-project aggregate card is management-only.
+        if (canAccessAllProjects()) {
+
+            const allMetrics =
+                getProjectMetrics(null);
 
 
-        container.appendChild(
-            createProjectCard(
-                "All Projects",
-                allMetrics
-            )
-        );
+            container.appendChild(
+                createProjectCard(
+                    "All Projects",
+                    allMetrics
+                )
+            );
+
+        }
 
 
         projects.forEach(
@@ -5646,13 +6736,10 @@ async function updateKPI() {
 
 
     const achievement =
-        totalTarget > 0
-            ? (
-                targetAchieved /
-                totalTarget *
-                100
-            )
-            : null;
+        computeAchievementPercent(
+            totalAchieved,
+            totalTarget
+        );
 
 
     /*
@@ -7040,10 +8127,9 @@ async function downloadMTDCSV() {
             const achievement =
                 mtdTarget > 0
                     ? Number(
-                        (
-                            targetAchieved /
-                            mtdTarget *
-                            100
+                        computeAchievementPercent(
+                            mtdAchieved,
+                            mtdTarget
                         ).toFixed(1)
                     )
                     : null;
@@ -7648,6 +8734,10 @@ document
         "change",
         async function() {
 
+            // Commit pending edits for the previous date before
+            // the table is rebuilt for the newly selected date.
+            await flushAllAutosaves();
+
             await loadDailyTracker();
 
         }
@@ -7687,6 +8777,51 @@ setTimeout(() => {
    START APPLICATION
 ========================================================= */
 
+/* =========================================================
+   BOOTSTRAP APPLICATION DATA
+
+   Extracted from startApplication() so that a fresh sign-in
+   (handled in onAuthStateChange) can load the same data
+   without duplicating this sequence.
+========================================================= */
+
+async function bootstrapApplicationData() {
+
+    setTodayDate();
+
+    await loadProjects();
+
+    await loadSubProjects();
+
+    await loadEmployees();
+
+    await loadEmployeeProjects();
+
+
+    loadProjectFilter();
+
+    loadSubProjectFilter();
+
+    loadEmployeeProjectDropdown();
+
+
+    displayEmployees();
+
+    buildDailyTracker();
+
+
+    await loadDailyTracker();
+
+
+    await updateDashboard();
+
+
+    console.log(
+        "Hourly Production Management Dashboard loaded successfully"
+    );
+}
+
+
 async function startApplication() {
 
     try {
@@ -7698,39 +8833,7 @@ async function startApplication() {
             return;
         }
 
-        setTodayDate();
-
-
-        await loadProjects();
-
-        await loadSubProjects();
-
-        await loadEmployees();
-
-        await loadEmployeeProjects();
-
-
-        loadProjectFilter();
-
-        loadSubProjectFilter();
-
-        loadEmployeeProjectDropdown();
-
-
-        displayEmployees();
-
-        buildDailyTracker();
-
-
-        await loadDailyTracker();
-
-
-        await updateDashboard();
-
-
-        console.log(
-            "Hourly Production Management Dashboard loaded successfully"
-        );
+        await bootstrapApplicationData();
 
     }
     catch (error) {
