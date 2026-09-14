@@ -216,7 +216,7 @@ body{
 }
 
 /* =========================================================
-   EXECUTIVE HEADLINE BANNER
+   HEADLINE BANNER
 ========================================================= */
 
 .headline{
@@ -368,21 +368,6 @@ body{
     display:flex;
     align-items:center;
     gap:5px;
-}
-
-.trend-up{
-    color:#16a34a;
-    font-weight:800;
-}
-
-.trend-down{
-    color:#dc2626;
-    font-weight:800;
-}
-
-.trend-flat{
-    color:#64748b;
-    font-weight:800;
 }
 
 /* =========================================================
@@ -1340,6 +1325,8 @@ let accessRows = [];
 
 let projects = [];
 
+let subProjects = [];   // <-- sub-project targets live here
+
 let employees = [];
 
 let productivityRows = [];
@@ -1729,6 +1716,8 @@ async function loadDashboard(){
 
         await loadProjects();
 
+        await loadSubProjects();
+
         await loadEmployees();
 
         await loadProductivity();
@@ -1797,6 +1786,42 @@ async function loadProjects(){
 }
 
 
+/* =========================================================
+   LOAD SUB-PROJECTS
+
+   This is the missing piece that caused Hopebridge's
+   target to be 0. Sub-project targets must be loaded so
+   employees can be resolved against them.
+========================================================= */
+
+async function loadSubProjects(){
+
+    const { data, error } =
+        await sb
+        .from("sub_projects")
+        .select("*")
+        .order("id", { ascending:true });
+
+
+    if(error){
+
+        console.warn(
+            "sub_projects load failed:",
+            error.message
+        );
+
+        subProjects = [];
+
+        return;
+
+    }
+
+
+    subProjects = data || [];
+
+}
+
+
 async function loadEmployees(){
 
     const { data, error } =
@@ -1820,12 +1845,6 @@ async function loadEmployees(){
 
 
 async function loadProductivity(){
-
-    /*
-       Daily mode: fetch only the tracker date.
-       MTD mode:   fetch everything from the 1st of the
-                   selected month up to the selected date.
-    */
 
     let fromDate =
         currentDate;
@@ -2053,6 +2072,143 @@ function getProjectById(projectId){
 }
 
 
+function getSubProjectById(subProjectId){
+
+    if(
+        subProjectId === null ||
+        subProjectId === undefined ||
+        subProjectId === ""
+    ){
+
+        return null;
+
+    }
+
+
+    return subProjects.find(
+        sp =>
+            String(sp.id).trim()
+            === String(subProjectId).trim()
+    );
+
+}
+
+
+/* =========================================================
+   RESOLVE EMPLOYEE TARGET
+
+   Priority order:
+
+     1. Sub-project assigned directly to the employee
+        (employees.sub_project_id), if target_based = true
+        and daily_target > 0.
+
+     2. If the employee's project has exactly one active
+        sub-project, use that sub-project's target.
+
+     3. Fall back to projects.daily_target.
+
+     4. If nothing is configured, return null (no target).
+
+   This is why Hopebridge (sub-project based) previously
+   showed target = 0: its project-level daily_target is
+   blank, and the dashboard was not looking at
+   sub_projects at all.
+========================================================= */
+
+function resolveEmployeeTarget(employee, project){
+
+    /*
+       Step 1: employee's directly assigned sub-project
+    */
+
+    const directSp =
+        getSubProjectById(employee?.sub_project_id);
+
+
+    if(
+        directSp &&
+        directSp.target_based !== false
+    ){
+
+        const spTarget =
+            num(directSp.daily_target);
+
+
+        if(spTarget > 0){
+
+            return spTarget;
+
+        }
+
+    }
+
+
+    /*
+       Step 2: unique active sub-project for the employee's
+       project (conventional match when there is only one)
+    */
+
+    if(project){
+
+        const projectSubProjects =
+            subProjects.filter(
+                sp =>
+                    String(sp.project_id).trim()
+                    === String(project.id).trim()
+                    &&
+                    sp.active !== false
+            );
+
+
+        if(projectSubProjects.length === 1){
+
+            const sp = projectSubProjects[0];
+
+
+            if(sp.target_based !== false){
+
+                const spTarget =
+                    num(sp.daily_target);
+
+
+                if(spTarget > 0){
+
+                    return spTarget;
+
+                }
+
+            }
+
+        }
+
+    }
+
+
+    /*
+       Step 3: project-level target
+    */
+
+    const projectTarget =
+        num(project?.daily_target);
+
+
+    if(projectTarget > 0){
+
+        return projectTarget;
+
+    }
+
+
+    /*
+       Step 4: nothing configured
+    */
+
+    return null;
+
+}
+
+
 /* =========================================================
    PRODUCTIVITY MATCH
 ========================================================= */
@@ -2062,11 +2218,6 @@ function findProductivity(employee, dateFilter){
     const employeeId =
         String(employee.id ?? "").trim();
 
-
-    /*
-       In MTD mode we may have several rows for the same
-       employee - one per date. We filter by date first.
-    */
 
     let rows =
         productivityRows;
@@ -2197,6 +2348,15 @@ function buildEmployeeMetric(employee){
 
 
     /*
+       Resolve target from sub-project first, then project.
+       This fixes the Hopebridge target = 0 issue.
+    */
+
+    const employeeTarget =
+        resolveEmployeeTarget(employee, project);
+
+
+    /*
        Daily mode uses the single tracker date.
        MTD mode aggregates all rows in the period.
     */
@@ -2242,7 +2402,6 @@ function buildEmployeeMetric(employee){
 
         /*
            MTD: aggregate all rows in the period.
-           FTE is average attendance factor.
         */
 
         const rows =
@@ -2255,8 +2414,6 @@ function buildEmployeeMetric(employee){
 
         let fteSum = 0;
 
-        let presentDays = 0;
-
         rows.forEach(
             row => {
 
@@ -2264,8 +2421,6 @@ function buildEmployeeMetric(employee){
                     getAttendanceFactor(row.attendance);
 
                 fteSum += f;
-
-                if(f > 0) presentDays++;
 
                 actualProduction +=
                     getActualProduction(row);
@@ -2283,22 +2438,7 @@ function buildEmployeeMetric(employee){
         );
 
 
-        /*
-           For MTD, "effective FTE" is the average of daily
-           FTE across days elapsed. If no rows exist, FTE is
-           treated as 0.
-        */
-
-        const elapsedDays =
-            rows.length > 0
-                ? rows.length
-                : 0;
-
-
-        fte =
-            elapsedDays > 0
-                ? fteSum
-                : 0;
+        fte = fteSum;
 
 
         attendance =
@@ -2309,69 +2449,67 @@ function buildEmployeeMetric(employee){
     }
 
 
-    const projectTarget =
-        num(project?.daily_target);
-
-
     /*
-       For daily view, target is adjusted by attendance.
+       Adjusted target:
 
-       For MTD view, target accumulates daily_target for
-       every day in the period for each employee,
-       scaled by their attendance factor each day.
+         Daily view:  projectTarget * attendance factor
+         MTD view:    sum over each day in the period
+                      of (projectTarget * attendance factor)
+                      for the days that have records
+
+       If employeeTarget is null (nothing configured anywhere)
+       the adjusted target is 0 and achievement is reported
+       as "No Target" instead of a fake 0%.
     */
 
     let adjustedTarget = 0;
 
 
-    if(currentPeriod === "day"){
-
-        adjustedTarget =
-            projectTarget * fte;
-
-    }
-    else{
-
-        /*
-           Count unique dates this employee has a row for.
-           If the employee has no rows at all, they are
-           treated as present across all elapsed working days
-           (fallback: single day target).
-        */
-
-        const employeeRows =
-            productivityRows.filter(
-                item =>
-                    String(item.employee_id ?? "").trim()
-                    === String(employee.id).trim()
-            );
+    const hasTarget =
+        employeeTarget !== null &&
+        employeeTarget !== undefined &&
+        employeeTarget > 0;
 
 
-        if(employeeRows.length > 0){
+    if(hasTarget){
 
-            employeeRows.forEach(
-                row => {
+        if(currentPeriod === "day"){
 
-                    const f =
-                        getAttendanceFactor(row.attendance);
-
-                    adjustedTarget +=
-                        projectTarget * f;
-
-                }
-            );
+            adjustedTarget =
+                employeeTarget * fte;
 
         }
         else{
 
-            /*
-               No records for this employee in the MTD period.
-               Treat as one day present so the target is not
-               understated.
-            */
+            const employeeRows =
+                productivityRows.filter(
+                    item =>
+                        String(item.employee_id ?? "").trim()
+                        === String(employee.id).trim()
+                );
 
-            adjustedTarget =
-                projectTarget;
+
+            if(employeeRows.length > 0){
+
+                employeeRows.forEach(
+                    row => {
+
+                        const f =
+                            getAttendanceFactor(row.attendance);
+
+                        adjustedTarget +=
+                            employeeTarget * f;
+
+                    }
+                );
+
+            }
+            else{
+
+                adjustedTarget =
+                    employeeTarget;
+
+            }
 
         }
 
@@ -2379,7 +2517,7 @@ function buildEmployeeMetric(employee){
 
 
     const achievement =
-        adjustedTarget > 0
+        hasTarget && adjustedTarget > 0
             ? (actualProduction / adjustedTarget) * 100
             : 0;
 
@@ -2414,7 +2552,11 @@ function buildEmployeeMetric(employee){
 
         hours: hourlyTotals,
 
-        averagePerHour
+        averagePerHour,
+
+        hasTarget,
+
+        employeeTarget
 
     };
 
@@ -2672,10 +2814,6 @@ function renderHeadline(){
             formatPercent(achievement);
 
 
-    /*
-       Period label
-    */
-
     const periodLabel =
         currentPeriod === "mtd"
             ? "Month to Date"
@@ -2693,10 +2831,6 @@ function renderHeadline(){
         .textContent =
             `As of ${currentDate} • ${filteredEmployees.length} employees • ${buildProjectMetrics().length} projects`;
 
-
-    /*
-       Health
-    */
 
     const pill =
         document.getElementById("healthPill");
@@ -2799,10 +2933,6 @@ function renderKPIs(){
             formatNumber(average, 1);
 
 
-    /*
-       Colour the KPI cards by achievement
-    */
-
     const achCard =
         document
         .getElementById("kpiAchievement")
@@ -2860,7 +2990,9 @@ function buildProjectMetrics(){
 
                         target: 0,
 
-                        production: 0
+                        production: 0,
+
+                        hasTarget: false
 
                     }
                 );
@@ -2878,6 +3010,13 @@ function buildProjectMetrics(){
 
             item.production += metric.production;
 
+
+            if(metric.hasTarget){
+
+                item.hasTarget = true;
+
+            }
+
         }
     );
 
@@ -2887,7 +3026,7 @@ function buildProjectMetrics(){
             item => {
 
                 item.achievement =
-                    item.target > 0
+                    item.hasTarget && item.target > 0
                         ? (item.production / item.target) * 100
                         : 0;
 
@@ -2998,11 +3137,11 @@ function renderProjectTable(){
 
                 <td>${formatNumber(item.production, 0)}</td>
 
-                <td>${achievementBadge(item.achievement)}</td>
+                <td>${achievementBadge(item.achievement, item.hasTarget)}</td>
 
                 <td>${formatNumber(item.average, 1)}</td>
 
-                <td>${statusBadge(item.achievement)}</td>
+                <td>${statusBadge(item.achievement, item.hasTarget)}</td>
 
             `;
 
@@ -3065,7 +3204,9 @@ function buildTeamLeadMetrics(){
 
                                     target: 0,
 
-                                    production: 0
+                                    production: 0,
+
+                                    hasTarget: false
 
                                 }
                             );
@@ -3086,6 +3227,13 @@ function buildTeamLeadMetrics(){
 
                         item.production += metric.production;
 
+
+                        if(metric.hasTarget){
+
+                            item.hasTarget = true;
+
+                        }
+
                     }
                 );
 
@@ -3098,7 +3246,7 @@ function buildTeamLeadMetrics(){
             item => {
 
                 item.achievement =
-                    item.target > 0
+                    item.hasTarget && item.target > 0
                         ? (item.production / item.target) * 100
                         : 0;
 
@@ -3188,9 +3336,9 @@ function renderTeamLeadTable(){
 
                 <td>${formatNumber(item.production, 0)}</td>
 
-                <td>${achievementBadge(item.achievement)}</td>
+                <td>${achievementBadge(item.achievement, item.hasTarget)}</td>
 
-                <td>${statusBadge(item.achievement)}</td>
+                <td>${statusBadge(item.achievement, item.hasTarget)}</td>
 
             `;
 
@@ -3207,7 +3355,20 @@ function renderTeamLeadTable(){
    BADGES
 ========================================================= */
 
-function achievementBadge(value){
+function achievementBadge(value, hasTarget = true){
+
+    /*
+       When a project has no configured target anywhere
+       (neither sub-project nor project), showing 0.0%
+       is misleading. We show N/A instead.
+    */
+
+    if(!hasTarget){
+
+        return `<span class="badge badge-neutral">N/A</span>`;
+
+    }
+
 
     const p = num(value);
 
@@ -3227,7 +3388,14 @@ function achievementBadge(value){
 }
 
 
-function statusBadge(value){
+function statusBadge(value, hasTarget = true){
+
+    if(!hasTarget){
+
+        return `<span class="badge badge-neutral">No Target</span>`;
+
+    }
+
 
     const p = num(value);
 
@@ -3285,6 +3453,7 @@ function renderProjectAchievementChart(){
         data.map(
             item => {
 
+                if(!item.hasTarget) return "#cbd5e1";
                 if(item.achievement >= 95) return "#16a34a";
                 if(item.achievement >= 75) return "#f59e0b";
                 if(item.achievement > 0) return "#dc2626";
@@ -3552,10 +3721,6 @@ function renderInsights(){
     }
 
 
-    /*
-       Peak hour
-    */
-
     const totals = HOUR_FIELDS.map(() => 0);
 
 
@@ -3628,10 +3793,6 @@ function exportCSV(){
     rows.push([]);
 
 
-    /*
-       Executive summary
-    */
-
     const totalTarget =
         filteredEmployees.reduce(
             (t,m) => t + m.adjustedTarget, 0
@@ -3680,10 +3841,6 @@ function exportCSV(){
     rows.push([]);
 
 
-    /*
-       Project scorecard
-    */
-
     rows.push(["Project Scorecard"]);
 
     rows.push([
@@ -3710,7 +3867,9 @@ function exportCSV(){
                 item.fte.toFixed(1),
                 item.target.toFixed(1),
                 item.production.toFixed(0),
-                item.achievement.toFixed(1),
+                item.hasTarget
+                    ? item.achievement.toFixed(1)
+                    : "N/A",
                 item.average.toFixed(1)
             ]);
 
@@ -3720,10 +3879,6 @@ function exportCSV(){
 
     rows.push([]);
 
-
-    /*
-       Team Lead scorecard
-    */
 
     rows.push(["Team Lead Scorecard"]);
 
@@ -3750,7 +3905,9 @@ function exportCSV(){
                 item.fte.toFixed(1),
                 item.target.toFixed(1),
                 item.production.toFixed(0),
-                item.achievement.toFixed(1)
+                item.hasTarget
+                    ? item.achievement.toFixed(1)
+                    : "N/A"
             ]);
 
         }
