@@ -1523,6 +1523,7 @@
                 <button class="btn-primary" onclick="renderManagerControlCenter()">
                     Refresh Manager View
                 </button>
+
             </div>
 
             <div class="manager-kpi-grid" id="managerControlKPIs"></div>
@@ -2391,7 +2392,7 @@ function refreshDependentViews() {
 
     dependentViewTimer =
         setTimeout(
-            () => {
+            async () => {
 
                 dependentViewTimer = null;
 
@@ -2400,6 +2401,13 @@ function refreshDependentViews() {
                     renderSubProjectDashboard();
                     renderPerformanceSummary();
                     renderManagerControlCenter();
+
+                    // FIX: The Performance Overview KPIs (including
+                    // Achieved / Achievement % / Current Month
+                    // Shrinkage) were never refreshed after an
+                    // autosave. That is the main reason the
+                    // dashboard looked "frozen" at the top.
+                    await updateKPI();
                 }
                 catch (error) {
                     console.error(
@@ -3823,7 +3831,11 @@ async function loadDailyTracker() {
             .eq(
                 "tracker_date",
                 date
-            );
+            )
+            // FIX: Without a limit, Supabase silently returns at
+            // most 1000 rows. On a busy month that truncated the
+            // tracker and made rows appear missing.
+            .limit(10000);
 
 
     if (error) {
@@ -6482,7 +6494,17 @@ async function calculateCurrentMonthShrinkage() {
     /*
        Load all attendance records
        for current month.
+
+       FIX: .in(employee_id, visibleIds) keeps the query
+       scoped to the employees currently on screen, and
+       .limit(20000) stops Supabase silently truncating at
+       1000 rows, which made the shrinkage numbers freeze
+       once the month filled up.
     */
+
+    const visibleIds =
+        visibleEmployees.map(e => Number(e.id));
+
 
     const {
         data,
@@ -6500,7 +6522,12 @@ async function calculateCurrentMonthShrinkage() {
             .lte(
                 "tracker_date",
                 toDate
-            );
+            )
+            .in(
+                "employee_id",
+                visibleIds
+            )
+            .limit(20000);
 
 
     if (error) {
@@ -7293,6 +7320,17 @@ async function updateDashboard() {
 
 async function refreshDashboard() {
 
+    // Commit any pending autosave before re-reading from the
+    // server, otherwise the manual Refresh button could race
+    // the debounced writer and show stale numbers.
+    try {
+        await flushAllAutosaves();
+    }
+    catch (error) {
+        console.error("Flush before refresh:", error);
+    }
+
+
     const selectedProject =
         document.getElementById(
             "projectFilter"
@@ -7537,7 +7575,8 @@ async function downloadDailyCSV() {
             .eq(
                 "tracker_date",
                 date
-            );
+            )
+            .limit(10000);
 
 
     if (error) {
@@ -7881,7 +7920,8 @@ async function downloadMTDCSV() {
             .lte(
                 "tracker_date",
                 toDate
-            );
+            )
+            .limit(20000);
 
 
     if (error) {
