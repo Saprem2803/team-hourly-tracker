@@ -28,6 +28,10 @@
         body {
             font-family:
                 Inter,
+                system-ui,
+                -apple-system,
+                Segoe UI,
+                Roboto,
                 Arial,
                 Helvetica,
                 sans-serif;
@@ -1255,6 +1259,13 @@
             color: #7b8490;
         }
 
+        .hour-row.grace .hour-status {
+
+            background: #fff4d6;
+
+            color: #9a6b0b;
+        }
+
         .hour-input {
 
             width: 100%;
@@ -1267,7 +1278,7 @@
 
             font-size: 18px;
 
-            font-weight: 850;
+            font-weight: 800;
 
             text-align: center;
 
@@ -1559,6 +1570,55 @@
 
         }
 
+        /* =====================================================
+           HOURLY DEADLINE BANNER (NEW)
+        ===================================================== */
+
+        .hourly-deadline-banner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #fff8e8, #fffdf8);
+            border: 1px solid #efd19b;
+            color: #765a20;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .hourly-deadline-banner strong {
+            color: #5f4515;
+        }
+
+        .hourly-deadline-banner.warning {
+            background: linear-gradient(135deg, #fff0f0, #fffafa);
+            border-color: #e9b4b4;
+            color: #8e2d2d;
+        }
+
+        .browser-notification-button {
+            border: 1px solid #cbd9ea;
+            background: #f4f8fd;
+            color: #245b96;
+            border-radius: 9px;
+            padding: 8px 11px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            margin-top: 8px;
+        }
+
+        .browser-notification-button:hover {
+            background: #e8f0fa;
+        }
+
+        .browser-notification-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
     </style>
 
 </head>
@@ -1566,486 +1626,337 @@
 
 <body>
 
-
-<!-- =========================================================
-     LOGIN
-========================================================= -->
-
-<div id="loginScreen"
-     class="login-wrapper">
-
-    <div class="login-card">
-
-        <div class="login-logo">
-            HP
-        </div>
-
-        <div class="login-title">
-            My Hourly Production
-        </div>
-
-        <div class="login-subtitle">
-            Sign in with your employee account to enter
-            your hourly production.
-        </div>
-
-        <div id="loginError"
-             class="error-message hidden">
-        </div>
-
-        <div class="field">
-
-            <label>
-                Email
-            </label>
-
-            <input
-                id="loginEmail"
-                type="email"
-                autocomplete="username"
-                placeholder="Enter your work email">
-
-        </div>
-
-
-        <div class="field">
-
-            <label>
-                Password
-            </label>
-
-            <input
-                id="loginPassword"
-                type="password"
-                autocomplete="current-password"
-                placeholder="Enter your password">
-
-        </div>
-
-
-        <!-- FORGOT PASSWORD -->
-
-        <div class="forgot-password-wrap">
-
-            <button
-                type="button"
-                class="forgot-password-button"
-                onclick="forgotPassword()">
-
-                Forgot Password?
-
-            </button>
-
-        </div>
-
-
-        <button
-            id="loginButton"
-            class="login-button"
-            onclick="loginEmployee()">
-
-            Sign In
-
-        </button>
-
-    </div>
-
-</div>
-
-
-<!-- =========================================================
-     FIRST LOGIN / PASSWORD CHANGE
-========================================================= -->
-
-<div id="setPasswordScreen"
-     class="password-screen hidden">
-
-    <div class="password-card">
-
-        <div class="password-icon">
-            🔐
-        </div>
-
-        <div class="password-title">
-            Set Your New Password
-        </div>
-
-        <div class="password-subtitle">
-
-            This is your first login.
-            For security, you must create your personal password
-            before accessing the Hourly Production Tracker.
-
-        </div>
-
-
-        <div id="setPasswordError"
-             class="password-error hidden">
-        </div>
-
-
-        <div id="setPasswordSuccess"
-             class="password-success hidden">
-        </div>
-
-
-        <div class="field">
-
-            <label>
-                New Password
-            </label>
-
-            <input
-                id="newPassword"
-                type="password"
-                autocomplete="new-password"
-                placeholder="Enter your new password">
-
-        </div>
-
-
-        <div class="field">
-
-            <label>
-                Confirm New Password
-            </label>
-
-            <input
-                id="confirmNewPassword"
-                type="password"
-                autocomplete="new-password"
-                placeholder="Re-enter your new password">
-
-        </div>
-
-
-        <div class="password-requirements">
-
-            <strong>
-                Password requirements:
-            </strong>
-
-            <br>
-
-            • Minimum 8 characters
-
-            <br>
-
-            • At least one uppercase letter
-
-            <br>
-
-            • At least one lowercase letter
-
-            <br>
-
-            • At least one number
-
-        </div>
-
-
-        <button
-            id="setPasswordButton"
-            class="login-button"
-            onclick="setFirstPassword()">
-
-            Set New Password
-
-        </button>
-
-    </div>
-
-</div>
-
-
-<!-- =========================================================
-     PASSWORD RECOVERY SCREEN
-========================================================= -->
-
-<div id="passwordResetScreen"
-     class="password-screen hidden">
-
-    <div class="password-card">
-
-        <div class="password-icon">
-            🔑
-        </div>
-
-        <div class="password-title">
-            Reset Your Password
-        </div>
-
-        <div class="password-subtitle">
-
-            Enter a new password for your employee account.
-
-        </div>
-
-
-        <div id="resetPasswordError"
-             class="password-error hidden">
-        </div>
-
-
-        <div id="resetPasswordSuccess"
-             class="password-success hidden">
-        </div>
-
-
-        <div class="field">
-
-            <label>
-                New Password
-            </label>
-
-            <input
-                id="resetNewPassword"
-                type="password"
-                autocomplete="new-password"
-                placeholder="Enter your new password">
-
-        </div>
-
-
-        <div class="field">
-
-            <label>
-                Confirm New Password
-            </label>
-
-            <input
-                id="resetConfirmPassword"
-                type="password"
-                autocomplete="new-password"
-                placeholder="Re-enter your new password">
-
-        </div>
-
-
-        <div class="password-requirements">
-
-            <strong>
-                Password requirements:
-            </strong>
-
-            <br>
-
-            • Minimum 8 characters
-
-            <br>
-
-            • At least one uppercase letter
-
-            <br>
-
-            • At least one lowercase letter
-
-            <br>
-
-            • At least one number
-
-        </div>
-
-
-        <button
-            id="resetPasswordButton"
-            class="login-button"
-            onclick="resetPassword()">
-
-            Update Password
-
-        </button>
-
-    </div>
-
-</div>
-
-
-<!-- =========================================================
-     APPLICATION
-========================================================= -->
-
-<div id="appScreen"
-     class="hidden">
-
-    <div class="page">
-
-        <div class="container">
-
-
-            <!-- HEADER -->
-
-            <div class="header">
-
-                <div class="header-content">
-
-                    <div class="header-title">
-                        My Hourly Production
-                    </div>
-
-                    <div class="header-subtitle">
-                        Enter your production hour by hour.
-                        Your entries are automatically saved.
-                    </div>
-
-                    <div class="header-date">
-
-                        <span>
-                            📅
-                        </span>
-
-                        <span id="headerDate">
-                            Loading...
-                        </span>
-
-                    </div>
-
-                </div>
+    <!-- =========================================================
+         LOGIN
+    ========================================================= -->
+
+    <div id="loginScreen"
+         class="login-wrapper">
+
+        <div class="login-card">
+
+            <div class="login-logo">
+                HP
+            </div>
+
+            <div class="login-title">
+                My Hourly Production
+            </div>
+
+            <div class="login-subtitle">
+                Sign in with your employee account to enter
+                your hourly production.
+            </div>
+
+            <div id="loginError"
+                 class="error-message hidden">
+            </div>
+
+            <div class="field">
+
+                <label>
+                    Email
+                </label>
+
+                <input
+                    id="loginEmail"
+                    type="email"
+                    autocomplete="username"
+                    placeholder="Enter your work email">
 
             </div>
 
 
-            <!-- LOADING -->
+            <div class="field">
 
-            <div id="loadingCard"
-                 class="card loading-card">
+                <label>
+                    Password
+                </label>
 
-                <div class="spinner"></div>
-
-                <div style="
-                    font-weight:800;
-                    color:#294466;
-                ">
-
-                    Loading your production profile...
-
-                </div>
-
-                <div style="
-                    margin-top:7px;
-                    font-size:12px;
-                    color:#8190a4;
-                ">
-
-                    Please wait.
-
-                </div>
+                <input
+                    id="loginPassword"
+                    type="password"
+                    autocomplete="current-password"
+                    placeholder="Enter your password">
 
             </div>
 
 
-            <!-- FATAL -->
+            <!-- FORGOT PASSWORD -->
 
-            <div id="fatalCard"
-                 class="card fatal-card hidden">
-
-                <div style="
-                    font-size:42px;
-                    margin-bottom:10px;
-                ">
-                    ⚠️
-                </div>
-
-                <div id="fatalTitle"
-                     style="
-                        font-size:20px;
-                        font-weight:850;
-                        color:#9b2525;
-                     ">
-
-                    Unable to load
-
-                </div>
-
-                <div id="fatalMessage"
-                     style="
-                        margin-top:8px;
-                        color:#68778c;
-                        font-size:13px;
-                        line-height:1.5;
-                     ">
-
-                </div>
+            <div class="forgot-password-wrap">
 
                 <button
-                    class="logout-button"
-                    style="margin-top:20px;"
-                    onclick="logoutEmployee()">
+                    type="button"
+                    class="forgot-password-button"
+                    onclick="forgotPassword()">
 
-                    Back to Login
+                    Forgot Password?
 
                 </button>
 
             </div>
 
 
-            <!-- ENTRY -->
+            <button
+                id="loginButton"
+                class="login-button"
+                onclick="loginEmployee()">
 
-            <div id="entryScreen"
-                 class="hidden">
+                Sign In
+
+            </button>
+
+        </div>
+
+    </div>
 
 
-                <!-- IDENTITY -->
+    <!-- =========================================================
+         FIRST LOGIN / PASSWORD CHANGE
+    ========================================================= -->
 
-                <div id="identityStrip"
-                     class="identity-strip">
+    <div id="setPasswordScreen"
+         class="password-screen hidden">
 
-                    <div class="identity-item">
+        <div class="password-card">
 
-                        <div class="identity-label">
-                            Employee
+            <div class="password-icon">
+                🔐
+            </div>
+
+            <div class="password-title">
+                Set Your New Password
+            </div>
+
+            <div class="password-subtitle">
+
+                This is your first login.
+                For security, you must create your personal password
+                before accessing the Hourly Production Tracker.
+
+            </div>
+
+
+            <div id="setPasswordError"
+                 class="password-error hidden">
+            </div>
+
+
+            <div id="setPasswordSuccess"
+                 class="password-success hidden">
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    New Password
+                </label>
+
+                <input
+                    id="newPassword"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="Enter your new password">
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Confirm New Password
+                </label>
+
+                <input
+                    id="confirmNewPassword"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="Re-enter your new password">
+
+            </div>
+
+
+            <div class="password-requirements">
+
+                <strong>
+                    Password requirements:
+                </strong>
+
+                <br>
+
+                • Minimum 8 characters
+
+                <br>
+
+                • At least one uppercase letter
+
+                <br>
+
+                • At least one lowercase letter
+
+                <br>
+
+                • At least one number
+
+            </div>
+
+
+            <button
+                id="setPasswordButton"
+                class="login-button"
+                onclick="setFirstPassword()">
+
+                Set New Password
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         PASSWORD RECOVERY SCREEN
+    ========================================================= -->
+
+    <div id="passwordResetScreen"
+         class="password-screen hidden">
+
+        <div class="password-card">
+
+            <div class="password-icon">
+                🔑
+            </div>
+
+            <div class="password-title">
+                Reset Your Password
+            </div>
+
+            <div class="password-subtitle">
+
+                Enter a new password for your employee account.
+
+            </div>
+
+
+            <div id="resetPasswordError"
+                 class="password-error hidden">
+            </div>
+
+
+            <div id="resetPasswordSuccess"
+                 class="password-success hidden">
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    New Password
+                </label>
+
+                <input
+                    id="resetNewPassword"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="Enter your new password">
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Confirm New Password
+                </label>
+
+                <input
+                    id="resetConfirmPassword"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="Re-enter your new password">
+
+            </div>
+
+
+            <div class="password-requirements">
+
+                <strong>
+                    Password requirements:
+                </strong>
+
+                <br>
+
+                • Minimum 8 characters
+
+                <br>
+
+                • At least one uppercase letter
+
+                <br>
+
+                • At least one lowercase letter
+
+                <br>
+
+                • At least one number
+
+            </div>
+
+
+            <button
+                id="resetPasswordButton"
+                class="login-button"
+                onclick="resetPassword()">
+
+                Update Password
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         APPLICATION
+    ========================================================= -->
+
+    <div id="appScreen"
+         class="hidden">
+
+        <div class="page">
+
+            <div class="container">
+
+
+                <!-- HEADER -->
+
+                <div class="header">
+
+                    <div class="header-content">
+
+                        <div class="header-title">
+                            My Hourly Production
                         </div>
 
-                        <div id="identityEmployee"
-                             class="identity-value">
-
-                            -
-
+                        <div class="header-subtitle">
+                            Enter your production hour by hour.
+                            Your entries are automatically saved.
                         </div>
 
-                    </div>
+                        <div class="header-date">
 
+                            <span>
+                                📅
+                            </span>
 
-                    <div class="identity-item">
+                            <span id="headerDate">
+                                Loading...
+                            </span>
 
-                        <div class="identity-label">
-                            Project
-                        </div>
-
-                        <div id="identityProject"
-                             class="identity-value">
-
-                            -
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="identity-item">
-
-                        <div class="identity-label">
-                            Sub-Project
-                        </div>
-
-                        <div id="identitySubProject"
-                             class="identity-value">
-
-                            -
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="identity-item">
-
-                        <div class="identity-label">
-                            Shift
-                        </div>
-
-                        <div class="identity-value">
-                            6 PM – 3 AM
                         </div>
 
                     </div>
@@ -2053,30 +1964,99 @@
                 </div>
 
 
-                <!-- EMPLOYEE HEADING -->
+                <!-- LOADING -->
 
-                <div class="card">
+                <div id="loadingCard"
+                     class="card loading-card">
 
-                    <div class="employee-heading">
+                    <div class="spinner"></div>
 
-                        <div id="employeeAvatar"
-                             class="avatar">
+                    <div style="
+                        font-weight:800;
+                        color:#294466;
+                    ">
 
-                            --
+                        Loading your production profile...
 
-                        </div>
+                    </div>
 
-                        <div>
+                    <div style="
+                        margin-top:7px;
+                        font-size:12px;
+                        color:#8190a4;
+                    ">
 
-                            <div id="employeeName"
-                                 class="employee-name">
+                        Please wait.
 
+                    </div>
+
+                </div>
+
+
+                <!-- FATAL -->
+
+                <div id="fatalCard"
+                     class="card fatal-card hidden">
+
+                    <div style="
+                        font-size:42px;
+                        margin-bottom:10px;
+                    ">
+                        ⚠️
+                    </div>
+
+                    <div id="fatalTitle"
+                         style="
+                            font-size:20px;
+                            font-weight:850;
+                            color:#9b2525;
+                         ">
+
+                        Unable to load
+
+                    </div>
+
+                    <div id="fatalMessage"
+                         style="
+                            margin-top:8px;
+                            color:#68778c;
+                            font-size:13px;
+                            line-height:1.5;
+                         ">
+
+                    </div>
+
+                    <button
+                        class="logout-button"
+                        style="margin-top:20px;"
+                        onclick="logoutEmployee()">
+
+                        Back to Login
+
+                    </button>
+
+                </div>
+
+
+                <!-- ENTRY -->
+
+                <div id="entryScreen"
+                     class="hidden">
+
+
+                    <!-- IDENTITY -->
+
+                    <div id="identityStrip"
+                         class="identity-strip">
+
+                        <div class="identity-item">
+
+                            <div class="identity-label">
                                 Employee
-
                             </div>
 
-                            <div id="employeeEmail"
-                                 class="employee-email">
+                            <div id="identityEmployee"
+                                 class="identity-value">
 
                                 -
 
@@ -2084,315 +2064,423 @@
 
                         </div>
 
+
+                        <div class="identity-item">
+
+                            <div class="identity-label">
+                                Project
+                            </div>
+
+                            <div id="identityProject"
+                                 class="identity-value">
+
+                                -
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="identity-item">
+
+                            <div class="identity-label">
+                                Sub-Project
+                            </div>
+
+                            <div id="identitySubProject"
+                                 class="identity-value">
+
+                                -
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="identity-item">
+
+                            <div class="identity-label">
+                                Shift
+                            </div>
+
+                            <div class="identity-value">
+                                6 PM – 3 AM
+                            </div>
+
+                        </div>
+
                     </div>
 
 
-                    <div class="entry-banner">
+                    <!-- EMPLOYEE HEADING -->
 
-                        <div class="entry-banner-icon">
-                            ⏱️
+                    <div class="card">
+
+                        <div class="employee-heading">
+
+                            <div id="employeeAvatar"
+                                 class="avatar">
+
+                                --
+
+                            </div>
+
+                            <div>
+
+                                <div id="employeeName"
+                                     class="employee-name">
+
+                                    Employee
+
+                                </div>
+
+                                <div id="employeeEmail"
+                                     class="employee-email">
+
+                                    -
+
+                                </div>
+
+                            </div>
+
                         </div>
+
+
+                        <div class="entry-banner">
+
+                            <div class="entry-banner-icon">
+                                ⏱️
+                            </div>
+
+                            <div>
+
+                                <div class="entry-banner-title">
+
+                                    Hourly Production Entry
+
+                                </div>
+
+                                <div class="entry-banner-text">
+
+                                    Past hours are automatically locked.
+                                    The current and future hours remain available
+                                    according to your shift.
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div id="dateLockNotice"
+                             class="lock-notice hidden">
+
+                            🔒 This shift date has been locked by management.
+                            Your production can still be viewed, but entries
+                            cannot be modified.
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PERFORMANCE -->
+
+                    <div id="performanceCard"
+                         class="performance-card neutral hidden">
+
+                        <div class="performance-top">
+
+                            <div id="performanceIcon"
+                                 class="performance-icon">
+
+                                📊
+
+                            </div>
+
+                            <div>
+
+                                <div id="performanceTitle"
+                                     class="performance-title">
+
+                                    Production Status
+
+                                </div>
+
+                                <div id="performanceMessage"
+                                     class="performance-message">
+
+                                    Updating your production status...
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="performance-metrics">
+
+                            <div class="performance-metric">
+
+                                <div class="metric-label">
+                                    Target
+                                </div>
+
+                                <div id="performanceTarget"
+                                     class="metric-value">
+
+                                    0
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="performance-metric">
+
+                                <div class="metric-label">
+                                    Achieved
+                                </div>
+
+                                <div id="performanceAchieved"
+                                     class="metric-value">
+
+                                    0
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="performance-metric">
+
+                                <div class="metric-label">
+                                    Remaining
+                                </div>
+
+                                <div id="performanceRemaining"
+                                     class="metric-value">
+
+                                    0
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="performance-metric">
+
+                                <div class="metric-label">
+                                    Achievement
+                                </div>
+
+                                <div id="performancePercentage"
+                                     class="metric-value">
+
+                                    0%
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="progress-track">
+
+                            <div id="performanceProgress"
+                                 class="progress-bar">
+
+                            </div>
+
+                        </div>
+
+
+                        <div id="performanceFootnote"
+                             class="performance-footnote">
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ATTENDANCE -->
+
+                    <div class="card">
+
+                        <div class="card-title">
+                            Attendance
+                        </div>
+
+                        <div class="attendance-grid">
+
+
+                            <div class="attendance-option">
+
+                                <input
+                                    id="attendancePresent"
+                                    name="attendance"
+                                    type="radio"
+                                    value="Present"
+                                    checked
+                                    onchange="onAttendanceChange()">
+
+                                <label
+                                    for="attendancePresent"
+                                    class="attendance-label">
+
+                                    Present
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="attendance-option">
+
+                                <input
+                                    id="attendanceHalf"
+                                    name="attendance"
+                                    type="radio"
+                                    value="Half Day"
+                                    onchange="onAttendanceChange()">
+
+                                <label
+                                    for="attendanceHalf"
+                                    class="attendance-label">
+
+                                    Half Day
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="attendance-option">
+
+                                <input
+                                    id="attendanceAbsent"
+                                    name="attendance"
+                                    type="radio"
+                                    value="Absent"
+                                    onchange="onAttendanceChange()">
+
+                                <label
+                                    for="attendanceAbsent"
+                                    class="attendance-label">
+
+                                    Absent
+
+                                </label>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- HOURLY DEADLINE BANNER (NEW) -->
+
+                    <div id="hourlyDeadlineBanner"
+                         class="hourly-deadline-banner hidden">
 
                         <div>
+                            <strong id="hourlyDeadlineTitle">
+                                Hourly update reminder
+                            </strong>
 
-                            <div class="entry-banner-title">
+                            <div id="hourlyDeadlineText">
+                                Please update your hourly count.
+                            </div>
 
-                                Hourly Production Entry
+                            <button
+                                id="browserNotificationButton"
+                                class="browser-notification-button"
+                                type="button"
+                                onclick="enableBrowserReminders()">
+
+                                Enable browser reminders
+
+                            </button>
+                        </div>
+
+                    </div>
+
+
+                    <!-- HOURLY -->
+
+                    <div class="card">
+
+                        <div class="hourly-header">
+
+                            <div class="card-title"
+                                 style="margin:0;">
+
+                                Hourly Production
 
                             </div>
 
-                            <div class="entry-banner-text">
+                            <div id="hourlyTotal"
+                                 class="hourly-total">
 
-                                Past hours are automatically locked.
-                                The current and future hours remain available
-                                according to your shift.
+                                Total: 0
 
                             </div>
+
+                        </div>
+
+
+                        <div id="hourList"
+                             class="hour-list">
 
                         </div>
 
                     </div>
 
 
-                    <div id="dateLockNotice"
-                         class="lock-notice hidden">
+                    <!-- AUTOSAVE -->
 
-                        🔒 This shift date has been locked by management.
-                        Your production can still be viewed, but entries
-                        cannot be modified.
+                    <div class="card">
 
-                    </div>
+                        <div class="bottom-actions">
 
-                </div>
+                            <div class="save-status">
 
+                                <div id="saveDot"
+                                     class="save-dot">
 
-                <!-- PERFORMANCE -->
+                                </div>
 
-                <div id="performanceCard"
-                     class="performance-card neutral hidden">
-
-                    <div class="performance-top">
-
-                        <div id="performanceIcon"
-                             class="performance-icon">
-
-                            📊
-
-                        </div>
-
-                        <div>
-
-                            <div id="performanceTitle"
-                                 class="performance-title">
-
-                                Production Status
+                                <span id="saveStatusText">
+                                    All changes saved
+                                </span>
 
                             </div>
 
-                            <div id="performanceMessage"
-                                 class="performance-message">
 
-                                Updating your production status...
+                            <button
+                                class="logout-button"
+                                onclick="logoutEmployee()">
 
-                            </div>
+                                Logout
+
+                            </button>
 
                         </div>
 
                     </div>
 
 
-                    <div class="performance-metrics">
+                    <div class="footer">
 
-                        <div class="performance-metric">
-
-                            <div class="metric-label">
-                                Target
-                            </div>
-
-                            <div id="performanceTarget"
-                                 class="metric-value">
-
-                                0
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="performance-metric">
-
-                            <div class="metric-label">
-                                Achieved
-                            </div>
-
-                            <div id="performanceAchieved"
-                                 class="metric-value">
-
-                                0
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="performance-metric">
-
-                            <div class="metric-label">
-                                Remaining
-                            </div>
-
-                            <div id="performanceRemaining"
-                                 class="metric-value">
-
-                                0
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="performance-metric">
-
-                            <div class="metric-label">
-                                Achievement
-                            </div>
-
-                            <div id="performancePercentage"
-                                 class="metric-value">
-
-                                0%
-
-                            </div>
-
-                        </div>
+                        Hourly Production Tracker
+                        &nbsp;•&nbsp;
+                        Automatic Save Enabled
 
                     </div>
-
-
-                    <div class="progress-track">
-
-                        <div id="performanceProgress"
-                             class="progress-bar">
-
-                        </div>
-
-                    </div>
-
-
-                    <div id="performanceFootnote"
-                         class="performance-footnote">
-
-                    </div>
-
-                </div>
-
-
-                <!-- ATTENDANCE -->
-
-                <div class="card">
-
-                    <div class="card-title">
-                        Attendance
-                    </div>
-
-                    <div class="attendance-grid">
-
-
-                        <div class="attendance-option">
-
-                            <input
-                                id="attendancePresent"
-                                name="attendance"
-                                type="radio"
-                                value="Present"
-                                checked
-                                onchange="onAttendanceChange()">
-
-                            <label
-                                for="attendancePresent"
-                                class="attendance-label">
-
-                                Present
-
-                            </label>
-
-                        </div>
-
-
-                        <div class="attendance-option">
-
-                            <input
-                                id="attendanceHalf"
-                                name="attendance"
-                                type="radio"
-                                value="Half Day"
-                                onchange="onAttendanceChange()">
-
-                            <label
-                                for="attendanceHalf"
-                                class="attendance-label">
-
-                                Half Day
-
-                            </label>
-
-                        </div>
-
-
-                        <div class="attendance-option">
-
-                            <input
-                                id="attendanceAbsent"
-                                name="attendance"
-                                type="radio"
-                                value="Absent"
-                                onchange="onAttendanceChange()">
-
-                            <label
-                                for="attendanceAbsent"
-                                class="attendance-label">
-
-                                Absent
-
-                            </label>
-
-                        </div>
-
-
-                    </div>
-
-                </div>
-
-
-                <!-- HOURLY -->
-
-                <div class="card">
-
-                    <div class="hourly-header">
-
-                        <div class="card-title"
-                             style="margin:0;">
-
-                            Hourly Production
-
-                        </div>
-
-                        <div id="hourlyTotal"
-                             class="hourly-total">
-
-                            Total: 0
-
-                        </div>
-
-                    </div>
-
-
-                    <div id="hourList"
-                         class="hour-list">
-
-                    </div>
-
-                </div>
-
-
-                <!-- AUTOSAVE -->
-
-                <div class="card">
-
-                    <div class="bottom-actions">
-
-                        <div class="save-status">
-
-                            <div id="saveDot"
-                                 class="save-dot">
-
-                            </div>
-
-                            <span id="saveStatusText">
-                                All changes saved
-                            </span>
-
-                        </div>
-
-
-                        <button
-                            class="logout-button"
-                            onclick="logoutEmployee()">
-
-                            Logout
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <div class="footer">
-
-                    Hourly Production Tracker
-                    &nbsp;•&nbsp;
-                    Automatic Save Enabled
 
                 </div>
 
@@ -2402,853 +2490,594 @@
 
     </div>
 
-</div>
 
+    <!-- =========================================================
+         CELEBRATION
+    ========================================================= -->
 
-<!-- =========================================================
-     CELEBRATION
-========================================================= -->
+    <div id="celebrationLayer"></div>
 
-<div id="celebrationLayer"></div>
 
+    <script>
 
-<script>
 
+    /* =========================================================
+       SUPABASE CONFIGURATION
+    ========================================================= */
 
-/* =========================================================
-   SUPABASE CONFIGURATION
-========================================================= */
+    const SUPABASE_URL =
+        "https://yhoblmvujfqnspaxdfav.supabase.co";
 
-const SUPABASE_URL =
-    "https://yhoblmvujfqnspaxdfav.supabase.co";
 
+    const SUPABASE_KEY =
+        "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
 
-const SUPABASE_KEY =
-    "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
 
-
-const supabaseClient =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
-
-
-/* =========================================================
-   SETTINGS
-========================================================= */
-
-const MANAGER_NAME = "Andy";
-
-
-const HOUR_FIELDS = [
-
-    "hour_6_7",
-    "hour_7_8",
-    "hour_8_9",
-    "hour_9_10",
-    "hour_10_11",
-    "hour_11_12",
-    "hour_12_1",
-    "hour_1_2",
-    "hour_2_3"
-
-];
-
-
-const HOUR_LABELS = [
-
-    "6–7 PM",
-    "7–8 PM",
-    "8–9 PM",
-    "9–10 PM",
-    "10–11 PM",
-    "11 PM–12 AM",
-    "12–1 AM",
-    "1–2 AM",
-    "2–3 AM"
-
-];
-
-
-const AUTO_SAVE_DELAY = 700;
-
-
-const PASSWORD_RECOVERY_REDIRECT =
-    "https://saprem2803.github.io/team-hourly-tracker/Employee_Hourly_Entry.html";
-
-
-let currentAuthUser = null;
-
-let me = null;
-
-let currentProject = null;
-
-let currentSubProject = null;
-
-let currentRecord = null;
-
-let currentShiftDate = null;
-
-let currentDateLocked = false;
-
-let saveTimer = null;
-
-let savePending = false;
-
-let saveInFlight = false;
-
-let lastPerformanceState = "";
-
-let celebrationTimer = null;
-
-let passwordChangeRequired = false;
-
-let passwordRecoveryMode = false;
-
-let lockTickerStarted = false;
-
-
-/* =========================================================
-   DOM HELPER
-========================================================= */
-
-function $(id) {
-
-    return document.getElementById(id);
-
-}
-
-
-/* =========================================================
-   VISIBILITY HELPERS
-========================================================= */
-
-function show(id) {
-
-    const element = $(id);
-
-    if (element) {
-
-        element.classList.remove("hidden");
-
-    }
-
-}
-
-
-function hide(id) {
-
-    const element = $(id);
-
-    if (element) {
-
-        element.classList.add("hidden");
-
-    }
-
-}
-
-
-/* =========================================================
-   ERROR DISPLAY
-========================================================= */
-
-function showFatal(title, message) {
-
-    hide("loadingCard");
-
-    hide("entryScreen");
-
-    show("fatalCard");
-
-    $("fatalTitle").textContent =
-        title || "Unable to load";
-
-    $("fatalMessage").textContent =
-        message || "An unexpected error occurred.";
-
-}
-
-
-function showLoginError(message) {
-
-    const box =
-        $("loginError");
-
-    box.textContent =
-        message;
-
-    show("loginError");
-
-}
-
-
-function clearLoginError() {
-
-    hide("loginError");
-
-    $("loginError").textContent = "";
-
-}
-
-
-function showSetPasswordError(message) {
-
-    const box =
-        $("setPasswordError");
-
-    box.textContent =
-        message;
-
-    show("setPasswordError");
-
-}
-
-
-function clearSetPasswordMessages() {
-
-    hide("setPasswordError");
-
-    hide("setPasswordSuccess");
-
-    $("setPasswordError").textContent = "";
-
-    $("setPasswordSuccess").textContent = "";
-
-}
-
-
-function showResetPasswordError(message) {
-
-    const box =
-        $("resetPasswordError");
-
-    box.textContent =
-        message;
-
-    show("resetPasswordError");
-
-}
-
-
-function clearResetPasswordMessages() {
-
-    hide("resetPasswordError");
-
-    hide("resetPasswordSuccess");
-
-    $("resetPasswordError").textContent = "";
-
-    $("resetPasswordSuccess").textContent = "";
-
-}
-
-
-/* =========================================================
-   FRIENDLY SUPABASE ERRORS
-========================================================= */
-
-function friendlySupabaseError(error) {
-
-    const message =
-        String(
-            error?.message ||
-            error ||
-            ""
+    const supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
         );
 
 
-    const lower =
-        message.toLowerCase();
+    /* =========================================================
+       SETTINGS
+    ========================================================= */
+
+    const MANAGER_NAME = "Andy";
 
 
-    if (
-        lower.includes(
-            "invalid login credentials"
-        )
-    ) {
+    const HOUR_FIELDS = [
 
-        return "Invalid email or password.";
+        "hour_6_7",
+        "hour_7_8",
+        "hour_8_9",
+        "hour_9_10",
+        "hour_10_11",
+        "hour_11_12",
+        "hour_12_1",
+        "hour_1_2",
+        "hour_2_3"
 
-    }
-
-
-    if (
-        lower.includes(
-            "invalid api key"
-        )
-    ) {
-
-        return "Invalid Supabase API key. Please verify the Publishable key in the HTML.";
-
-    }
+    ];
 
 
-    if (
-        lower.includes(
-            "email not confirmed"
-        )
-    ) {
+    const HOUR_LABELS = [
 
-        return "Your email address has not been confirmed in Supabase.";
+        "6–7 PM",
+        "7–8 PM",
+        "8–9 PM",
+        "9–10 PM",
+        "10–11 PM",
+        "11 PM–12 AM",
+        "12–1 AM",
+        "1–2 AM",
+        "2–3 AM"
 
-    }
-
-
-    if (
-        lower.includes(
-            "network"
-        )
-    ) {
-
-        return "Network error. Please check your internet connection.";
-
-    }
+    ];
 
 
-    if (
-        lower.includes(
-            "row-level security"
-        )
-    ) {
-
-        return "Supabase security policy blocked this action. Please contact your administrator.";
-
-    }
+    const AUTO_SAVE_DELAY = 700;
 
 
-    if (
-        lower.includes(
-            "permission denied"
-        )
-    ) {
-
-        return "Permission denied by the database security policy. Please contact your administrator.";
-
-    }
+    const PASSWORD_RECOVERY_REDIRECT =
+        "https://saprem2803.github.io/team-hourly-tracker/Employee_Hourly_Entry.html";
 
 
-    return (
-        message ||
-        "An unexpected error occurred."
-    );
+    const HOURLY_GRACE_MINUTES = 10;
+    const REMINDER_MINUTES_BEFORE_DEADLINE = 5;
 
-}
-
-
-/* =========================================================
-   PASSWORD VALIDATION
-========================================================= */
-
-function validatePassword(password) {
-
-    if (!password) {
-
-        return "Please enter a new password.";
-
-    }
+    let reminderTickerStarted = false;
+    let lastReminderKey = "";
+    let browserReminderPermissionRequested = false;
 
 
-    if (password.length < 8) {
+    let currentAuthUser = null;
 
-        return "Password must contain at least 8 characters.";
+    let me = null;
+
+    let currentProject = null;
+
+    let currentSubProject = null;
+
+    let currentRecord = null;
+
+    let currentShiftDate = null;
+
+    let currentDateLocked = false;
+
+    let saveTimer = null;
+
+    let savePending = false;
+
+    let saveInFlight = false;
+
+    let lastPerformanceState = "";
+
+    let celebrationTimer = null;
+
+    let passwordChangeRequired = false;
+
+    let passwordRecoveryMode = false;
+
+    let lockTickerStarted = false;
+
+
+    /* =========================================================
+       DOM HELPER
+    ========================================================= */
+
+    function $(id) {
+
+        return document.getElementById(id);
 
     }
 
 
-    if (!/[A-Z]/.test(password)) {
+    /* =========================================================
+       VISIBILITY HELPERS
+    ========================================================= */
 
-        return "Password must contain at least one uppercase letter.";
+    function show(id) {
 
-    }
+        const element = $(id);
 
+        if (element) {
 
-    if (!/[a-z]/.test(password)) {
-
-        return "Password must contain at least one lowercase letter.";
-
-    }
-
-
-    if (!/[0-9]/.test(password)) {
-
-        return "Password must contain at least one number.";
-
-    }
-
-
-    return null;
-
-}
-
-
-/* =========================================================
-   PASSWORD RECOVERY URL
-========================================================= */
-
-function isPasswordRecoveryUrl() {
-
-    const hash =
-        window.location.hash
-            .replace(/^#/, "");
-
-
-    if (!hash) {
-
-        return false;
-
-    }
-
-
-    const params =
-        new URLSearchParams(hash);
-
-
-    return (
-        params.get("type") === "recovery"
-    );
-
-}
-
-
-/* =========================================================
-   SHOW FIRST PASSWORD SCREEN
-========================================================= */
-
-function showFirstPasswordScreen() {
-
-    passwordChangeRequired = true;
-
-    passwordRecoveryMode = false;
-
-    hide("loginScreen");
-
-    hide("appScreen");
-
-    hide("loadingCard");
-
-    hide("fatalCard");
-
-    hide("entryScreen");
-
-    hide("passwordResetScreen");
-
-    show("setPasswordScreen");
-
-    clearSetPasswordMessages();
-
-    $("newPassword").value = "";
-
-    $("confirmNewPassword").value = "";
-
-    setTimeout(
-        () => {
-
-            $("newPassword").focus();
-
-        },
-        100
-    );
-
-}
-
-
-/* =========================================================
-   SHOW PASSWORD RESET SCREEN
-========================================================= */
-
-function showPasswordResetScreen() {
-
-    passwordRecoveryMode = true;
-
-    passwordChangeRequired = false;
-
-    hide("loginScreen");
-
-    hide("appScreen");
-
-    hide("loadingCard");
-
-    hide("fatalCard");
-
-    hide("entryScreen");
-
-    hide("setPasswordScreen");
-
-    show("passwordResetScreen");
-
-    clearResetPasswordMessages();
-
-    $("resetNewPassword").value = "";
-
-    $("resetConfirmPassword").value = "";
-
-    setTimeout(
-        () => {
-
-            $("resetNewPassword").focus();
-
-        },
-        100
-    );
-
-}
-
-
-/* =========================================================
-   FIRST LOGIN PASSWORD CHANGE
-========================================================= */
-
-async function setFirstPassword() {
-
-    clearSetPasswordMessages();
-
-    const newPassword =
-        $("newPassword").value;
-
-    const confirmPassword =
-        $("confirmNewPassword").value;
-
-
-    const validationError =
-        validatePassword(
-            newPassword
-        );
-
-
-    if (validationError) {
-
-        showSetPasswordError(
-            validationError
-        );
-
-        return;
-
-    }
-
-
-    if (
-        newPassword !==
-        confirmPassword
-    ) {
-
-        showSetPasswordError(
-            "The passwords do not match."
-        );
-
-        return;
-
-    }
-
-
-    if (!currentAuthUser) {
-
-        showSetPasswordError(
-            "Your login session has expired. Please log in again."
-        );
-
-        return;
-
-    }
-
-
-    if (!me) {
-
-        showSetPasswordError(
-            "Employee profile could not be found. Please log in again."
-        );
-
-        return;
-
-    }
-
-
-    const button =
-        $("setPasswordButton");
-
-
-    button.disabled = true;
-
-    button.textContent =
-        "Updating Password...";
-
-
-    try {
-
-        /*
-           STEP 1:
-           Change the Supabase Auth password.
-        */
-
-        const {
-            error: passwordError
-        } =
-            await supabaseClient.auth.updateUser({
-
-                password:
-                    newPassword
-
-            });
-
-
-        if (passwordError) {
-
-            throw passwordError;
+            element.classList.remove("hidden");
 
         }
 
-
-        /*
-           STEP 2:
-           Mark the employee password as changed.
-        */
-
-        const {
-            data: employeeUpdateData,
-            error: employeeError
-        } =
-            await supabaseClient
-                .from("employees")
-                .update({
-
-                    password_changed:
-                        true
-
-                })
-                .eq(
-                    "id",
-                    me.id
-                )
-                .select("id,password_changed")
-                .maybeSingle();
+    }
 
 
-        if (employeeError) {
+    function hide(id) {
 
-            console.error(
-                "PASSWORD STATUS UPDATE ERROR:",
-                employeeError
-            );
+        const element = $(id);
 
+        if (element) {
 
-            throw new Error(
-                "Your password was changed successfully, but the employee profile could not be updated. Please contact your administrator before trying again."
-            );
+            element.classList.add("hidden");
 
         }
 
+    }
 
-        /*
-           If RLS allows the update but returns no row,
-           treat it as a failed status update.
-        */
+
+    /* =========================================================
+       ERROR DISPLAY
+    ========================================================= */
+
+    function showFatal(title, message) {
+
+        hide("loadingCard");
+
+        hide("entryScreen");
+
+        show("fatalCard");
+
+        $("fatalTitle").textContent =
+            title || "Unable to load";
+
+        $("fatalMessage").textContent =
+            message || "An unexpected error occurred.";
+
+    }
+
+
+    function showLoginError(message) {
+
+        const box =
+            $("loginError");
+
+        box.textContent =
+            message;
+
+        show("loginError");
+
+    }
+
+
+    function clearLoginError() {
+
+        hide("loginError");
+
+        $("loginError").textContent = "";
+
+    }
+
+
+    function showSetPasswordError(message) {
+
+        const box =
+            $("setPasswordError");
+
+        box.textContent =
+            message;
+
+        show("setPasswordError");
+
+    }
+
+
+    function clearSetPasswordMessages() {
+
+        hide("setPasswordError");
+
+        hide("setPasswordSuccess");
+
+        $("setPasswordError").textContent = "";
+
+        $("setPasswordSuccess").textContent = "";
+
+    }
+
+
+    function showResetPasswordError(message) {
+
+        const box =
+            $("resetPasswordError");
+
+        box.textContent =
+            message;
+
+        show("resetPasswordError");
+
+    }
+
+
+    function clearResetPasswordMessages() {
+
+        hide("resetPasswordError");
+
+        hide("resetPasswordSuccess");
+
+        $("resetPasswordError").textContent = "";
+
+        $("resetPasswordSuccess").textContent = "";
+
+    }
+
+
+    /* =========================================================
+       FRIENDLY SUPABASE ERRORS
+    ========================================================= */
+
+    function friendlySupabaseError(error) {
+
+        const message =
+            String(
+                error?.message ||
+                error ||
+                ""
+            );
+
+
+        const lower =
+            message.toLowerCase();
+
 
         if (
-            !employeeUpdateData
+            lower.includes(
+                "invalid login credentials"
+            )
         ) {
 
-            throw new Error(
-                "Your password was changed, but the employee profile could not be updated. Please contact your administrator."
-            );
+            return "Invalid email or password.";
 
         }
 
 
-        /*
-           STEP 3:
-           Update local employee object.
-        */
+        if (
+            lower.includes(
+                "invalid api key"
+            )
+        ) {
 
-        me.password_changed =
-            true;
+            return "Invalid Supabase API key. Please verify the Publishable key in the HTML.";
 
-        passwordChangeRequired =
-            false;
-
-
-        $("newPassword").value = "";
-
-        $("confirmNewPassword").value = "";
+        }
 
 
-        /*
-           Continue directly into the portal.
-        */
+        if (
+            lower.includes(
+                "email not confirmed"
+            )
+        ) {
 
-        hide("setPasswordScreen");
+            return "Your email address has not been confirmed in Supabase.";
 
-        show("appScreen");
+        }
 
-        show("loadingCard");
+
+        if (
+            lower.includes(
+                "network"
+            )
+        ) {
+
+            return "Network error. Please check your internet connection.";
+
+        }
+
+
+        if (
+            lower.includes(
+                "row-level security"
+            )
+        ) {
+
+            return "Supabase security policy blocked this action. Please contact your administrator.";
+
+        }
+
+
+        if (
+            lower.includes(
+                "permission denied"
+            )
+        ) {
+
+            return "Permission denied by the database security policy. Please contact your administrator.";
+
+        }
+
+
+        return (
+            message ||
+            "An unexpected error occurred."
+        );
+
+    }
+
+
+    /* =========================================================
+       PASSWORD VALIDATION
+    ========================================================= */
+
+    function validatePassword(password) {
+
+        if (!password) {
+
+            return "Please enter a new password.";
+
+        }
+
+
+        if (password.length < 8) {
+
+            return "Password must contain at least 8 characters.";
+
+        }
+
+
+        if (!/[A-Z]/.test(password)) {
+
+            return "Password must contain at least one uppercase letter.";
+
+        }
+
+
+        if (!/[a-z]/.test(password)) {
+
+            return "Password must contain at least one lowercase letter.";
+
+        }
+
+
+        if (!/[0-9]/.test(password)) {
+
+            return "Password must contain at least one number.";
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /* =========================================================
+       PASSWORD RECOVERY URL
+    ========================================================= */
+
+    function isPasswordRecoveryUrl() {
+
+        const hash =
+            window.location.hash
+                .replace(/^#/, "");
+
+
+        if (!hash) {
+
+            return false;
+
+        }
+
+
+        const params =
+            new URLSearchParams(hash);
+
+        return (
+            params.get("type") === "recovery"
+        );
+
+    }
+
+
+    /* =========================================================
+       SHOW FIRST PASSWORD SCREEN
+    ========================================================= */
+
+    function showFirstPasswordScreen() {
+
+        passwordChangeRequired = true;
+
+        passwordRecoveryMode = false;
+
+        hide("loginScreen");
+
+        hide("appScreen");
+
+        hide("loadingCard");
 
         hide("fatalCard");
 
         hide("entryScreen");
 
+        hide("passwordResetScreen");
 
-        await openAuthenticatedPortal();
+        show("setPasswordScreen");
 
-    }
-    catch (error) {
+        clearSetPasswordMessages();
 
-        console.error(
-            "SET PASSWORD ERROR:",
-            error
+        $("newPassword").value = "";
+
+        $("confirmNewPassword").value = "";
+
+        setTimeout(
+            () => {
+
+                $("newPassword").focus();
+
+            },
+            100
         );
 
+    }
 
-        showSetPasswordError(
-            friendlySupabaseError(error)
+
+    /* =========================================================
+       SHOW PASSWORD RESET SCREEN
+    ========================================================= */
+
+    function showPasswordResetScreen() {
+
+        passwordRecoveryMode = true;
+
+        passwordChangeRequired = false;
+
+        hide("loginScreen");
+
+        hide("appScreen");
+
+        hide("loadingCard");
+
+        hide("fatalCard");
+
+        hide("entryScreen");
+
+        hide("setPasswordScreen");
+
+        show("passwordResetScreen");
+
+        clearResetPasswordMessages();
+
+        $("resetNewPassword").value = "";
+
+        $("resetConfirmPassword").value = "";
+
+        setTimeout(
+            () => {
+
+                $("resetNewPassword").focus();
+
+            },
+            100
         );
 
     }
-    finally {
-
-        button.disabled = false;
-
-        button.textContent =
-            "Set New Password";
-
-    }
-
-}
 
 
-/* =========================================================
-   FORGOT PASSWORD
-========================================================= */
+    /* =========================================================
+       FIRST LOGIN PASSWORD CHANGE
+    ========================================================= */
 
-async function forgotPassword() {
+    async function setFirstPassword() {
 
-    clearLoginError();
+        clearSetPasswordMessages();
 
+        const newPassword =
+            $("newPassword").value;
 
-    const email =
-        $("loginEmail").value.trim();
-
-
-    if (!email) {
-
-        showLoginError(
-            "Please enter your work email address first."
-        );
-
-        $("loginEmail").focus();
-
-        return;
-
-    }
+        const confirmPassword =
+            $("confirmNewPassword").value;
 
 
-    try {
-
-        const {
-            error
-        } =
-            await supabaseClient.auth
-                .resetPasswordForEmail(
-                    email,
-                    {
-                        redirectTo:
-                            PASSWORD_RECOVERY_REDIRECT
-                    }
-                );
+        const validationError =
+            validatePassword(
+                newPassword
+            );
 
 
-        if (error) {
+        if (validationError) {
 
-            throw error;
+            showSetPasswordError(
+                validationError
+            );
+
+            return;
 
         }
 
 
-        alert(
-            "Password reset instructions have been sent to your email."
-        );
+        if (
+            newPassword !==
+            confirmPassword
+        ) {
 
-    }
-    catch (error) {
+            showSetPasswordError(
+                "The passwords do not match."
+            );
 
-        console.error(
-            "FORGOT PASSWORD ERROR:",
-            error
-        );
+            return;
 
-
-        showLoginError(
-            friendlySupabaseError(error)
-        );
-
-    }
-
-}
+        }
 
 
-/* =========================================================
-   PASSWORD RECOVERY
-========================================================= */
+        if (!currentAuthUser) {
 
-async function resetPassword() {
+            showSetPasswordError(
+                "Your login session has expired. Please log in again."
+            );
 
-    clearResetPasswordMessages();
+            return;
 
-
-    const newPassword =
-        $("resetNewPassword").value;
-
-    const confirmPassword =
-        $("resetConfirmPassword").value;
+        }
 
 
-    const validationError =
-        validatePassword(
-            newPassword
-        );
+        if (!me) {
+
+            showSetPasswordError(
+                "Employee profile could not be found. Please log in again."
+            );
+
+            return;
+
+        }
 
 
-    if (validationError) {
-
-        showResetPasswordError(
-            validationError
-        );
-
-        return;
-
-    }
+        const button =
+            $("setPasswordButton");
 
 
-    if (
-        newPassword !==
-        confirmPassword
-    ) {
+        button.disabled = true;
 
-        showResetPasswordError(
-            "The passwords do not match."
-        );
-
-        return;
-
-    }
+        button.textContent =
+            "Updating Password...";
 
 
-    const button =
-        $("resetPasswordButton");
+        try {
 
+            /*
+               STEP 1:
+               Change the Supabase Auth password.
+            */
 
-    button.disabled = true;
-
-    button.textContent =
-        "Updating Password...";
-
-
-    try {
-
-        const {
-            error
-        } =
-            await supabaseClient.auth
-                .updateUser({
+            const {
+                error: passwordError
+            } =
+                await supabaseClient.auth.updateUser({
 
                     password:
                         newPassword
@@ -3256,21 +3085,20 @@ async function resetPassword() {
                 });
 
 
-        if (error) {
+            if (passwordError) {
 
-            throw error;
+                throw passwordError;
 
-        }
+            }
 
 
-        /*
-           Password recovery is complete.
-           Update password_changed when possible.
-        */
-
-        if (currentAuthUser) {
+            /*
+               STEP 2:
+               Mark the employee password as changed.
+            */
 
             const {
+                data: employeeUpdateData,
                 error: employeeError
             } =
                 await supabaseClient
@@ -3282,365 +3110,663 @@ async function resetPassword() {
 
                     })
                     .eq(
-                        "auth_user_id",
-                        currentAuthUser.id
-                    );
+                        "id",
+                        me.id
+                    )
+                    .select("id,password_changed")
+                    .maybeSingle();
 
 
             if (employeeError) {
 
-                console.warn(
-                    "Could not update password_changed after recovery:",
+                console.error(
+                    "PASSWORD STATUS UPDATE ERROR:",
                     employeeError
+                );
+
+
+                throw new Error(
+                    "Your password was changed successfully, but the employee profile could not be updated. Please contact your administrator before trying again."
                 );
 
             }
 
+
+            /*
+               If RLS allows the update but returns no row,
+               treat it as a failed status update.
+            */
+
+            if (
+                !employeeUpdateData
+            ) {
+
+                throw new Error(
+                    "Your password was changed, but the employee profile could not be updated. Please contact your administrator."
+                );
+
+            }
+
+
+            /*
+               STEP 3:
+               Update local employee object.
+            */
+
+            me.password_changed =
+                true;
+
+            passwordChangeRequired =
+                false;
+
+
+            $("newPassword").value = "";
+
+            $("confirmNewPassword").value = "";
+
+
+            /*
+               Continue directly into the portal.
+            */
+
+            hide("setPasswordScreen");
+
+            show("appScreen");
+
+            show("loadingCard");
+
+            hide("fatalCard");
+
+            hide("entryScreen");
+
+
+            await openAuthenticatedPortal();
+
+        }
+        catch (error) {
+
+            console.error(
+                "SET PASSWORD ERROR:",
+                error
+            );
+
+
+            showSetPasswordError(
+                friendlySupabaseError(error)
+            );
+
+        }
+        finally {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Set New Password";
+
         }
 
+    }
 
-        hide("passwordResetScreen");
 
-        hide("appScreen");
+    /* =========================================================
+       FORGOT PASSWORD
+    ========================================================= */
 
-        show("loginScreen");
+    async function forgotPassword() {
 
         clearLoginError();
 
-        $("loginPassword").value = "";
 
-        $("resetNewPassword").value = "";
-
-        $("resetConfirmPassword").value = "";
+        const email =
+            $("loginEmail").value.trim();
 
 
-        alert(
-            "Your password has been updated successfully. Please sign in with your new password."
-        );
+        if (!email) {
 
-
-        /*
-           Clear recovery information from URL.
-        */
-
-        if (
-            window.history &&
-            window.history.replaceState
-        ) {
-
-            window.history.replaceState(
-                {},
-                document.title,
-                PASSWORD_RECOVERY_REDIRECT
+            showLoginError(
+                "Please enter your work email address first."
             );
 
-        }
-
-
-        /*
-           Sign out the recovery session so the employee
-           must authenticate normally.
-        */
-
-        try {
-
-            await supabaseClient.auth.signOut();
-
-        }
-        catch (signOutError) {
-
-            console.warn(
-                "Recovery sign-out warning:",
-                signOutError
-            );
-
-        }
-
-        currentAuthUser = null;
-
-        me = null;
-
-        passwordRecoveryMode = false;
-
-    }
-    catch (error) {
-
-        console.error(
-            "RESET PASSWORD ERROR:",
-            error
-        );
-
-
-        showResetPasswordError(
-            friendlySupabaseError(error)
-        );
-
-    }
-    finally {
-
-        button.disabled = false;
-
-        button.textContent =
-            "Update Password";
-
-    }
-
-}
-
-
-/* =========================================================
-   LOGIN
-========================================================= */
-
-async function loginEmployee() {
-
-    clearLoginError();
-
-
-    const email =
-        $("loginEmail").value.trim();
-
-    const password =
-        $("loginPassword").value;
-
-
-    if (!email || !password) {
-
-        showLoginError(
-            "Please enter both email and password."
-        );
-
-        return;
-
-    }
-
-
-    const button =
-        $("loginButton");
-
-
-    button.disabled = true;
-
-    button.textContent =
-        "Signing in...";
-
-
-    try {
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.auth
-                .signInWithPassword({
-
-                    email,
-                    password
-
-                });
-
-
-        if (error) {
-
-            throw error;
-
-        }
-
-
-        if (
-            !data ||
-            !data.user
-        ) {
-
-            throw new Error(
-                "Login succeeded, but no authenticated user was returned."
-            );
-
-        }
-
-
-        currentAuthUser =
-            data.user;
-
-
-        /*
-           Load employee profile BEFORE opening
-           the production portal.
-        */
-
-        await loadEmployee();
-
-
-        /*
-           FIRST LOGIN CHECK
-        */
-
-        if (
-            me.password_changed === false ||
-            me.password_changed === null ||
-            typeof me.password_changed === "undefined"
-        ) {
-
-            showFirstPasswordScreen();
+            $("loginEmail").focus();
 
             return;
 
         }
 
 
-        /*
-           NORMAL LOGIN
-        */
+        try {
 
-        passwordChangeRequired =
-            false;
+            const {
+                error
+            } =
+                await supabaseClient.auth
+                    .resetPasswordForEmail(
+                        email,
+                        {
+                            redirectTo:
+                                PASSWORD_RECOVERY_REDIRECT
+                        }
+                    );
 
-        passwordRecoveryMode =
-            false;
+
+            if (error) {
+
+                throw error;
+
+            }
 
 
-        hide("loginScreen");
+            alert(
+                "Password reset instructions have been sent to your email."
+            );
 
-        show("appScreen");
+        }
+        catch (error) {
 
-        show("loadingCard");
+            console.error(
+                "FORGOT PASSWORD ERROR:",
+                error
+            );
+
+
+            showLoginError(
+                friendlySupabaseError(error)
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       PASSWORD RECOVERY
+    ========================================================= */
+
+    async function resetPassword() {
+
+        clearResetPasswordMessages();
+
+
+        const newPassword =
+            $("resetNewPassword").value;
+
+        const confirmPassword =
+            $("resetConfirmPassword").value;
+
+
+        const validationError =
+            validatePassword(
+                newPassword
+            );
+
+
+        if (validationError) {
+
+            showResetPasswordError(
+                validationError
+            );
+
+            return;
+
+        }
+
+
+        if (
+            newPassword !==
+            confirmPassword
+        ) {
+
+            showResetPasswordError(
+                "The passwords do not match."
+            );
+
+            return;
+
+        }
+
+
+        const button =
+            $("resetPasswordButton");
+
+
+        button.disabled = true;
+
+        button.textContent =
+            "Updating Password...";
+
+
+        try {
+
+            const {
+                error
+            } =
+                await supabaseClient.auth
+                    .updateUser({
+
+                        password:
+                            newPassword
+
+                    });
+
+
+            if (error) {
+
+                throw error;
+
+            }
+
+
+            /*
+               Password recovery is complete.
+               Update password_changed when possible.
+            */
+
+            if (currentAuthUser) {
+
+                const {
+                    error: employeeError
+                } =
+                    await supabaseClient
+                        .from("employees")
+                        .update({
+
+                            password_changed:
+                                true
+
+                        })
+                        .eq(
+                            "auth_user_id",
+                            currentAuthUser.id
+                        );
+
+
+                if (employeeError) {
+
+                    console.warn(
+                        "Could not update password_changed after recovery:",
+                        employeeError
+                    );
+
+                }
+
+            }
+
+
+            hide("passwordResetScreen");
+
+            hide("appScreen");
+
+            show("loginScreen");
+
+            clearLoginError();
+
+            $("loginPassword").value = "";
+
+            $("resetNewPassword").value = "";
+
+            $("resetConfirmPassword").value = "";
+
+
+            alert(
+                "Your password has been updated successfully. Please sign in with your new password."
+            );
+
+
+            /*
+               Clear recovery information from URL.
+            */
+
+            if (
+                window.history &&
+                window.history.replaceState
+            ) {
+
+                window.history.replaceState(
+                    {},
+                    document.title,
+                    PASSWORD_RECOVERY_REDIRECT
+                );
+
+            }
+
+
+            /*
+               Sign out the recovery session so the employee
+               must authenticate normally.
+            */
+
+            try {
+
+                await supabaseClient.auth.signOut();
+
+            }
+            catch (signOutError) {
+
+                console.warn(
+                    "Recovery sign-out warning:",
+                    signOutError
+                );
+
+            }
+
+            currentAuthUser = null;
+
+            me = null;
+
+            passwordRecoveryMode = false;
+
+        }
+        catch (error) {
+
+            console.error(
+                "RESET PASSWORD ERROR:",
+                error
+            );
+
+
+            showResetPasswordError(
+                friendlySupabaseError(error)
+            );
+
+        }
+        finally {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Update Password";
+
+        }
+
+    }
+
+
+    /* =========================================================
+       LOGIN
+    ========================================================= */
+
+    async function loginEmployee() {
+
+        clearLoginError();
+
+
+        const email =
+            $("loginEmail").value.trim();
+
+        const password =
+            $("loginPassword").value;
+
+
+        if (!email || !password) {
+
+            showLoginError(
+                "Please enter both email and password."
+            );
+
+            return;
+
+        }
+
+
+        const button =
+            $("loginButton");
+
+
+        button.disabled = true;
+
+        button.textContent =
+            "Signing in...";
+
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient.auth
+                    .signInWithPassword({
+
+                        email,
+                        password
+
+                    });
+
+
+            if (error) {
+
+                throw error;
+
+            }
+
+
+            if (
+                !data ||
+                !data.user
+            ) {
+
+                throw new Error(
+                    "Login succeeded, but no authenticated user was returned."
+                );
+
+            }
+
+
+            currentAuthUser =
+                data.user;
+
+
+            /*
+               Load employee profile BEFORE opening
+               the production portal.
+            */
+
+            await loadEmployee();
+
+
+            /*
+               FIRST LOGIN CHECK
+            */
+
+            if (
+                me.password_changed === false ||
+                me.password_changed === null ||
+                typeof me.password_changed === "undefined"
+            ) {
+
+                showFirstPasswordScreen();
+
+                return;
+
+            }
+
+
+            /*
+               NORMAL LOGIN
+            */
+
+            passwordChangeRequired =
+                false;
+
+            passwordRecoveryMode =
+                false;
+
+
+            hide("loginScreen");
+
+            show("appScreen");
+
+            show("loadingCard");
+
+            hide("fatalCard");
+
+            hide("entryScreen");
+
+
+            await openAuthenticatedPortal();
+
+        }
+        catch (error) {
+
+            console.error(
+                "LOGIN ERROR:",
+                error
+            );
+
+
+            showLoginError(
+                friendlySupabaseError(error)
+            );
+
+        }
+        finally {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Sign In";
+
+        }
+
+    }
+
+
+    /* =========================================================
+       LOGOUT
+    ========================================================= */
+
+    async function logoutEmployee() {
+
+        clearTimeout(
+            saveTimer
+        );
+
+        saveTimer = null;
+
+        savePending = false;
+
+        saveInFlight = false;
+
+        currentAuthUser = null;
+
+        me = null;
+
+        currentProject = null;
+
+        currentSubProject = null;
+
+        currentRecord = null;
+
+        currentShiftDate = null;
+
+        currentDateLocked = false;
+
+        lastPerformanceState = "";
+
+        passwordChangeRequired = false;
+
+        passwordRecoveryMode = false;
+
+
+        try {
+
+            await supabaseClient.auth.signOut();
+
+        }
+        catch (error) {
+
+            console.error(
+                "Logout error:",
+                error
+            );
+
+        }
+
+
+        hide("appScreen");
 
         hide("fatalCard");
 
+        hide("loadingCard");
+
         hide("entryScreen");
 
+        hide("setPasswordScreen");
 
-        await openAuthenticatedPortal();
+        hide("passwordResetScreen");
 
-    }
-    catch (error) {
-
-        console.error(
-            "LOGIN ERROR:",
-            error
-        );
+        show("loginScreen");
 
 
-        showLoginError(
-            friendlySupabaseError(error)
-        );
+        $("loginPassword").value = "";
 
-    }
-    finally {
+        $("newPassword").value = "";
 
-        button.disabled = false;
+        $("confirmNewPassword").value = "";
 
-        button.textContent =
-            "Sign In";
+        $("resetNewPassword").value = "";
 
-    }
-
-}
+        $("resetConfirmPassword").value = "";
 
 
-/* =========================================================
-   LOGOUT
-========================================================= */
+        clearLoginError();
 
-async function logoutEmployee() {
+        clearSetPasswordMessages();
 
-    clearTimeout(
-        saveTimer
-    );
-
-    saveTimer = null;
-
-    savePending = false;
-
-    saveInFlight = false;
-
-    currentAuthUser = null;
-
-    me = null;
-
-    currentProject = null;
-
-    currentSubProject = null;
-
-    currentRecord = null;
-
-    currentShiftDate = null;
-
-    currentDateLocked = false;
-
-    lastPerformanceState = "";
-
-    passwordChangeRequired = false;
-
-    passwordRecoveryMode = false;
-
-
-    try {
-
-        await supabaseClient.auth.signOut();
-
-    }
-    catch (error) {
-
-        console.error(
-            "Logout error:",
-            error
-        );
+        clearResetPasswordMessages();
 
     }
 
 
-    hide("appScreen");
+    /* =========================================================
+       EXISTING SESSION
+    ========================================================= */
 
-    hide("fatalCard");
+    async function checkExistingSession() {
 
-    hide("loadingCard");
+        try {
 
-    hide("entryScreen");
+            /*
+               Check whether this is a password recovery
+               redirect BEFORE normal session processing.
+            */
 
-    hide("setPasswordScreen");
+            if (
+                isPasswordRecoveryUrl()
+            ) {
 
-    hide("passwordResetScreen");
-
-    show("loginScreen");
-
-
-    $("loginPassword").value = "";
-
-    $("newPassword").value = "";
-
-    $("confirmNewPassword").value = "";
-
-    $("resetNewPassword").value = "";
-
-    $("resetConfirmPassword").value = "";
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient.auth.getSession();
 
 
-    clearLoginError();
+                if (error) {
 
-    clearSetPasswordMessages();
+                    throw error;
 
-    clearResetPasswordMessages();
-
-}
+                }
 
 
-/* =========================================================
-   EXISTING SESSION
-========================================================= */
+                if (
+                    data &&
+                    data.session &&
+                    data.session.user
+                ) {
 
-async function checkExistingSession() {
+                    currentAuthUser =
+                        data.session.user;
 
-    try {
+                }
 
-        /*
-           Check whether this is a password recovery
-           redirect BEFORE normal session processing.
-        */
 
-        if (
-            isPasswordRecoveryUrl()
-        ) {
+                showPasswordResetScreen();
+
+                return;
+
+            }
+
 
             const {
                 data,
@@ -3665,367 +3791,388 @@ async function checkExistingSession() {
                 currentAuthUser =
                     data.session.user;
 
+
+                /*
+                   Load employee before deciding
+                   whether to open the portal.
+                */
+
+                await loadEmployee();
+
+
+                /*
+                   First-login password check.
+                */
+
+                if (
+                    me.password_changed === false ||
+                    me.password_changed === null ||
+                    typeof me.password_changed === "undefined"
+                ) {
+
+                    showFirstPasswordScreen();
+
+                    return;
+
+                }
+
+
+                /*
+                   Normal existing session.
+                */
+
+                hide("loginScreen");
+
+                show("appScreen");
+
+                show("loadingCard");
+
+                hide("fatalCard");
+
+                hide("entryScreen");
+
+
+                await openAuthenticatedPortal();
+
+            }
+            else {
+
+                show("loginScreen");
+
             }
 
-
-            showPasswordResetScreen();
-
-            return;
-
         }
+        catch (error) {
 
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.auth.getSession();
-
-
-        if (error) {
-
-            throw error;
-
-        }
-
-
-        if (
-            data &&
-            data.session &&
-            data.session.user
-        ) {
-
-            currentAuthUser =
-                data.session.user;
+            console.error(
+                "SESSION ERROR:",
+                error
+            );
 
 
             /*
-               Load employee before deciding
-               whether to open the portal.
+               If the session is invalid or the employee
+               profile is unavailable, return to login.
             */
+
+            currentAuthUser = null;
+
+            me = null;
+
+
+            hide("appScreen");
+
+            hide("loadingCard");
+
+            hide("entryScreen");
+
+            hide("setPasswordScreen");
+
+            hide("passwordResetScreen");
+
+
+            show("loginScreen");
+
+
+            showLoginError(
+                friendlySupabaseError(error)
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       OPEN PORTAL
+    ========================================================= */
+
+    async function openAuthenticatedPortal() {
+
+        hide("fatalCard");
+
+        hide("entryScreen");
+
+        show("loadingCard");
+
+
+        try {
+
+            if (!currentAuthUser) {
+
+                throw new Error(
+                    "No authenticated user found."
+                );
+
+            }
+
 
             await loadEmployee();
 
 
-            /*
-               First-login password check.
-            */
-
-            if (
-                me.password_changed === false ||
-                me.password_changed === null ||
-                typeof me.password_changed === "undefined"
-            ) {
-
-                showFirstPasswordScreen();
-
-                return;
-
-            }
+            await loadReferenceData();
 
 
-            /*
-               Normal existing session.
-            */
-
-            hide("loginScreen");
-
-            show("appScreen");
-
-            show("loadingCard");
-
-            hide("fatalCard");
-
-            hide("entryScreen");
+            currentShiftDate =
+                getShiftDate();
 
 
-            await openAuthenticatedPortal();
+            $("headerDate").textContent =
+                formatShiftDate(
+                    currentShiftDate
+                );
+
+
+            await loadDateLock();
+
+
+            await loadDailyRecord();
+
+
+            renderIdentity();
+
+
+            renderAttendance();
+
+
+            renderHourRows();
+
+
+            applyLocks();
+
+
+            recalcTotal();
+
+
+            updatePerformanceCard();
+
+
+            hide("loadingCard");
+
+            show("entryScreen");
+
+
+            startLockTicker();
 
         }
-        else {
+        catch (error) {
 
-            show("loginScreen");
+            console.error(
+                "PORTAL LOAD ERROR:",
+                error
+            );
+
+
+            showFatal(
+                "Cannot load your production page",
+                friendlySupabaseError(error)
+            );
 
         }
 
     }
-    catch (error) {
-
-        console.error(
-            "SESSION ERROR:",
-            error
-        );
 
 
-        /*
-           If the session is invalid or the employee
-           profile is unavailable, return to login.
-        */
+    /* =========================================================
+       LOAD EMPLOYEE
+       IMPORTANT:
+       No employees.active filter.
+       Employee is identified by auth_user_id.
+    ========================================================= */
 
-        currentAuthUser = null;
-
-        me = null;
-
-
-        hide("appScreen");
-
-        hide("loadingCard");
-
-        hide("entryScreen");
-
-        hide("setPasswordScreen");
-
-        hide("passwordResetScreen");
-
-
-        show("loginScreen");
-
-
-        showLoginError(
-            friendlySupabaseError(error)
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   OPEN PORTAL
-========================================================= */
-
-async function openAuthenticatedPortal() {
-
-    hide("fatalCard");
-
-    hide("entryScreen");
-
-    show("loadingCard");
-
-
-    try {
+    async function loadEmployee() {
 
         if (!currentAuthUser) {
 
             throw new Error(
-                "No authenticated user found."
+                "No authenticated employee was found."
             );
 
         }
 
-
-        await loadEmployee();
-
-
-        await loadReferenceData();
-
-
-        currentShiftDate =
-            getShiftDate();
-
-
-        $("headerDate").textContent =
-            formatShiftDate(
-                currentShiftDate
-            );
-
-
-        await loadDateLock();
-
-
-        await loadDailyRecord();
-
-
-        renderIdentity();
-
-
-        renderAttendance();
-
-
-        renderHourRows();
-
-
-        applyLocks();
-
-
-        recalcTotal();
-
-
-        updatePerformanceCard();
-
-
-        hide("loadingCard");
-
-        show("entryScreen");
-
-
-        startLockTicker();
-
-    }
-    catch (error) {
-
-        console.error(
-            "PORTAL LOAD ERROR:",
-            error
-        );
-
-
-        showFatal(
-            "Cannot load your production page",
-            friendlySupabaseError(error)
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   LOAD EMPLOYEE
-   IMPORTANT:
-   No employees.active filter.
-   Employee is identified by auth_user_id.
-========================================================= */
-
-async function loadEmployee() {
-
-    if (!currentAuthUser) {
-
-        throw new Error(
-            "No authenticated employee was found."
-        );
-
-    }
-
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("employees")
-            .select("*")
-            .eq(
-                "auth_user_id",
-                currentAuthUser.id
-            )
-            .maybeSingle();
-
-
-    if (error) {
-
-        throw new Error(
-            "Employee profile could not be loaded: "
-            + error.message
-        );
-
-    }
-
-
-    if (!data) {
-
-        throw new Error(
-            "No employee profile is linked to this login."
-        );
-
-    }
-
-
-    if (data.active === false) {
-
-        throw new Error(
-            "Your employee profile is currently inactive."
-        );
-
-    }
-
-
-    me = data;
-
-}
-
-
-/* =========================================================
-   LOAD PROJECT / SUBPROJECT
-   IMPORTANT:
-   We DO NOT use projects.active.
-========================================================= */
-
-async function loadReferenceData() {
-
-    currentProject = null;
-
-    currentSubProject = null;
-
-
-    const projectId =
-        me?.project_id;
-
-
-    if (!projectId) {
-
-        console.warn(
-            "Employee has no project_id."
-        );
-
-        return;
-
-    }
-
-
-    /* -----------------------------------------------------
-       PROJECT
-    ----------------------------------------------------- */
-
-    try {
 
         const {
             data,
             error
         } =
             await supabaseClient
-                .from("projects")
+                .from("employees")
                 .select("*")
                 .eq(
-                    "id",
-                    projectId
+                    "auth_user_id",
+                    currentAuthUser.id
                 )
                 .maybeSingle();
 
 
         if (error) {
 
-            console.warn(
-                "Project could not be loaded:",
-                error.message
+            throw new Error(
+                "Employee profile could not be loaded: "
+                + error.message
             );
 
         }
-        else {
 
-            currentProject =
-                data || null;
+
+        if (!data) {
+
+            throw new Error(
+                "No employee profile is linked to this login."
+            );
 
         }
 
+
+        if (data.active === false) {
+
+            throw new Error(
+                "Your employee profile is currently inactive."
+            );
+
+        }
+
+
+        me = data;
+
     }
-    catch (error) {
-
-        console.warn(
-            "Project query failed:",
-            error
-        );
-
-    }
 
 
-    /* -----------------------------------------------------
-       SUBPROJECT
-       If employee has direct sub_project_id,
-       load only that record.
-    ----------------------------------------------------- */
+    /* =========================================================
+       LOAD PROJECT / SUBPROJECT
+       IMPORTANT:
+       We DO NOT use projects.active.
+    ========================================================= */
 
-    if (me.sub_project_id) {
+    async function loadReferenceData() {
+
+        currentProject = null;
+
+        currentSubProject = null;
+
+
+        const projectId =
+            me?.project_id;
+
+
+        if (!projectId) {
+
+            console.warn(
+                "Employee has no project_id."
+            );
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------------------
+           PROJECT
+        ----------------------------------------------------- */
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .from("projects")
+                    .select("*")
+                    .eq(
+                        "id",
+                        projectId
+                    )
+                    .maybeSingle();
+
+
+            if (error) {
+
+                console.warn(
+                    "Project could not be loaded:",
+                    error.message
+                );
+
+            }
+            else {
+
+                currentProject =
+                    data || null;
+
+            }
+
+        }
+        catch (error) {
+
+            console.warn(
+                "Project query failed:",
+                error
+            );
+
+        }
+
+
+        /* -----------------------------------------------------
+           SUBPROJECT
+           If employee has direct sub_project_id,
+           load only that record.
+        ----------------------------------------------------- */
+
+        if (me.sub_project_id) {
+
+            try {
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient
+                        .from("sub_projects")
+                        .select("*")
+                        .eq(
+                            "id",
+                            me.sub_project_id
+                        )
+                        .maybeSingle();
+
+
+                if (error) {
+
+                    console.warn(
+                        "Sub-project could not be loaded:",
+                        error.message
+                    );
+
+                }
+                else {
+
+                    currentSubProject =
+                        data || null;
+
+                }
+
+            }
+            catch (error) {
+
+                console.warn(
+                    "Sub-project query failed:",
+                    error
+                );
+
+            }
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------------------
+           FALLBACK:
+           If employee has no sub_project_id, look for a
+           single sub-project under the project.
+
+           No active column is assumed.
+        ----------------------------------------------------- */
 
         try {
 
@@ -4037,24 +4184,30 @@ async function loadReferenceData() {
                     .from("sub_projects")
                     .select("*")
                     .eq(
-                        "id",
-                        me.sub_project_id
-                    )
-                    .maybeSingle();
+                        "project_id",
+                        projectId
+                    );
 
 
             if (error) {
 
                 console.warn(
-                    "Sub-project could not be loaded:",
+                    "Sub-project list could not be loaded:",
                     error.message
                 );
 
+                return;
+
             }
-            else {
+
+
+            if (
+                Array.isArray(data) &&
+                data.length === 1
+            ) {
 
                 currentSubProject =
-                    data || null;
+                    data[0];
 
             }
 
@@ -4062,428 +4215,538 @@ async function loadReferenceData() {
         catch (error) {
 
             console.warn(
-                "Sub-project query failed:",
+                "Sub-project fallback failed:",
                 error
             );
 
         }
 
-        return;
-
     }
 
 
-    /* -----------------------------------------------------
-       FALLBACK:
-       If employee has no sub_project_id, look for a
-       single sub-project under the project.
+    /* =========================================================
+       GET EMPLOYEE SUBPROJECT
+    ========================================================= */
 
-       No active column is assumed.
-    ----------------------------------------------------- */
+    function getEmployeeSubProject() {
 
-    try {
+        if (
+            currentSubProject &&
+            me.sub_project_id
+        ) {
 
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .from("sub_projects")
-                .select("*")
-                .eq(
-                    "project_id",
-                    projectId
-                );
-
-
-        if (error) {
-
-            console.warn(
-                "Sub-project list could not be loaded:",
-                error.message
-            );
-
-            return;
+            return currentSubProject;
 
         }
 
 
         if (
-            Array.isArray(data) &&
-            data.length === 1
+            currentSubProject
         ) {
 
-            currentSubProject =
-                data[0];
+            return currentSubProject;
 
         }
 
-    }
-    catch (error) {
-
-        console.warn(
-            "Sub-project fallback failed:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   GET EMPLOYEE SUBPROJECT
-========================================================= */
-
-function getEmployeeSubProject() {
-
-    if (
-        currentSubProject &&
-        me.sub_project_id
-    ) {
-
-        return currentSubProject;
-
-    }
-
-
-    if (
-        currentSubProject
-    ) {
-
-        return currentSubProject;
-
-    }
-
-
-    return null;
-
-}
-
-
-/* =========================================================
-   BASE TARGET
-========================================================= */
-
-function getEmployeeBaseTarget() {
-
-    const subProject =
-        getEmployeeSubProject();
-
-
-    if (subProject) {
-
-        if (
-            subProject.target_based === false
-        ) {
-
-            return null;
-
-        }
-
-
-        const subTarget =
-            Number(
-                subProject.daily_target
-            );
-
-
-        if (
-            Number.isFinite(subTarget) &&
-            subTarget > 0
-        ) {
-
-            return subTarget;
-
-        }
-
-    }
-
-
-    if (currentProject) {
-
-        const projectTarget =
-            Number(
-                currentProject.daily_target
-            );
-
-
-        if (
-            Number.isFinite(projectTarget) &&
-            projectTarget > 0
-        ) {
-
-            return projectTarget;
-
-        }
-
-    }
-
-
-    return null;
-
-}
-
-
-/* =========================================================
-   DAILY TARGET
-========================================================= */
-
-function getDailyTarget() {
-
-    const baseTarget =
-        getEmployeeBaseTarget();
-
-
-    if (baseTarget === null) {
 
         return null;
 
     }
 
 
-    const attendance =
-        getAttendance();
+    /* =========================================================
+       BASE TARGET
+    ========================================================= */
 
+    function getEmployeeBaseTarget() {
 
-    if (
-        attendance === "Absent"
-    ) {
+        const subProject =
+            getEmployeeSubProject();
 
-        return 0;
 
-    }
+        if (subProject) {
 
+            if (
+                subProject.target_based === false
+            ) {
 
-    if (
-        attendance === "Half Day"
-    ) {
+                return null;
 
-        return Math.ceil(
-            baseTarget / 2
-        );
+            }
 
-    }
 
+            const subTarget =
+                Number(
+                    subProject.daily_target
+                );
 
-    return baseTarget;
 
-}
+            if (
+                Number.isFinite(subTarget) &&
+                subTarget > 0
+            ) {
 
+                return subTarget;
 
-/* =========================================================
-   ATTENDANCE
-========================================================= */
+            }
 
-function getAttendance() {
-
-    const selected =
-        document.querySelector(
-            'input[name="attendance"]:checked'
-        );
-
-
-    return selected
-        ? selected.value
-        : "Present";
-
-}
-
-
-function setAttendance(value) {
-
-    const radio =
-        document.querySelector(
-            'input[name="attendance"][value="' +
-            value +
-            '"]'
-        );
-
-
-    if (radio) {
-
-        radio.checked = true;
-
-    }
-
-}
-
-
-/* =========================================================
-   SHIFT DATE
-   6 PM – 3 AM
-   Midnight–3 AM belongs to previous date.
-========================================================= */
-
-function getShiftDate(date = new Date()) {
-
-    const year =
-        date.getFullYear();
-
-    const month =
-        String(
-            date.getMonth() + 1
-        ).padStart(2, "0");
-
-    const day =
-        String(
-            date.getDate()
-        ).padStart(2, "0");
-
-    const hour =
-        date.getHours();
-
-
-    let shiftDate =
-        `${year}-${month}-${day}`;
-
-
-    if (hour < 15) {
-
-        const previous =
-            new Date(date);
-
-        previous.setDate(
-            previous.getDate() - 1
-        );
-
-
-        const y =
-            previous.getFullYear();
-
-        const m =
-            String(
-                previous.getMonth() + 1
-            ).padStart(2, "0");
-
-        const d =
-            String(
-                previous.getDate()
-            ).padStart(2, "0");
-
-
-        shiftDate =
-            `${y}-${m}-${d}`;
-
-    }
-
-
-    return shiftDate;
-
-}
-
-
-/* =========================================================
-   FORMAT DATE
-========================================================= */
-
-function formatShiftDate(dateString) {
-
-    if (!dateString) {
-
-        return "-";
-
-    }
-
-
-    const parts =
-        dateString.split("-");
-
-
-    if (parts.length !== 3) {
-
-        return dateString;
-
-    }
-
-
-    const date =
-        new Date(
-            Number(parts[0]),
-            Number(parts[1]) - 1,
-            Number(parts[2])
-        );
-
-
-    return date.toLocaleDateString(
-        "en-IN",
-        {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
         }
-    );
-
-}
 
 
-/* =========================================================
-   CURRENT HOUR INDEX
-========================================================= */
+        if (currentProject) {
 
-function getCurrentHourIndex() {
-
-    const now =
-        new Date();
-
-    const hour =
-        now.getHours();
+            const projectTarget =
+                Number(
+                    currentProject.daily_target
+                );
 
 
-    /*
-       6 PM = index 0
-       7 PM = index 1
-       ...
-       2 AM = index 8
-    */
+            if (
+                Number.isFinite(projectTarget) &&
+                projectTarget > 0
+            ) {
+
+                return projectTarget;
+
+            }
+
+        }
 
 
-    if (hour >= 18) {
-
-        return hour - 18;
+        return null;
 
     }
 
 
-    if (hour < 3) {
+    /* =========================================================
+       DAILY TARGET
+    ========================================================= */
 
-        return hour + 6;
+    function getDailyTarget() {
+
+        const baseTarget =
+            getEmployeeBaseTarget();
+
+
+        if (baseTarget === null) {
+
+            return null;
+
+        }
+
+
+        const attendance =
+            getAttendance();
+
+
+        if (
+            attendance === "Absent"
+        ) {
+
+            return 0;
+
+        }
+
+
+        if (
+            attendance === "Half Day"
+        ) {
+
+            return Math.ceil(
+                baseTarget / 2
+            );
+
+        }
+
+
+        return baseTarget;
 
     }
 
 
-    return -1;
+    /* =========================================================
+       ATTENDANCE
+    ========================================================= */
 
-}
+    function getAttendance() {
 
-
-/* =========================================================
-   LOAD DATE LOCK
-========================================================= */
-
-async function loadDateLock() {
-
-    currentDateLocked = false;
-
-    hide("dateLockNotice");
+        const selected =
+            document.querySelector(
+                'input[name="attendance"]:checked'
+            );
 
 
-    if (!currentShiftDate) {
-
-        return;
+        return selected
+            ? selected.value
+            : "Present";
 
     }
 
 
-    try {
+    function setAttendance(value) {
+
+        const radio =
+            document.querySelector(
+                'input[name="attendance"][value="' +
+                value +
+                '"]'
+            );
+
+
+        if (radio) {
+
+            radio.checked = true;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       SHIFT DATE
+       6 PM – 3 AM
+       Midnight–3 AM belongs to previous date.
+    ========================================================= */
+
+    function getShiftDate(date = new Date()) {
+
+        const year =
+            date.getFullYear();
+
+        const month =
+            String(
+                date.getMonth() + 1
+            ).padStart(2, "0");
+
+        const day =
+            String(
+                date.getDate()
+            ).padStart(2, "0");
+
+        const hour =
+            date.getHours();
+
+
+        let shiftDate =
+            `${year}-${month}-${day}`;
+
+
+        if (hour < 15) {
+
+            const previous =
+                new Date(date);
+
+            previous.setDate(
+                previous.getDate() - 1
+            );
+
+
+            const y =
+                previous.getFullYear();
+
+            const m =
+                String(
+                    previous.getMonth() + 1
+                ).padStart(2, "0");
+
+            const d =
+                String(
+                    previous.getDate()
+                ).padStart(2, "0");
+
+
+            shiftDate =
+                `${y}-${m}-${d}`;
+
+        }
+
+
+        return shiftDate;
+
+    }
+
+
+    /* =========================================================
+       FORMAT DATE
+    ========================================================= */
+
+    function formatShiftDate(dateString) {
+
+        if (!dateString) {
+
+            return "-";
+
+        }
+
+
+        const parts =
+            dateString.split("-");
+
+
+        if (parts.length !== 3) {
+
+            return dateString;
+
+        }
+
+
+        const date =
+            new Date(
+                Number(parts[0]),
+                Number(parts[1]) - 1,
+                Number(parts[2])
+            );
+
+
+        return date.toLocaleDateString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       CURRENT HOUR INDEX
+    ========================================================= */
+
+    function getCurrentHourIndex() {
+
+        const now =
+            new Date();
+
+        const hour =
+            now.getHours();
+
+
+        /*
+           6 PM = index 0
+           7 PM = index 1
+           ...
+           2 AM = index 8
+        */
+
+
+        if (hour >= 18) {
+
+            return hour - 18;
+
+        }
+
+
+        if (hour < 3) {
+
+            return hour + 6;
+
+        }
+
+
+        return -1;
+
+    }
+
+
+    /* =========================================================
+       NEW: SHIFT HOUR START / END
+    ========================================================= */
+
+    function getShiftHourStart(index, referenceDate = new Date()) {
+        const date = new Date(referenceDate);
+
+        if (index <= 5) {
+            date.setHours(18 + index, 0, 0, 0);
+        }
+        else {
+            date.setDate(date.getDate() + 1);
+            date.setHours(index - 6, 0, 0, 0);
+        }
+
+        return date;
+    }
+
+
+    function getShiftHourEnd(index, referenceDate = new Date()) {
+        const start = getShiftHourStart(index, referenceDate);
+        const end = new Date(start);
+
+        end.setHours(end.getHours() + 1);
+
+        return end;
+    }
+
+
+    function formatRemainingTime(milliseconds) {
+        const totalSeconds = Math.max(
+            Math.ceil(milliseconds / 1000),
+            0
+        );
+
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+
+        return `${minutes}m ${String(seconds).padStart(2, "0")}s`;
+    }
+
+
+    function getCurrentEditableHourIndex() {
+        const now = new Date();
+
+        for (let index = 0; index < HOUR_FIELDS.length; index++) {
+            const deadline = getShiftHourEnd(index, now);
+            const graceEnd = new Date(deadline);
+
+            graceEnd.setMinutes(
+                graceEnd.getMinutes() + HOURLY_GRACE_MINUTES
+            );
+
+            if (
+                now >= getShiftHourStart(index, now) &&
+                now < graceEnd
+            ) {
+                return index;
+            }
+        }
+
+        return -1;
+    }
+
+
+    function getHourLockState(index) {
+        const now = new Date();
+        const deadline = getShiftHourEnd(index, now);
+        const graceEnd = new Date(deadline);
+
+        graceEnd.setMinutes(
+            graceEnd.getMinutes() + HOURLY_GRACE_MINUTES
+        );
+
+        if (currentDateLocked) {
+            return {
+                locked: true,
+                status: "DATE LOCKED"
+            };
+        }
+
+        if (now < deadline) {
+            return {
+                locked: false,
+                status: index === getCurrentHourIndex()
+                    ? "CURRENT"
+                    : "OPEN"
+            };
+        }
+
+        if (now < graceEnd) {
+            return {
+                locked: false,
+                status: "GRACE"
+            };
+        }
+
+        return {
+            locked: true,
+            status: "LOCKED"
+        };
+    }
+
+
+    /* =========================================================
+       LOAD DATE LOCK
+    ========================================================= */
+
+    async function loadDateLock() {
+
+        currentDateLocked = false;
+
+        hide("dateLockNotice");
+
+
+        if (!currentShiftDate) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .from("tracker_date_locks")
+                    .select("*")
+                    .eq(
+                        "tracker_date",
+                        currentShiftDate
+                    )
+                    .maybeSingle();
+
+
+            if (error) {
+
+                console.warn(
+                    "Date lock check failed:",
+                    error.message
+                );
+
+                return;
+
+            }
+
+
+            if (
+                data &&
+                (
+                    data.is_locked === true ||
+                    data.locked === true
+                )
+            ) {
+
+                currentDateLocked = true;
+
+                show("dateLockNotice");
+
+            }
+
+        }
+        catch (error) {
+
+            console.warn(
+                "Date lock query failed:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       LOAD DAILY RECORD
+    ========================================================= */
+
+    async function loadDailyRecord() {
+
+        currentRecord = null;
+
 
         const {
             data,
             error
         } =
             await supabaseClient
-                .from("tracker_date_locks")
+                .from("daily_productivity")
                 .select("*")
+                .eq(
+                    "employee_id",
+                    me.id
+                )
                 .eq(
                     "tracker_date",
                     currentShiftDate
@@ -4493,584 +4756,301 @@ async function loadDateLock() {
 
         if (error) {
 
-            console.warn(
-                "Date lock check failed:",
-                error.message
+            throw new Error(
+                "Production record could not be loaded: "
+                + error.message
             );
 
-            return;
+        }
+
+
+        currentRecord =
+            data || null;
+
+
+        if (currentRecord) {
+
+            setAttendance(
+                currentRecord.attendance ||
+                "Present"
+            );
 
         }
+        else {
+
+            setAttendance("Present");
+
+        }
+
+    }
+
+
+    /* =========================================================
+       RENDER IDENTITY
+    ========================================================= */
+
+    function renderIdentity() {
+
+        const name =
+            me.employee_name ||
+            me.name ||
+            "Employee";
+
+
+        $("identityEmployee").textContent =
+            name;
+
+
+        $("identityProject").textContent =
+            currentProject?.project_name ||
+            "Project not assigned";
+
+
+        $("identitySubProject").textContent =
+            currentSubProject?.sub_project_name ||
+            "—";
+
+
+        $("employeeName").textContent =
+            name;
+
+
+        $("employeeEmail").textContent =
+            currentAuthUser?.email ||
+            "—";
+
+
+        $("employeeAvatar").textContent =
+            getInitials(name);
+
+    }
+
+
+    /* =========================================================
+       INITIALS
+    ========================================================= */
+
+    function getInitials(name) {
+
+        const words =
+            String(name || "")
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
+
+
+        if (!words.length) {
+
+            return "--";
+
+        }
+
+
+        if (words.length === 1) {
+
+            return words[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+
+        return (
+            words[0][0] +
+            words[words.length - 1][0]
+        ).toUpperCase();
+
+    }
+
+
+    /* =========================================================
+       RENDER ATTENDANCE
+    ========================================================= */
+
+    function renderAttendance() {
+
+        const attendance =
+            currentRecord?.attendance ||
+            "Present";
+
+
+        setAttendance(attendance);
+
+    }
+
+
+    /* =========================================================
+       GET VALUE FROM RECORD
+    ========================================================= */
+
+    function getHourValue(field) {
+
+        if (!currentRecord) {
+
+            return 0;
+
+        }
+
+
+        const value =
+            Number(
+                currentRecord[field]
+            );
 
 
         if (
-            data &&
-            (
-                data.is_locked === true ||
-                data.locked === true
-            )
+            !Number.isFinite(value) ||
+            value < 0
         ) {
 
-            currentDateLocked = true;
-
-            show("dateLockNotice");
+            return 0;
 
         }
 
-    }
-    catch (error) {
 
-        console.warn(
-            "Date lock query failed:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   LOAD DAILY RECORD
-========================================================= */
-
-async function loadDailyRecord() {
-
-    currentRecord = null;
-
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("daily_productivity")
-            .select("*")
-            .eq(
-                "employee_id",
-                me.id
-            )
-            .eq(
-                "tracker_date",
-                currentShiftDate
-            )
-            .maybeSingle();
-
-
-    if (error) {
-
-        throw new Error(
-            "Production record could not be loaded: "
-            + error.message
-        );
+        return value;
 
     }
 
 
-    currentRecord =
-        data || null;
+    /* =========================================================
+       RENDER HOUR ROWS (UPDATED FOR GRACE)
+    ========================================================= */
 
+    function renderHourRows() {
+        const container = $("hourList");
 
-    if (currentRecord) {
+        container.innerHTML = "";
 
-        setAttendance(
-            currentRecord.attendance ||
-            "Present"
-        );
+        HOUR_FIELDS.forEach((field, index) => {
+            const row = document.createElement("div");
+            row.className = "hour-row";
 
-    }
-    else {
+            const lockState = getHourLockState(index);
 
-        setAttendance("Present");
-
-    }
-
-}
-
-
-/* =========================================================
-   RENDER IDENTITY
-========================================================= */
-
-function renderIdentity() {
-
-    const name =
-        me.employee_name ||
-        me.name ||
-        "Employee";
-
-
-    $("identityEmployee").textContent =
-        name;
-
-
-    $("identityProject").textContent =
-        currentProject?.project_name ||
-        "Project not assigned";
-
-
-    $("identitySubProject").textContent =
-        currentSubProject?.sub_project_name ||
-        "—";
-
-
-    $("employeeName").textContent =
-        name;
-
-
-    $("employeeEmail").textContent =
-        currentAuthUser?.email ||
-        "—";
-
-
-    $("employeeAvatar").textContent =
-        getInitials(name);
-
-}
-
-
-/* =========================================================
-   INITIALS
-========================================================= */
-
-function getInitials(name) {
-
-    const words =
-        String(name || "")
-            .trim()
-            .split(/\s+/)
-            .filter(Boolean);
-
-
-    if (!words.length) {
-
-        return "--";
-
-    }
-
-
-    if (words.length === 1) {
-
-        return words[0]
-            .substring(0, 2)
-            .toUpperCase();
-
-    }
-
-
-    return (
-        words[0][0] +
-        words[words.length - 1][0]
-    ).toUpperCase();
-
-}
-
-
-/* =========================================================
-   RENDER ATTENDANCE
-========================================================= */
-
-function renderAttendance() {
-
-    const attendance =
-        currentRecord?.attendance ||
-        "Present";
-
-
-    setAttendance(attendance);
-
-}
-
-
-/* =========================================================
-   GET VALUE FROM RECORD
-========================================================= */
-
-function getHourValue(field) {
-
-    if (!currentRecord) {
-
-        return 0;
-
-    }
-
-
-    const value =
-        Number(
-            currentRecord[field]
-        );
-
-
-    if (
-        !Number.isFinite(value) ||
-        value < 0
-    ) {
-
-        return 0;
-
-    }
-
-
-    return value;
-
-}
-
-
-/* =========================================================
-   RENDER HOUR ROWS
-========================================================= */
-
-function renderHourRows() {
-
-    const container =
-        $("hourList");
-
-
-    container.innerHTML = "";
-
-
-    const currentIndex =
-        getCurrentHourIndex();
-
-
-    HOUR_FIELDS.forEach(
-        (field, index) => {
-
-            const row =
-                document.createElement("div");
-
-            row.className =
-                "hour-row";
-
-
-            const isCurrent =
-                index === currentIndex;
-
-
-            const isPast =
-                currentIndex >= 0 &&
-                index < currentIndex;
-
-
-            if (isCurrent) {
-
-                row.classList.add(
-                    "current"
-                );
-
+            if (lockState.status === "CURRENT") {
+                row.classList.add("current");
             }
 
-
-            if (isPast) {
-
-                row.classList.add(
-                    "locked"
-                );
-
+            if (lockState.locked) {
+                row.classList.add("locked");
             }
 
-
-            const label =
-                document.createElement("div");
-
-            label.className =
-                "hour-label";
-
-
-            const time =
-                document.createElement("div");
-
-            time.className =
-                "hour-time";
-
-            time.textContent =
-                HOUR_LABELS[index];
-
-
-            const status =
-                document.createElement("div");
-
-            status.className =
-                "hour-status";
-
-
-            if (currentDateLocked) {
-
-                status.textContent =
-                    "DATE LOCKED";
-
-            }
-            else if (isPast) {
-
-                status.textContent =
-                    "LOCKED";
-
-            }
-            else if (isCurrent) {
-
-                status.textContent =
-                    "CURRENT";
-
-            }
-            else {
-
-                status.textContent =
-                    "OPEN";
-
+            if (lockState.status === "GRACE") {
+                row.classList.add("current");
+                row.classList.add("grace");
             }
 
+            const label = document.createElement("div");
+            label.className = "hour-label";
+
+            const time = document.createElement("div");
+            time.className = "hour-time";
+            time.textContent = HOUR_LABELS[index];
+
+            const status = document.createElement("div");
+            status.className = "hour-status";
+            status.textContent = lockState.status;
 
             label.appendChild(time);
-
             label.appendChild(status);
 
+            const input = document.createElement("input");
 
-            const input =
-                document.createElement("input");
-
-            input.type =
-                "number";
-
-            input.min =
-                "0";
-
-            input.step =
-                "1";
-
-            input.inputMode =
-                "numeric";
-
-            input.className =
-                "hour-input";
-
-            input.dataset.field =
-                field;
-
-            input.value =
-                getHourValue(field);
-
+            input.type = "number";
+            input.min = "0";
+            input.step = "1";
+            input.inputMode = "numeric";
+            input.className = "hour-input";
+            input.dataset.field = field;
+            input.value = getHourValue(field);
+            input.disabled = lockState.locked;
 
             input.addEventListener(
                 "input",
                 onHourInput
             );
 
-
             input.addEventListener(
                 "blur",
                 () => {
-
                     if (
                         input.value === "" ||
                         Number(input.value) < 0
                     ) {
-
                         input.value = "0";
-
                         recalcTotal();
-
                         updatePerformanceCard();
-
                         queueSave();
-
                     }
-
                 }
             );
 
-
             row.appendChild(label);
-
             row.appendChild(input);
 
             container.appendChild(row);
+        });
 
-        }
-    );
-
-}
-
-
-/* =========================================================
-   APPLY LOCKS
-========================================================= */
-
-function applyLocks() {
-
-    const inputs =
-        document.querySelectorAll(
-            ".hour-input"
-        );
-
-
-    const currentIndex =
-        getCurrentHourIndex();
-
-
-    inputs.forEach(
-        (input, index) => {
-
-            const isPast =
-                currentIndex >= 0 &&
-                index < currentIndex;
-
-
-            const shouldLock =
-                currentDateLocked ||
-                isPast;
-
-
-            input.disabled =
-                shouldLock;
-
-
-            const row =
-                input.closest(".hour-row");
-
-
-            if (!row) {
-
-                return;
-
-            }
-
-
-            if (shouldLock) {
-
-                row.classList.add(
-                    "locked"
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   TOTAL
-========================================================= */
-
-function getEnteredTotal() {
-
-    let total = 0;
-
-
-    HOUR_FIELDS.forEach(
-        field => {
-
-            const input =
-                document.querySelector(
-                    `[data-field="${field}"]`
-                );
-
-
-            if (!input) {
-
-                return;
-
-            }
-
-
-            const value =
-                Number(input.value);
-
-
-            if (
-                Number.isFinite(value) &&
-                value > 0
-            ) {
-
-                total += value;
-
-            }
-
-        }
-    );
-
-
-    return total;
-
-}
-
-
-function recalcTotal() {
-
-    const total =
-        getEnteredTotal();
-
-
-    $("hourlyTotal").textContent =
-        "Total: " + total;
-
-
-    return total;
-
-}
-
-
-/* =========================================================
-   HOUR INPUT
-========================================================= */
-
-function onHourInput(event) {
-
-    const input =
-        event.target;
-
-
-    let value =
-        Number(input.value);
-
-
-    if (
-        !Number.isFinite(value) ||
-        value < 0
-    ) {
-
-        value = 0;
-
+        updateHourlyDeadlineBanner();
     }
 
 
-    input.value =
-        Math.floor(value);
+    /* =========================================================
+       APPLY LOCKS (UPDATED FOR GRACE)
+    ========================================================= */
+
+    function applyLocks() {
+        const inputs = document.querySelectorAll(
+            ".hour-input"
+        );
+
+        inputs.forEach((input, index) => {
+            const lockState = getHourLockState(index);
+
+            input.disabled = lockState.locked;
+
+            const row = input.closest(".hour-row");
+
+            if (!row) {
+                return;
+            }
+
+            row.classList.toggle(
+                "locked",
+                lockState.locked
+            );
+
+            row.classList.toggle(
+                "current",
+                lockState.status === "CURRENT" ||
+                lockState.status === "GRACE"
+            );
+
+            const status = row.querySelector(
+                ".hour-status"
+            );
+
+            if (status) {
+                status.textContent = lockState.status;
+            }
+        });
+
+        updateHourlyDeadlineBanner();
+    }
 
 
-    recalcTotal();
+    /* =========================================================
+       TOTAL
+    ========================================================= */
 
-    updatePerformanceCard();
+    function getEnteredTotal() {
 
-    queueSave();
-
-}
-
-
-/* =========================================================
-   ATTENDANCE CHANGE
-========================================================= */
-
-function onAttendanceChange() {
-
-    const attendance =
-        getAttendance();
-
-
-    if (attendance === "Absent") {
-
-        /*
-           Do not overwrite locked historical hours.
-           Only clear editable hours.
-        */
-
-        const currentIndex =
-            getCurrentHourIndex();
+        let total = 0;
 
 
         HOUR_FIELDS.forEach(
-            (field, index) => {
+            field => {
 
                 const input =
                     document.querySelector(
@@ -5085,1203 +5065,881 @@ function onAttendanceChange() {
                 }
 
 
-                const isPast =
-                    currentIndex >= 0 &&
-                    index < currentIndex;
-
+                const value =
+                    Number(input.value);
 
                 if (
-                    !isPast &&
-                    !currentDateLocked
+                    Number.isFinite(value) &&
+                    value > 0
                 ) {
 
-                    input.value = "0";
+                    total += value;
 
                 }
 
             }
         );
 
-    }
 
-
-    recalcTotal();
-
-    updatePerformanceCard();
-
-    queueSave();
-
-}
-
-
-/* =========================================================
-   PERFORMANCE CARD
-========================================================= */
-
-function updatePerformanceCard() {
-
-    const card =
-        $("performanceCard");
-
-
-    const title =
-        $("performanceTitle");
-
-    const message =
-        $("performanceMessage");
-
-    const icon =
-        $("performanceIcon");
-
-    const targetElement =
-        $("performanceTarget");
-
-    const achievedElement =
-        $("performanceAchieved");
-
-    const remainingElement =
-        $("performanceRemaining");
-
-    const percentageElement =
-        $("performancePercentage");
-
-    const progress =
-        $("performanceProgress");
-
-    const footnote =
-        $("performanceFootnote");
-
-
-    const attendance =
-        getAttendance();
-
-
-    const baseTarget =
-        getEmployeeBaseTarget();
-
-
-    const achieved =
-        getEnteredTotal();
-
-
-    card.className =
-        "performance-card";
-
-
-    show("performanceCard");
-
-
-    /*
-       ABSENT
-    */
-
-    if (attendance === "Absent") {
-
-        card.classList.add(
-            "absent"
-        );
-
-
-        icon.textContent =
-            "🌙";
-
-
-        title.textContent =
-            "Attendance marked Absent";
-
-
-        message.textContent =
-            "Hourly production entry is set to zero for the available hours.";
-
-
-        targetElement.textContent =
-            "0";
-
-
-        achievedElement.textContent =
-            achieved;
-
-
-        remainingElement.textContent =
-            "0";
-
-
-        percentageElement.textContent =
-            "0%";
-
-
-        progress.style.width =
-            "0%";
-
-
-        footnote.textContent =
-            "Attendance status is Absent.";
-
-
-        lastPerformanceState =
-            "absent";
-
-
-        return;
+        return total;
 
     }
 
 
-    /*
-       NON-TARGET PROCESS
-    */
+    function recalcTotal() {
 
-    if (baseTarget === null) {
-
-        card.classList.add(
-            "neutral"
-        );
+        const total =
+            getEnteredTotal();
 
 
-        icon.textContent =
-            "📋";
+        $("hourlyTotal").textContent =
+            "Total: " + total;
 
 
-        title.textContent =
-            "Production tracking is active";
-
-
-        message.textContent =
-            "No daily production target is configured for this process.";
-
-
-        targetElement.textContent =
-            "N/A";
-
-
-        achievedElement.textContent =
-            achieved;
-
-
-        remainingElement.textContent =
-            "N/A";
-
-
-        percentageElement.textContent =
-            "N/A";
-
-
-        progress.style.width =
-            "0%";
-
-
-        footnote.textContent =
-            "Hourly production is still being recorded.";
-
-
-        lastPerformanceState =
-            "neutral";
-
-
-        return;
+        return total;
 
     }
 
 
-    const target =
-        getDailyTarget();
+    /* =========================================================
+       HOUR INPUT
+    ========================================================= */
+
+    function onHourInput(event) {
+
+        const input =
+            event.target;
 
 
-    if (
-        !target ||
-        target <= 0
-    ) {
-
-        card.classList.add(
-            "neutral"
-        );
-
-
-        icon.textContent =
-            "📊";
-
-
-        title.textContent =
-            "Production tracking is active";
-
-
-        message.textContent =
-            "A valid daily target is not currently configured.";
-
-
-        targetElement.textContent =
-            "0";
-
-
-        achievedElement.textContent =
-            achieved;
-
-
-        remainingElement.textContent =
-            "0";
-
-
-        percentageElement.textContent =
-            "0%";
-
-
-        progress.style.width =
-            "0%";
-
-
-        footnote.textContent =
-            "";
-
-
-        lastPerformanceState =
-            "neutral";
-
-
-        return;
-
-    }
-
-
-    const remaining =
-        Math.max(
-            target - achieved,
-            0
-        );
-
-
-    const percentage =
-        (achieved / target) * 100;
-
-
-    const roundedPercentage =
-        Math.round(
-            percentage * 10
-        ) / 10;
-
-
-    const progressWidth =
-        Math.min(
-            percentage,
-            100
-        );
-
-
-    targetElement.textContent =
-        target;
-
-
-    achievedElement.textContent =
-        achieved;
-
-
-    remainingElement.textContent =
-        remaining;
-
-
-    percentageElement.textContent =
-        roundedPercentage + "%";
-
-
-    progress.style.width =
-        progressWidth + "%";
-
-
-    let state = "";
-
-
-    /*
-       ABOVE TARGET
-    */
-
-    if (achieved > target) {
-
-        state =
-            "above";
-
-
-        card.classList.add(
-            "above"
-        );
-
-
-        icon.textContent =
-            "🎉";
-
-
-        title.textContent =
-            "Outstanding! You're above target";
-
-
-        message.textContent =
-            `${MANAGER_NAME} is watching you 👀 — but you're giving him nothing to complain about!`;
-
-
-        const extra =
-            achieved - target;
-
-
-        footnote.textContent =
-            `You are ${extra} above target. Keep the momentum going!`;
+        let value =
+            Number(input.value);
 
 
         if (
-            lastPerformanceState !== "above"
+            !Number.isFinite(value) ||
+            value < 0
         ) {
 
-            launchCelebration();
+            value = 0;
 
         }
 
-    }
+
+        input.value =
+            Math.floor(value);
 
 
-    /*
-       EXACTLY ON TARGET
-    */
+        recalcTotal();
 
-    else if (achieved === target) {
+        updatePerformanceCard();
 
-        state =
-            "target";
-
-
-        card.classList.add(
-            "target"
-        );
-
-
-        icon.textContent =
-            "🎯";
-
-
-        title.textContent =
-            "Good job! You're exactly on target";
-
-
-        message.textContent =
-            "You've reached today's production target. Great work!";
-
-
-        footnote.textContent =
-            "Target achieved. Keep the consistency going.";
+        queueSave();
 
     }
 
 
-    /*
-       BELOW TARGET
-    */
+    /* =========================================================
+       ATTENDANCE CHANGE
+    ========================================================= */
 
-    else {
+    function onAttendanceChange() {
 
-        state =
-            "below";
-
-
-        card.classList.add(
-            "below"
-        );
+        const attendance =
+            getAttendance();
 
 
-        icon.textContent =
-            "👀";
+        if (attendance === "Absent") {
+
+            /*
+               Do not overwrite locked historical hours.
+               Only clear editable hours.
+            */
+
+            const currentIndex =
+                getCurrentHourIndex();
 
 
-        title.textContent =
-            `${MANAGER_NAME} is watching you...`;
+            HOUR_FIELDS.forEach(
+                (field, index) => {
+
+                    const input =
+                        document.querySelector(
+                            `[data-field="${field}"]`
+                        );
 
 
-        message.textContent =
-            `You're ${remaining} away from target. Keep going — you've got this!`;
+                    if (!input) {
+
+                        return;
+
+                    }
 
 
-        footnote.textContent =
-            `${roundedPercentage}% of today's target completed.`;
-
-    }
-
-
-    lastPerformanceState =
-        state;
-
-}
+                    const isPast =
+                        currentIndex >= 0 &&
+                        index < currentIndex;
 
 
-/* =========================================================
-   CELEBRATION
-========================================================= */
+                    if (
+                        !isPast &&
+                        !currentDateLocked
+                    ) {
 
-function launchCelebration() {
+                        input.value = "0";
 
-    const layer =
-        $("celebrationLayer");
+                    }
 
+                }
+            );
 
-    layer.innerHTML = "";
-
-
-    clearTimeout(
-        celebrationTimer
-    );
+        }
 
 
-    const symbols = [
+        recalcTotal();
 
-        "🎉",
-        "✨",
-        "⭐",
-        "🎊"
+        updatePerformanceCard();
 
-    ];
-
-
-    for (
-        let i = 0;
-        i < 30;
-        i++
-    ) {
-
-        const piece =
-            document.createElement("div");
-
-
-        piece.className =
-            "confetti";
-
-
-        piece.textContent =
-            symbols[
-                Math.floor(
-                    Math.random() *
-                    symbols.length
-                )
-            ];
-
-
-        piece.style.left =
-            (
-                Math.random() * 100
-            ) + "%";
-
-
-        piece.style.fontSize =
-            (
-                10 +
-                Math.random() * 13
-            ) + "px";
-
-
-        piece.style.animationDelay =
-            (
-                Math.random() * 0.8
-            ) + "s";
-
-
-        piece.style.animationDuration =
-            (
-                1.8 +
-                Math.random() * 1.2
-            ) + "s";
-
-
-        layer.appendChild(
-            piece
-        );
+        queueSave();
 
     }
 
 
-    celebrationTimer =
-        setTimeout(
-            () => {
+    /* =========================================================
+       PERFORMANCE CARD
+    ========================================================= */
 
-                layer.innerHTML = "";
+    function updatePerformanceCard() {
 
-            },
-            3500
-        );
-
-}
+        const card =
+            $("performanceCard");
 
 
-/* =========================================================
-   BUILD DATABASE RECORD
-   IMPORTANT:
-   remaining is NEVER NULL.
-========================================================= */
+        const title =
+            $("performanceTitle");
 
-function buildRecord() {
+        const message =
+            $("performanceMessage");
 
-    const attendance =
-        getAttendance();
+        const icon =
+            $("performanceIcon");
 
+        const targetElement =
+            $("performanceTarget");
 
-    const target =
-        getDailyTarget();
+        const achievedElement =
+            $("performanceAchieved");
 
+        const remainingElement =
+            $("performanceRemaining");
 
-    const achieved =
-        getEnteredTotal();
+        const percentageElement =
+            $("performancePercentage");
 
+        const progress =
+            $("performanceProgress");
 
-    let dailyTarget = 0;
-
-    let remaining = 0;
-
-    let achievementPercentage = 0;
-
-
-    /*
-       If the process has no target,
-       all numeric target fields remain 0.
-    */
-
-    if (
-        target !== null &&
-        Number.isFinite(
-            Number(target)
-        ) &&
-        Number(target) > 0
-    ) {
-
-        dailyTarget =
-            Number(target);
+        const footnote =
+            $("performanceFootnote");
 
 
-        remaining =
+        const attendance =
+            getAttendance();
+
+
+        const baseTarget =
+            getEmployeeBaseTarget();
+
+
+        const achieved =
+            getEnteredTotal();
+
+
+        card.className =
+            "performance-card";
+
+
+        show("performanceCard");
+
+
+        /*
+           ABSENT
+        */
+
+        if (attendance === "Absent") {
+
+            card.classList.add(
+                "absent"
+            );
+
+
+            icon.textContent =
+                "🌙";
+
+
+            title.textContent =
+                "Attendance marked Absent";
+
+
+            message.textContent =
+                "Hourly production entry is set to zero for the available hours.";
+
+
+            targetElement.textContent =
+                "0";
+
+
+            achievedElement.textContent =
+                achieved;
+
+
+            remainingElement.textContent =
+                "0";
+
+
+            percentageElement.textContent =
+                "0%";
+
+
+            progress.style.width =
+                "0%";
+
+
+            footnote.textContent =
+                "Attendance status is Absent.";
+
+
+            lastPerformanceState =
+                "absent";
+
+
+            return;
+
+        }
+
+
+        /*
+           NON-TARGET PROCESS
+        */
+
+        if (baseTarget === null) {
+
+            card.classList.add(
+                "neutral"
+            );
+
+
+            icon.textContent =
+                "📋";
+
+
+            title.textContent =
+                "Production tracking is active";
+
+
+            message.textContent =
+                "No daily production target is configured for this process.";
+
+
+            targetElement.textContent =
+                "N/A";
+
+
+            achievedElement.textContent =
+                achieved;
+
+
+            remainingElement.textContent =
+                "N/A";
+
+
+            percentageElement.textContent =
+                "N/A";
+
+
+            progress.style.width =
+                "0%";
+
+
+            footnote.textContent =
+                "Hourly production is still being recorded.";
+
+
+            lastPerformanceState =
+                "neutral";
+
+
+            return;
+
+        }
+
+
+        const target =
+            getDailyTarget();
+
+
+        if (
+            !target ||
+            target <= 0
+        ) {
+
+            card.classList.add(
+                "neutral"
+            );
+
+
+            icon.textContent =
+                "📊";
+
+
+            title.textContent =
+                "Production tracking is active";
+
+
+            message.textContent =
+                "A valid daily target is not currently configured.";
+
+
+            targetElement.textContent =
+                "0";
+
+
+            achievedElement.textContent =
+                achieved;
+
+
+            remainingElement.textContent =
+                "0";
+
+
+            percentageElement.textContent =
+                "0%";
+
+
+            progress.style.width =
+                "0%";
+
+
+            footnote.textContent =
+                "";
+
+
+            lastPerformanceState =
+                "neutral";
+
+
+            return;
+
+        }
+
+
+        const remaining =
             Math.max(
-                dailyTarget - achieved,
+                target - achieved,
                 0
             );
 
 
-        achievementPercentage =
-            (
-                achieved /
-                dailyTarget
-            ) * 100;
+        const percentage =
+            (achieved / target) * 100;
 
-    }
 
+        const roundedPercentage =
+            Math.round(
+                percentage * 10
+            ) / 10;
 
-    const record = {
 
-        employee_id:
-            me.id,
+        const progressWidth =
+            Math.min(
+                percentage,
+                100
+            );
 
-        tracker_date:
-            currentShiftDate,
 
-        daily_target:
-            Number(dailyTarget),
+        targetElement.textContent =
+            target;
 
-        attendance:
-            attendance,
 
-        hour_6_7:
-            getInputNumber("hour_6_7"),
+        achievedElement.textContent =
+            achieved;
 
-        hour_7_8:
-            getInputNumber("hour_7_8"),
 
-        hour_8_9:
-            getInputNumber("hour_8_9"),
+        remainingElement.textContent =
+            remaining;
 
-        hour_9_10:
-            getInputNumber("hour_9_10"),
 
-        hour_10_11:
-            getInputNumber("hour_10_11"),
+        percentageElement.textContent =
+            roundedPercentage + "%";
 
-        hour_11_12:
-            getInputNumber("hour_11_12"),
 
-        hour_12_1:
-            getInputNumber("hour_12_1"),
+        progress.style.width =
+            progressWidth + "%";
 
-        hour_1_2:
-            getInputNumber("hour_1_2"),
 
-        hour_2_3:
-            getInputNumber("hour_2_3"),
-
-        break_minutes:
-            Number(
-                currentRecord?.break_minutes || 0
-            ),
-
-        remaining:
-            Number(remaining),
-
-        achievement_percentage:
-            Number(
-                achievementPercentage
-            )
-
-    };
-
-
-    return record;
-
-}
-
-
-/* =========================================================
-   INPUT NUMBER
-========================================================= */
-
-function getInputNumber(field) {
-
-    const input =
-        document.querySelector(
-            `[data-field="${field}"]`
-        );
-
-
-    if (!input) {
-
-        return 0;
-
-    }
-
-
-    const value =
-        Number(input.value);
-
-
-    if (
-        !Number.isFinite(value) ||
-        value < 0
-    ) {
-
-        return 0;
-
-    }
-
-
-    return Math.floor(value);
-
-}
-
-
-/* =========================================================
-   QUEUE SAVE
-========================================================= */
-
-function queueSave() {
-
-    savePending = true;
-
-
-    setSaveStatus(
-        "Saving...",
-        "saving"
-    );
-
-
-    clearTimeout(
-        saveTimer
-    );
-
-
-    saveTimer =
-        setTimeout(
-            flushSave,
-            AUTO_SAVE_DELAY
-        );
-
-}
-
-
-/* =========================================================
-   SAVE STATUS
-========================================================= */
-
-function setSaveStatus(
-    text,
-    state = "saved"
-) {
-
-    $("saveStatusText").textContent =
-        text;
-
-
-    const dot =
-        $("saveDot");
-
-
-    dot.className =
-        "save-dot";
-
-
-    if (state === "saving") {
-
-        dot.classList.add(
-            "saving"
-        );
-
-    }
-
-
-    if (state === "error") {
-
-        dot.classList.add(
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   FLUSH SAVE
-========================================================= */
-
-async function flushSave() {
-
-    clearTimeout(
-        saveTimer
-    );
-
-    saveTimer = null;
-
-
-    if (
-        !savePending
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        !me ||
-        !currentAuthUser ||
-        !currentShiftDate
-    ) {
-
-        return;
-
-    }
-
-
-    if (currentDateLocked) {
-
-        savePending = false;
-
-        setSaveStatus(
-            "Date locked — changes not saved",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    if (saveInFlight) {
-
-        return;
-
-    }
-
-
-    saveInFlight = true;
-
-    savePending = false;
-
-
-    setSaveStatus(
-        "Saving...",
-        "saving"
-    );
-
-
-    try {
-
-        const record =
-            buildRecord();
+        let state = "";
 
 
         /*
-           Explicitly guarantee that these
-           NOT NULL numeric columns never receive null.
+           ABOVE TARGET
+        */
+
+        if (achieved > target) {
+
+            state =
+                "above";
+
+
+            card.classList.add(
+                "above"
+            );
+
+
+            icon.textContent =
+                "🎉";
+
+
+            title.textContent =
+                "Outstanding! You're above target";
+
+
+            message.textContent =
+                `${MANAGER_NAME} is watching you 👀 — but you're giving him nothing to complain about!`;
+
+
+            const extra =
+                achieved - target;
+
+
+            footnote.textContent =
+                `You are ${extra} above target. Keep the momentum going!`;
+
+
+            if (
+                lastPerformanceState !== "above"
+            ) {
+
+                launchCelebration();
+
+            }
+
+        }
+
+
+        /*
+           EXACTLY ON TARGET
+        */
+
+        else if (achieved === target) {
+
+            state =
+                "target";
+
+
+            card.classList.add(
+                "target"
+            );
+
+
+            icon.textContent =
+                "🎯";
+
+
+            title.textContent =
+                "Good job! You're exactly on target";
+
+
+            message.textContent =
+                "You've reached today's production target. Great work!";
+
+
+            footnote.textContent =
+                "Target achieved. Keep the consistency going.";
+
+        }
+
+
+        /*
+           BELOW TARGET
+        */
+
+        else {
+
+            state =
+                "below";
+
+
+            card.classList.add(
+                "below"
+            );
+
+
+            icon.textContent =
+                "👀";
+
+
+            title.textContent =
+                `${MANAGER_NAME} is watching you...`;
+
+
+            message.textContent =
+                `You're ${remaining} away from target. Keep going — you've got this!`;
+
+
+            footnote.textContent =
+                `${roundedPercentage}% of today's target completed.`;
+
+        }
+
+
+        lastPerformanceState =
+            state;
+
+    }
+
+
+    /* =========================================================
+       CELEBRATION
+    ========================================================= */
+
+    function launchCelebration() {
+
+        const layer =
+            $("celebrationLayer");
+
+
+        layer.innerHTML = "";
+
+
+        clearTimeout(
+            celebrationTimer
+        );
+
+
+        const symbols = [
+
+            "🎉",
+            "✨",
+            "⭐",
+            "🎊"
+
+        ];
+
+
+        for (
+            let i = 0;
+            i < 30;
+            i++
+        ) {
+
+            const piece =
+                document.createElement("div");
+
+
+            piece.className =
+                "confetti";
+
+
+            piece.textContent =
+                symbols[
+                    Math.floor(
+                        Math.random() *
+                        symbols.length
+                    )
+                ];
+
+
+            piece.style.left =
+                (
+                    Math.random() * 100
+                ) + "%";
+
+
+            piece.style.fontSize =
+                (
+                    10 +
+                    Math.random() * 13
+                ) + "px";
+
+
+            piece.style.animationDelay =
+                (
+                    Math.random() * 0.8
+                ) + "s";
+
+
+            piece.style.animationDuration =
+                (
+                    1.8 +
+                    Math.random() * 1.2
+                ) + "s";
+
+
+            layer.appendChild(
+                    piece
+            );
+
+        }
+
+
+        celebrationTimer =
+            setTimeout(
+                () => {
+
+                    layer.innerHTML = "";
+
+                },
+                3500
+            );
+
+    }
+
+
+    /* =========================================================
+       BUILD DATABASE RECORD
+       IMPORTANT:
+       remaining is NEVER NULL.
+    ========================================================= */
+
+    function buildRecord() {
+
+        const attendance =
+            getAttendance();
+
+
+        const target =
+            getDailyTarget();
+
+
+        const achieved =
+            getEnteredTotal();
+
+
+        let dailyTarget = 0;
+
+        let remaining = 0;
+
+        let achievementPercentage = 0;
+
+
+        /*
+           If the process has no target,
+           all numeric target fields remain 0.
         */
 
         if (
-            record.daily_target === null ||
-            !Number.isFinite(
-                Number(record.daily_target)
-            )
+            target !== null &&
+            Number.isFinite(
+                Number(target)
+            ) &&
+            Number(target) > 0
         ) {
 
-            record.daily_target = 0;
+            dailyTarget =
+                Number(target);
+
+
+            remaining =
+                Math.max(
+                    dailyTarget - achieved,
+                    0
+                );
+
+
+            achievementPercentage =
+                (
+                    achieved /
+                    dailyTarget
+                ) * 100;
 
         }
 
 
-        if (
-            record.remaining === null ||
-            !Number.isFinite(
-                Number(record.remaining)
-            )
-        ) {
+        const record = {
 
-            record.remaining = 0;
+            employee_id:
+                me.id,
 
-        }
+            tracker_date:
+                currentShiftDate,
 
+            daily_target:
+                Number(dailyTarget),
 
-        if (
-            record.achievement_percentage === null ||
-            !Number.isFinite(
+            attendance:
+                attendance,
+
+            hour_6_7:
+                getInputNumber("hour_6_7"),
+
+            hour_7_8:
+                getInputNumber("hour_7_8"),
+
+            hour_8_9:
+                getInputNumber("hour_8_9"),
+
+            hour_9_10:
+                getInputNumber("hour_9_10"),
+
+            hour_10_11:
+                getInputNumber("hour_10_11"),
+
+            hour_11_12:
+                getInputNumber("hour_11_12"),
+
+            hour_12_1:
+                getInputNumber("hour_12_1"),
+
+            hour_1_2:
+                getInputNumber("hour_1_2"),
+
+            hour_2_3:
+                getInputNumber("hour_2_3"),
+
+            break_minutes:
                 Number(
-                    record.achievement_percentage
+                    currentRecord?.break_minutes || 0
+                ),
+
+            remaining:
+                Number(remaining),
+
+            achievement_percentage:
+                Number(
+                    achievementPercentage
                 )
-            )
-        ) {
 
-            record.achievement_percentage = 0;
-
-        }
+        };
 
 
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .from("daily_productivity")
-                .upsert(
-                    record,
-                    {
-                        onConflict:
-                            "employee_id,tracker_date"
-                    }
-                )
-                .select()
-                .single();
-
-
-        if (error) {
-
-            throw error;
-
-        }
-
-
-        currentRecord =
-            data || record;
-
-
-        setSaveStatus(
-            "All changes saved",
-            "saved"
-        );
+        return record;
 
     }
-    catch (error) {
 
-        console.error(
-            "SAVE ERROR:",
-            error
-        );
 
+    /* =========================================================
+       INPUT NUMBER
+    ========================================================= */
+
+    function getInputNumber(field) {
+
+        const input =
+            document.querySelector(
+                `[data-field="${field}"]`
+            );
+
+
+        if (!input) {
+
+            return 0;
+
+        }
+
+
+        const value =
+            Number(input.value);
+
+
+        if (
+            !Number.isFinite(value) ||
+            value < 0
+        ) {
+
+            return 0;
+
+        }
+
+
+        return Math.floor(value);
+
+    }
+
+
+    /* =========================================================
+       QUEUE SAVE
+    ========================================================= */
+
+    function queueSave() {
 
         savePending = true;
 
 
         setSaveStatus(
-            "Not saved — " +
-            friendlySupabaseError(error),
-            "error"
+            "Saving...",
+            "saving"
         );
 
-    }
-    finally {
 
-        saveInFlight = false;
+        clearTimeout(
+            saveTimer
+        );
 
 
-        /*
-           If another edit happened while
-           the save was running, save again.
-        */
-
-        if (savePending) {
-
-            clearTimeout(
-                saveTimer
+        saveTimer =
+            setTimeout(
+                flushSave,
+                AUTO_SAVE_DELAY
             );
 
-
-            saveTimer =
-                setTimeout(
-                    flushSave,
-                    AUTO_SAVE_DELAY
-                );
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   VISIBILITY CHANGE
-========================================================= */
-
-document.addEventListener(
-    "visibilitychange",
-    async () => {
-
-        if (
-            document.visibilityState ===
-            "hidden"
-        ) {
-
-            if (savePending) {
-
-                await flushSave();
-
-            }
-
-        }
-        else {
-
-            await checkShiftDateChange();
-
-            await loadDateLock();
-
-            applyLocks();
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   SHIFT DATE CHANGE
-========================================================= */
-
-async function checkShiftDateChange() {
-
-    if (!me) {
-
-        return;
-
     }
 
 
-    const newShiftDate =
-        getShiftDate();
+    /* =========================================================
+       SAVE STATUS
+    ========================================================= */
 
-
-    if (
-        currentShiftDate &&
-        newShiftDate !==
-        currentShiftDate
+    function setSaveStatus(
+        text,
+        state = "saved"
     ) {
 
-        location.reload();
+        $("saveStatusText").textContent =
+            text;
+
+
+        const dot =
+            $("saveDot");
+
+
+        dot.className =
+            "save-dot";
+
+
+        if (state === "saving") {
+
+            dot.classList.add(
+                "saving"
+            );
+
+        }
+
+
+        if (state === "error") {
+
+            dot.classList.add(
+                "error"
+            );
+
+        }
 
     }
 
-}
 
+    /* =========================================================
+       FLUSH SAVE
+    ========================================================= */
 
-/* =========================================================
-   LOCK TICKER
-========================================================= */
+    async function flushSave() {
 
-function startLockTicker() {
-
-    if (lockTickerStarted) {
-
-        return;
-
-    }
-
-
-    lockTickerStarted = true;
-
-
-    setInterval(
-        async () => {
-
-            if (
-                !me ||
-                !currentShiftDate
-            ) {
-
-                return;
-
-            }
-
-
-            await checkShiftDateChange();
-
-
-            const oldLocked =
-                currentDateLocked;
-
-
-            await loadDateLock();
-
-
-            applyLocks();
-
-
-            /*
-               If the lock state changed,
-               refresh status.
-            */
-
-            if (
-                oldLocked !==
-                currentDateLocked
-            ) {
-
-                if (
-                    currentDateLocked
-                ) {
-
-                    setSaveStatus(
-                        "Date locked",
-                        "error"
-                    );
-
-                }
-
-            }
-
-        },
-        30000
-    );
-
-}
-
-
-/* =========================================================
-   ENTER KEY LOGIN
-========================================================= */
-
-$("loginPassword")
-    .addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                loginEmployee();
-
-            }
-
-        }
-    );
-
-
-$("loginEmail")
-    .addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                $("loginPassword").focus();
-
-            }
-
-        }
-    );
-
-
-/* =========================================================
-   ENTER KEY - FIRST PASSWORD
-========================================================= */
-
-$("confirmNewPassword")
-    .addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                setFirstPassword();
-
-            }
-
-        }
-    );
-
-
-/* =========================================================
-   ENTER KEY - PASSWORD RECOVERY
-========================================================= */
-
-$("resetConfirmPassword")
-    .addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                resetPassword();
-
-            }
-
-        }
-    );
-
-
-/* =========================================================
-   AUTH STATE LISTENER
-========================================================= */
-
-supabaseClient.auth.onAuthStateChange(
-    async (
-        event,
-        session
-    ) => {
-
-        console.log(
-            "AUTH EVENT:",
-            event
+        clearTimeout(
+            saveTimer
         );
+
+        saveTimer = null;
 
 
         if (
-            event === "PASSWORD_RECOVERY"
+            !savePending
         ) {
-
-            passwordRecoveryMode =
-                true;
-
-
-            if (
-                session &&
-                session.user
-            ) {
-
-                currentAuthUser =
-                    session.user;
-
-            }
-
-
-            showPasswordResetScreen();
 
             return;
 
@@ -6289,69 +5947,677 @@ supabaseClient.auth.onAuthStateChange(
 
 
         if (
-            event === "SIGNED_IN"
+            !me ||
+            !currentAuthUser ||
+            !currentShiftDate
         ) {
 
+            return;
+
+        }
+
+
+        if (currentDateLocked) {
+
+            savePending = false;
+
+            setSaveStatus(
+                "Date locked — changes not saved",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (saveInFlight) {
+
+            return;
+
+        }
+
+
+        saveInFlight = true;
+
+        savePending = false;
+
+
+        setSaveStatus(
+            "Saving...",
+            "saving"
+        );
+
+
+        try {
+
+            const record =
+                buildRecord();
+
+
+            /*
+               Explicitly guarantee that these
+               NOT NULL numeric columns never receive null.
+            */
+
             if (
-                session &&
-                session.user
+                record.daily_target === null ||
+                !Number.isFinite(
+                    Number(record.daily_target)
+                )
             ) {
 
-                currentAuthUser =
-                    session.user;
+                record.daily_target = 0;
+
+            }
+
+
+            if (
+                record.remaining === null ||
+                !Number.isFinite(
+                    Number(record.remaining)
+                )
+            ) {
+
+                record.remaining = 0;
+
+            }
+
+
+            if (
+                record.achievement_percentage === null ||
+                !Number.isFinite(
+                    Number(
+                        record.achievement_percentage
+                    )
+                )
+            ) {
+
+                record.achievement_percentage = 0;
+
+            }
+
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .from("daily_productivity")
+                    .upsert(
+                        record,
+                        {
+                            onConflict:
+                                "employee_id,tracker_date"
+                        }
+                    )
+                    .select()
+                    .single();
+
+
+            if (error) {
+
+                throw error;
+
+            }
+
+
+            currentRecord =
+                data || record;
+
+
+            setSaveStatus(
+                "All changes saved",
+                "saved"
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "SAVE ERROR:",
+                error
+            );
+
+
+            savePending = true;
+
+
+            setSaveStatus(
+                "Not saved — " +
+                friendlySupabaseError(error),
+                "error"
+            );
+
+        }
+        finally {
+
+            saveInFlight = false;
+
+
+            /*
+               If another edit happened while
+               the save was running, save again.
+            */
+
+            if (savePending) {
+
+                clearTimeout(
+                    saveTimer
+                );
+
+
+                saveTimer =
+                    setTimeout(
+                        flushSave,
+                        AUTO_SAVE_DELAY
+                    );
 
             }
 
         }
 
+    }
+
+
+    /* =========================================================
+       VISIBILITY CHANGE
+    ========================================================= */
+
+    document.addEventListener(
+        "visibilitychange",
+        async () => {
+
+            if (
+                document.visibilityState ===
+                "hidden"
+            ) {
+
+                if (savePending) {
+
+                    await flushSave();
+
+                }
+
+            }
+            else {
+
+                await checkShiftDateChange();
+
+                await loadDateLock();
+
+                applyLocks();
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       SHIFT DATE CHANGE
+    ========================================================= */
+
+    async function checkShiftDateChange() {
+
+        if (!me) {
+
+            return;
+
+        }
+
+
+        const newShiftDate =
+            getShiftDate();
+
 
         if (
-            event === "SIGNED_OUT"
+            currentShiftDate &&
+            newShiftDate !==
+            currentShiftDate
         ) {
 
-            currentAuthUser = null;
-
-            me = null;
-
-            currentRecord = null;
-
-            currentProject = null;
-
-            currentSubProject = null;
-
-            currentShiftDate = null;
-
-            currentDateLocked = false;
-
-            passwordChangeRequired =
-                false;
-
-            passwordRecoveryMode =
-                false;
-
-
-            hide("appScreen");
-
-            hide("setPasswordScreen");
-
-            hide("passwordResetScreen");
-
-            show("loginScreen");
+            location.reload();
 
         }
 
     }
-);
 
 
-/* =========================================================
-   START
-========================================================= */
+    /* =========================================================
+       LOCK TICKER (UPDATED WITH REMINDERS)
+    ========================================================= */
 
-checkExistingSession();
+    function startLockTicker() {
+
+        if (lockTickerStarted) {
+
+            return;
+
+        }
 
 
-</script>
+        lockTickerStarted = true;
+
+
+        setInterval(
+            async () => {
+
+                if (
+                    !me ||
+                    !currentShiftDate
+                ) {
+
+                    return;
+
+                }
+
+
+                await checkShiftDateChange();
+
+
+                const oldLocked =
+                    currentDateLocked;
+
+
+                await loadDateLock();
+
+
+                applyLocks();
+
+                checkHourlyReminder();
+
+
+                if (
+                    oldLocked !==
+                    currentDateLocked
+                ) {
+
+                    if (
+                        currentDateLocked
+                    ) {
+
+                        setSaveStatus(
+                            "Date locked",
+                            "error"
+                        );
+
+                    }
+
+                }
+
+            },
+            1000
+        );
+
+    }
+
+
+    /* =========================================================
+       HOURLY DEADLINE BANNER & BROWSER REMINDERS
+    ========================================================= */
+
+    async function enableBrowserReminders() {
+        if (!("Notification" in window)) {
+            alert(
+                "This browser does not support desktop notifications."
+            );
+            return;
+        }
+
+        const permission =
+            await Notification.requestPermission();
+
+        if (permission === "granted") {
+            $("browserNotificationButton").textContent =
+                "Browser reminders enabled";
+
+            $("browserNotificationButton").disabled =
+                true;
+
+            showBrowserNotification(
+                "Hourly production reminders enabled",
+                "You will be reminded before hourly updates close."
+            );
+        }
+        else {
+            $("browserNotificationButton").textContent =
+                "Browser permission blocked";
+        }
+    }
+
+
+    function showBrowserNotification(title, body) {
+        if (
+            !("Notification" in window) ||
+            Notification.permission !== "granted"
+        ) {
+            return;
+        }
+
+        new Notification(title, {
+            body,
+            icon: "./favicon.ico"
+        });
+    }
+
+
+    function updateHourlyDeadlineBanner() {
+        const banner = $("hourlyDeadlineBanner");
+        const title = $("hourlyDeadlineTitle");
+        const text = $("hourlyDeadlineText");
+
+        if (!banner || !title || !text) {
+            return;
+        }
+
+        const now = new Date();
+        let activeIndex = -1;
+        let message = "";
+        let warning = false;
+
+        for (
+            let index = 0;
+            index < HOUR_FIELDS.length;
+            index++
+        ) {
+            const start = getShiftHourStart(index, now);
+            const deadline = getShiftHourEnd(index, now);
+            const graceEnd = new Date(deadline);
+
+            graceEnd.setMinutes(
+                graceEnd.getMinutes() + HOURLY_GRACE_MINUTES
+            );
+
+            if (
+                now >= start &&
+                now < deadline
+            ) {
+                activeIndex = index;
+
+                message =
+                    `${HOUR_LABELS[index]} closes in ` +
+                    `${formatRemainingTime(deadline - now)}.`;
+
+                break;
+            }
+
+            if (
+                now >= deadline &&
+                now < graceEnd
+            ) {
+                activeIndex = index;
+                warning = true;
+
+                message =
+                    `${HOUR_LABELS[index]} is in the 10-minute grace period. ` +
+                    `It closes in ` +
+                    `${formatRemainingTime(graceEnd - now)}.`;
+
+                break;
+            }
+        }
+
+        if (activeIndex === -1) {
+            banner.classList.add("hidden");
+            return;
+        }
+
+        banner.classList.remove("hidden");
+        banner.classList.toggle("warning", warning);
+
+        title.textContent = warning
+            ? "Grace period active"
+            : "Hourly update reminder";
+
+        text.textContent = message;
+
+        const button = $("browserNotificationButton");
+
+        if (
+            "Notification" in window &&
+            Notification.permission === "granted"
+        ) {
+            button.textContent =
+                "Browser reminders enabled";
+
+            button.disabled = true;
+        }
+    }
+
+
+    function checkHourlyReminder() {
+        if (
+            !me ||
+            !currentAuthUser ||
+            !currentShiftDate ||
+            currentDateLocked
+        ) {
+            return;
+        }
+
+        const now = new Date();
+
+        HOUR_FIELDS.forEach((field, index) => {
+            const deadline = getShiftHourEnd(index, now);
+            const reminderTime = new Date(deadline);
+
+            reminderTime.setMinutes(
+                reminderTime.getMinutes() -
+                REMINDER_MINUTES_BEFORE_DEADLINE
+            );
+
+            const reminderKey =
+                `${currentShiftDate}-${index}-${reminderTime.toISOString()}`;
+
+            if (
+                now >= reminderTime &&
+                now < deadline &&
+                lastReminderKey !== reminderKey
+            ) {
+                lastReminderKey = reminderKey;
+
+                const message =
+                    `${HOUR_LABELS[index]} closes in ` +
+                    `${REMINDER_MINUTES_BEFORE_DEADLINE} minutes.`;
+
+                showBrowserNotification(
+                    "Hourly production update reminder",
+                    message
+                );
+            }
+        });
+
+        updateHourlyDeadlineBanner();
+    }
+
+
+    /* =========================================================
+       ENTER KEY LOGIN
+    ========================================================= */
+
+    $("loginPassword")
+        .addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    loginEmployee();
+
+                }
+
+            }
+        );
+
+
+    $("loginEmail")
+        .addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    $("loginPassword").focus();
+
+                }
+
+            }
+        );
+
+
+    /* =========================================================
+       ENTER KEY - FIRST PASSWORD
+    ========================================================= */
+
+    $("confirmNewPassword")
+        .addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    setFirstPassword();
+
+                }
+
+            }
+        );
+
+
+    /* =========================================================
+       ENTER KEY - PASSWORD RECOVERY
+    ========================================================= */
+
+    $("resetConfirmPassword")
+        .addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    resetPassword();
+
+                }
+
+            }
+        );
+
+
+    /* =========================================================
+       AUTH STATE LISTENER
+    ========================================================= */
+
+    supabaseClient.auth.onAuthStateChange(
+        async (
+            event,
+            session
+        ) => {
+
+            console.log(
+                "AUTH EVENT:",
+                event
+            );
+
+
+            if (
+                event === "PASSWORD_RECOVERY"
+            ) {
+
+                passwordRecoveryMode =
+                    true;
+
+
+                if (
+                    session &&
+                    session.user
+                ) {
+
+                    currentAuthUser =
+                        session.user;
+
+                }
+
+
+                showPasswordResetScreen();
+
+                return;
+
+            }
+
+
+            if (
+                event === "SIGNED_IN"
+            ) {
+
+                if (
+                    session &&
+                    session.user
+                ) {
+
+                    currentAuthUser =
+                        session.user;
+
+                }
+
+            }
+
+
+            if (
+                event === "SIGNED_OUT"
+            ) {
+
+                currentAuthUser = null;
+
+                me = null;
+
+                currentRecord = null;
+
+                currentProject = null;
+
+                currentSubProject = null;
+
+                currentShiftDate = null;
+
+                currentDateLocked = false;
+
+                passwordChangeRequired =
+                    false;
+
+                passwordRecoveryMode =
+                    false;
+
+
+                hide("appScreen");
+
+                hide("setPasswordScreen");
+
+                hide("passwordResetScreen");
+
+                show("loginScreen");
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       START
+    ========================================================= */
+
+    checkExistingSession();
+
+
+    </script>
 
 </body>
 
