@@ -47,6 +47,13 @@
     --shadow-sm: 0 1px 2px rgba(15,42,74,.04);
     --shadow: 0 4px 16px rgba(15,42,74,.06);
     --shadow-lg: 0 12px 40px rgba(15,42,74,.10);
+
+    /* Layered card shadow for professional depth */
+    --shadow-card:
+        0 1px 2px rgba(15,42,74,.04),
+        0 8px 24px -8px rgba(15,42,74,.06),
+        inset 0 1px 0 rgba(255,255,255,.9);
+
     --radius: 14px;
     --radius-sm: 10px;
 
@@ -63,12 +70,73 @@ html{
     -moz-osx-font-smoothing:grayscale;
 }
 
+/* =========================================================
+   BODY — PROFESSIONAL TEXTURED WHITE BACKGROUND
+
+   Layers (bottom → top):
+     1. Base soft cream-white gradient
+     2. Faint engineering grid
+     3. Two soft radial glows (gold top-left, navy bottom-right)
+     4. Micro-noise speckle
+========================================================= */
+
 body{
     font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-    background:#ffffff;
     color:var(--ink-2);
     font-size:14px;
     line-height:1.5;
+
+    background-color:#fdfdfb;
+
+    background-image:
+
+        /* 1. Micro-noise speckle */
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+
+        /* 2. Faint grid */
+        linear-gradient(rgba(15,42,74,.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15,42,74,.022) 1px, transparent 1px),
+
+        /* 3. Radial glows */
+        radial-gradient(ellipse 900px 600px at 0% 0%, rgba(201,162,39,.045) 0%, transparent 60%),
+        radial-gradient(ellipse 800px 600px at 100% 100%, rgba(15,42,74,.035) 0%, transparent 65%),
+
+        /* 4. Base vertical gradient */
+        linear-gradient(180deg, #fefefc 0%, #fbfbf8 45%, #f9f9f6 100%);
+
+    background-size:
+        200px 200px,
+        48px 48px,
+        48px 48px,
+        100% 100%,
+        100% 100%,
+        100% 100%;
+
+    background-repeat:
+        repeat,
+        repeat,
+        repeat,
+        no-repeat,
+        no-repeat,
+        no-repeat;
+
+    background-attachment:
+        fixed,
+        fixed,
+        fixed,
+        fixed,
+        fixed,
+        fixed;
+
+    background-blend-mode:
+        multiply,
+        normal,
+        normal,
+        normal,
+        normal,
+        normal;
+
+    min-height:100vh;
 }
 
 /* =========================================================
@@ -77,7 +145,7 @@ body{
 
 .header{
 
-    background:#ffffff;
+    background:rgba(255,255,255,.78);
 
     border-bottom:1px solid var(--line);
 
@@ -99,9 +167,12 @@ body{
 
     z-index:100;
 
-    backdrop-filter:saturate(180%) blur(12px);
+    backdrop-filter:saturate(180%) blur(16px);
+    -webkit-backdrop-filter:saturate(180%) blur(16px);
 
-    background:rgba(255,255,255,.92);
+    box-shadow:
+        0 1px 0 rgba(201,162,39,.12),
+        0 4px 20px rgba(10,22,40,.03);
 
 }
 
@@ -878,7 +949,7 @@ body{
 
 .kpi-card{
 
-    background:#ffffff;
+    background:linear-gradient(180deg,#ffffff 0%,#fefefc 100%);
 
     border:1px solid var(--line);
 
@@ -892,7 +963,7 @@ body{
 
     transition:all .2s ease;
 
-    box-shadow:var(--shadow-sm);
+    box-shadow:var(--shadow-card);
 
 }
 
@@ -925,7 +996,10 @@ body{
 
     transform:translateY(-2px);
 
-    box-shadow:var(--shadow-lg);
+    box-shadow:
+        0 1px 2px rgba(15,42,74,.04),
+        0 16px 40px -8px rgba(15,42,74,.12),
+        inset 0 1px 0 rgba(255,255,255,.9);
 
     border-color:#cbd5e1;
 
@@ -1119,7 +1193,7 @@ body{
 
     overflow:hidden;
 
-    box-shadow:var(--shadow-sm);
+    box-shadow:var(--shadow-card);
 
 }
 
@@ -1193,7 +1267,7 @@ tbody tr{
 
 tbody tr:hover{
 
-    background:var(--bg-softer);
+    background:linear-gradient(90deg, #fdfcf7 0%, #fbfaf5 100%);
 
 }
 
@@ -1525,7 +1599,7 @@ tbody tr:hover{
 
     padding:24px;
 
-    box-shadow:var(--shadow-sm);
+    box-shadow:var(--shadow-card);
 
 }
 
@@ -1601,7 +1675,7 @@ tbody tr:hover{
 
     overflow:hidden;
 
-    box-shadow:var(--shadow-sm);
+    box-shadow:var(--shadow-card);
 
     transition:all .2s ease;
 
@@ -1633,7 +1707,10 @@ tbody tr:hover{
 
     transform:translateY(-2px);
 
-    box-shadow:var(--shadow-lg);
+    box-shadow:
+        0 1px 2px rgba(15,42,74,.04),
+        0 16px 40px -8px rgba(15,42,74,.12),
+        inset 0 1px 0 rgba(255,255,255,.9);
 
 }
 
@@ -1765,7 +1842,7 @@ tbody tr:hover{
 
     padding:24px;
 
-    background:#ffffff;
+    background:transparent;
 
     position:relative;
 
@@ -1773,7 +1850,36 @@ tbody tr:hover{
 
 }
 
+/* Gold letterhead band across the top */
 .login-page::before{
+
+    content:'';
+
+    position:absolute;
+
+    top:0;
+
+    left:0;
+
+    right:0;
+
+    height:4px;
+
+    background:linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(201,162,39,.5) 20%,
+        rgba(201,162,39,.85) 50%,
+        rgba(201,162,39,.5) 80%,
+        transparent 100%
+    );
+
+    z-index:3;
+
+}
+
+/* Soft navy radial glow top-left */
+.login-page::after{
 
     content:'';
 
@@ -1785,31 +1891,13 @@ tbody tr:hover{
 
     border-radius:50%;
 
-    background:radial-gradient(circle,rgba(15,42,74,.04),transparent 70%);
+    background:radial-gradient(circle,rgba(15,42,74,.05),transparent 70%);
 
     top:-200px;
 
     left:-200px;
 
-}
-
-.login-page::after{
-
-    content:'';
-
-    position:absolute;
-
-    width:500px;
-
-    height:500px;
-
-    border-radius:50%;
-
-    background:radial-gradient(circle,rgba(201,162,39,.05),transparent 70%);
-
-    bottom:-150px;
-
-    right:-150px;
+    pointer-events:none;
 
 }
 
@@ -1819,7 +1907,7 @@ tbody tr:hover{
 
     max-width:440px;
 
-    background:#ffffff;
+    background:linear-gradient(180deg,#ffffff 0%,#fefefc 100%);
 
     border:1px solid var(--line);
 
@@ -1827,7 +1915,10 @@ tbody tr:hover{
 
     padding:44px 40px;
 
-    box-shadow:0 24px 60px rgba(15,42,74,.08);
+    box-shadow:
+        0 24px 60px rgba(15,42,74,.08),
+        0 8px 24px -8px rgba(15,42,74,.06),
+        inset 0 1px 0 rgba(255,255,255,.9);
 
     position:relative;
 
@@ -2095,9 +2186,10 @@ tbody tr:hover{
 
     inset:0;
 
-    background:rgba(10,22,40,.5);
+    background:rgba(10,22,40,.42);
 
-    backdrop-filter:blur(4px);
+    backdrop-filter:blur(8px) saturate(120%);
+    -webkit-backdrop-filter:blur(8px) saturate(120%);
 
     display:flex;
 
@@ -2122,11 +2214,13 @@ tbody tr:hover{
 
 .modal-card{
 
-    background:#ffffff;
+    background:linear-gradient(180deg,#ffffff 0%,#fefefc 100%);
 
     border-radius:16px;
 
-    box-shadow:0 24px 80px rgba(10,22,40,.3);
+    box-shadow:
+        0 24px 80px rgba(10,22,40,.3),
+        inset 0 1px 0 rgba(255,255,255,.9);
 
     width:100%;
 
@@ -3879,9 +3973,6 @@ function getSubProjectById(subProjectId){
         ANY target-based sub-project, no target.
         Otherwise fall back to project.daily_target.
      3. Otherwise: no target.
-
-   This is what fixes WRMC showing 750 target when only 2 of
-   its 7 employees are actually on target-based work.
 ========================================================= */
 
 function resolveEmployeeTarget(employee, project){
