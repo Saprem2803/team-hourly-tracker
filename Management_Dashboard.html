@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
 <title>AMI | RCM Management Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
 <style>
@@ -18,36 +23,39 @@
 body{
     margin:0;
     font-family:Arial,Helvetica,sans-serif;
-    background:#f4f7fb;
-    color:#172033;
+    background:#f4f6f9;
+    color:#1f2937;
 }
 
-header{
-    background:linear-gradient(135deg,#071b3a,#123b73);
+.header{
+    background:linear-gradient(135deg,#071d3a,#123d6b);
     color:white;
-    padding:18px 24px;
+    padding:20px 28px;
     display:flex;
     justify-content:space-between;
     align-items:center;
     gap:20px;
     flex-wrap:wrap;
+    box-shadow:0 3px 12px rgba(0,0,0,.15);
 }
 
-.header-title{
-    font-size:24px;
-    font-weight:700;
+.header-left h1{
+    margin:0;
+    font-size:25px;
+    letter-spacing:.3px;
 }
 
-.header-subtitle{
-    font-size:13px;
+.header-left p{
+    margin:5px 0 0;
     opacity:.85;
-    margin-top:4px;
+    font-size:13px;
 }
 
 .header-right{
     display:flex;
     align-items:center;
     gap:10px;
+    flex-wrap:wrap;
 }
 
 button,
@@ -56,109 +64,113 @@ input{
     font-family:inherit;
 }
 
-button{
+.btn{
     border:none;
     border-radius:7px;
-    padding:9px 14px;
+    padding:10px 15px;
     cursor:pointer;
     font-weight:600;
 }
 
 .btn-primary{
-    background:#0d6efd;
-    color:#fff;
+    background:#d6a72c;
+    color:#111827;
 }
 
-.btn-success{
-    background:#198754;
-    color:#fff;
-}
-
-.btn-danger{
-    background:#dc3545;
-    color:#fff;
+.btn-primary:hover{
+    background:#bd9120;
 }
 
 .btn-secondary{
-    background:#6c757d;
-    color:#fff;
+    background:#ffffff;
+    color:#123d6b;
 }
 
-.btn-light{
-    background:#fff;
-    color:#17345f;
+.btn-secondary:hover{
+    background:#eef2f7;
 }
 
 .container{
-    padding:20px;
+    padding:22px;
     max-width:1700px;
     margin:auto;
 }
 
 .toolbar{
     background:#fff;
+    border-radius:10px;
     padding:15px;
-    border-radius:12px;
-    box-shadow:0 2px 10px rgba(0,0,0,.06);
+    margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.07);
     display:flex;
-    flex-wrap:wrap;
-    gap:12px;
     align-items:end;
-    margin-bottom:18px;
+    gap:14px;
+    flex-wrap:wrap;
 }
 
-.control{
+.filter-group{
     display:flex;
     flex-direction:column;
     gap:5px;
-    min-width:160px;
 }
 
-.control label{
+.filter-group label{
     font-size:12px;
     font-weight:700;
-    color:#596579;
+    color:#4b5563;
 }
 
-.control select,
-.control input{
-    padding:9px 10px;
-    border:1px solid #d5dce7;
-    border-radius:7px;
-    background:#fff;
+.filter-group select,
+.filter-group input{
+    min-width:170px;
+    padding:9px 11px;
+    border:1px solid #d1d5db;
+    border-radius:6px;
+    background:white;
 }
 
 .status{
     margin-left:auto;
     font-size:13px;
     font-weight:600;
+    color:#475569;
 }
 
-.status.ok{
-    color:#198754;
+.lock-status{
+    padding:8px 11px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:700;
 }
 
-.status.error{
-    color:#dc3545;
+.locked{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.unlocked{
+    background:#dcfce7;
+    color:#166534;
 }
 
 .kpi-grid{
     display:grid;
     grid-template-columns:repeat(6,1fr);
-    gap:14px;
-    margin-bottom:18px;
+    gap:15px;
+    margin-bottom:20px;
 }
 
 .kpi{
     background:#fff;
-    border-radius:12px;
-    padding:16px;
-    box-shadow:0 2px 10px rgba(0,0,0,.06);
+    border-radius:10px;
+    padding:17px;
+    box-shadow:0 2px 8px rgba(0,0,0,.07);
+    border-left:5px solid #123d6b;
 }
 
 .kpi-title{
     font-size:12px;
-    color:#697386;
+    color:#64748b;
     font-weight:700;
     text-transform:uppercase;
 }
@@ -167,114 +179,135 @@ button{
     font-size:27px;
     font-weight:800;
     margin-top:7px;
-    color:#123b73;
+    color:#123d6b;
 }
 
-.kpi-note{
-    font-size:11px;
-    color:#7b8494;
+.kpi-sub{
     margin-top:4px;
+    font-size:11px;
+    color:#64748b;
 }
 
 .section{
     background:#fff;
-    border-radius:12px;
-    box-shadow:0 2px 10px rgba(0,0,0,.06);
-    margin-bottom:18px;
-    overflow:hidden;
+    border-radius:10px;
+    padding:18px;
+    margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.07);
 }
 
 .section-header{
-    padding:14px 16px;
-    background:#f8fafc;
-    border-bottom:1px solid #e5e9ef;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    gap:10px;
+    gap:15px;
+    margin-bottom:15px;
     flex-wrap:wrap;
 }
 
 .section-title{
-    font-size:17px;
-    font-weight:800;
-    color:#18345d;
+    margin:0;
+    font-size:18px;
+    color:#123d6b;
 }
 
-.section-body{
-    padding:15px;
+.section-subtitle{
+    font-size:12px;
+    color:#64748b;
 }
 
 .table-wrap{
-    overflow:auto;
+    width:100%;
+    overflow-x:auto;
 }
 
 table{
     width:100%;
     border-collapse:collapse;
-    min-width:850px;
+    min-width:900px;
+}
+
+thead{
+    background:#0d3158;
+    color:white;
 }
 
 th{
-    background:#edf2f8;
-    color:#344054;
-    font-size:12px;
+    padding:11px 10px;
     text-align:left;
-    padding:10px;
+    font-size:12px;
     white-space:nowrap;
 }
 
 td{
-    padding:9px 10px;
-    border-bottom:1px solid #edf0f4;
-    font-size:13px;
+    padding:10px;
+    border-bottom:1px solid #e5e7eb;
+    font-size:12px;
     white-space:nowrap;
 }
 
-tr:hover td{
-    background:#f8fbff;
+tbody tr:hover{
+    background:#f8fafc;
 }
 
-.number{
-    text-align:right;
+.project-row{
+    font-weight:700;
 }
 
-.center{
-    text-align:center;
+.project-name{
+    color:#123d6b;
+}
+
+.team-lead{
+    color:#334155;
+    font-weight:600;
 }
 
 .badge{
     display:inline-block;
     padding:4px 8px;
     border-radius:20px;
-    font-size:11px;
-    font-weight:700;
+    font-size:10px;
+    font-weight:800;
 }
 
-.badge-green{
-    background:#dff5e8;
-    color:#137333;
+.badge-good{
+    background:#dcfce7;
+    color:#166534;
 }
 
-.badge-yellow{
-    background:#fff1c7;
-    color:#8a6100;
+.badge-mid{
+    background:#fef3c7;
+    color:#92400e;
 }
 
-.badge-red{
-    background:#fde2e2;
-    color:#a61b1b;
+.badge-low{
+    background:#fee2e2;
+    color:#991b1b;
 }
 
-.badge-blue{
-    background:#dcecff;
-    color:#1459a6;
+.badge-neutral{
+    background:#e2e8f0;
+    color:#334155;
 }
 
-.chart-grid{
+.charts{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:18px;
+    gap:20px;
+}
+
+.chart-card{
+    background:#fff;
+    border-radius:10px;
+    padding:18px;
+    box-shadow:0 2px 8px rgba(0,0,0,.07);
+}
+
+.chart-card h3{
+    margin:0 0 15px;
+    color:#123d6b;
+    font-size:16px;
 }
 
 .chart-box{
@@ -282,474 +315,526 @@ tr:hover td{
     position:relative;
 }
 
-.progress{
-    width:100%;
-    height:8px;
-    background:#e9edf3;
-    border-radius:10px;
-    overflow:hidden;
-}
-
-.progress-bar{
-    height:100%;
-    background:#0d6efd;
-}
-
 .empty{
-    text-align:center;
     padding:35px;
-    color:#788395;
+    text-align:center;
+    color:#64748b;
 }
 
-.lock-panel{
+.loading{
+    padding:40px;
+    text-align:center;
+    color:#123d6b;
+    font-weight:700;
+}
+
+.error{
+    padding:15px;
+    border-radius:8px;
+    background:#fee2e2;
+    color:#991b1b;
+    margin-bottom:15px;
+    font-size:13px;
+    white-space:pre-wrap;
+}
+
+.login-screen{
+    min-height:100vh;
     display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    align-items:end;
-}
-
-.admin-only{
-    display:none;
-}
-
-.modal{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.45);
-    z-index:1000;
-    padding:30px;
-}
-
-.modal-content{
-    background:#fff;
-    max-width:1300px;
-    margin:auto;
-    border-radius:12px;
-    max-height:90vh;
-    overflow:auto;
-}
-
-.modal-header{
-    padding:15px 18px;
-    background:#123b73;
-    color:#fff;
-    display:flex;
-    justify-content:space-between;
     align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#071d3a,#164b80);
+    padding:20px;
 }
 
-.modal-body{
-    padding:18px;
+.login-card{
+    background:white;
+    width:420px;
+    max-width:100%;
+    border-radius:14px;
+    padding:30px;
+    box-shadow:0 15px 40px rgba(0,0,0,.25);
 }
 
-.close{
-    font-size:25px;
-    cursor:pointer;
+.login-card h1{
+    margin:0 0 5px;
+    color:#123d6b;
+}
+
+.login-card p{
+    color:#64748b;
+    font-size:13px;
+}
+
+.login-card input{
+    width:100%;
+    padding:12px;
+    margin:7px 0 12px;
+    border:1px solid #cbd5e1;
+    border-radius:7px;
+}
+
+.login-card button{
+    width:100%;
+}
+
+.hidden{
+    display:none !important;
 }
 
 .footer{
     text-align:center;
-    color:#7c8798;
+    color:#94a3b8;
     font-size:11px;
-    padding:10px;
-}
-
-.alert{
-    padding:12px 14px;
-    border-radius:8px;
-    margin-bottom:15px;
-    display:none;
-}
-
-.alert-error{
-    background:#fde7e7;
-    color:#9c1c1c;
-}
-
-.alert-success{
-    background:#e3f7eb;
-    color:#146c35;
+    padding:15px;
 }
 
 @media(max-width:1200px){
+
     .kpi-grid{
         grid-template-columns:repeat(3,1fr);
     }
+
 }
 
 @media(max-width:800px){
+
     .kpi-grid{
         grid-template-columns:repeat(2,1fr);
     }
 
-    .chart-grid{
+    .charts{
         grid-template-columns:1fr;
     }
 
-    .container{
-        padding:10px;
-    }
 }
 
 @media(max-width:500px){
+
     .kpi-grid{
         grid-template-columns:1fr;
     }
+
 }
 
 </style>
+
 </head>
 
 <body>
 
-<header>
 
-    <div>
-        <div class="header-title">
-            AMI | RCM Management Dashboard
-        </div>
+<!-- =========================================================
+     LOGIN SCREEN
+========================================================= -->
 
-        <div class="header-subtitle">
-            Team Hourly Production Management Control Center
-        </div>
-    </div>
+<div id="loginScreen" class="login-screen">
 
-    <div class="header-right">
+    <div class="login-card">
 
-        <span id="userEmail">
-            Loading...
-        </span>
+        <h1>AMI Management Dashboard</h1>
 
-        <button
-            class="btn-light"
-            onclick="openOperationalDashboard()">
-            Operational Dashboard
-        </button>
+        <p>
+            Authorized Management access only.
+        </p>
 
-        <button
-            class="btn-light"
-            onclick="logout()">
-            Logout
-        </button>
+        <label>Email</label>
 
-    </div>
+        <input
+            id="loginEmail"
+            type="email"
+            placeholder="Enter your email">
 
-</header>
+        <label>Password</label>
 
-
-<div class="container">
-
-    <div id="errorAlert" class="alert alert-error"></div>
-
-    <div id="successAlert" class="alert alert-success"></div>
-
-
-    <!-- FILTERS -->
-
-    <div class="toolbar">
-
-        <div class="control">
-
-            <label>
-                Tracker Date
-            </label>
-
-            <input
-                type="date"
-                id="trackerDate">
-
-        </div>
-
-
-        <div class="control">
-
-            <label>
-                Project
-            </label>
-
-            <select id="projectFilter">
-                <option value="ALL">
-                    All Projects
-                </option>
-            </select>
-
-        </div>
-
-
-        <div class="control">
-
-            <label>
-                Team Lead
-            </label>
-
-            <select id="teamLeadFilter">
-                <option value="ALL">
-                    All Team Leads
-                </option>
-            </select>
-
-        </div>
-
-
-        <div class="control">
-
-            <label>
-                Employee
-            </label>
-
-            <select id="employeeFilter">
-                <option value="ALL">
-                    All Employees
-                </option>
-            </select>
-
-        </div>
-
+        <input
+            id="loginPassword"
+            type="password"
+            placeholder="Enter your password">
 
         <button
-            class="btn-primary"
-            onclick="loadDashboard()">
-            Refresh
+            class="btn btn-primary"
+            onclick="loginUser()">
+            Login
         </button>
-
-
-        <button
-            class="btn-success"
-            onclick="downloadCSV()">
-            Download CSV
-        </button>
-
 
         <div
-            id="loadStatus"
-            class="status">
-            Ready
+            id="loginError"
+            class="error hidden"
+            style="margin-top:12px;">
         </div>
 
     </div>
 
+</div>
 
-    <!-- KPI -->
 
-    <div class="kpi-grid">
+<!-- =========================================================
+     MAIN DASHBOARD
+========================================================= -->
 
-        <div class="kpi">
+<div id="dashboardScreen" class="hidden">
 
-            <div class="kpi-title">
-                Active Employees
+    <header class="header">
+
+        <div class="header-left">
+
+            <h1>
+                AMI | RCM Management Dashboard
+            </h1>
+
+            <p>
+                Team Hourly Production Management Control Center
+            </p>
+
+        </div>
+
+        <div class="header-right">
+
+            <span id="loggedUserName">
+                Management
+            </span>
+
+            <button
+                class="btn btn-secondary"
+                onclick="openOperationalDashboard()">
+                Operational Dashboard
+            </button>
+
+            <button
+                class="btn btn-primary"
+                onclick="exportCSV()">
+                Export CSV
+            </button>
+
+            <button
+                class="btn btn-secondary"
+                onclick="refreshDashboard()">
+                Refresh
+            </button>
+
+            <button
+                class="btn btn-secondary"
+                onclick="logoutUser()">
+                Logout
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+
+        <!-- =====================================================
+             FILTERS
+        ====================================================== -->
+
+        <div class="toolbar">
+
+            <div class="filter-group">
+
+                <label>Date</label>
+
+                <input
+                    id="trackerDate"
+                    type="date"
+                    onchange="loadDashboard()">
+
             </div>
 
-            <div
-                id="kpiEmployees"
-                class="kpi-value">
-                0
+
+            <div class="filter-group">
+
+                <label>Project</label>
+
+                <select
+                    id="projectFilter"
+                    onchange="applyFilters()">
+
+                    <option value="ALL">
+                        All Projects
+                    </option>
+
+                </select>
+
             </div>
 
-            <div class="kpi-note">
-                Employees in selected scope
+
+            <div class="filter-group">
+
+                <label>Team Lead</label>
+
+                <select
+                    id="teamLeadFilter"
+                    onchange="applyFilters()">
+
+                    <option value="ALL">
+                        All Team Leads
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-group">
+
+                <label>Employee</label>
+
+                <select
+                    id="employeeFilter"
+                    onchange="applyFilters()">
+
+                    <option value="ALL">
+                        All Employees
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div id="lockStatus"
+                 class="lock-status unlocked">
+
+                Checking date lock...
+
+            </div>
+
+
+            <div id="status"
+                 class="status">
+
+                Loading...
+
             </div>
 
         </div>
 
 
-        <div class="kpi">
+        <div id="pageError"
+             class="error hidden">
+        </div>
 
-            <div class="kpi-title">
-                Present FTE
+
+        <!-- =====================================================
+             KPI SECTION
+        ====================================================== -->
+
+        <div class="kpi-grid">
+
+
+            <div class="kpi">
+
+                <div class="kpi-title">
+                    Total Employees
+                </div>
+
+                <div
+                    id="kpiEmployees"
+                    class="kpi-value">
+                    0
+                </div>
+
+                <div class="kpi-sub">
+                    Active employees
+                </div>
+
             </div>
 
-            <div
-                id="kpiPresent"
-                class="kpi-value">
-                0
+
+            <div class="kpi">
+
+                <div class="kpi-title">
+                    Present FTE
+                </div>
+
+                <div
+                    id="kpiPresent"
+                    class="kpi-value">
+                    0
+                </div>
+
+                <div class="kpi-sub">
+                    Present + Half Day weighted
+                </div>
+
             </div>
 
-            <div class="kpi-note">
-                Present = 1 FTE
+
+            <div class="kpi">
+
+                <div class="kpi-title">
+                    Daily Target
+                </div>
+
+                <div
+                    id="kpiTarget"
+                    class="kpi-value">
+                    0
+                </div>
+
+                <div class="kpi-sub">
+                    Adjusted for attendance
+                </div>
+
+            </div>
+
+
+            <div class="kpi">
+
+                <div class="kpi-title">
+                    Actual Production
+                </div>
+
+                <div
+                    id="kpiProduction"
+                    class="kpi-value">
+                    0
+                </div>
+
+                <div class="kpi-sub">
+                    Hourly production
+                </div>
+
+            </div>
+
+
+            <div class="kpi">
+
+                <div class="kpi-title">
+                    Achievement
+                </div>
+
+                <div
+                    id="kpiAchievement"
+                    class="kpi-value">
+                    0%
+                </div>
+
+                <div class="kpi-sub">
+                    Actual ÷ adjusted target
+                </div>
+
+            </div>
+
+
+            <div class="kpi">
+
+                <div class="kpi-title">
+                    Average / FTE
+                </div>
+
+                <div
+                    id="kpiAverage"
+                    class="kpi-value">
+                    0
+                </div>
+
+                <div class="kpi-sub">
+                    Production per weighted FTE
+                </div>
+
             </div>
 
         </div>
 
 
-        <div class="kpi">
+        <!-- =====================================================
+             PROJECT PERFORMANCE
+        ====================================================== -->
 
-            <div class="kpi-title">
-                Half Day FTE
+        <section class="section">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Project Performance
+                    </h2>
+
+                    <div class="section-subtitle">
+                        Management-level project and Team Lead view
+                    </div>
+
+                </div>
+
             </div>
 
-            <div
-                id="kpiHalf"
-                class="kpi-value">
-                0
+
+            <div id="projectLoading"
+                 class="loading">
+
+                Loading project performance...
+
             </div>
 
-            <div class="kpi-note">
-                Half Day = 0.5 FTE
-            </div>
-
-        </div>
-
-
-        <div class="kpi">
-
-            <div class="kpi-title">
-                Total Production
-            </div>
-
-            <div
-                id="kpiProduction"
-                class="kpi-value">
-                0
-            </div>
-
-            <div class="kpi-note">
-                Actual hourly production
-            </div>
-
-        </div>
-
-
-        <div class="kpi">
-
-            <div class="kpi-title">
-                Adjusted Target
-            </div>
-
-            <div
-                id="kpiTarget"
-                class="kpi-value">
-                0
-            </div>
-
-            <div class="kpi-note">
-                Half Day adjusted to 50%
-            </div>
-
-        </div>
-
-
-        <div class="kpi">
-
-            <div class="kpi-title">
-                Achievement
-            </div>
-
-            <div
-                id="kpiAchievement"
-                class="kpi-value">
-                0%
-            </div>
-
-            <div class="kpi-note">
-                Production ÷ adjusted target
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- PROJECT SUMMARY -->
-
-    <div class="section">
-
-        <div class="section-header">
-
-            <div class="section-title">
-                Project Performance
-            </div>
-
-            <div>
-                <button
-                    class="btn-secondary"
-                    onclick="showProjectDetails()">
-                    View Details
-                </button>
-            </div>
-
-        </div>
-
-        <div class="section-body">
 
             <div class="table-wrap">
 
-                <table>
+                <table id="projectTable">
 
                     <thead>
 
                         <tr>
 
-                            <th>
-                                Project
-                            </th>
+                            <th>Project</th>
 
-                            <th>
-                                Team Lead
-                            </th>
+                            <th>Project ID</th>
 
-                            <th>
-                                Employees
-                            </th>
+                            <th>Team Lead</th>
 
-                            <th>
-                                Present
-                            </th>
+                            <th>Employees</th>
 
-                            <th>
-                                Half Day
-                            </th>
+                            <th>Present FTE</th>
 
-                            <th>
-                                Absent
-                            </th>
+                            <th>Target</th>
 
-                            <th class="number">
-                                Production
-                            </th>
+                            <th>Production</th>
 
-                            <th class="number">
-                                Adjusted Target
-                            </th>
+                            <th>Achievement</th>
 
-                            <th class="number">
-                                Achievement
-                            </th>
-
-                            <th>
-                                Status
-                            </th>
+                            <th>Avg/FTE</th>
 
                         </tr>
 
                     </thead>
 
                     <tbody id="projectTableBody">
-
                     </tbody>
 
                 </table>
 
             </div>
 
-        </div>
-
-    </div>
+        </section>
 
 
-    <!-- TEAM LEAD SUMMARY -->
+        <!-- =====================================================
+             EMPLOYEE PERFORMANCE
+        ====================================================== -->
 
-    <div class="section">
+        <section class="section">
 
-        <div class="section-header">
+            <div class="section-header">
 
-            <div class="section-title">
-                Team Lead Performance
+                <div>
+
+                    <h2 class="section-title">
+                        Employee Performance
+                    </h2>
+
+                    <div class="section-subtitle">
+                        Actual hourly production and attendance
+                    </div>
+
+                </div>
+
             </div>
 
-        </div>
-
-        <div class="section-body">
 
             <div class="table-wrap">
 
@@ -759,151 +844,62 @@ tr:hover td{
 
                         <tr>
 
-                            <th>
-                                Team Lead
-                            </th>
+                            <th>Employee</th>
 
-                            <th>
-                                Project
-                            </th>
+                            <th>Employee Code</th>
 
-                            <th>
-                                Employees
-                            </th>
+                            <th>Project</th>
 
-                            <th>
-                                Present
-                            </th>
+                            <th>Team Lead</th>
 
-                            <th>
-                                Half Day
-                            </th>
+                            <th>Attendance</th>
 
-                            <th>
-                                Absent
-                            </th>
+                            <th>FTE</th>
 
-                            <th class="number">
-                                Production
-                            </th>
+                            <th>Target</th>
 
-                            <th class="number">
-                                Target
-                            </th>
+                            <th>Production</th>
 
-                            <th class="number">
-                                Achievement
-                            </th>
+                            <th>Achievement</th>
 
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="teamLeadTableBody">
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- EMPLOYEE SUMMARY -->
-
-    <div class="section">
-
-        <div class="section-header">
-
-            <div class="section-title">
-                Employee Performance
-            </div>
-
-        </div>
-
-        <div class="section-body">
-
-            <div class="table-wrap">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                Employee
-                            </th>
-
-                            <th>
-                                Employee Code
-                            </th>
-
-                            <th>
-                                Project
-                            </th>
-
-                            <th>
-                                Team Lead
-                            </th>
-
-                            <th>
-                                Attendance
-                            </th>
-
-                            <th class="number">
-                                Daily Target
-                            </th>
-
-                            <th class="number">
-                                Adjusted Target
-                            </th>
-
-                            <th class="number">
-                                Production
-                            </th>
-
-                            <th class="number">
-                                Achievement
-                            </th>
-
-                            <th>
-                                Status
-                            </th>
+                            <th>Avg/Hr</th>
 
                         </tr>
 
                     </thead>
 
                     <tbody id="employeeTableBody">
-
                     </tbody>
 
                 </table>
 
             </div>
 
-        </div>
-
-    </div>
+        </section>
 
 
-    <!-- HOURLY PRODUCTION -->
+        <!-- =====================================================
+             HOURLY PERFORMANCE
+        ====================================================== -->
 
-    <div class="section">
+        <section class="section">
 
-        <div class="section-header">
+            <div class="section-header">
 
-            <div class="section-title">
-                Hourly Production
+                <div>
+
+                    <h2 class="section-title">
+                        Hourly Production
+                    </h2>
+
+                    <div class="section-subtitle">
+                        6 PM – 3 AM production breakdown
+                    </div>
+
+                </div>
+
             </div>
 
-        </div>
-
-        <div class="section-body">
 
             <div class="table-wrap">
 
@@ -913,257 +909,127 @@ tr:hover td{
 
                         <tr>
 
-                            <th>
-                                Employee
-                            </th>
+                            <th>Employee</th>
 
-                            <th>
-                                Project
-                            </th>
+                            <th>6–7</th>
 
-                            <th>
-                                6–7
-                            </th>
+                            <th>7–8</th>
 
-                            <th>
-                                7–8
-                            </th>
+                            <th>8–9</th>
 
-                            <th>
-                                8–9
-                            </th>
+                            <th>9–10</th>
 
-                            <th>
-                                9–10
-                            </th>
+                            <th>10–11</th>
 
-                            <th>
-                                10–11
-                            </th>
+                            <th>11–12</th>
 
-                            <th>
-                                11–12
-                            </th>
+                            <th>12–1</th>
 
-                            <th>
-                                12–1
-                            </th>
+                            <th>1–2</th>
 
-                            <th>
-                                1–2
-                            </th>
+                            <th>2–3</th>
 
-                            <th>
-                                2–3
-                            </th>
-
-                            <th>
-                                Total
-                            </th>
+                            <th>Total</th>
 
                         </tr>
 
                     </thead>
 
                     <tbody id="hourlyTableBody">
-
                     </tbody>
 
                 </table>
 
             </div>
 
-        </div>
-
-    </div>
+        </section>
 
 
-    <!-- CHARTS -->
+        <!-- =====================================================
+             CHARTS
+        ====================================================== -->
 
-    <div class="chart-grid">
+        <div class="charts">
 
-        <div class="section">
 
-            <div class="section-header">
+            <div class="chart-card">
 
-                <div class="section-title">
-                    Production by Project
-                </div>
-
-            </div>
-
-            <div class="section-body">
+                <h3>
+                    Project Achievement
+                </h3>
 
                 <div class="chart-box">
 
-                    <canvas id="projectChart"></canvas>
+                    <canvas id="projectAchievementChart">
+                    </canvas>
 
                 </div>
 
             </div>
 
-        </div>
 
+            <div class="chart-card">
 
-        <div class="section">
-
-            <div class="section-header">
-
-                <div class="section-title">
-                    Achievement by Project
-                </div>
-
-            </div>
-
-            <div class="section-body">
+                <h3>
+                    Hourly Production
+                </h3>
 
                 <div class="chart-box">
 
-                    <canvas id="achievementChart"></canvas>
+                    <canvas id="hourlyProductionChart">
+                    </canvas>
 
                 </div>
 
             </div>
 
-        </div>
-
-    </div>
-
-
-    <!-- ADMIN DATE LOCK -->
-
-    <div
-        id="adminPanel"
-        class="section admin-only">
-
-        <div class="section-header">
-
-            <div class="section-title">
-                Management Date Lock Control
-            </div>
 
         </div>
 
-        <div class="section-body">
 
-            <div class="lock-panel">
+        <div class="footer">
 
-                <div class="control">
-
-                    <label>
-                        Date
-                    </label>
-
-                    <input
-                        type="date"
-                        id="lockDate">
-
-                </div>
-
-
-                <button
-                    class="btn-danger"
-                    onclick="lockSelectedDate()">
-                    Lock Date
-                </button>
-
-
-                <button
-                    class="btn-success"
-                    onclick="unlockSelectedDate()">
-                    Unlock Date
-                </button>
-
-
-                <span
-                    id="lockStatus">
-                    Checking...
-                </span>
-
-            </div>
+            AMI | Revenue Cycle Management |
+            Management Control Center
 
         </div>
 
-    </div>
 
-
-    <div class="footer">
-        AMI | RCM Hourly Production Management Dashboard
-    </div>
-
-</div>
-
-
-<!-- DETAILS MODAL -->
-
-<div
-    id="detailsModal"
-    class="modal">
-
-    <div class="modal-content">
-
-        <div class="modal-header">
-
-            <strong>
-                Project Details
-            </strong>
-
-            <span
-                class="close"
-                onclick="closeDetails()">
-                ×
-            </span>
-
-        </div>
-
-        <div
-            id="detailsBody"
-            class="modal-body">
-        </div>
-
-    </div>
+    </main>
 
 </div>
 
 
 <script>
 
+
 /* =========================================================
    SUPABASE CONFIGURATION
 ========================================================= */
 
-const SUPABASE_URL = "https://yhoblmvujfqnspaxdfav.supabase.co";
+const SUPABASE_URL =
+    "https://yhoblmvujfqnspaxdfav.supabase.co";
 
-const SUPABASE_ANON_KEY = "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
+const SUPABASE_ANON_KEY =
+    "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
 
-const supabaseClient =
-    window.supabase.createClient(
+
+const { createClient } =
+    supabase;
+
+
+const sb =
+    createClient(
         SUPABASE_URL,
         SUPABASE_ANON_KEY
     );
 
 
 /* =========================================================
-   OPERATIONAL DASHBOARD
+   AUTHORIZED MANAGEMENT USERS
 ========================================================= */
 
-const OPERATIONAL_DASHBOARD =
-    "Hourly_Production_Management_Dashboard_HOURLY_REMINDERS.html";
-
-
-function openOperationalDashboard(){
-
-    window.location.href =
-        OPERATIONAL_DASHBOARD;
-
-}
-
-
-/* =========================================================
-   AUTHORIZED ADMIN USERS
-========================================================= */
-
-const AUTHORIZED_ADMINS = [
+const AUTHORIZED_MANAGEMENT_EMAILS = [
 
     "scott.newman@aminfoweb.co.in",
 
@@ -1173,30 +1039,920 @@ const AUTHORIZED_ADMINS = [
 
 
 /* =========================================================
-   STATE
+   OPERATIONAL DASHBOARD
 ========================================================= */
 
-let currentUser = null;
+const OPERATIONAL_DASHBOARD_FILE =
+    "Hourly_Production_Management_Dashboard_HOURLY_REMINDERS.html";
 
-let currentProfile = null;
+
+function openOperationalDashboard(){
+
+    /*
+       Use relative path.
+
+       This avoids the previous problem where the old
+       operational-dashboard path was producing 404.
+    */
+
+    window.location.href =
+        OPERATIONAL_DASHBOARD_FILE;
+
+}
+
+
+/* =========================================================
+   GLOBAL VARIABLES
+========================================================= */
+
+let accessRows = [];
 
 let projects = [];
 
 let employees = [];
 
-let productivity = [];
+let productivityRows = [];
 
-let accessRows = [];
-
-let filteredRows = [];
+let filteredEmployees = [];
 
 let projectChart = null;
 
-let achievementChart = null;
+let hourlyChart = null;
+
+let currentUser = null;
+
+let currentDate = null;
 
 
 /* =========================================================
-   SHIFT HOURS
+   PROJECT / TEAM LEAD FALLBACK
+========================================================= */
+
+const TEAM_LEAD_FALLBACK = {
+
+    "19":
+        "Moses Aitiwadekar",
+
+    "22":
+        "Saprem Nikhar",
+
+    "24":
+        "Omkar Talegaonkar",
+
+    "26":
+        "Anmoldeep Sethi"
+
+};
+
+
+/* =========================================================
+   PAGE INITIALIZATION
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function(){
+
+        setDefaultDate();
+
+        await checkSession();
+
+    }
+);
+
+
+/* =========================================================
+   DEFAULT DATE
+========================================================= */
+
+function setDefaultDate(){
+
+    const input =
+        document.getElementById("trackerDate");
+
+    const now =
+        new Date();
+
+    const year =
+        now.getFullYear();
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(2,"0");
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(2,"0");
+
+    input.value =
+        `${year}-${month}-${day}`;
+
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+async function loginUser(){
+
+    const email =
+        document.getElementById("loginEmail")
+        .value
+        .trim()
+        .toLowerCase();
+
+    const password =
+        document.getElementById("loginPassword")
+        .value;
+
+    const error =
+        document.getElementById("loginError");
+
+
+    error.classList.add("hidden");
+
+
+    if(!email || !password){
+
+        showLoginError(
+            "Please enter email and password."
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        const { data, error:loginError } =
+            await sb.auth.signInWithPassword({
+
+                email:email,
+
+                password:password
+
+            });
+
+
+        if(loginError)
+            throw loginError;
+
+
+        if(!data || !data.user){
+
+            throw new Error(
+                "Login session was not created."
+            );
+
+        }
+
+
+        currentUser =
+            data.user;
+
+
+        await initializeDashboard();
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        showLoginError(
+            error.message ||
+            "Unable to login."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGIN ERROR
+========================================================= */
+
+function showLoginError(message){
+
+    const element =
+        document.getElementById("loginError");
+
+    element.textContent =
+        message;
+
+    element.classList.remove("hidden");
+
+}
+
+
+/* =========================================================
+   CHECK SESSION
+========================================================= */
+
+async function checkSession(){
+
+    try{
+
+        const { data } =
+            await sb.auth.getSession();
+
+
+        if(data && data.session){
+
+            currentUser =
+                data.session.user;
+
+            await initializeDashboard();
+
+        }
+
+    }
+    catch(error){
+
+        console.error(
+            "Session check failed:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   INITIALIZE DASHBOARD
+========================================================= */
+
+async function initializeDashboard(){
+
+    const email =
+        String(
+            currentUser.email || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+       Management accounts are authorized through
+       user_project_access first.
+    */
+
+    let managementAccess = false;
+
+
+    const { data:accessCheck, error } =
+        await sb
+        .from("user_project_access")
+        .select("*")
+        .eq(
+            "user_id",
+            currentUser.id
+        );
+
+
+    if(error){
+
+        console.error(error);
+
+        /*
+           Keep authorized management emails as a
+           secondary check.
+        */
+
+        managementAccess =
+            AUTHORIZED_MANAGEMENT_EMAILS
+            .includes(email);
+
+    }
+    else{
+
+        managementAccess =
+            (accessCheck || [])
+            .some(
+                row =>
+                    String(row.role || "")
+                    .trim()
+                    .toLowerCase()
+                    === "management"
+            );
+
+    }
+
+
+    /*
+       Explicit authorized-admin fallback.
+    */
+
+    if(
+        AUTHORIZED_MANAGEMENT_EMAILS
+        .includes(email)
+    ){
+
+        managementAccess = true;
+
+    }
+
+
+    if(!managementAccess){
+
+        alert(
+            "You do not have Management access."
+        );
+
+        await sb.auth.signOut();
+
+        return;
+
+    }
+
+
+    document
+        .getElementById("loginScreen")
+        .classList
+        .add("hidden");
+
+
+    document
+        .getElementById("dashboardScreen")
+        .classList
+        .remove("hidden");
+
+
+    document
+        .getElementById("loggedUserName")
+        .textContent =
+            email;
+
+
+    await loadDashboard();
+
+}
+
+
+/* =========================================================
+   LOAD DASHBOARD
+========================================================= */
+
+async function loadDashboard(){
+
+    showStatus(
+        "Loading dashboard..."
+    );
+
+    hidePageError();
+
+
+    currentDate =
+        document
+        .getElementById("trackerDate")
+        .value;
+
+
+    if(!currentDate){
+
+        showPageError(
+            "Please select a tracker date."
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        await loadAccessRows();
+
+        await loadProjects();
+
+        await loadEmployees();
+
+        await loadProductivity();
+
+        await loadDateLock();
+
+        populateFilters();
+
+        applyFilters();
+
+        showStatus(
+            "Dashboard updated"
+        );
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        showPageError(
+            error.message ||
+            "Unable to load dashboard."
+        );
+
+        showStatus(
+            "Load failed"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD ACCESS ROWS
+========================================================= */
+
+async function loadAccessRows(){
+
+    const { data, error } =
+        await sb
+        .from("user_project_access")
+        .select("*");
+
+
+    if(error)
+        throw error;
+
+
+    accessRows =
+        data || [];
+
+}
+
+
+/* =========================================================
+   LOAD PROJECTS
+========================================================= */
+
+async function loadProjects(){
+
+    const { data, error } =
+        await sb
+        .from("projects")
+        .select("*")
+        .order(
+            "id",
+            {
+                ascending:true
+            }
+        );
+
+
+    if(error)
+        throw error;
+
+
+    projects =
+        data || [];
+
+}
+
+
+/* =========================================================
+   LOAD EMPLOYEES
+========================================================= */
+
+async function loadEmployees(){
+
+    const { data, error } =
+        await sb
+        .from("employees")
+        .select("*")
+        .eq(
+            "active",
+            true
+        )
+        .order(
+            "employee_name",
+            {
+                ascending:true
+            }
+        );
+
+
+    if(error)
+        throw error;
+
+
+    employees =
+        data || [];
+
+}
+
+
+/* =========================================================
+   LOAD DAILY PRODUCTIVITY
+========================================================= */
+
+async function loadProductivity(){
+
+    const { data, error } =
+        await sb
+        .from("daily_productivity")
+        .select("*")
+        .eq(
+            "tracker_date",
+            currentDate
+        );
+
+
+    if(error)
+        throw error;
+
+
+    productivityRows =
+        data || [];
+
+}
+
+
+/* =========================================================
+   DATE LOCK
+========================================================= */
+
+async function loadDateLock(){
+
+    const element =
+        document.getElementById(
+            "lockStatus"
+        );
+
+
+    const { data, error } =
+        await sb
+        .from("tracker_date_locks")
+        .select("*")
+        .eq(
+            "tracker_date",
+            currentDate
+        )
+        .maybeSingle();
+
+
+    if(error){
+
+        /*
+           Do not stop the management dashboard if
+           the lock record is not found.
+        */
+
+        console.warn(
+            "Date lock check:",
+            error
+        );
+
+        element.textContent =
+            "Lock status unavailable";
+
+        element.className =
+            "lock-status unlocked";
+
+        return;
+
+    }
+
+
+    if(data && data.is_locked){
+
+        element.textContent =
+            "Date Locked";
+
+        element.className =
+            "lock-status locked";
+
+    }
+    else{
+
+        element.textContent =
+            "Date Unlocked";
+
+        element.className =
+            "lock-status unlocked";
+
+    }
+
+}
+
+
+/* =========================================================
+   TEAM LEAD LOOKUP
+========================================================= */
+
+function getTeamLeadForProject(projectId){
+
+    const normalizedProjectId =
+        String(
+            projectId ?? ""
+        )
+        .trim();
+
+
+    /*
+       First use database mapping.
+    */
+
+    const rows =
+        accessRows.filter(
+            row => {
+
+                const rowProjectId =
+                    String(
+                        row.project_id ?? ""
+                    )
+                    .trim();
+
+
+                const rowRole =
+                    String(
+                        row.role || ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                return (
+
+                    rowProjectId ===
+                    normalizedProjectId
+
+                    &&
+
+                    rowRole ===
+                    "team_lead"
+
+                );
+
+            }
+        );
+
+
+    const names =
+        rows
+        .map(
+            row =>
+                String(
+                    row.team_lead_name || ""
+                )
+                .trim()
+        )
+        .filter(
+            name =>
+                name !== ""
+        );
+
+
+    if(names.length > 0){
+
+        return [
+            ...new Set(names)
+        ].join(", ");
+
+    }
+
+
+    /*
+       Fallback mapping.
+
+       This specifically prevents NS,
+       BFW and Hopebridge from appearing
+       as Unassigned when their database
+       project IDs are correct.
+    */
+
+    return (
+        TEAM_LEAD_FALLBACK[
+            normalizedProjectId
+        ]
+        ||
+        "Unassigned"
+    );
+
+}
+
+
+/* =========================================================
+   PROJECT LOOKUP
+========================================================= */
+
+function getProjectById(projectId){
+
+    return projects.find(
+        project =>
+            String(project.id).trim()
+            ===
+            String(projectId).trim()
+    );
+
+}
+
+
+/* =========================================================
+   PRODUCTIVITY MATCH
+========================================================= */
+
+function findProductivity(employee){
+
+    const employeeId =
+        String(
+            employee.id ?? ""
+        ).trim();
+
+
+    const employeeCode =
+        String(
+            employee.employee_code ?? ""
+        ).trim();
+
+
+    const authUserId =
+        String(
+            employee.auth_user_id ?? ""
+        ).trim();
+
+
+    /*
+       Match by employee_id first.
+    */
+
+    let row =
+        productivityRows.find(
+            item =>
+                employeeId !== "" &&
+                String(
+                    item.employee_id ?? ""
+                ).trim()
+                === employeeId
+        );
+
+
+    /*
+       Then employee code.
+    */
+
+    if(!row && employeeCode){
+
+        row =
+            productivityRows.find(
+                item =>
+                    String(
+                        item.employee_code ?? ""
+                    ).trim()
+                    === employeeCode
+            );
+
+    }
+
+
+    /*
+       Then auth user ID.
+    */
+
+    if(!row && authUserId){
+
+        row =
+            productivityRows.find(
+                item =>
+                    String(
+                        item.auth_user_id ?? ""
+                    ).trim()
+                    === authUserId
+            );
+
+    }
+
+
+    /*
+       Final fallback for systems where
+       daily_productivity uses employee_id
+       as a number/string mismatch.
+    */
+
+    if(!row){
+
+        row =
+            productivityRows.find(
+                item =>
+                    String(
+                        item.employee_id ?? ""
+                    )
+                    === String(
+                        employee.id ?? ""
+                    )
+            );
+
+    }
+
+
+    return row || null;
+
+}
+
+
+/* =========================================================
+   ATTENDANCE FACTOR
+========================================================= */
+
+function getAttendanceFactor(value){
+
+    const attendance =
+        String(
+            value ?? ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+       Half Day = exactly 0.5
+    */
+
+    if(
+        attendance === "half day" ||
+        attendance === "halfday" ||
+        attendance === "half" ||
+        attendance === "0.5" ||
+        attendance === "0,5"
+    ){
+
+        return 0.5;
+
+    }
+
+
+    /*
+       Absent = 0
+    */
+
+    if(
+        attendance === "absent" ||
+        attendance === "0"
+    ){
+
+        return 0;
+
+    }
+
+
+    /*
+       Present = 1
+    */
+
+    return 1;
+
+}
+
+
+/* =========================================================
+   ATTENDANCE LABEL
+========================================================= */
+
+function getAttendanceLabel(value){
+
+    const factor =
+        getAttendanceFactor(value);
+
+
+    if(factor === 0.5)
+        return "Half Day";
+
+
+    if(factor === 0)
+        return "Absent";
+
+
+    return "Present";
+
+}
+
+
+/* =========================================================
+   SAFE NUMBER
+========================================================= */
+
+function num(value){
+
+    const n =
+        Number(value);
+
+
+    if(
+        !Number.isFinite(n)
+    )
+        return 0;
+
+
+    return n;
+
+}
+
+
+/* =========================================================
+   HOURLY PRODUCTION
 ========================================================= */
 
 const HOUR_FIELDS = [
@@ -1222,498 +1978,384 @@ const HOUR_FIELDS = [
 ];
 
 
-/* =========================================================
-   INITIALIZATION
-========================================================= */
+function getHourlyValues(productivity){
 
-document.addEventListener(
-    "DOMContentLoaded",
-    async function(){
+    if(!productivity){
 
-        setToday();
-
-        await initialize();
+        return HOUR_FIELDS.map(
+            () => 0
+        );
 
     }
-);
 
 
-/* =========================================================
-   SET TODAY
-========================================================= */
-
-function setToday(){
-
-    const today =
-        new Date().toISOString().split("T")[0];
-
-    document.getElementById("trackerDate").value =
-        today;
-
-    document.getElementById("lockDate").value =
-        today;
-
-}
-
-
-/* =========================================================
-   INITIALIZE
-========================================================= */
-
-async function initialize(){
-
-    try{
-
-        setStatus("Checking login...");
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.auth.getSession();
-
-        if(error){
-
-            throw error;
-
-        }
-
-        if(!data.session){
-
-            window.location.href =
-                "index.html";
-
-            return;
-
-        }
-
-        currentUser =
-            data.session.user;
-
-        document.getElementById("userEmail").textContent =
-            currentUser.email || "";
-
-
-        await loadAccess();
-
-        await loadProjects();
-
-        await loadEmployees();
-
-        await loadDashboard();
-
-        await loadLockStatus();
-
-
-        if(
-            isAdmin(
-                currentUser.email
+    return HOUR_FIELDS.map(
+        field =>
+            num(
+                productivity[field]
             )
-        ){
-
-            document.getElementById("adminPanel").style.display =
-                "block";
-
-        }
-
-
-        document
-            .getElementById("trackerDate")
-            .addEventListener(
-                "change",
-                async function(){
-
-                    await loadDashboard();
-
-                    await loadLockStatus();
-
-                }
-            );
-
-
-        document
-            .getElementById("projectFilter")
-            .addEventListener(
-                "change",
-                updateSecondaryFilters
-            );
-
-
-        document
-            .getElementById("teamLeadFilter")
-            .addEventListener(
-                "change",
-                updateEmployeeFilter
-            );
-
-
-        setStatus("Dashboard loaded", true);
-
-    }
-    catch(error){
-
-        console.error(error);
-
-        showError(
-            error.message ||
-            "Unable to load dashboard."
-        );
-
-        setStatus("Error");
-
-    }
-
-}
-
-
-/* =========================================================
-   ACCESS
-========================================================= */
-
-async function loadAccess(){
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("user_project_access")
-            .select("*");
-
-    if(error){
-
-        throw error;
-
-    }
-
-    accessRows =
-        data || [];
-
-}
-
-
-/* =========================================================
-   CHECK ADMIN
-========================================================= */
-
-function isAdmin(email){
-
-    if(!email){
-        return false;
-    }
-
-    return AUTHORIZED_ADMINS
-        .map(
-            x => x.toLowerCase()
-        )
-        .includes(
-            email.toLowerCase()
-        );
-
-}
-
-
-/* =========================================================
-   MANAGEMENT ACCESS
-========================================================= */
-
-function hasManagementAccess(){
-
-    if(!currentUser){
-        return false;
-    }
-
-    return accessRows.some(
-        row =>
-            String(row.user_id) ===
-            String(currentUser.id)
-            &&
-            String(row.role || "")
-                .toLowerCase()
-                ===
-                "management"
     );
 
 }
 
 
 /* =========================================================
-   TEAM LEAD MAPPING
+   ACTUAL PRODUCTION
 ========================================================= */
 
-function getTeamLeadForProject(projectId){
+function getActualProduction(productivity){
 
-    const rows =
-        accessRows.filter(
-            row =>
-                String(row.project_id) ===
-                String(projectId)
-                &&
-                String(row.role || "")
-                    .toLowerCase()
-                    ===
-                    "team_lead"
+    const hours =
+        getHourlyValues(
+            productivity
         );
 
 
-    if(rows.length){
-
-        const names =
-            rows
-                .map(
-                    row =>
-                        row.team_lead_name
-                )
-                .filter(Boolean);
-
-
-        if(names.length){
-
-            return names.join(", ");
-
-        }
-
-    }
-
-
-    return "Unassigned";
+    return hours.reduce(
+        (total,value) =>
+            total + value,
+        0
+    );
 
 }
 
 
 /* =========================================================
-   LOAD PROJECTS
+   PROJECT DAILY TARGET
 ========================================================= */
 
-async function loadProjects(){
+function getProjectTarget(project){
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("projects")
-            .select("*")
-            .order(
-                "project_name",
-                {
-                    ascending:true
-                }
-            );
+    if(!project)
+        return 0;
 
 
-    if(error){
-
-        throw error;
-
-    }
-
-
-    projects =
-        data || [];
-
-
-    populateProjectFilter();
+    return num(
+        project.daily_target
+    );
 
 }
 
 
 /* =========================================================
-   PROJECT FILTER
+   EMPLOYEE METRICS
 ========================================================= */
 
-function populateProjectFilter(){
+function buildEmployeeMetric(employee){
 
-    const select =
+    const project =
+        getProjectById(
+            employee.project_id
+        );
+
+
+    const productivity =
+        findProductivity(
+            employee
+        );
+
+
+    const attendance =
+        getAttendanceLabel(
+            productivity
+                ?.attendance
+        );
+
+
+    const fte =
+        getAttendanceFactor(
+            productivity
+                ?.attendance
+        );
+
+
+    const projectTarget =
+        getProjectTarget(
+            project
+        );
+
+
+    /*
+       Important:
+
+       Target is adjusted by attendance.
+
+       Present:
+       125 -> 125
+
+       Half Day:
+       125 -> 62.5
+
+       Absent:
+       125 -> 0
+    */
+
+    const adjustedTarget =
+        projectTarget *
+        fte;
+
+
+    /*
+       Production is ALWAYS actual hourly
+       production.
+
+       We do NOT use daily_target as
+       production.
+
+       This fixes the previous AR
+       subprocess showing 40.
+    */
+
+    const production =
+        getActualProduction(
+            productivity
+        );
+
+
+    const achievement =
+        adjustedTarget > 0
+            ? (
+                production /
+                adjustedTarget
+            ) * 100
+            : 0;
+
+
+    const hours =
+        getHourlyValues(
+            productivity
+        );
+
+
+    const activeHours =
+        hours.filter(
+            value =>
+                value > 0
+        ).length;
+
+
+    const averagePerHour =
+        activeHours > 0
+            ? production /
+              activeHours
+            : 0;
+
+
+    return {
+
+        employee,
+
+        project,
+
+        productivity,
+
+        attendance,
+
+        fte,
+
+        adjustedTarget,
+
+        production,
+
+        achievement,
+
+        hours,
+
+        averagePerHour
+
+    };
+
+}
+
+
+/* =========================================================
+   FILTER DROPDOWNS
+========================================================= */
+
+function populateFilters(){
+
+    const projectFilter =
         document.getElementById(
             "projectFilter"
         );
 
 
-    select.innerHTML =
-        `<option value="ALL">All Projects</option>`;
+    const currentProject =
+        projectFilter.value;
 
 
-    let visibleProjects =
-        projects;
+    projectFilter.innerHTML =
+        `<option value="ALL">
+            All Projects
+        </option>`;
 
 
-    /*
-       Management users see all projects.
-       Non-management users see assigned projects.
-    */
-
-    if(!hasManagementAccess()){
-
-        const assignedIds =
-            accessRows
-                .filter(
-                    row =>
-                        String(row.user_id) ===
-                        String(currentUser.id)
-                        &&
-                        row.project_id != null
-                )
-                .map(
-                    row =>
-                        String(row.project_id)
-                );
-
-
-        visibleProjects =
-            projects.filter(
-                p =>
-                    assignedIds.includes(
-                        String(p.id)
-                    )
-            );
-
-    }
-
-
-    visibleProjects.forEach(
+    projects.forEach(
         project => {
-
-            const option =
-                document.createElement("option");
-
-            option.value =
-                project.id;
-
-            option.textContent =
-                project.project_name;
-
-            select.appendChild(option);
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   LOAD EMPLOYEES
-========================================================= */
-
-async function loadEmployees(){
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("employees")
-            .select("*")
-            .eq(
-                "active",
-                true
-            )
-            .order(
-                "employee_name",
-                {
-                    ascending:true
-                }
-            );
-
-
-    if(error){
-
-        throw error;
-
-    }
-
-
-    employees =
-        data || [];
-
-
-    updateSecondaryFilters();
-
-}
-
-
-/* =========================================================
-   SECONDARY FILTERS
-========================================================= */
-
-function updateSecondaryFilters(){
-
-    const projectId =
-        document.getElementById(
-            "projectFilter"
-        ).value;
-
-
-    let rows =
-        employees;
-
-
-    if(projectId !== "ALL"){
-
-        rows =
-            rows.filter(
-                e =>
-                    String(e.project_id) ===
-                    String(projectId)
-            );
-
-    }
-
-
-    /*
-       Only Team Leads associated with
-       visible projects are shown.
-    */
-
-    const teamLeads =
-        [
-            ...new Set(
-                rows.map(
-                    e =>
-                        getTeamLeadForProject(
-                            e.project_id
-                        )
-                )
-            )
-        ]
-        .filter(
-            x =>
-                x &&
-                x !== "Unassigned"
-        )
-        .sort();
-
-
-    const teamLeadSelect =
-        document.getElementById(
-            "teamLeadFilter"
-        );
-
-
-    teamLeadSelect.innerHTML =
-        `<option value="ALL">All Team Leads</option>`;
-
-
-    teamLeads.forEach(
-        lead => {
 
             const option =
                 document.createElement(
                     "option"
                 );
 
+
             option.value =
-                lead;
+                String(project.id);
+
 
             option.textContent =
-                lead;
+                project.project_name ||
+                `Project ${project.id}`;
 
-            teamLeadSelect.appendChild(
-                option
-            );
+
+            projectFilter
+                .appendChild(
+                    option
+                );
 
         }
     );
+
+
+    if(
+        [...projectFilter.options]
+        .some(
+            option =>
+                option.value ===
+                currentProject
+        )
+    ){
+
+        projectFilter.value =
+            currentProject;
+
+    }
+
+
+    updateTeamLeadFilter();
+
+}
+
+
+/* =========================================================
+   TEAM LEAD FILTER
+========================================================= */
+
+function updateTeamLeadFilter(){
+
+    const projectValue =
+        document
+        .getElementById(
+            "projectFilter"
+        )
+        .value;
+
+
+    const teamLeadFilter =
+        document
+        .getElementById(
+            "teamLeadFilter"
+        );
+
+
+    const current =
+        teamLeadFilter.value;
+
+
+    teamLeadFilter.innerHTML =
+        `<option value="ALL">
+            All Team Leads
+        </option>`;
+
+
+    const names =
+        new Set();
+
+
+    projects.forEach(
+        project => {
+
+            if(
+                projectValue !== "ALL"
+                &&
+                String(project.id)
+                    !== String(projectValue)
+            ){
+
+                return;
+
+            }
+
+
+            const name =
+                getTeamLeadForProject(
+                    project.id
+                );
+
+
+            if(
+                name &&
+                name !== "Unassigned"
+            ){
+
+                name
+                    .split(",")
+                    .map(
+                        item =>
+                            item.trim()
+                    )
+                    .filter(Boolean)
+                    .forEach(
+                        item =>
+                            names.add(item)
+                    );
+
+            }
+
+        }
+    );
+
+
+    [...names]
+        .sort()
+        .forEach(
+            name => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    name;
+
+
+                option.textContent =
+                    name;
+
+
+                teamLeadFilter
+                    .appendChild(
+                        option
+                    );
+
+            }
+        );
+
+
+    if(
+        [...teamLeadFilter.options]
+        .some(
+            option =>
+                option.value === current
+        )
+    ){
+
+        teamLeadFilter.value =
+            current;
+
+    }
 
 
     updateEmployeeFilter();
@@ -1727,582 +2369,266 @@ function updateSecondaryFilters(){
 
 function updateEmployeeFilter(){
 
-    const projectId =
-        document.getElementById(
+    const projectValue =
+        document
+        .getElementById(
             "projectFilter"
-        ).value;
+        )
+        .value;
 
 
-    const teamLead =
-        document.getElementById(
+    const teamLeadValue =
+        document
+        .getElementById(
             "teamLeadFilter"
-        ).value;
+        )
+        .value;
 
 
-    let rows =
-        employees;
-
-
-    if(projectId !== "ALL"){
-
-        rows =
-            rows.filter(
-                e =>
-                    String(e.project_id) ===
-                    String(projectId)
-            );
-
-    }
-
-
-    if(teamLead !== "ALL"){
-
-        rows =
-            rows.filter(
-                e =>
-                    getTeamLeadForProject(
-                        e.project_id
-                    )
-                    ===
-                    teamLead
-            );
-
-    }
-
-
-    const select =
-        document.getElementById(
+    const employeeFilter =
+        document
+        .getElementById(
             "employeeFilter"
         );
 
 
-    select.innerHTML =
-        `<option value="ALL">All Employees</option>`;
+    const current =
+        employeeFilter.value;
 
 
-    rows.forEach(
-        employee => {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-            option.value =
-                employee.id;
-
-            option.textContent =
-                employee.employee_name;
-
-            select.appendChild(
-                option
-            );
-
-        }
-    );
-
-}
+    employeeFilter.innerHTML =
+        `<option value="ALL">
+            All Employees
+        </option>`;
 
 
-/* =========================================================
-   ATTENDANCE FACTOR
-========================================================= */
+    employees
+        .filter(
+            employee => {
 
-function attendanceFactor(attendance){
+                if(
+                    projectValue !== "ALL"
+                    &&
+                    String(
+                        employee.project_id
+                    )
+                    !== String(
+                        projectValue
+                    )
+                ){
 
-    const value =
-        String(
-            attendance || ""
+                    return false;
+
+                }
+
+
+                if(
+                    teamLeadValue !== "ALL"
+                ){
+
+                    const lead =
+                        getTeamLeadForProject(
+                            employee.project_id
+                        );
+
+
+                    if(
+                        !lead
+                        .split(",")
+                        .map(
+                            x =>
+                                x.trim()
+                        )
+                        .includes(
+                            teamLeadValue
+                        )
+                    ){
+
+                        return false;
+
+                    }
+
+                }
+
+
+                return true;
+
+            }
         )
-        .trim()
-        .toLowerCase();
-
-
-    if(
-        value === "half day" ||
-        value === "halfday" ||
-        value === "half" ||
-        value === "0.5"
-    ){
-
-        return 0.5;
-
-    }
-
-
-    if(
-        value === "absent" ||
-        value === "0"
-    ){
-
-        return 0;
-
-    }
-
-
-    return 1;
-
-}
-
-
-/* =========================================================
-   ATTENDANCE LABEL
-========================================================= */
-
-function attendanceLabel(value){
-
-    const factor =
-        attendanceFactor(value);
-
-
-    if(factor === 0){
-        return "Absent";
-    }
-
-
-    if(factor === 0.5){
-        return "Half Day";
-    }
-
-
-    return "Present";
-
-}
-
-
-/* =========================================================
-   NUMBER
-========================================================= */
-
-function num(value){
-
-    const n =
-        Number(value);
-
-    return Number.isFinite(n)
-        ? n
-        : 0;
-
-}
-
-
-/* =========================================================
-   PRODUCTION
-========================================================= */
-
-function getProduction(row){
-
-    return HOUR_FIELDS.reduce(
-        (
-            total,
-            field
-        ) => {
-
-            return total +
-                num(row[field]);
-
-        },
-        0
-    );
-
-}
-
-
-/* =========================================================
-   PROJECT TARGET
-========================================================= */
-
-function getProjectTarget(project){
-
-    /*
-       Use daily_target from projects.
-
-       This is intentionally NOT used as actual
-       production. This prevents a project target
-       such as 40 from incorrectly appearing as
-       production.
-    */
-
-    return num(
-        project &&
-        project.daily_target
-    );
-
-}
-
-
-/* =========================================================
-   EMPLOYEE TARGET
-========================================================= */
-
-function getEmployeeTarget(employee){
-
-    const project =
-        projects.find(
-            p =>
-                String(p.id) ===
-                String(employee.project_id)
-        );
-
-
-    return getProjectTarget(
-        project
-    );
-
-}
-
-
-/* =========================================================
-   LOAD DASHBOARD
-========================================================= */
-
-async function loadDashboard(){
-
-    try{
-
-        setStatus(
-            "Loading..."
-        );
-
-
-        const date =
-            document.getElementById(
-                "trackerDate"
-            ).value;
-
-
-        if(!date){
-
-            return;
-
-        }
-
-
-        /*
-           Load all productivity rows for selected date.
-        */
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .from("daily_productivity")
-                .select("*")
-                .eq(
-                    "tracker_date",
-                    date
-                );
-
-
-        if(error){
-
-            throw error;
-
-        }
-
-
-        productivity =
-            data || [];
-
-
-        buildDashboardData();
-
-        setStatus(
-            "Updated " +
-            new Date().toLocaleTimeString()
-            ,
-            true
-        );
-
-    }
-    catch(error){
-
-        console.error(error);
-
-        showError(
-            error.message ||
-            "Unable to load dashboard."
-        );
-
-        setStatus("Error");
-
-    }
-
-}
-
-
-/* =========================================================
-   MATCH PRODUCTIVITY TO EMPLOYEE
-========================================================= */
-
-function findProductivity(employee){
-
-    /*
-       Primary match:
-       employee_id
-
-       Secondary:
-       employee_code
-
-       Additional compatibility:
-       auth_user_id
-    */
-
-    const matches =
-        productivity.filter(
-            row => {
-
-                if(
-                    row.employee_id != null
-                    &&
-                    String(row.employee_id) ===
-                    String(employee.id)
-                ){
-
-                    return true;
-
-                }
-
-
-                if(
-                    row.employee_code != null
-                    &&
-                    String(row.employee_code) ===
-                    String(employee.employee_code)
-                ){
-
-                    return true;
-
-                }
-
-
-                if(
-                    row.auth_user_id != null
-                    &&
-                    String(row.auth_user_id) ===
-                    String(employee.auth_user_id)
-                ){
-
-                    return true;
-
-                }
-
-
-                return false;
+        .sort(
+            (a,b) =>
+                String(
+                    a.employee_name
+                ).localeCompare(
+                    String(
+                        b.employee_name
+                    )
+                )
+        )
+        .forEach(
+            employee => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    String(employee.id);
+
+
+                option.textContent =
+                    employee.employee_name;
+
+
+                employeeFilter
+                    .appendChild(
+                        option
+                    );
 
             }
         );
 
 
-    /*
-       If duplicates exist, use the latest row.
-    */
+    if(
+        [...employeeFilter.options]
+        .some(
+            option =>
+                option.value === current
+        )
+    ){
 
-    if(matches.length <= 1){
-
-        return matches[0] || {};
+        employeeFilter.value =
+            current;
 
     }
-
-
-    return matches
-        .sort(
-            (
-                a,
-                b
-            ) =>
-                new Date(
-                    b.updated_at ||
-                    b.created_at ||
-                    0
-                )
-                -
-                new Date(
-                    a.updated_at ||
-                    a.created_at ||
-                    0
-                )
-        )[0];
 
 }
 
 
 /* =========================================================
-   BUILD DASHBOARD DATA
+   APPLY FILTERS
 ========================================================= */
 
-function buildDashboardData(){
+function applyFilters(){
 
-    const projectFilter =
-        document.getElementById(
+    updateTeamLeadFilter();
+
+
+    const projectValue =
+        document
+        .getElementById(
             "projectFilter"
-        ).value;
+        )
+        .value;
 
 
-    const teamLeadFilter =
-        document.getElementById(
+    const teamLeadValue =
+        document
+        .getElementById(
             "teamLeadFilter"
-        ).value;
+        )
+        .value;
 
 
-    const employeeFilter =
-        document.getElementById(
+    const employeeValue =
+        document
+        .getElementById(
             "employeeFilter"
-        ).value;
+        )
+        .value;
 
 
-    filteredRows =
+    filteredEmployees =
         employees
-            .map(
-                employee => {
+        .map(
+            buildEmployeeMetric
+        )
+        .filter(
+            metric => {
 
-                    const product =
-                        findProductivity(
-                            employee
-                        );
+                if(
+                    projectValue !== "ALL"
+                    &&
+                    String(
+                        metric.employee.project_id
+                    )
+                    !== String(
+                        projectValue
+                    )
+                ){
 
-
-                    const project =
-                        projects.find(
-                            p =>
-                                String(p.id) ===
-                                String(employee.project_id)
-                        );
-
-
-                    const attendance =
-                        attendanceLabel(
-                            product.attendance
-                        );
-
-
-                    const factor =
-                        attendanceFactor(
-                            product.attendance
-                        );
-
-
-                    const dailyTarget =
-                        getEmployeeTarget(
-                            employee
-                        );
-
-
-                    const adjustedTarget =
-                        dailyTarget *
-                        factor;
-
-
-                    const production =
-                        getProduction(
-                            product
-                        );
-
-
-                    const achievement =
-                        adjustedTarget > 0
-                            ?
-                            (
-                                production /
-                                adjustedTarget
-                            ) *
-                            100
-                            :
-                            0;
-
-
-                    return {
-
-                        employee,
-
-                        product,
-
-                        project,
-
-                        projectName:
-                            project
-                                ? project.project_name
-                                : "Unknown",
-
-                        teamLead:
-                            getTeamLeadForProject(
-                                employee.project_id
-                            ),
-
-                        attendance,
-
-                        factor,
-
-                        dailyTarget,
-
-                        adjustedTarget,
-
-                        production,
-
-                        achievement
-
-                    };
+                    return false;
 
                 }
-            )
-            .filter(
-                row => {
+
+
+                if(
+                    teamLeadValue !== "ALL"
+                ){
+
+                    const lead =
+                        getTeamLeadForProject(
+                            metric.employee.project_id
+                        );
+
 
                     if(
-                        projectFilter !==
-                        "ALL"
-                        &&
-                        String(
-                            row.employee.project_id
-                        ) !==
-                        String(projectFilter)
+                        !lead
+                        .split(",")
+                        .map(
+                            x =>
+                                x.trim()
+                        )
+                        .includes(
+                            teamLeadValue
+                        )
                     ){
 
                         return false;
 
                     }
-
-
-                    if(
-                        teamLeadFilter !==
-                        "ALL"
-                        &&
-                        row.teamLead !==
-                        teamLeadFilter
-                    ){
-
-                        return false;
-
-                    }
-
-
-                    if(
-                        employeeFilter !==
-                        "ALL"
-                        &&
-                        String(
-                            row.employee.id
-                        ) !==
-                        String(employeeFilter)
-                    ){
-
-                        return false;
-
-                    }
-
-
-                    return true;
 
                 }
-            );
 
+
+                if(
+                    employeeValue !== "ALL"
+                    &&
+                    String(
+                        metric.employee.id
+                    )
+                    !== String(
+                        employeeValue
+                    )
+                ){
+
+                    return false;
+
+                }
+
+
+                return true;
+
+            }
+        );
+
+
+    renderAll();
+
+}
+
+
+/* =========================================================
+   RENDER ALL
+========================================================= */
+
+function renderAll(){
 
     renderKPIs();
 
     renderProjectTable();
-
-    renderTeamLeadTable();
 
     renderEmployeeTable();
 
@@ -2319,125 +2645,156 @@ function buildDashboardData(){
 
 function renderKPIs(){
 
-    const rows =
-        filteredRows;
+    const totalEmployees =
+        filteredEmployees.length;
 
 
-    const activeEmployees =
-        rows.length;
+    /*
+       Absent is excluded from FTE
+       consolidation.
 
+       Half Day contributes 0.5.
+    */
 
-    const present =
-        rows.filter(
-            r =>
-                r.factor === 1
-        ).length;
-
-
-    const half =
-        rows.filter(
-            r =>
-                r.factor === 0.5
-        ).length;
-
-
-    const production =
-        rows.reduce(
+    const presentFTE =
+        filteredEmployees.reduce(
             (
-                sum,
-                r
+                total,
+                metric
             ) =>
-                sum +
-                r.production,
+                total +
+                metric.fte,
             0
         );
 
 
     const target =
-        rows.reduce(
+        filteredEmployees.reduce(
             (
-                sum,
-                r
+                total,
+                metric
             ) =>
-                sum +
-                r.adjustedTarget,
+                total +
+                metric.adjustedTarget,
+            0
+        );
+
+
+    const production =
+        filteredEmployees.reduce(
+            (
+                total,
+                metric
+            ) =>
+                total +
+                metric.production,
             0
         );
 
 
     const achievement =
         target > 0
-            ?
-            (
+            ? (
                 production /
                 target
-            ) *
-            100
-            :
-            0;
+            ) * 100
+            : 0;
 
 
-    document.getElementById(
-        "kpiEmployees"
-    ).textContent =
-        activeEmployees;
+    const average =
+        presentFTE > 0
+            ? production /
+              presentFTE
+            : 0;
 
 
-    document.getElementById(
-        "kpiPresent"
-    ).textContent =
-        present;
+    document
+        .getElementById(
+            "kpiEmployees"
+        )
+        .textContent =
+            totalEmployees;
 
 
-    document.getElementById(
-        "kpiHalf"
-    ).textContent =
-        half;
+    document
+        .getElementById(
+            "kpiPresent"
+        )
+        .textContent =
+            formatNumber(
+                presentFTE,
+                1
+            );
 
 
-    document.getElementById(
-        "kpiProduction"
-    ).textContent =
-        formatNumber(
-            production
-        );
+    document
+        .getElementById(
+            "kpiTarget"
+        )
+        .textContent =
+            formatNumber(
+                target,
+                1
+            );
 
 
-    document.getElementById(
-        "kpiTarget"
-    ).textContent =
-        formatNumber(
-            target
-        );
+    document
+        .getElementById(
+            "kpiProduction"
+        )
+        .textContent =
+            formatNumber(
+                production,
+                0
+            );
 
 
-    document.getElementById(
-        "kpiAchievement"
-    ).textContent =
-        formatPercent(
-            achievement
-        );
+    document
+        .getElementById(
+            "kpiAchievement"
+        )
+        .textContent =
+            formatPercent(
+                achievement
+            );
+
+
+    document
+        .getElementById(
+            "kpiAverage"
+        )
+        .textContent =
+            formatNumber(
+                average,
+                1
+            );
 
 }
 
 
 /* =========================================================
-   PROJECT SUMMARY
+   PROJECT METRICS
 ========================================================= */
 
-function getProjectGroups(){
+function buildProjectMetrics(){
 
     const map =
         new Map();
 
 
-    filteredRows.forEach(
-        row => {
+    filteredEmployees.forEach(
+        metric => {
+
+            const project =
+                metric.project;
+
+
+            if(!project)
+                return;
+
 
             const key =
-                String(
-                    row.employee.project_id
-                );
+                String(project.id);
 
 
             if(!map.has(key)){
@@ -2445,62 +2802,122 @@ function getProjectGroups(){
                 map.set(
                     key,
                     {
-                        project:
-                            row.project,
 
-                        projectName:
-                            row.projectName,
+                        project,
 
                         teamLead:
-                            row.teamLead,
+                            getTeamLeadForProject(
+                                project.id
+                            ),
 
-                        rows:[]
+                        employees:0,
+
+                        fte:0,
+
+                        target:0,
+
+                        production:0
+
                     }
                 );
 
             }
 
 
-            map.get(key).rows.push(
-                row
-            );
+            const item =
+                map.get(key);
+
+
+            item.employees += 1;
+
+            item.fte +=
+                metric.fte;
+
+            item.target +=
+                metric.adjustedTarget;
+
+            item.production +=
+                metric.production;
 
         }
     );
 
 
-    return [
-        ...map.values()
-    ];
+    return [...map.values()]
+        .map(
+            item => {
+
+                item.achievement =
+                    item.target > 0
+                        ? (
+                            item.production /
+                            item.target
+                        ) * 100
+                        : 0;
+
+
+                item.average =
+                    item.fte > 0
+                        ? item.production /
+                          item.fte
+                        : 0;
+
+
+                return item;
+
+            }
+        )
+        .sort(
+            (a,b) =>
+                String(
+                    a.project.project_name
+                ).localeCompare(
+                    String(
+                        b.project.project_name
+                    )
+                )
+        );
 
 }
 
 
 /* =========================================================
-   RENDER PROJECT TABLE
+   PROJECT TABLE
 ========================================================= */
 
 function renderProjectTable(){
 
-    const tbody =
+    const body =
         document.getElementById(
             "projectTableBody"
         );
 
 
-    tbody.innerHTML = "";
+    const loading =
+        document.getElementById(
+            "projectLoading"
+        );
 
 
-    const groups =
-        getProjectGroups();
+    loading.classList.add(
+        "hidden"
+    );
 
 
-    if(!groups.length){
+    body.innerHTML = "";
 
-        tbody.innerHTML =
+
+    const data =
+        buildProjectMetrics();
+
+
+    if(!data.length){
+
+        body.innerHTML =
             `<tr>
-                <td colspan="10" class="empty">
-                    No data available.
+                <td colspan="9"
+                    class="empty">
+                    No project data available.
                 </td>
             </tr>`;
 
@@ -2509,71 +2926,8 @@ function renderProjectTable(){
     }
 
 
-    groups.forEach(
-        group => {
-
-            const rows =
-                group.rows;
-
-
-            const employeesCount =
-                rows.length;
-
-
-            const present =
-                rows.filter(
-                    r =>
-                        r.factor === 1
-                ).length;
-
-
-            const half =
-                rows.filter(
-                    r =>
-                        r.factor === 0.5
-                ).length;
-
-
-            const absent =
-                rows.filter(
-                    r =>
-                        r.factor === 0
-                ).length;
-
-
-            const production =
-                rows.reduce(
-                    (
-                        s,
-                        r
-                    ) =>
-                        s +
-                        r.production,
-                    0
-                );
-
-
-            const target =
-                rows.reduce(
-                    (
-                        s,
-                        r
-                    ) =>
-                        s +
-                        r.adjustedTarget,
-                    0
-                );
-
-
-            const achievement =
-                target > 0
-                    ?
-                    production /
-                    target *
-                    100
-                    :
-                    0;
-
+    data.forEach(
+        item => {
 
             const tr =
                 document.createElement(
@@ -2581,265 +2935,74 @@ function renderProjectTable(){
                 );
 
 
+            tr.className =
+                "project-row";
+
+
             tr.innerHTML = `
 
+                <td class="project-name">
+                    ${escapeHTML(
+                        item.project.project_name
+                        ||
+                        `Project ${item.project.id}`
+                    )}
+                </td>
+
                 <td>
-                    <strong>
-                        ${escapeHtml(
-                            group.projectName
-                        )}
-                    </strong>
+                    ${escapeHTML(
+                        item.project.id
+                    )}
+                </td>
+
+                <td class="team-lead">
+                    ${escapeHTML(
+                        item.teamLead
+                    )}
                 </td>
 
                 <td>
-                    ${escapeHtml(
-                        group.teamLead
-                    )}
+                    ${item.employees}
                 </td>
 
-                <td class="center">
-                    ${employeesCount}
-                </td>
-
-                <td class="center">
-                    ${present}
-                </td>
-
-                <td class="center">
-                    ${half}
-                </td>
-
-                <td class="center">
-                    ${absent}
-                </td>
-
-                <td class="number">
+                <td>
                     ${formatNumber(
-                        production
+                        item.fte,
+                        1
                     )}
                 </td>
 
-                <td class="number">
+                <td>
                     ${formatNumber(
-                        target
+                        item.target,
+                        1
                     )}
                 </td>
 
-                <td class="number">
-                    ${formatPercent(
-                        achievement
+                <td>
+                    ${formatNumber(
+                        item.production,
+                        0
                     )}
                 </td>
 
                 <td>
                     ${achievementBadge(
-                        achievement
+                        item.achievement
+                    )}
+                </td>
+
+                <td>
+                    ${formatNumber(
+                        item.average,
+                        1
                     )}
                 </td>
 
             `;
 
 
-            tbody.appendChild(
-                tr
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   TEAM LEAD SUMMARY
-========================================================= */
-
-function renderTeamLeadTable(){
-
-    const tbody =
-        document.getElementById(
-            "teamLeadTableBody"
-        );
-
-
-    tbody.innerHTML = "";
-
-
-    const map =
-        new Map();
-
-
-    filteredRows.forEach(
-        row => {
-
-            const key =
-                row.teamLead +
-                "|" +
-                row.projectName;
-
-
-            if(!map.has(key)){
-
-                map.set(
-                    key,
-                    {
-                        teamLead:
-                            row.teamLead,
-
-                        project:
-                            row.projectName,
-
-                        rows:[]
-                    }
-                );
-
-            }
-
-
-            map.get(key).rows.push(
-                row
-            );
-
-        }
-    );
-
-
-    if(!map.size){
-
-        tbody.innerHTML =
-            `<tr>
-                <td colspan="9" class="empty">
-                    No data available.
-                </td>
-            </tr>`;
-
-        return;
-
-    }
-
-
-    map.forEach(
-        group => {
-
-            const rows =
-                group.rows;
-
-
-            const present =
-                rows.filter(
-                    r =>
-                        r.factor === 1
-                ).length;
-
-
-            const half =
-                rows.filter(
-                    r =>
-                        r.factor === 0.5
-                ).length;
-
-
-            const absent =
-                rows.filter(
-                    r =>
-                        r.factor === 0
-                ).length;
-
-
-            const production =
-                rows.reduce(
-                    (
-                        s,
-                        r
-                    ) =>
-                        s +
-                        r.production,
-                    0
-                );
-
-
-            const target =
-                rows.reduce(
-                    (
-                        s,
-                        r
-                    ) =>
-                        s +
-                        r.adjustedTarget,
-                    0
-                );
-
-
-            const achievement =
-                target > 0
-                    ?
-                    production /
-                    target *
-                    100
-                    :
-                    0;
-
-
-            const tr =
-                document.createElement(
-                    "tr"
-                );
-
-
-            tr.innerHTML = `
-
-                <td>
-                    <strong>
-                        ${escapeHtml(
-                            group.teamLead
-                        )}
-                    </strong>
-                </td>
-
-                <td>
-                    ${escapeHtml(
-                        group.project
-                    )}
-                </td>
-
-                <td class="center">
-                    ${rows.length}
-                </td>
-
-                <td class="center">
-                    ${present}
-                </td>
-
-                <td class="center">
-                    ${half}
-                </td>
-
-                <td class="center">
-                    ${absent}
-                </td>
-
-                <td class="number">
-                    ${formatNumber(
-                        production
-                    )}
-                </td>
-
-                <td class="number">
-                    ${formatNumber(
-                        target
-                    )}
-                </td>
-
-                <td class="number">
-                    ${formatPercent(
-                        achievement
-                    )}
-                </td>
-
-            `;
-
-
-            tbody.appendChild(
+            body.appendChild(
                 tr
             );
 
@@ -2855,20 +3018,21 @@ function renderTeamLeadTable(){
 
 function renderEmployeeTable(){
 
-    const tbody =
+    const body =
         document.getElementById(
             "employeeTableBody"
         );
 
 
-    tbody.innerHTML = "";
+    body.innerHTML = "";
 
 
-    if(!filteredRows.length){
+    if(!filteredEmployees.length){
 
-        tbody.innerHTML =
+        body.innerHTML =
             `<tr>
-                <td colspan="10" class="empty">
+                <td colspan="10"
+                    class="empty">
                     No employee data available.
                 </td>
             </tr>`;
@@ -2878,8 +3042,22 @@ function renderEmployeeTable(){
     }
 
 
-    filteredRows.forEach(
-        row => {
+    filteredEmployees.forEach(
+        metric => {
+
+            const employee =
+                metric.employee;
+
+
+            const project =
+                metric.project;
+
+
+            const teamLead =
+                getTeamLeadForProject(
+                    employee.project_id
+                );
+
 
             const tr =
                 document.createElement(
@@ -2890,72 +3068,72 @@ function renderEmployeeTable(){
             tr.innerHTML = `
 
                 <td>
-                    <strong>
-                        ${escapeHtml(
-                            row.employee.employee_name
-                        )}
-                    </strong>
-                </td>
-
-                <td>
-                    ${escapeHtml(
-                        row.employee.employee_code ||
-                        ""
+                    ${escapeHTML(
+                        employee.employee_name
                     )}
                 </td>
 
                 <td>
-                    ${escapeHtml(
-                        row.projectName
+                    ${escapeHTML(
+                        employee.employee_code
                     )}
                 </td>
 
                 <td>
-                    ${escapeHtml(
-                        row.teamLead
+                    ${escapeHTML(
+                        project?.project_name
+                        ||
+                        `Project ${employee.project_id}`
+                    )}
+                </td>
+
+                <td class="team-lead">
+                    ${escapeHTML(
+                        teamLead
                     )}
                 </td>
 
                 <td>
                     ${attendanceBadge(
-                        row.attendance
+                        metric.attendance
                     )}
                 </td>
 
-                <td class="number">
+                <td>
+                    ${metric.fte}
+                </td>
+
+                <td>
                     ${formatNumber(
-                        row.dailyTarget
+                        metric.adjustedTarget,
+                        1
                     )}
                 </td>
 
-                <td class="number">
+                <td>
                     ${formatNumber(
-                        row.adjustedTarget
-                    )}
-                </td>
-
-                <td class="number">
-                    ${formatNumber(
-                        row.production
-                    )}
-                </td>
-
-                <td class="number">
-                    ${formatPercent(
-                        row.achievement
+                        metric.production,
+                        0
                     )}
                 </td>
 
                 <td>
                     ${achievementBadge(
-                        row.achievement
+                        metric.achievement
+                    )}
+                </td>
+
+                <td>
+                    ${formatNumber(
+                        metric.averagePerHour,
+                        1
                     )}
                 </td>
 
             `;
 
 
-            tbody.appendChild(
+            body.appendChild(
                 tr
             );
 
@@ -2971,21 +3149,22 @@ function renderEmployeeTable(){
 
 function renderHourlyTable(){
 
-    const tbody =
+    const body =
         document.getElementById(
             "hourlyTableBody"
         );
 
 
-    tbody.innerHTML = "";
+    body.innerHTML = "";
 
 
-    if(!filteredRows.length){
+    if(!filteredEmployees.length){
 
-        tbody.innerHTML =
+        body.innerHTML =
             `<tr>
-                <td colspan="12" class="empty">
-                    No hourly production available.
+                <td colspan="11"
+                    class="empty">
+                    No hourly data available.
                 </td>
             </tr>`;
 
@@ -2994,12 +3173,8 @@ function renderHourlyTable(){
     }
 
 
-    filteredRows.forEach(
-        row => {
-
-            const p =
-                row.product || {};
-
+    filteredEmployees.forEach(
+        metric => {
 
             const tr =
                 document.createElement(
@@ -3007,43 +3182,32 @@ function renderHourlyTable(){
                 );
 
 
-            let html = `
+            tr.innerHTML = `
 
                 <td>
-                    ${escapeHtml(
-                        row.employee.employee_name
+                    ${escapeHTML(
+                        metric.employee.employee_name
                     )}
                 </td>
 
-                <td>
-                    ${escapeHtml(
-                        row.projectName
-                    )}
-                </td>
-            `;
-
-
-            HOUR_FIELDS.forEach(
-                field => {
-
-                    html += `
-                        <td class="number">
-                            ${formatNumber(
-                                p[field]
-                            )}
-                        </td>
-                    `;
-
+                ${metric.hours
+                    .map(
+                        value =>
+                            `<td>
+                                ${formatNumber(
+                                    value,
+                                    0
+                                )}
+                             </td>`
+                    )
+                    .join("")
                 }
-            );
 
-
-            html += `
-
-                <td class="number">
+                <td>
                     <strong>
                         ${formatNumber(
-                            row.production
+                            metric.production,
+                            0
                         )}
                     </strong>
                 </td>
@@ -3051,11 +3215,7 @@ function renderHourlyTable(){
             `;
 
 
-            tr.innerHTML =
-                html;
-
-
-            tbody.appendChild(
+            body.appendChild(
                 tr
             );
 
@@ -3071,70 +3231,27 @@ function renderHourlyTable(){
 
 function renderCharts(){
 
-    const groups =
-        getProjectGroups();
+    renderProjectAchievementChart();
+
+    renderHourlyProductionChart();
+
+}
 
 
-    const labels =
-        groups.map(
-            g =>
-                g.projectName
+/* =========================================================
+   PROJECT ACHIEVEMENT CHART
+========================================================= */
+
+function renderProjectAchievementChart(){
+
+    const canvas =
+        document.getElementById(
+            "projectAchievementChart"
         );
 
 
-    const production =
-        groups.map(
-            g =>
-                g.rows.reduce(
-                    (
-                        s,
-                        r
-                    ) =>
-                        s +
-                        r.production,
-                    0
-                )
-        );
-
-
-    const achievements =
-        groups.map(
-            g => {
-
-                const prod =
-                    g.rows.reduce(
-                        (
-                            s,
-                            r
-                        ) =>
-                            s +
-                            r.production,
-                        0
-                    );
-
-
-                const target =
-                    g.rows.reduce(
-                        (
-                            s,
-                            r
-                        ) =>
-                            s +
-                            r.adjustedTarget,
-                        0
-                    );
-
-
-                return target > 0
-                    ?
-                    prod /
-                    target *
-                    100
-                    :
-                    0;
-
-            }
-        );
+    const data =
+        buildProjectMetrics();
 
 
     if(projectChart){
@@ -3144,105 +3261,173 @@ function renderCharts(){
     }
 
 
-    if(achievementChart){
-
-        achievementChart.destroy();
-
-    }
-
-
     projectChart =
         new Chart(
-            document.getElementById(
-                "projectChart"
-            ),
+            canvas,
             {
 
                 type:"bar",
 
                 data:{
-                    labels,
 
-                    datasets:[
+                    labels:
+                        data.map(
+                            item =>
+                                item.project.project_name
+                        ),
 
-                        {
-                            label:
-                                "Production",
+                    datasets:[{
 
-                            data:
-                                production
-                        }
+                        label:
+                            "Achievement %",
 
-                    ]
+                        data:
+                            data.map(
+                                item =>
+                                    Number(
+                                        item.achievement
+                                        .toFixed(1)
+                                    )
+                            )
+
+                    }]
 
                 },
 
                 options:{
+
                     responsive:true,
 
                     maintainAspectRatio:false,
 
                     plugins:{
+
                         legend:{
-                            display:true
+                            display:false
                         }
+
                     },
 
                     scales:{
+
+                        y:{
+
+                            beginAtZero:true,
+
+                            title:{
+                                display:true,
+                                text:"Achievement %"
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   HOURLY PRODUCTION CHART
+========================================================= */
+
+function renderHourlyProductionChart(){
+
+    const canvas =
+        document.getElementById(
+            "hourlyProductionChart"
+        );
+
+
+    const totals =
+        HOUR_FIELDS.map(
+            () => 0
+        );
+
+
+    filteredEmployees.forEach(
+        metric => {
+
+            metric.hours.forEach(
+                (
+                    value,
+                    index
+                ) => {
+
+                    totals[index] +=
+                        value;
+
+                }
+            );
+
+        }
+    );
+
+
+    if(hourlyChart){
+
+        hourlyChart.destroy();
+
+    }
+
+
+    hourlyChart =
+        new Chart(
+            canvas,
+            {
+
+                type:"line",
+
+                data:{
+
+                    labels:[
+                        "6–7 PM",
+                        "7–8 PM",
+                        "8–9 PM",
+                        "9–10 PM",
+                        "10–11 PM",
+                        "11–12",
+                        "12–1 AM",
+                        "1–2 AM",
+                        "2–3 AM"
+                    ],
+
+                    datasets:[{
+
+                        label:
+                            "Production",
+
+                        data:
+                            totals
+
+                    }]
+
+                },
+
+                options:{
+
+                    responsive:true,
+
+                    maintainAspectRatio:false,
+
+                    plugins:{
+
+                        legend:{
+                            display:true
+                        }
+
+                    },
+
+                    scales:{
+
                         y:{
                             beginAtZero:true
                         }
-                    }
 
-                }
-
-            }
-        );
-
-
-    achievementChart =
-        new Chart(
-            document.getElementById(
-                "achievementChart"
-            ),
-            {
-
-                type:"bar",
-
-                data:{
-                    labels,
-
-                    datasets:[
-
-                        {
-                            label:
-                                "Achievement %",
-
-                            data:
-                                achievements
-                        }
-
-                    ]
-
-                },
-
-                options:{
-                    responsive:true,
-
-                    maintainAspectRatio:false,
-
-                    plugins:{
-                        legend:{
-                            display:true
-                        }
-                    },
-
-                    scales:{
-                        y:{
-                            beginAtZero:true,
-
-                            suggestedMax:100
-                        }
                     }
 
                 }
@@ -3254,291 +3439,123 @@ function renderCharts(){
 
 
 /* =========================================================
-   PROJECT DETAILS
+   ACHIEVEMENT BADGE
 ========================================================= */
 
-function showProjectDetails(){
+function achievementBadge(value){
 
-    const groups =
-        getProjectGroups();
+    const percentage =
+        num(value);
 
 
-    let html = `
+    let css =
+        "badge-neutral";
 
-        <div class="table-wrap">
 
-            <table>
+    if(percentage >= 100){
 
-                <thead>
+        css =
+            "badge-good";
 
-                    <tr>
+    }
+    else if(percentage >= 80){
 
-                        <th>
-                            Project
-                        </th>
+        css =
+            "badge-mid";
 
-                        <th>
-                            Team Lead
-                        </th>
+    }
+    else if(percentage > 0){
 
-                        <th>
-                            Production
-                        </th>
+        css =
+            "badge-low";
 
-                        <th>
-                            Target
-                        </th>
+    }
 
-                        <th>
-                            Achievement
-                        </th>
 
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
+    return `
+        <span class="badge ${css}">
+            ${formatPercent(
+                percentage
+            )}
+        </span>
     `;
 
-
-    groups.forEach(
-        group => {
-
-            const production =
-                group.rows.reduce(
-                    (
-                        s,
-                        r
-                    ) =>
-                        s +
-                        r.production,
-                    0
-                );
+}
 
 
-            const target =
-                group.rows.reduce(
-                    (
-                        s,
-                        r
-                    ) =>
-                        s +
-                        r.adjustedTarget,
-                    0
-                );
+/* =========================================================
+   ATTENDANCE BADGE
+========================================================= */
+
+function attendanceBadge(value){
+
+    const label =
+        value;
 
 
-            const achievement =
-                target > 0
-                    ?
-                    production /
-                    target *
-                    100
-                    :
-                    0;
+    let css =
+        "badge-good";
 
 
-            html += `
+    if(label === "Half Day"){
 
-                <tr>
+        css =
+            "badge-mid";
 
-                    <td>
-                        ${escapeHtml(
-                            group.projectName
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            group.teamLead
-                        )}
-                    </td>
-
-                    <td class="number">
-                        ${formatNumber(
-                            production
-                        )}
-                    </td>
-
-                    <td class="number">
-                        ${formatNumber(
-                            target
-                        )}
-                    </td>
-
-                    <td class="number">
-                        ${formatPercent(
-                            achievement
-                        )}
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
-    );
+    }
 
 
-    html += `
+    if(label === "Absent"){
 
-                </tbody>
+        css =
+            "badge-low";
 
-            </table>
+    }
 
-        </div>
 
+    return `
+        <span class="badge ${css}">
+            ${escapeHTML(label)}
+        </span>
     `;
 
-
-    document.getElementById(
-        "detailsBody"
-    ).innerHTML =
-        html;
-
-
-    document.getElementById(
-        "detailsModal"
-    ).style.display =
-        "block";
-
 }
 
 
-function closeDetails(){
+/* =========================================================
+   REFRESH
+========================================================= */
 
-    document.getElementById(
-        "detailsModal"
-    ).style.display =
-        "none";
+async function refreshDashboard(){
+
+    await loadDashboard();
 
 }
 
 
 /* =========================================================
-   DATE LOCK
+   LOGOUT
 ========================================================= */
 
-async function loadLockStatus(){
+async function logoutUser(){
 
-    const date =
-        document.getElementById(
-            "lockDate"
-        ).value;
+    await sb.auth.signOut();
 
-
-    if(!date){
-
-        return;
-
-    }
-
-
-    try{
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .from("tracker_date_locks")
-                .select("*")
-                .eq(
-                    "tracker_date",
-                    date
-                )
-                .maybeSingle();
-
-
-        if(error){
-
-            throw error;
-
-        }
-
-
-        const status =
-            document.getElementById(
-                "lockStatus"
-            );
-
-
-        if(data && data.is_locked){
-
-            status.textContent =
-                "🔒 Locked";
-
-            status.style.color =
-                "#dc3545";
-
-        }
-        else{
-
-            status.textContent =
-                "🔓 Unlocked";
-
-            status.style.color =
-                "#198754";
-
-        }
-
-    }
-    catch(error){
-
-        console.error(error);
-
-        document.getElementById(
-            "lockStatus"
-        ).textContent =
-            "Unable to check";
-
-    }
+    location.reload();
 
 }
 
 
 /* =========================================================
-   LOCK DATE
+   CSV EXPORT
 ========================================================= */
 
-async function lockSelectedDate(){
+function exportCSV(){
 
-    await setDateLock(
-        true
-    );
+    if(!filteredEmployees.length){
 
-}
-
-
-/* =========================================================
-   UNLOCK DATE
-========================================================= */
-
-async function unlockSelectedDate(){
-
-    await setDateLock(
-        false
-    );
-
-}
-
-
-/* =========================================================
-   SET DATE LOCK
-========================================================= */
-
-async function setDateLock(isLocked){
-
-    if(
-        !currentUser ||
-        !isAdmin(
-            currentUser.email
-        )
-    ){
-
-        showError(
-            "You are not authorized to lock or unlock dates."
+        alert(
+            "No data available to export."
         );
 
         return;
@@ -3546,220 +3563,97 @@ async function setDateLock(isLocked){
     }
 
 
-    const date =
-        document.getElementById(
-            "lockDate"
-        ).value;
+    const rows = [];
 
 
-    if(!date){
+    rows.push([
 
-        showError(
-            "Please select a date."
-        );
-
-        return;
-
-    }
-
-
-    try{
-
-        const {
-            error
-        } =
-            await supabaseClient
-                .from("tracker_date_locks")
-                .upsert(
-                    {
-
-                        tracker_date:
-                            date,
-
-                        is_locked:
-                            isLocked,
-
-                        locked_by:
-                            isLocked
-                                ?
-                                currentUser.id
-                                :
-                                null,
-
-                        locked_at:
-                            isLocked
-                                ?
-                                new Date().toISOString()
-                                :
-                                null
-
-                    },
-                    {
-                        onConflict:
-                            "tracker_date"
-                    }
-                );
-
-
-        if(error){
-
-            throw error;
-
-        }
-
-
-        showSuccess(
-            isLocked
-                ?
-                "Date locked successfully."
-                :
-                "Date unlocked successfully."
-        );
-
-
-        await loadLockStatus();
-
-    }
-    catch(error){
-
-        console.error(error);
-
-        showError(
-            error.message ||
-            "Unable to update date lock."
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   CSV DOWNLOAD
-========================================================= */
-
-function downloadCSV(){
-
-    if(!filteredRows.length){
-
-        showError(
-            "There is no data to export."
-        );
-
-        return;
-
-    }
-
-
-    const headers = [
-
+        "Date",
         "Employee",
-
         "Employee Code",
-
         "Project",
-
+        "Project ID",
         "Team Lead",
-
         "Attendance",
-
-        "Daily Target",
-
+        "FTE",
         "Adjusted Target",
-
         "Production",
-
         "Achievement %",
-
         "6-7",
-
         "7-8",
-
         "8-9",
-
         "9-10",
-
         "10-11",
-
         "11-12",
-
         "12-1",
-
         "1-2",
-
         "2-3"
 
-    ];
+    ]);
 
 
-    const lines = [
+    filteredEmployees.forEach(
+        metric => {
 
-        headers
-
-    ];
-
-
-    filteredRows.forEach(
-        row => {
-
-            const p =
-                row.product || {};
+            const employee =
+                metric.employee;
 
 
-            lines.push(
+            const project =
+                metric.project;
 
-                [
 
-                    row.employee.employee_name,
+            const teamLead =
+                getTeamLeadForProject(
+                    employee.project_id
+                );
 
-                    row.employee.employee_code,
 
-                    row.projectName,
+            rows.push([
 
-                    row.teamLead,
+                currentDate,
 
-                    row.attendance,
+                employee.employee_name,
 
-                    row.dailyTarget,
+                employee.employee_code,
 
-                    row.adjustedTarget,
+                project?.project_name
+                    || "",
 
-                    row.production,
+                employee.project_id,
 
-                    row.achievement.toFixed(2),
+                teamLead,
 
-                    ...HOUR_FIELDS.map(
-                        field =>
-                            num(
-                                p[field]
-                            )
-                    )
+                metric.attendance,
 
-                ]
+                metric.fte,
 
-            );
+                metric.adjustedTarget,
+
+                metric.production,
+
+                metric.achievement,
+
+                ...metric.hours
+
+            ]);
 
         }
     );
 
 
     const csv =
-        lines
-            .map(
-                row =>
-                    row
-                        .map(
-                            value =>
-                                `"${String(
-                                    value ?? ""
-                                ).replace(
-                                    /"/g,
-                                    '""'
-                                )}"`
-                        )
-                        .join(",")
-            )
-            .join("\n");
+        rows
+        .map(
+            row =>
+                row
+                .map(
+                    value =>
+                        csvEscape(value)
+                )
+                .join(",")
+        )
+        .join("\n");
 
 
     const blob =
@@ -3789,11 +3683,7 @@ function downloadCSV(){
 
 
     link.download =
-        "AMI_Management_Production_" +
-        document.getElementById(
-            "trackerDate"
-        ).value +
-        ".csv";
+        `AMI_Management_${currentDate}.csv`;
 
 
     document.body.appendChild(
@@ -3815,128 +3705,70 @@ function downloadCSV(){
 
 
 /* =========================================================
-   LOGOUT
+   CSV ESCAPE
 ========================================================= */
 
-async function logout(){
+function csvEscape(value){
 
-    await supabaseClient.auth.signOut();
+    const text =
+        String(
+            value ?? ""
+        );
 
-    window.location.href =
-        "index.html";
+
+    if(
+        text.includes(",") ||
+        text.includes('"') ||
+        text.includes("\n")
+    ){
+
+        return `"${text.replace(
+            /"/g,
+            '""'
+        )}"`;
+
+    }
+
+
+    return text;
 
 }
 
 
 /* =========================================================
-   FORMATTING
+   NUMBER FORMAT
 ========================================================= */
 
-function formatNumber(value){
+function formatNumber(
+    value,
+    decimals = 0
+){
 
     return num(value)
         .toLocaleString(
             "en-IN",
             {
-                maximumFractionDigits:2
+                minimumFractionDigits:
+                    decimals,
+
+                maximumFractionDigits:
+                    decimals
             }
         );
 
 }
 
 
-function formatPercent(value){
-
-    return num(value)
-        .toFixed(1) +
-        "%";
-
-}
-
-
 /* =========================================================
-   BADGES
+   PERCENT FORMAT
 ========================================================= */
 
-function attendanceBadge(value){
+function formatPercent(value){
 
-    const label =
-        attendanceLabel(
-            value
-        );
-
-
-    if(label === "Present"){
-
-        return `
-            <span class="badge badge-green">
-                Present
-            </span>
-        `;
-
-    }
-
-
-    if(label === "Half Day"){
-
-        return `
-            <span class="badge badge-yellow">
-                Half Day · 0.5
-            </span>
-        `;
-
-    }
-
-
-    return `
-        <span class="badge badge-red">
-            Absent · 0
-        </span>
-    `;
-
-}
-
-
-function achievementBadge(value){
-
-    if(value >= 100){
-
-        return `
-            <span class="badge badge-green">
-                ${formatPercent(value)}
-            </span>
-        `;
-
-    }
-
-
-    if(value >= 80){
-
-        return `
-            <span class="badge badge-blue">
-                ${formatPercent(value)}
-            </span>
-        `;
-
-    }
-
-
-    if(value >= 50){
-
-        return `
-            <span class="badge badge-yellow">
-                ${formatPercent(value)}
-            </span>
-        `;
-
-    }
-
-
-    return `
-        <span class="badge badge-red">
-            ${formatPercent(value)}
-        </span>
-    `;
+    return (
+        num(value)
+        .toFixed(1)
+    ) + "%";
 
 }
 
@@ -3945,7 +3777,7 @@ function achievementBadge(value){
    HTML ESCAPE
 ========================================================= */
 
-function escapeHtml(value){
+function escapeHTML(value){
 
     return String(
         value ?? ""
@@ -3978,14 +3810,27 @@ function escapeHtml(value){
    STATUS
 ========================================================= */
 
-function setStatus(
-    message,
-    success=false
-){
+function showStatus(message){
+
+    document
+        .getElementById(
+            "status"
+        )
+        .textContent =
+            message;
+
+}
+
+
+/* =========================================================
+   PAGE ERROR
+========================================================= */
+
+function showPageError(message){
 
     const element =
         document.getElementById(
-            "loadStatus"
+            "pageError"
         );
 
 
@@ -3993,137 +3838,105 @@ function setStatus(
         message;
 
 
-    element.className =
-        success
-            ?
-            "status ok"
-            :
-            "status";
-
-}
-
-
-function showError(message){
-
-    const alert =
-        document.getElementById(
-            "errorAlert"
-        );
-
-
-    alert.textContent =
-        message;
-
-
-    alert.style.display =
-        "block";
-
-
-    document.getElementById(
-        "successAlert"
-    ).style.display =
-        "none";
-
-
-    setTimeout(
-        () => {
-
-            alert.style.display =
-                "none";
-
-        },
-        6000
-    );
-
-}
-
-
-function showSuccess(message){
-
-    const alert =
-        document.getElementById(
-            "successAlert"
-        );
-
-
-    alert.textContent =
-        message;
-
-
-    alert.style.display =
-        "block";
-
-
-    document.getElementById(
-        "errorAlert"
-    ).style.display =
-        "none";
-
-
-    setTimeout(
-        () => {
-
-            alert.style.display =
-                "none";
-
-        },
-        4000
+    element.classList.remove(
+        "hidden"
     );
 
 }
 
 
 /* =========================================================
-   MODAL OUTSIDE CLICK
+   HIDE PAGE ERROR
 ========================================================= */
 
-window.addEventListener(
-    "click",
-    function(event){
+function hidePageError(){
 
-        const modal =
-            document.getElementById(
-                "detailsModal"
-            );
+    document
+        .getElementById(
+            "pageError"
+        )
+        .classList
+        .add("hidden");
 
-
-        if(
-            event.target ===
-            modal
-        ){
-
-            closeDetails();
-
-        }
-
-    }
-);
+}
 
 
 /* =========================================================
-   AUTH STATE
+   AUTH STATE CHANGE
 ========================================================= */
 
-supabaseClient.auth.onAuthStateChange(
-    function(
+sb.auth.onAuthStateChange(
+    async (
         event,
         session
-    ){
+    ) => {
 
         if(
             event ===
             "SIGNED_OUT"
         ){
 
-            window.location.href =
-                "index.html";
+            document
+                .getElementById(
+                    "dashboardScreen"
+                )
+                .classList
+                .add("hidden");
+
+
+            document
+                .getElementById(
+                    "loginScreen"
+                )
+                .classList
+                .remove("hidden");
 
         }
 
     }
 );
 
+
+/* =========================================================
+   DATE CHANGE
+========================================================= */
+
+document
+.getElementById(
+    "trackerDate"
+)
+.addEventListener(
+    "change",
+    async function(){
+
+        await loadDashboard();
+
+    }
+);
+
+
+/* =========================================================
+   PROJECT CHANGE
+========================================================= */
+
+document
+.getElementById(
+    "projectFilter"
+)
+.addEventListener(
+    "change",
+    function(){
+
+        updateTeamLeadFilter();
+
+        applyFilters();
+
+    }
+);
+
+
 </script>
 
 </body>
+
 </html>
