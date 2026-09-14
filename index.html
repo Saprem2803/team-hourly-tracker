@@ -4148,6 +4148,41 @@ function getProductionRecord(
 
 
 /* =========================================================
+   COMPUTE ACHIEVED FROM HOURLY FIELDS
+
+   The `achieved` column in daily_productivity can be stale
+   (it is only correct if every write went through the same
+   code path - the employee self-entry page, admin edits, and
+   older versions of this dashboard could all write hourly
+   values without recomputing the total). The hourly columns
+   are the source of truth, so every dashboard view recomputes
+   the total from them instead of trusting the stored
+   `achieved`.
+
+   This fixes the symptom where the Hourly Production table
+   showed real hourly counts but the Performance Overview,
+   Manager Control Center, Project Performance and Sub-Project
+   Performance all reported Achieved = 0.
+========================================================= */
+
+function computeAchievedFromRecord(record) {
+
+    if (!record) return 0;
+
+    let total = 0;
+
+    hourFields.forEach(field => {
+
+        total += Math.max(Number(record[field] || 0), 0);
+
+    });
+
+    return total;
+
+}
+
+
+/* =========================================================
    FILTERED EMPLOYEES
 ========================================================= */
 
@@ -5469,10 +5504,11 @@ function getProjectMetrics(
                 );
 
 
+            // FIX: never trust the stored achieved column.
+            // Compute it from the hourly columns, which are the
+            // real source of truth.
             const achieved =
-                Number(
-                    record?.achieved || 0
-                );
+                computeAchievedFromRecord(record);
 
 
             totalAchieved +=
@@ -5587,10 +5623,9 @@ function getSubProjectMetrics(
                 );
 
 
+            // FIX: same reasoning as getProjectMetrics above.
             const production =
-                Number(
-                    record?.achieved || 0
-                );
+                computeAchievedFromRecord(record);
 
 
             achieved +=
@@ -6095,10 +6130,9 @@ function renderPerformanceSummary() {
                 );
 
 
+            // FIX: compute achieved from the hourly columns.
             const achieved =
-                Number(
-                    record?.achieved || 0
-                );
+                computeAchievedFromRecord(record);
 
 
             const remaining =
@@ -6754,10 +6788,10 @@ async function updateKPI() {
                 );
 
 
+            // FIX: recompute achieved from hourly columns rather
+            // than reading the (possibly stale) stored value.
             const production =
-                Number(
-                    record?.achieved || 0
-                );
+                computeAchievedFromRecord(record);
 
 
             totalAchieved +=
@@ -7174,7 +7208,11 @@ function renderManagerControlCenter() {
         const attendance = record?.attendance || "Present";
         const targetRaw = getDailyTarget(employee, attendance);
         const target = targetRaw === null ? 0 : Number(targetRaw || 0);
-        const achieved = Number(record?.achieved || 0);
+
+        // FIX: compute achieved from hourly columns, not the
+        // stored (possibly stale) achieved value.
+        const achieved = computeAchievedFromRecord(record);
+
         const remaining = Math.max(target - achieved, 0);
         const pct = target > 0 ? achieved / target * 100 : null;
         const project = getProjectById(employee.project_id);
@@ -7643,10 +7681,9 @@ async function downloadDailyCSV() {
                 );
 
 
+            // FIX: compute achieved from hourly columns.
             const achieved =
-                Number(
-                    record?.achieved || 0
-                );
+                computeAchievedFromRecord(record);
 
 
             const remaining =
@@ -8089,10 +8126,10 @@ async function downloadMTDCSV() {
                     }
 
 
+                    // FIX: compute achieved from the hourly
+                    // columns for each day, then accumulate.
                     const achieved =
-                        Number(
-                            record?.achieved || 0
-                        );
+                        computeAchievedFromRecord(record);
 
 
                     mtdAchieved +=
