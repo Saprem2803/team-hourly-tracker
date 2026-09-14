@@ -2086,6 +2086,302 @@ tbody tr:hover{
 }
 
 /* =========================================================
+   EXPORT MODAL
+========================================================= */
+
+.modal-overlay{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(10,22,40,.5);
+
+    backdrop-filter:blur(4px);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:24px;
+
+    z-index:1000;
+
+    animation:fadeIn .15s ease;
+
+}
+
+@keyframes fadeIn{
+
+    from{opacity:0;}
+    to{opacity:1;}
+
+}
+
+.modal-card{
+
+    background:#ffffff;
+
+    border-radius:16px;
+
+    box-shadow:0 24px 80px rgba(10,22,40,.3);
+
+    width:100%;
+
+    max-width:540px;
+
+    padding:28px 30px;
+
+    animation:slideUp .2s ease;
+
+}
+
+@keyframes slideUp{
+
+    from{transform:translateY(20px);opacity:0;}
+    to{transform:translateY(0);opacity:1;}
+
+}
+
+.modal-head{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    margin-bottom:20px;
+
+}
+
+.modal-eyebrow{
+
+    font-size:10px;
+
+    font-weight:700;
+
+    letter-spacing:1.6px;
+
+    text-transform:uppercase;
+
+    color:var(--gold);
+
+    margin-bottom:5px;
+
+}
+
+.modal-title{
+
+    font-family:'Playfair Display',Georgia,serif;
+
+    font-size:22px;
+
+    font-weight:700;
+
+    color:var(--ink);
+
+    letter-spacing:-.3px;
+
+}
+
+.modal-close{
+
+    background:var(--bg-soft);
+
+    border:1px solid var(--line);
+
+    border-radius:8px;
+
+    width:32px;
+
+    height:32px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    cursor:pointer;
+
+    font-size:14px;
+
+    color:var(--ink-4);
+
+    transition:all .15s;
+
+    font-family:inherit;
+
+}
+
+.modal-close:hover{
+
+    background:var(--line);
+
+    color:var(--ink);
+
+}
+
+.modal-presets{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:6px;
+
+    margin-bottom:20px;
+
+    padding-bottom:18px;
+
+    border-bottom:1px solid var(--line);
+
+}
+
+.modal-presets button{
+
+    border:1px solid var(--line);
+
+    background:#ffffff;
+
+    border-radius:7px;
+
+    padding:6px 11px;
+
+    font-size:11px;
+
+    font-weight:600;
+
+    color:var(--ink-3);
+
+    cursor:pointer;
+
+    font-family:inherit;
+
+    transition:all .15s;
+
+}
+
+.modal-presets button:hover{
+
+    background:var(--bg-soft);
+
+    border-color:#cbd5e1;
+
+    color:var(--ink);
+
+}
+
+.modal-fields{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:14px;
+
+    margin-bottom:16px;
+
+}
+
+.modal-field{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:6px;
+
+    margin-bottom:16px;
+
+}
+
+.modal-field label{
+
+    font-size:10px;
+
+    font-weight:700;
+
+    letter-spacing:1.2px;
+
+    text-transform:uppercase;
+
+    color:var(--ink-4);
+
+}
+
+.modal-field input,
+.modal-field select{
+
+    padding:10px 12px;
+
+    border:1px solid var(--line);
+
+    border-radius:9px;
+
+    font-size:13px;
+
+    font-family:inherit;
+
+    color:var(--ink-2);
+
+    background:#ffffff;
+
+    outline:none;
+
+    transition:all .15s;
+
+}
+
+.modal-field input:focus,
+.modal-field select:focus{
+
+    border-color:var(--brand-2);
+
+    box-shadow:0 0 0 3px rgba(26,77,122,.08);
+
+}
+
+.modal-info{
+
+    font-size:12px;
+
+    color:var(--ink-4);
+
+    line-height:1.5;
+
+    padding:10px 14px;
+
+    background:var(--bg-soft);
+
+    border-radius:9px;
+
+    border:1px solid var(--line);
+
+    margin-bottom:20px;
+
+}
+
+.modal-info strong{
+
+    color:var(--ink);
+
+}
+
+.modal-actions{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:10px;
+
+}
+
+/* =========================================================
    RESPONSIVE
 ========================================================= */
 
@@ -2166,6 +2462,12 @@ tbody tr:hover{
     }
 
     .chart-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .modal-fields{
 
         grid-template-columns:1fr;
 
@@ -2333,7 +2635,7 @@ tbody tr:hover{
 
             </button>
 
-            <button class="btn btn-ghost" onclick="exportCSV()">
+            <button class="btn btn-ghost" onclick="openExportModal()">
 
                 Export Report
 
@@ -2862,6 +3164,97 @@ tbody tr:hover{
         </div>
 
     </footer>
+
+</div>
+
+
+<!-- =========================================================
+     EXPORT MODAL
+========================================================= -->
+
+<div id="exportModal" class="modal-overlay hidden">
+
+    <div class="modal-card">
+
+        <div class="modal-head">
+
+            <div>
+
+                <div class="modal-eyebrow">Export Report</div>
+
+                <div class="modal-title">Choose a date range</div>
+
+            </div>
+
+            <button class="modal-close" onclick="closeExportModal()">✕</button>
+
+        </div>
+
+        <div class="modal-presets">
+
+            <button type="button" onclick="setExportPreset('today')">Today</button>
+
+            <button type="button" onclick="setExportPreset('yesterday')">Yesterday</button>
+
+            <button type="button" onclick="setExportPreset('7days')">Last 7 Days</button>
+
+            <button type="button" onclick="setExportPreset('30days')">Last 30 Days</button>
+
+            <button type="button" onclick="setExportPreset('mtd')">This Month</button>
+
+            <button type="button" onclick="setExportPreset('lastmonth')">Last Month</button>
+
+        </div>
+
+        <div class="modal-fields">
+
+            <div class="modal-field">
+
+                <label>From Date</label>
+
+                <input type="date" id="exportFromDate">
+
+            </div>
+
+            <div class="modal-field">
+
+                <label>To Date</label>
+
+                <input type="date" id="exportToDate">
+
+            </div>
+
+        </div>
+
+        <div class="modal-field">
+
+            <label>Scope</label>
+
+            <select id="exportScope">
+
+                <option value="current">Current filter (recommended)</option>
+
+                <option value="all">All Projects &amp; Team Leads</option>
+
+            </select>
+
+        </div>
+
+        <div class="modal-info" id="exportInfo">
+
+            Please select a date range to include in the report.
+
+        </div>
+
+        <div class="modal-actions">
+
+            <button class="btn btn-ghost" onclick="closeExportModal()">Cancel</button>
+
+            <button class="btn btn-primary" onclick="confirmExport()">Download CSV</button>
+
+        </div>
+
+    </div>
 
 </div>
 
@@ -4700,119 +5093,425 @@ async function logoutUser(){
 
 
 /* =========================================================
-   CSV EXPORT
+   EXPORT MODAL — DATE RANGE PICKER
 ========================================================= */
 
-function exportCSV(){
+function todayStr(){
 
-    if(!filteredEmployees.length){
+    const d = new Date();
 
-        alert("No data available to export.");
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+
+    return `${yyyy}-${mm}-${dd}`;
+
+}
+
+
+function shiftDate(dateStr, days){
+
+    const d = new Date(dateStr + "T00:00:00");
+
+    d.setDate(d.getDate() + days);
+
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+
+    return `${yyyy}-${mm}-${dd}`;
+
+}
+
+
+function openExportModal(){
+
+    const modal = document.getElementById("exportModal");
+
+    document.getElementById("exportFromDate").value = currentDate;
+    document.getElementById("exportToDate").value = currentDate;
+    document.getElementById("exportScope").value = "current";
+
+    updateExportInfo();
+
+    modal.classList.remove("hidden");
+
+    ["exportFromDate","exportToDate","exportScope"].forEach(id => {
+
+        const el = document.getElementById(id);
+
+        el.onchange = updateExportInfo;
+
+    });
+
+}
+
+
+function closeExportModal(){
+
+    document.getElementById("exportModal").classList.add("hidden");
+
+}
+
+
+function setExportPreset(preset){
+
+    const today = todayStr();
+
+    let from = today;
+    let to = today;
+
+    if(preset === "today"){
+
+        from = today;
+        to = today;
+
+    }
+    else if(preset === "yesterday"){
+
+        from = shiftDate(today, -1);
+        to = from;
+
+    }
+    else if(preset === "7days"){
+
+        from = shiftDate(today, -6);
+        to = today;
+
+    }
+    else if(preset === "30days"){
+
+        from = shiftDate(today, -29);
+        to = today;
+
+    }
+    else if(preset === "mtd"){
+
+        from = today.substring(0, 8) + "01";
+        to = today;
+
+    }
+    else if(preset === "lastmonth"){
+
+        const firstOfThis = new Date(today.substring(0, 4), Number(today.substring(5, 7)) - 1, 1);
+
+        const firstOfLast = new Date(firstOfThis);
+        firstOfLast.setMonth(firstOfLast.getMonth() - 1);
+
+        const lastOfLast = new Date(firstOfThis);
+        lastOfLast.setDate(0);
+
+        const y1 = firstOfLast.getFullYear();
+        const m1 = String(firstOfLast.getMonth() + 1).padStart(2, "0");
+
+        const y2 = lastOfLast.getFullYear();
+        const m2 = String(lastOfLast.getMonth() + 1).padStart(2, "0");
+        const d2 = String(lastOfLast.getDate()).padStart(2, "0");
+
+        from = `${y1}-${m1}-01`;
+        to = `${y2}-${m2}-${d2}`;
+
+    }
+
+    document.getElementById("exportFromDate").value = from;
+    document.getElementById("exportToDate").value = to;
+
+    updateExportInfo();
+
+}
+
+
+function updateExportInfo(){
+
+    const from = document.getElementById("exportFromDate").value;
+    const to = document.getElementById("exportToDate").value;
+
+    const info = document.getElementById("exportInfo");
+
+    if(!from || !to){
+
+        info.textContent = "Please select both From Date and To Date.";
         return;
 
     }
 
-    const rows = [];
+    if(from > to){
 
-    rows.push([
-        "AMI Executive Report",
-        `${currentPeriod === "mtd" ? "MTD" : "Daily"} - ${currentDate}`
-    ]);
+        info.innerHTML = `<strong style="color:#b91c1c;">From Date cannot be later than To Date.</strong>`;
+        return;
 
-    rows.push([]);
+    }
 
-    const totalTarget = filteredEmployees.reduce((t,m) => t + m.adjustedTarget, 0);
-    const totalProduction = filteredEmployees.reduce((t,m) => t + m.production, 0);
+    const d1 = new Date(from + "T00:00:00");
+    const d2 = new Date(to + "T00:00:00");
 
-    const achievement = totalTarget > 0
-        ? (totalProduction / totalTarget) * 100
-        : 0;
+    const days = Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
 
-    rows.push(["Metric", "Value"]);
-    rows.push(["Active Headcount", filteredEmployees.length]);
-    rows.push(["Effective FTE", filteredEmployees.reduce((t,m) => t + m.fte, 0).toFixed(1)]);
-    rows.push(["Adjusted Target", totalTarget.toFixed(1)]);
-    rows.push(["Actual Production", totalProduction.toFixed(0)]);
-    rows.push(["Achievement %", achievement.toFixed(1) + "%"]);
+    info.innerHTML =
+        `Report will include <strong>${days} day${days === 1 ? "" : "s"}</strong> ` +
+        `from <strong>${from}</strong> to <strong>${to}</strong>. ` +
+        `Scope: <strong>${document.getElementById("exportScope").value === "all" ? "All Projects" : "Current filter"}</strong>.`;
 
-    rows.push([]);
+}
 
-    rows.push(["Project Scorecard"]);
 
-    rows.push([
-        "Rank","Project","Team Lead","Headcount","Target Scope",
-        "Effective FTE","Target","Production","Achievement %","Units / FTE","Status"
-    ]);
+async function confirmExport(){
 
-    buildProjectMetrics().forEach((item, i) => {
+    const from = document.getElementById("exportFromDate").value;
+    const to = document.getElementById("exportToDate").value;
+    const scope = document.getElementById("exportScope").value;
 
-        rows.push([
-            i + 1,
-            item.project.project_name || "",
-            item.teamLead,
-            item.employees,
-            `${item.targetBasedEmployees} / ${item.employees}`,
-            item.fte.toFixed(1),
-            item.hasTarget ? item.target.toFixed(1) : "N/A",
-            item.production.toFixed(0),
-            item.hasTarget ? item.achievement.toFixed(1) : "N/A",
-            item.average.toFixed(1),
-            item.hasTarget
-                ? (item.achievement >= 95 ? "On Track"
-                    : item.achievement >= 75 ? "Monitor"
-                    : item.achievement > 0 ? "Attention"
-                    : "No Data")
-                : "No Target"
+    if(!from || !to){
+
+        alert("Please select both From Date and To Date.");
+        return;
+
+    }
+
+    if(from > to){
+
+        alert("From Date cannot be later than To Date.");
+        return;
+
+    }
+
+    closeExportModal();
+
+    await exportReportRange(from, to, scope);
+
+}
+
+
+async function exportReportRange(fromDate, toDate, scope){
+
+    try {
+
+        const { data: productivity, error } = await sb
+            .from("daily_productivity")
+            .select("*")
+            .gte("tracker_date", fromDate)
+            .lte("tracker_date", toDate)
+            .limit(50000);
+
+        if(error) throw error;
+
+        const rows = productivity || [];
+
+        let scopedEmployees = employees;
+
+        if(scope === "current"){
+
+            const projectValue = document.getElementById("projectFilter").value;
+            const teamLeadValue = document.getElementById("teamLeadFilter").value;
+
+            scopedEmployees = employees.filter(emp => {
+
+                if(projectValue !== "ALL" &&
+                   String(emp.project_id) !== String(projectValue)) return false;
+
+                if(teamLeadValue !== "ALL"){
+
+                    const lead = getTeamLeadForProject(emp.project_id);
+
+                    if(!lead.split(",").map(x => x.trim()).includes(teamLeadValue)) return false;
+
+                }
+
+                return true;
+
+            });
+
+        }
+
+        const csvRows = [];
+
+        csvRows.push([
+            "AMI Executive Report",
+            `${fromDate} to ${toDate}`
         ]);
 
-    });
-
-    rows.push([]);
-
-    rows.push(["Team Lead Scorecard"]);
-
-    rows.push([
-        "Rank","Team Lead","Projects","Headcount","Effective FTE",
-        "Target","Production","Achievement %","Status"
-    ]);
-
-    buildTeamLeadMetrics().forEach((item, i) => {
-
-        rows.push([
-            i + 1,
-            item.teamLead,
-            item.projectCount,
-            item.employees,
-            item.fte.toFixed(1),
-            item.hasTarget ? item.target.toFixed(1) : "N/A",
-            item.production.toFixed(0),
-            item.hasTarget ? item.achievement.toFixed(1) : "N/A",
-            item.hasTarget
-                ? (item.achievement >= 95 ? "On Track"
-                    : item.achievement >= 75 ? "Monitor"
-                    : item.achievement > 0 ? "Attention"
-                    : "No Data")
-                : "No Target"
+        csvRows.push([
+            "Scope",
+            scope === "all" ? "All Projects" : "Current filter"
         ]);
 
-    });
+        csvRows.push([
+            "Generated at",
+            new Date().toLocaleString("en-IN")
+        ]);
 
-    const csv = rows.map(row => row.map(value => csvEscape(value)).join(",")).join("\n");
+        csvRows.push([]);
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        csvRows.push([
+            "Date",
+            "Employee",
+            "EMP ID",
+            "Project",
+            "Sub-Project",
+            "Team Lead",
+            "Attendance",
+            "FTE",
+            "Target",
+            "Production",
+            "Remaining",
+            "Achievement %"
+        ]);
 
-    const url = URL.createObjectURL(blob);
+        const dates = [];
 
-    const link = document.createElement("a");
+        let cursor = new Date(fromDate + "T00:00:00");
+        const endDate = new Date(toDate + "T00:00:00");
 
-    link.href = url;
-    link.download = `AMI_Executive_${currentPeriod}_${currentDate}.csv`;
+        while(cursor <= endDate){
 
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+            const yyyy = cursor.getFullYear();
+            const mm = String(cursor.getMonth() + 1).padStart(2, "0");
+            const dd = String(cursor.getDate()).padStart(2, "0");
 
-    URL.revokeObjectURL(url);
+            dates.push(`${yyyy}-${mm}-${dd}`);
+
+            cursor.setDate(cursor.getDate() + 1);
+
+        }
+
+        scopedEmployees.forEach(emp => {
+
+            const project = getProjectById(emp.project_id);
+
+            const sp = emp.sub_project_id ? getSubProjectById(emp.sub_project_id) : null;
+
+            const teamLead = getTeamLeadForProject(emp.project_id);
+
+            const employeeTarget = resolveEmployeeTarget(emp, project);
+
+            dates.forEach(date => {
+
+                const record = rows.find(r =>
+                    Number(r.employee_id) === Number(emp.id) &&
+                    r.tracker_date === date
+                );
+
+                const attendance = getAttendanceLabel(record?.attendance);
+                const fte = getAttendanceFactor(record?.attendance);
+
+                let target = 0;
+
+                if(employeeTarget !== null && employeeTarget > 0){
+
+                    target = employeeTarget * fte;
+
+                }
+
+                let production = 0;
+
+                HOUR_FIELDS.forEach(field => {
+
+                    production += num(record?.[field]);
+
+                });
+
+                const remaining = Math.max(target - production, 0);
+
+                const achievement = target > 0 ? (production / target) * 100 : 0;
+
+                const hasAnyData = record && (
+                    attendance !== "Present" ||
+                    production > 0
+                );
+
+                if(!hasAnyData) return;
+
+                csvRows.push([
+                    date,
+                    emp.employee_name || "",
+                    emp.employee_code || "",
+                    project?.project_name || "",
+                    sp?.sub_project_name || "",
+                    teamLead,
+                    attendance,
+                    fte,
+                    target.toFixed(1),
+                    production,
+                    remaining,
+                    target > 0 ? achievement.toFixed(1) : "N/A"
+                ]);
+
+            });
+
+        });
+
+        csvRows.push([]);
+        csvRows.push(["Summary"]);
+
+        let totalTarget = 0;
+        let totalProduction = 0;
+
+        scopedEmployees.forEach(emp => {
+
+            const project = getProjectById(emp.project_id);
+
+            const employeeTarget = resolveEmployeeTarget(emp, project);
+
+            dates.forEach(date => {
+
+                const record = rows.find(r =>
+                    Number(r.employee_id) === Number(emp.id) &&
+                    r.tracker_date === date
+                );
+
+                const fte = getAttendanceFactor(record?.attendance);
+
+                if(employeeTarget !== null && employeeTarget > 0){
+
+                    totalTarget += employeeTarget * fte;
+
+                }
+
+                HOUR_FIELDS.forEach(field => {
+
+                    totalProduction += num(record?.[field]);
+
+                });
+
+            });
+
+        });
+
+        const totalAchievement = totalTarget > 0
+            ? (totalProduction / totalTarget) * 100
+            : 0;
+
+        csvRows.push(["Total Target", totalTarget.toFixed(1)]);
+        csvRows.push(["Total Production", totalProduction.toFixed(0)]);
+        csvRows.push(["Total Achievement %", totalAchievement.toFixed(1) + "%"]);
+
+        const csv = csvRows
+            .map(row => row.map(v => csvEscape(v)).join(","))
+            .join("\n");
+
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = `AMI_Executive_${fromDate}_to_${toDate}.csv`;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        URL.revokeObjectURL(url);
+
+    }
+    catch(error){
+
+        console.error("EXPORT ERROR:", error);
+
+        alert("Could not generate report: " + (error.message || error));
+
+    }
 
 }
 
@@ -4868,6 +5567,28 @@ document.getElementById("projectFilter")
         applyFilters();
 
     });
+
+
+/* Close modal on overlay click and Escape key */
+
+document.getElementById("exportModal").addEventListener("click", function(event){
+
+    if(event.target === this) closeExportModal();
+
+});
+
+
+document.addEventListener("keydown", function(event){
+
+    if(event.key === "Escape"){
+
+        const modal = document.getElementById("exportModal");
+
+        if(!modal.classList.contains("hidden")) closeExportModal();
+
+    }
+
+});
 
 
 </script>
