@@ -1214,13 +1214,6 @@
 
         /* =====================================================
            YELLOW DUCK COMPANION
-
-           Replaces the emoji with a custom SVG so the duck
-           is genuinely yellow (#FFD93D) rather than the
-           browser's default orange/brown duck emoji.
-
-           The duck walks continuously on the current row,
-           not just when it moves between hours.
         ===================================================== */
 
         .duck {
@@ -1251,31 +1244,26 @@
             overflow: visible;
         }
 
-        /* Idle breathing */
         .duck.sitting svg {
             animation: duckBreathe 2s ease-in-out infinite;
             transform-origin: center bottom;
         }
 
-        /* Walking in place on the same row */
         .duck.walking-in-place svg {
             animation: duckWalkInPlace 0.6s ease-in-out infinite;
             transform-origin: center bottom;
         }
 
-        /* Walking to another row */
         .duck.walking svg {
             animation: duckWaddle 0.35s ease-in-out infinite;
             transform-origin: center bottom;
         }
 
-        /* Big jump between hours */
         .duck.jumping svg {
             animation: duckJump 1.2s ease-in-out;
             transform-origin: center bottom;
         }
 
-        /* Fading away when the shift ends */
         .duck.home svg {
             animation: duckHome 1.6s ease-in-out forwards;
             transform-origin: center bottom;
@@ -1329,7 +1317,6 @@
             50%      { transform: scale(1.06); }
         }
 
-        /* Continuous walking in place — legs + body bob */
         @keyframes duckWalkInPlace {
             0%   { transform: translateY(0)     rotate(-3deg); }
             25%  { transform: translateY(-2px)  rotate(0deg);  }
@@ -3043,6 +3030,9 @@ async function openAuthenticatedPortal() {
         startLockTicker();
         startHourTicker();
 
+        /* NEW: keeps employee page in sync with Team Lead edits. */
+        startSyncTicker();
+
         maybeShowNotificationPrompt();
 
         setTimeout(startDuckCompanion, 500);
@@ -4230,6 +4220,164 @@ async function flushSave() {
 
 
 /* =========================================================
+   SMART SYNC WITH TEAM LEAD EDITS
+
+   The Team Lead dashboard can edit the same daily_productivity
+   row the employee is working on. When that happens, the
+   employee's cached `currentRecord` is stale: the hour inputs
+   still show the old values, and if the employee hits Save,
+   the stale values would overwrite the Team Lead's correction.
+
+   This function:
+
+     1. Re-fetches the daily record from Supabase.
+     2. Compares it to what is currently in the DOM inputs.
+     3. Only updates an hour input if:
+          - the input is NOT currently focused (user isn't typing)
+          - there are no pending autosaves for that row
+          - the DB value actually differs from the DOM value
+     4. Silently skips if the employee has unsaved work.
+
+   It also refreshes the attendance radio if it changed.
+========================================================= */
+
+async function syncFromDatabase() {
+
+    if (!me || !currentShiftDate) return;
+
+    /* If the operator is mid-save, do not interfere. */
+    if (savePending || saveInFlight) return;
+
+    /* If any input currently has focus, the employee is
+       actively typing. Skip the whole sync to avoid
+       yanking the value out from under their cursor. */
+    const active = document.activeElement;
+
+    if (
+        active &&
+        active.classList &&
+        active.classList.contains("hour-input")
+    ) {
+        return;
+    }
+
+    let fresh = null;
+
+    try {
+
+        const { data, error } =
+            await supabaseClient
+                .from("daily_productivity")
+                .select("*")
+                .eq("employee_id", me.id)
+                .eq("tracker_date", currentShiftDate)
+                .maybeSingle();
+
+        if (error) {
+
+            console.warn("Sync from DB failed:", error.message);
+            return;
+
+        }
+
+        fresh = data || null;
+
+    }
+    catch (err) {
+
+        console.warn("Sync from DB error:", err);
+        return;
+
+    }
+
+    if (!fresh) return;
+
+    let anyChange = false;
+
+    /* -----------------------------------------------
+       Attendance
+    ----------------------------------------------- */
+
+    const currentAttendance = getAttendance();
+    const freshAttendance = fresh.attendance || "Present";
+
+    if (freshAttendance !== currentAttendance) {
+
+        setAttendance(freshAttendance);
+        anyChange = true;
+
+        /* If someone marked the employee Absent, all their
+           hours were zeroed on the DB side. Mirror that in
+           the DOM so the numbers agree. */
+        if (freshAttendance === "Absent") {
+
+            HOUR_FIELDS.forEach((field, index) => {
+
+                if (isStateReadOnly(getHourLockState(index))) return;
+
+                const input = document.querySelector(`[data-field="${field}"]`);
+
+                if (input) input.value = 0;
+
+            });
+
+        }
+
+    }
+
+    /* -----------------------------------------------
+       Hourly values
+    ----------------------------------------------- */
+
+    HOUR_FIELDS.forEach((field, index) => {
+
+        const input = document.querySelector(`[data-field="${field}"]`);
+
+        if (!input) return;
+
+        if (isStateReadOnly(getHourLockState(index))) return;
+
+        const dbValue = Number(fresh[field] || 0);
+        const domValue = Number(input.value || 0);
+
+        if (dbValue !== domValue) {
+
+            input.value = dbValue;
+            anyChange = true;
+
+        }
+
+    });
+
+    /* -----------------------------------------------
+       If anything changed, refresh derived UI.
+    ----------------------------------------------- */
+
+    if (anyChange) {
+
+        currentRecord = fresh;
+
+        recalcTotal();
+        updatePerformanceCard();
+
+        showMessage(
+            "Updated from Team Lead corrections.",
+            "success"
+        );
+
+    }
+    else {
+
+        /* Still refresh the cache so a future save does not
+           clobber a change the employee has not seen. */
+        currentRecord = fresh;
+
+    }
+
+}
+
+
+/* =========================================================
    VISIBILITY CHANGE
 ========================================================= */
 
@@ -4244,6 +4392,12 @@ document.addEventListener("visibilitychange", async () => {
 
         await checkShiftDateChange();
         await loadDateLock();
+
+        /* NEW: re-fetch the daily record so any Team Lead
+           corrections that happened while the tab was
+           hidden show up immediately. */
+        await syncFromDatabase();
+
         applyLocks();
         checkHourReminder();
 
@@ -4306,6 +4460,37 @@ function startLockTicker() {
         }
 
     }, 30000);
+
+}
+
+
+/* =========================================================
+   PERIODIC SYNC TICKER
+
+   Re-fetches the daily record from Supabase every 60
+   seconds so Team Lead corrections show up on the
+   employee page without a manual reload.
+========================================================= */
+
+let syncTickerStarted = false;
+
+function startSyncTicker() {
+
+    if (syncTickerStarted) return;
+
+    syncTickerStarted = true;
+
+    /* Run once immediately so the page reflects any Team
+       Lead edits that happened between login and first autosave. */
+    setTimeout(syncFromDatabase, 1500);
+
+    setInterval(() => {
+
+        if (!me || !currentShiftDate) return;
+
+        syncFromDatabase();
+
+    }, 60000);
 
 }
 
@@ -4574,70 +4759,40 @@ function sendBrowserNotification(label, minutesRemaining) {
 
 /* =========================================================
    YELLOW DUCK COMPANION
-
-   A custom SVG duck (not the emoji, which is orange)
-   that walks continuously on the current hour block.
-   When the hour changes, it walks to the next block.
-   When the shift is over, it walks off to a home.
 ========================================================= */
-
-/* ---------------------------------------------------------
-   The yellow duck SVG.
-   Body: yellow (#FFD93D), beak: orange (#F59E0B),
-   eye: black, wing: darker yellow.
---------------------------------------------------------- */
 
 const DUCK_SVG = `
 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <!-- Feet (behind body) -->
     <g class="duck-feet">
         <ellipse cx="38" cy="88" rx="9" ry="4" fill="#F59E0B"
                  stroke="#B45309" stroke-width="1.2"/>
         <ellipse cx="62" cy="88" rx="9" ry="4" fill="#F59E0B"
                  stroke="#B45309" stroke-width="1.2"/>
     </g>
-
-    <!-- Body -->
     <ellipse cx="50" cy="60" rx="34" ry="26"
              fill="#FFD93D"
              stroke="#D97706" stroke-width="2"/>
-
-    <!-- Wing -->
     <path d="M 30 62 Q 24 50 38 48 Q 50 46 56 58 Q 50 68 30 62 Z"
           fill="#FBBF24"
           stroke="#D97706" stroke-width="1.8"/>
-
-    <!-- Wing detail -->
     <path d="M 34 60 Q 40 52 50 52"
           fill="none"
           stroke="#D97706" stroke-width="1.3"
           stroke-linecap="round" opacity="0.65"/>
-
-    <!-- Neck & head -->
     <ellipse cx="68" cy="38" rx="18" ry="16"
              fill="#FFD93D"
              stroke="#D97706" stroke-width="2"/>
-
-    <!-- Cheek -->
     <circle cx="72" cy="44" r="4" fill="#FBBF24" opacity="0.6"/>
-
-    <!-- Eye -->
     <circle cx="74" cy="34" r="3.2" fill="#111827"/>
     <circle cx="75.2" cy="33" r="1.1" fill="#ffffff"/>
-
-    <!-- Beak -->
     <path d="M 84 38 Q 96 36 94 42 Q 92 48 84 46 Z"
           fill="#F59E0B"
           stroke="#B45309" stroke-width="1.5"
           stroke-linejoin="round"/>
-
-    <!-- Beak highlight -->
     <path d="M 86 40 Q 92 39 92 41"
           fill="none"
           stroke="#FEF3C7" stroke-width="1"
           stroke-linecap="round" opacity="0.8"/>
-
-    <!-- Top head tuft -->
     <path d="M 62 22 Q 66 16 72 20"
           fill="none"
           stroke="#D97706" stroke-width="2.2"
@@ -4820,12 +4975,6 @@ function spawnDuckTrail() {
 }
 
 
-/* ---------------------------------------------------------
-   Switch the duck to a walking-in-place animation.
-   This is what runs continuously while it sits on the
-   current hour block.
---------------------------------------------------------- */
-
 function startDuckWalkingInPlace() {
 
     if (!duckState.element) return;
@@ -4836,8 +4985,6 @@ function startDuckWalkingInPlace() {
         duckState.walkTimerId = null;
 
     }
-
-    /* Walk for a random stretch, then briefly rest, then walk again. */
 
     duckState.element.classList.remove("sitting", "walking", "jumping", "home");
     duckState.element.classList.add("walking-in-place");
@@ -4938,7 +5085,6 @@ function runDuckTick() {
 
     const currentIndex = getCurrentHourIndex();
 
-    /* Outside shift: duck hides */
     if (currentIndex === -1) {
 
         duckState.element.style.display = "none";
@@ -4964,7 +5110,6 @@ function runDuckTick() {
 
     }
 
-    /* First placement */
     if (duckState.currentIndex === null) {
 
         duckState.currentIndex = currentIndex;
@@ -4977,14 +5122,12 @@ function runDuckTick() {
 
         duckSay("Quack! I'll walk around here this hour 🦆", 3200);
 
-        /* Begin the continuous in-place walking */
         startDuckWalkingInPlace();
 
         return;
 
     }
 
-    /* No hour change: keep anchored and keep walking */
     if (duckState.currentIndex === currentIndex) {
 
         positionDuckImmediate(currentIndex);
@@ -5000,8 +5143,6 @@ function runDuckTick() {
         return;
 
     }
-
-    /* Hour changed: walk + jump to next row */
 
     stopDuckWalkingInPlace();
 
