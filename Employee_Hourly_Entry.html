@@ -155,7 +155,7 @@
         }
 
         /* =====================================================
-           REMINDER BANNER (NEW)
+           REMINDER BANNER
         ===================================================== */
 
         .reminder-banner {
@@ -1481,6 +1481,33 @@
             cursor: not-allowed;
         }
 
+        .hour-row.future {
+
+            background: #f7f9fc;
+
+            border-color: #dfe6f0;
+
+            opacity: 0.72;
+        }
+
+        .hour-row.future .hour-input {
+
+            background: #eef1f6;
+
+            color: #97a2b3;
+
+            cursor: not-allowed;
+
+            border-style: dashed;
+        }
+
+        .hour-row.future .hour-status {
+
+            background: #e5eaf2;
+
+            color: #6f7c92;
+        }
+
         .hour-row.urgent {
 
             border-color: #e08a8a;
@@ -1612,7 +1639,7 @@
         }
 
         /* =====================================================
-           QUICK-ADD BUTTONS (NEW)
+           QUICK-ADD BUTTONS
         ===================================================== */
 
         .quick-actions {
@@ -1657,6 +1684,13 @@
         .quick-btn:active {
 
             transform: scale(0.96);
+        }
+
+        .quick-btn:disabled {
+
+            opacity: 0.4;
+
+            cursor: not-allowed;
         }
 
         /* =====================================================
@@ -2281,7 +2315,7 @@
             </div>
 
 
-            <!-- HOURLY REMINDER BANNER (NEW) -->
+            <!-- HOURLY REMINDER BANNER -->
 
             <div id="reminderBanner"
                  class="reminder-banner">
@@ -2318,7 +2352,7 @@
             </div>
 
 
-            <!-- BROWSER NOTIFICATION PERMISSION (NEW) -->
+            <!-- BROWSER NOTIFICATION PERMISSION -->
 
             <div id="notifyPermission"
                  class="notify-permission">
@@ -2549,9 +2583,10 @@
 
                             <div class="entry-banner-text">
 
-                                Each hour locks automatically 10 minutes
-                                after it ends. Enter your count before the
-                                hour closes to stay on track.
+                                Future hours stay locked until they begin.
+                                Each hour opens at the top of the hour, gives
+                                you a 10-minute grace period after it ends,
+                                and then locks automatically.
 
                             </div>
 
@@ -2980,11 +3015,6 @@ let lockTickerStarted = false;
 
 let hourTickerStarted = false;
 
-/*
-   Remembers which hour indices have already had a browser
-   reminder fired, so we do not spam the employee every
-   tick. The key is `${currentShiftDate}_${hourIndex}`.
-*/
 let reminderFiredFor = {};
 
 
@@ -4842,18 +4872,29 @@ function getCurrentHourIndex() {
 
 
 /* =========================================================
-   WHICH HOUR IS LOCKED
+   HOUR LOCK STATE
 
-   Rules:
-   - Admin date lock: all hours locked.
-   - Otherwise, an hour is locked once it has finished
-     PLUS the grace period. Example: 6–7 PM hour ends at
-     7:00 PM; with a 10-minute grace, it locks at 7:10 PM.
-   - The current hour (as long as we are inside it) is
-     always editable.
+   Returns one of:
+
+     "date-locked"  - the whole shift date was locked by management
+     "locked"       - hour ended AND its grace window has elapsed
+     "grace"        - hour just ended but is still inside grace window
+     "current"      - the hour we are inside right now
+     "future"       - the hour has not started yet (locked)
+     "open"         - outside shift; only used for edge cases
+
+   Future-hour rule (NEW):
+     Any hour whose start time is later than the current
+     clock time is treated as "future" and cannot be edited.
+     This stops employees from pre-filling hours that have
+     not happened yet.
 ========================================================= */
 
 function getHourLockState(index) {
+
+    /*
+       Admin override: the whole date is frozen.
+    */
 
     if (currentDateLocked) {
 
@@ -4867,56 +4908,29 @@ function getHourLockState(index) {
 
 
     /*
-       Outside shift hours entirely:
-       - all hours from before the shift remain locked
-       - future hours are open
-       We treat them as follows:
-         * if a shift is not currently active, hours before
-           the current shift's start are all locked.
+       Outside the shift entirely (between 3 AM and 6 PM):
+       every hour belongs to a shift that has already finished,
+       so nothing is editable. We mark them all as "locked"
+       so the employee can still see yesterday's values but
+       cannot change them from this screen.
     */
 
     if (currentIndex === -1) {
 
-        const now = new Date();
-
-        const hour = now.getHours();
-
-        /*
-           Between 3 AM and 6 PM: entire previous shift
-           is fully locked.
-        */
-
-        if (hour >= 3 && hour < 18) {
-
-            return "locked";
-
-        }
-
-
-        /*
-           Should not normally reach here, but keep it
-           open to be safe.
-        */
-
-        return "open";
+        return "locked";
 
     }
 
 
     /*
-       Inside the active shift:
-       - past hours (index < currentIndex) are locked
-         once their grace period has elapsed.
-       - the hour immediately before currentIndex may still
-         be editable if we are within the grace window.
+       Before the current hour: either locked or in grace.
     */
 
     if (index < currentIndex) {
 
         /*
-           If it's the hour right before the current one,
-           check whether we are still inside its grace window.
-           Example: at 7:05 PM, hour 0 (6–7 PM) is still open.
+           Only the hour immediately before the current one
+           can still be inside its grace window.
         */
 
         if (index === currentIndex - 1) {
@@ -4927,7 +4941,10 @@ function getHourLockState(index) {
                 now.getMinutes();
 
 
-            if (minutesIntoHour < LOCK_GRACE_MINUTES) {
+            if (
+                minutesIntoHour <
+                LOCK_GRACE_MINUTES
+            ) {
 
                 return "grace";
 
@@ -4943,6 +4960,10 @@ function getHourLockState(index) {
     }
 
 
+    /*
+       The hour we are inside right now.
+    */
+
     if (index === currentIndex) {
 
         return "current";
@@ -4950,7 +4971,18 @@ function getHourLockState(index) {
     }
 
 
-    return "open";
+    /*
+       Any hour after the current one has not started yet.
+       The employee must wait for the hour to begin before
+       entering data for it.
+
+       Note: we deliberately do NOT open the next hour even
+       if we are in the last minute of the current hour.
+       This keeps the entry rule consistent - one hour in,
+       one hour entered.
+    */
+
+    return "future";
 
 }
 
@@ -5244,25 +5276,7 @@ function renderHourRows() {
                 getHourLockState(index);
 
 
-            if (state === "current") {
-
-                row.classList.add(
-                    "current"
-                );
-
-            }
-
-
-            if (
-                state === "locked" ||
-                state === "date-locked"
-            ) {
-
-                row.classList.add(
-                    "locked"
-                );
-
-            }
+            applyRowStateClass(row, state);
 
 
             const label =
@@ -5323,10 +5337,7 @@ function renderHourRows() {
                 getHourValue(field);
 
 
-            if (
-                state === "locked" ||
-                state === "date-locked"
-            ) {
+            if (isStateReadOnly(state)) {
 
                 input.disabled = true;
 
@@ -5361,10 +5372,6 @@ function renderHourRows() {
                 }
             );
 
-
-            /*
-               Quick-add buttons for speed.
-            */
 
             const quickActions =
                 document.createElement("div");
@@ -5438,6 +5445,57 @@ function renderHourRows() {
 
 
 /* =========================================================
+   STATE HELPERS
+========================================================= */
+
+function isStateReadOnly(state) {
+
+    return (
+        state === "locked" ||
+        state === "date-locked" ||
+        state === "future"
+    );
+
+}
+
+
+function applyRowStateClass(row, state) {
+
+    row.classList.remove(
+        "current",
+        "locked",
+        "future",
+        "urgent"
+    );
+
+
+    if (state === "current") {
+
+        row.classList.add("current");
+
+    }
+
+
+    if (
+        state === "locked" ||
+        state === "date-locked"
+    ) {
+
+        row.classList.add("locked");
+
+    }
+
+
+    if (state === "future") {
+
+        row.classList.add("future");
+
+    }
+
+}
+
+
+/* =========================================================
    HOUR STATUS TEXT
 ========================================================= */
 
@@ -5464,6 +5522,12 @@ function getHourStatusText(state) {
     if (state === "grace") {
 
         return "GRACE PERIOD";
+
+    }
+
+    if (state === "future") {
+
+        return "NOT STARTED";
 
     }
 
@@ -5524,15 +5588,7 @@ function applyLocks() {
                 );
 
 
-            /*
-               Reset classes
-            */
-
-            row.classList.remove(
-                "current",
-                "locked",
-                "urgent"
-            );
+            applyRowStateClass(row, state);
 
 
             if (status) {
@@ -5543,74 +5599,32 @@ function applyLocks() {
             }
 
 
-            if (state === "current") {
+            const readOnly =
+                isStateReadOnly(state);
 
-                row.classList.add(
-                    "current"
-                );
+
+            if (input) {
+
+                input.disabled = readOnly;
 
             }
 
 
-            if (
-                state === "locked" ||
-                state === "date-locked"
-            ) {
+            quickBtns.forEach(
+                btn => {
 
-                row.classList.add(
-                    "locked"
-                );
-
-
-                if (input) {
-
-                    input.disabled = true;
+                    btn.disabled = readOnly;
 
                 }
+            );
 
-
-                quickBtns.forEach(
-                    btn => {
-
-                        btn.disabled = true;
-
-                    }
-                );
-
-            }
-            else {
-
-                if (input) {
-
-                    input.disabled = false;
-
-                }
-
-
-                quickBtns.forEach(
-                    btn => {
-
-                        btn.disabled = false;
-
-                    }
-                );
-
-            }
-
-
-            /*
-               Urgent state: current hour and we are within
-               the reminder window.
-            */
 
             if (
                 state === "current" &&
                 isWithinReminderWindow(index)
             ) {
 
-                row.classList.add(
-                    "urgent"
-                );
+                row.classList.add("urgent");
 
             }
 
@@ -5690,6 +5704,43 @@ function onHourInput(event) {
 
     const input =
         event.target;
+
+
+    /*
+       Safety net: even if a disabled input somehow fired an
+       event, we check the row state before accepting a value.
+    */
+
+    const row =
+        input.closest(".hour-row");
+
+
+    if (row) {
+
+        const index =
+            Number(row.dataset.hourIndex);
+
+
+        const state =
+            getHourLockState(index);
+
+
+        if (isStateReadOnly(state)) {
+
+            /*
+               Revert to the stored value and do not queue a save.
+            */
+
+            input.value =
+                getHourValue(
+                    input.dataset.field
+                );
+
+            return;
+
+        }
+
+    }
 
 
     let value =
@@ -6240,6 +6291,11 @@ function launchCelebration() {
 
 /* =========================================================
    BUILD DATABASE RECORD
+
+   IMPORTANT:
+   Future hours are never written, even if the underlying
+   input field somehow holds a stale value. This guarantees
+   the dashboard never sees pre-filled production.
 ========================================================= */
 
 function buildRecord() {
@@ -6291,6 +6347,55 @@ function buildRecord() {
     }
 
 
+    /*
+       Build hourly values, forced to zero for any hour
+       that is currently in a read-only state.
+    */
+
+    function safeHourValue(field, index) {
+
+        const state =
+            getHourLockState(index);
+
+
+        if (
+            state === "future" ||
+            state === "date-locked"
+        ) {
+
+            /*
+               Never send future or admin-locked values.
+               If the record was already saved with these
+               hours (e.g. admin reopened a locked date),
+               keep whatever Supabase already has.
+            */
+
+            if (currentRecord) {
+
+                const existing =
+                    Number(
+                        currentRecord[field]
+                    );
+
+                if (Number.isFinite(existing)) {
+
+                    return existing;
+
+                }
+
+            }
+
+
+            return 0;
+
+        }
+
+
+        return getInputNumber(field);
+
+    }
+
+
     const record = {
 
         employee_id:
@@ -6306,31 +6411,31 @@ function buildRecord() {
             attendance,
 
         hour_6_7:
-            getInputNumber("hour_6_7"),
+            safeHourValue("hour_6_7", 0),
 
         hour_7_8:
-            getInputNumber("hour_7_8"),
+            safeHourValue("hour_7_8", 1),
 
         hour_8_9:
-            getInputNumber("hour_8_9"),
+            safeHourValue("hour_8_9", 2),
 
         hour_9_10:
-            getInputNumber("hour_9_10"),
+            safeHourValue("hour_9_10", 3),
 
         hour_10_11:
-            getInputNumber("hour_10_11"),
+            safeHourValue("hour_10_11", 4),
 
         hour_11_12:
-            getInputNumber("hour_11_12"),
+            safeHourValue("hour_11_12", 5),
 
         hour_12_1:
-            getInputNumber("hour_12_1"),
+            safeHourValue("hour_12_1", 6),
 
         hour_1_2:
-            getInputNumber("hour_1_2"),
+            safeHourValue("hour_1_2", 7),
 
         hour_2_3:
-            getInputNumber("hour_2_3"),
+            safeHourValue("hour_2_3", 8),
 
         break_minutes:
             Number(
@@ -6715,10 +6820,6 @@ async function checkShiftDateChange() {
 
 /* =========================================================
    LOCK TICKER
-
-   Re-evaluates which hours are locked every 30 seconds,
-   so that as the clock crosses each hour's grace window,
-   the row auto-locks without needing a manual refresh.
 ========================================================= */
 
 function startLockTicker() {
@@ -6785,14 +6886,7 @@ function startLockTicker() {
 
 
 /* =========================================================
-   HOUR TICKER (NEW)
-
-   Fires every 20 seconds:
-   - checks if the current hour is approaching its close
-   - updates the reminder banner
-   - updates the urgent styling on the current hour row
-   - fires a browser notification once per hour when
-     within the reminder window.
+   HOUR TICKER
 ========================================================= */
 
 function startHourTicker() {
@@ -6806,11 +6900,6 @@ function startHourTicker() {
 
     hourTickerStarted = true;
 
-
-    /*
-       Run immediately once so the banner reflects the
-       current state as soon as the portal opens.
-    */
 
     checkHourReminder();
 
@@ -6838,9 +6927,6 @@ function startHourTicker() {
 
 /* =========================================================
    IS WITHIN REMINDER WINDOW
-
-   True if we are inside the last REMINDER_MINUTES_BEFORE_END
-   minutes of the given hour (index).
 ========================================================= */
 
 function isWithinReminderWindow(index) {
@@ -6862,12 +6948,6 @@ function isWithinReminderWindow(index) {
         now.getMinutes();
 
 
-    /*
-       Example: hour ends at 7:00 PM. At 6:50 PM the
-       reminder window is open because 60 - 50 = 10,
-       which is <= REMINDER_MINUTES_BEFORE_END.
-    */
-
     const minutesRemaining =
         60 - minutes;
 
@@ -6881,9 +6961,7 @@ function isWithinReminderWindow(index) {
 
 
 /* =========================================================
-   CHECK HOUR REMINDER (NEW)
-
-   Updates the banner + fires the browser notification.
+   CHECK HOUR REMINDER
 ========================================================= */
 
 function checkHourReminder() {
@@ -6911,10 +6989,6 @@ function checkHourReminder() {
     const reminderIcon =
         $("reminderIcon");
 
-
-    /*
-       Outside shift hours: hide the banner.
-    */
 
     if (currentIndex === -1) {
 
@@ -6946,11 +7020,6 @@ function checkHourReminder() {
         HOUR_FIELDS[currentIndex];
 
 
-    /*
-       Has the employee already entered a value for
-       this hour? If so, we can suppress the reminder.
-    */
-
     const input =
         document.querySelector(
             `[data-field="${field}"]`
@@ -6967,11 +7036,6 @@ function checkHourReminder() {
         enteredValue > 0;
 
 
-    /*
-       If the value is already entered, hide the banner
-       for this hour. We do not nag.
-    */
-
     if (hasValue) {
 
         banner.classList.remove(
@@ -6984,27 +7048,10 @@ function checkHourReminder() {
     }
 
 
-    /*
-       Show the banner only if we are within the reminder
-       window OR if the hour has already ended (a missed
-       submission during the grace window).
-    */
-
     const inReminderWindow =
         minutesRemaining <=
         REMINDER_MINUTES_BEFORE_END;
 
-
-    const inGraceWindow =
-        currentDateLocked === false &&
-        minutes < LOCK_GRACE_MINUTES;
-
-
-    /*
-       We do not show the banner in grace window for the
-       previous hour - the row itself already shows
-       GRACE PERIOD. Banner is only for the current hour.
-    */
 
     if (!inReminderWindow) {
 
@@ -7017,13 +7064,6 @@ function checkHourReminder() {
 
     }
 
-
-    /*
-       Determine urgency:
-
-       - Under 3 minutes remaining -> urgent (red)
-       - Otherwise -> normal (yellow)
-    */
 
     const isUrgent =
         minutesRemaining <= 3;
@@ -7067,10 +7107,6 @@ function checkHourReminder() {
 
     }
 
-
-    /*
-       Fire the browser notification once per hour.
-    */
 
     const reminderKey =
         `${currentShiftDate}_${currentIndex}`;
@@ -7153,7 +7189,7 @@ function scrollToCurrentHour() {
 
 
 /* =========================================================
-   BROWSER NOTIFICATIONS (NEW)
+   BROWSER NOTIFICATIONS
 ========================================================= */
 
 function notificationsSupported() {
@@ -7237,11 +7273,6 @@ async function enableBrowserNotifications() {
                 "active"
             );
 
-
-            /*
-               Fire a quick test notification so the
-               employee knows it works.
-            */
 
             try {
 
