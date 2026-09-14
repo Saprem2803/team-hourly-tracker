@@ -205,36 +205,25 @@
 
             0%,
             100% {
-
                 transform: scale(1);
-
             }
 
             50% {
-
                 transform: scale(1.012);
-
             }
 
         }
 
         .reminder-content {
-
             display: flex;
-
             align-items: center;
-
             gap: 15px;
         }
 
         .reminder-icon {
-
             font-size: 32px;
-
             flex-shrink: 0;
-
-            animation:
-                reminderShake 1.5s ease-in-out infinite;
+            animation: reminderShake 1.5s ease-in-out infinite;
         }
 
         @keyframes reminderShake {
@@ -255,74 +244,50 @@
         }
 
         .reminder-text-block {
-
             flex: 1;
         }
 
         .reminder-title {
-
             font-size: 15px;
-
             font-weight: 850;
-
             color: #875c07;
-
             margin-bottom: 4px;
         }
 
         .reminder-banner.urgent .reminder-title {
-
             color: #9e1f1f;
         }
 
         .reminder-text {
-
             font-size: 13px;
-
             color: #6b5309;
-
             line-height: 1.45;
         }
 
         .reminder-banner.urgent .reminder-text {
-
             color: #7d1c1c;
         }
 
         .reminder-cta {
-
             background: #875c07;
-
             color: white;
-
             border: none;
-
             padding: 10px 16px;
-
             border-radius: 10px;
-
             font-size: 12px;
-
             font-weight: 800;
-
             cursor: pointer;
-
             white-space: nowrap;
-
             transition: 0.2s;
         }
 
         .reminder-banner.urgent .reminder-cta {
-
             background: #9e1f1f;
         }
 
         .reminder-cta:hover {
-
             transform: translateY(-1px);
-
-            box-shadow:
-                0 6px 14px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.15);
         }
 
         /* =====================================================
@@ -330,21 +295,13 @@
         ===================================================== */
 
         .notify-permission {
-
             display: none;
-
             background: #f1f7ff;
-
             border: 1px solid #d0e2f7;
-
             border-radius: 14px;
-
             padding: 14px 18px;
-
             margin-bottom: 18px;
-
             align-items: center;
-
             gap: 14px;
         }
 
@@ -379,7 +336,6 @@
         }
 
         .notify-permission-btn {
-
             border: none;
             background: #1755a0;
             color: white;
@@ -393,7 +349,6 @@
         }
 
         .notify-permission-btn:hover {
-
             background: #0f4489;
         }
 
@@ -403,57 +358,38 @@
 
         .card {
             background: white;
-
             border-radius: 18px;
-
             padding: 22px;
-
             margin-bottom: 18px;
-
-            box-shadow:
-                0 8px 28px rgba(24, 55, 99, 0.08);
-
+            box-shadow: 0 8px 28px rgba(24, 55, 99, 0.08);
             border: 1px solid #e6edf7;
         }
 
         .card-title {
             font-size: 17px;
-
             font-weight: 800;
-
             margin-bottom: 15px;
-
             color: #15294b;
         }
 
         .loading-card,
         .fatal-card {
             text-align: center;
-
             padding: 40px;
         }
 
         .spinner {
             width: 42px;
             height: 42px;
-
             border: 4px solid #dce7f8;
-
             border-top-color: #1b5db7;
-
             border-radius: 50%;
-
             animation: spin 0.8s linear infinite;
-
             margin: 0 auto 15px;
         }
 
         @keyframes spin {
-
-            to {
-                transform: rotate(360deg);
-            }
-
+            to { transform: rotate(360deg); }
         }
 
         /* =====================================================
@@ -462,78 +398,47 @@
 
         .login-wrapper {
             min-height: 100vh;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             padding: 25px;
         }
 
         .login-card {
             width: 100%;
-
             max-width: 440px;
-
             background: white;
-
             border-radius: 22px;
-
             padding: 34px;
-
-            box-shadow:
-                0 18px 55px rgba(18, 46, 88, 0.15);
-
+            box-shadow: 0 18px 55px rgba(18, 46, 88, 0.15);
             border: 1px solid #e4ebf5;
         }
 
         .login-logo {
             width: 65px;
             height: 65px;
-
             border-radius: 18px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #0b1f44,
-                    #2868b7
-                );
-
+            background: linear-gradient(135deg, #0b1f44, #2868b7);
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             color: white;
-
             font-size: 27px;
-
             font-weight: 900;
-
             margin-bottom: 18px;
         }
 
         .login-title {
             font-size: 26px;
-
             font-weight: 850;
-
             color: #14284b;
-
             margin-bottom: 7px;
         }
 
         .login-subtitle {
             color: #68768c;
-
             font-size: 14px;
-
             margin-bottom: 25px;
-
             line-height: 1.5;
         }
 
@@ -543,117 +448,70 @@
 
         .field label {
             display: block;
-
             font-size: 13px;
-
             font-weight: 750;
-
             color: #3e4d64;
-
             margin-bottom: 7px;
         }
 
         .field input,
         .field select {
-
             width: 100%;
-
             padding: 13px 14px;
-
             border: 1px solid #ccd7e7;
-
             border-radius: 11px;
-
             outline: none;
-
             font-size: 14px;
-
             background: #fbfdff;
-
             transition: 0.2s;
         }
 
         .field input:focus,
         .field select:focus {
-
             border-color: #3775c5;
-
-            box-shadow:
-                0 0 0 3px rgba(55,117,197,0.10);
-
+            box-shadow: 0 0 0 3px rgba(55,117,197,0.10);
             background: white;
         }
 
         .login-button,
         .logout-button,
         .primary-button {
-
             border: none;
-
             cursor: pointer;
-
             border-radius: 11px;
-
             font-weight: 800;
-
             transition: 0.2s;
         }
 
         .login-button {
-
             width: 100%;
-
             padding: 14px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #123568,
-                    #2872c8
-                );
-
+            background: linear-gradient(135deg, #123568, #2872c8);
             color: white;
-
             font-size: 15px;
-
             margin-top: 5px;
         }
 
         .login-button:hover {
-
             transform: translateY(-1px);
-
-            box-shadow:
-                0 8px 20px rgba(28, 90, 166, 0.22);
+            box-shadow: 0 8px 20px rgba(28, 90, 166, 0.22);
         }
 
         .login-button:disabled {
-
             opacity: 0.65;
-
             cursor: not-allowed;
-
             transform: none;
-
             box-shadow: none;
         }
 
         .error-message {
-
             background: #fff0f0;
-
             border: 1px solid #f0caca;
-
             color: #a32626;
-
             padding: 11px 13px;
-
             border-radius: 10px;
-
             font-size: 13px;
-
             margin-bottom: 15px;
-
             line-height: 1.45;
         }
 
@@ -662,185 +520,105 @@
         ===================================================== */
 
         .forgot-password-wrap {
-
             text-align: right;
-
             margin-top: -8px;
-
             margin-bottom: 15px;
         }
 
         .forgot-password-button {
-
             background: none;
-
             border: none;
-
             color: #2868b7;
-
             cursor: pointer;
-
             font-size: 13px;
-
             font-weight: 700;
-
             padding: 0;
         }
 
         .forgot-password-button:hover {
-
             text-decoration: underline;
-
         }
 
         .password-screen {
-
             min-height: 100vh;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             padding: 25px;
-
         }
 
         .password-card {
-
             width: 100%;
-
             max-width: 470px;
-
             background: white;
-
             border-radius: 22px;
-
             padding: 34px;
-
-            box-shadow:
-                0 18px 55px rgba(18, 46, 88, 0.15);
-
+            box-shadow: 0 18px 55px rgba(18, 46, 88, 0.15);
             border: 1px solid #e4ebf5;
         }
 
         .password-icon {
-
             width: 65px;
             height: 65px;
-
             border-radius: 18px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #0b1f44,
-                    #2868b7
-                );
-
+            background: linear-gradient(135deg, #0b1f44, #2868b7);
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             color: white;
-
             font-size: 28px;
-
             margin-bottom: 18px;
         }
 
         .password-title {
-
             font-size: 25px;
-
             font-weight: 850;
-
             color: #14284b;
-
             margin-bottom: 7px;
         }
 
         .password-subtitle {
-
             color: #68768c;
-
             font-size: 14px;
-
             line-height: 1.55;
-
             margin-bottom: 24px;
         }
 
         .password-requirements {
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #f3f7fc,
-                    #f9fbff
-                );
-
+            background: linear-gradient(135deg, #f3f7fc, #f9fbff);
             border: 1px solid #dce6f2;
-
             border-radius: 11px;
-
             padding: 13px 15px;
-
             margin-top: -2px;
-
             margin-bottom: 18px;
-
             color: #607089;
-
             font-size: 12px;
-
             line-height: 1.65;
         }
 
         .password-requirements strong {
-
             color: #334c6d;
-
         }
 
         .password-error {
-
             background: #fff0f0;
-
             border: 1px solid #f0caca;
-
             color: #a32626;
-
             padding: 11px 13px;
-
             border-radius: 10px;
-
             font-size: 13px;
-
             margin-bottom: 15px;
-
             line-height: 1.45;
         }
 
         .password-success {
-
             background: #eefbf3;
-
             border: 1px solid #b9e5c9;
-
             color: #216b3d;
-
             padding: 11px 13px;
-
             border-radius: 10px;
-
             font-size: 13px;
-
             margin-bottom: 15px;
-
             line-height: 1.45;
         }
 
@@ -849,57 +627,33 @@
         ===================================================== */
 
         .identity-strip {
-
             display: grid;
-
-            grid-template-columns:
-                1.2fr
-                1fr
-                1fr
-                1fr;
-
+            grid-template-columns: 1.2fr 1fr 1fr 1fr;
             gap: 12px;
-
             margin-bottom: 18px;
         }
 
         .identity-item {
-
             background: white;
-
             border: 1px solid #e3eaf4;
-
             border-radius: 15px;
-
             padding: 15px;
-
-            box-shadow:
-                0 5px 18px rgba(30, 62, 106, 0.06);
+            box-shadow: 0 5px 18px rgba(30, 62, 106, 0.06);
         }
 
         .identity-label {
-
             font-size: 11px;
-
             text-transform: uppercase;
-
             letter-spacing: 0.7px;
-
             color: #8491a4;
-
             font-weight: 800;
-
             margin-bottom: 5px;
         }
 
         .identity-value {
-
             font-size: 15px;
-
             font-weight: 800;
-
             color: #17335f;
-
             word-break: break-word;
         }
 
@@ -908,63 +662,36 @@
         ===================================================== */
 
         .employee-heading {
-
             display: flex;
-
             align-items: center;
-
             gap: 15px;
-
             margin-bottom: 20px;
         }
 
         .avatar {
-
             width: 52px;
             height: 52px;
-
             flex-shrink: 0;
-
             border-radius: 50%;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             color: white;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #16447e,
-                    #3e81c8
-                );
-
+            background: linear-gradient(135deg, #16447e, #3e81c8);
             font-size: 17px;
-
             font-weight: 900;
-
-            box-shadow:
-                0 7px 18px rgba(30, 78, 140, 0.2);
+            box-shadow: 0 7px 18px rgba(30, 78, 140, 0.2);
         }
 
         .employee-name {
-
             font-size: 20px;
-
             font-weight: 850;
-
             color: #152b4f;
         }
 
         .employee-email {
-
             font-size: 12px;
-
             color: #7a879a;
-
             margin-top: 3px;
         }
 
@@ -973,66 +700,38 @@
         ===================================================== */
 
         .entry-banner {
-
             display: flex;
-
             align-items: center;
-
             gap: 13px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #f1f7ff,
-                    #f9fbff
-                );
-
+            background: linear-gradient(135deg, #f1f7ff, #f9fbff);
             border: 1px solid #d8e7fb;
-
             border-radius: 15px;
-
             padding: 15px 17px;
-
             margin-bottom: 18px;
         }
 
         .entry-banner-icon {
-
             width: 38px;
             height: 38px;
-
             border-radius: 10px;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             background: #dcecff;
-
             color: #1755a0;
-
             font-size: 19px;
         }
 
         .entry-banner-title {
-
             font-size: 14px;
-
             font-weight: 850;
-
             color: #16345e;
         }
 
         .entry-banner-text {
-
             font-size: 12px;
-
             color: #687991;
-
             margin-top: 3px;
-
             line-height: 1.4;
         }
 
@@ -1041,78 +740,46 @@
         ===================================================== */
 
         .attendance-grid {
-
             display: grid;
-
-            grid-template-columns:
-                repeat(3, 1fr);
-
+            grid-template-columns: repeat(3, 1fr);
             gap: 12px;
         }
 
         .attendance-option {
-
             position: relative;
         }
 
         .attendance-option input {
-
             position: absolute;
-
             opacity: 0;
-
             pointer-events: none;
         }
 
         .attendance-label {
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             min-height: 54px;
-
             border-radius: 12px;
-
             border: 1px solid #d8e1ed;
-
             background: #fbfdff;
-
             cursor: pointer;
-
             font-size: 14px;
-
             font-weight: 800;
-
             color: #526078;
-
             transition: 0.2s;
         }
 
         .attendance-label:hover {
-
             border-color: #8eafd5;
-
             background: #f5f9ff;
         }
 
         .attendance-option input:checked + .attendance-label {
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #e8f2ff,
-                    #dcecff
-                );
-
+            background: linear-gradient(135deg, #e8f2ff, #dcecff);
             border-color: #4d86ca;
-
             color: #174e91;
-
-            box-shadow:
-                0 5px 14px rgba(44, 105, 174, 0.12);
+            box-shadow: 0 5px 14px rgba(44, 105, 174, 0.12);
         }
 
         /* =====================================================
@@ -1120,252 +787,132 @@
         ===================================================== */
 
         .performance-card {
-
             position: relative;
-
             overflow: hidden;
-
             border-radius: 20px;
-
             padding: 23px;
-
             margin-bottom: 18px;
-
             border: 1px solid;
-
-            transition:
-                transform 0.25s ease,
-                box-shadow 0.25s ease;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
 
         .performance-card.above {
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #effff5,
-                    #f8fffb
-                );
-
+            background: linear-gradient(135deg, #effff5, #f8fffb);
             border-color: #a9e4c0;
-
-            box-shadow:
-                0 10px 30px rgba(39, 145, 84, 0.11);
+            box-shadow: 0 10px 30px rgba(39, 145, 84, 0.11);
         }
 
         .performance-card.target {
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #eef6ff,
-                    #f8fbff
-                );
-
+            background: linear-gradient(135deg, #eef6ff, #f8fbff);
             border-color: #b8d3f2;
-
-            box-shadow:
-                0 10px 30px rgba(39, 99, 166, 0.10);
+            box-shadow: 0 10px 30px rgba(39, 99, 166, 0.10);
         }
 
         .performance-card.below {
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #fff8eb,
-                    #fffdf8
-                );
-
+            background: linear-gradient(135deg, #fff8eb, #fffdf8);
             border-color: #efd19b;
-
-            box-shadow:
-                0 10px 30px rgba(177, 122, 32, 0.09);
+            box-shadow: 0 10px 30px rgba(177, 122, 32, 0.09);
         }
 
         .performance-card.neutral {
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #f5f7fa,
-                    #fbfcfd
-                );
-
+            background: linear-gradient(135deg, #f5f7fa, #fbfcfd);
             border-color: #dce2e9;
         }
 
         .performance-card.absent {
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #fff2f2,
-                    #fffafa
-                );
-
+            background: linear-gradient(135deg, #fff2f2, #fffafa);
             border-color: #eccaca;
         }
 
         .performance-top {
-
             display: flex;
-
             align-items: center;
-
             gap: 14px;
-
             margin-bottom: 18px;
         }
 
         .performance-icon {
-
             width: 52px;
             height: 52px;
-
             border-radius: 15px;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             font-size: 25px;
-
             background: rgba(255,255,255,0.75);
-
             border: 1px solid rgba(0,0,0,0.05);
-
             flex-shrink: 0;
         }
 
         .performance-title {
-
             font-size: 19px;
-
             font-weight: 900;
-
             color: #18304f;
         }
 
         .performance-message {
-
             font-size: 13px;
-
             color: #64738a;
-
             margin-top: 4px;
-
             line-height: 1.45;
         }
 
         .performance-metrics {
-
             display: grid;
-
-            grid-template-columns:
-                repeat(4, 1fr);
-
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-
             margin-bottom: 17px;
         }
 
         .performance-metric {
-
             background: rgba(255,255,255,0.78);
-
             border: 1px solid rgba(40,70,105,0.08);
-
             border-radius: 12px;
-
             padding: 12px;
-
         }
 
         .metric-label {
-
             font-size: 10px;
-
             text-transform: uppercase;
-
             letter-spacing: 0.5px;
-
             color: #7c899c;
-
             font-weight: 800;
         }
 
         .metric-value {
-
             font-size: 20px;
-
             font-weight: 900;
-
             color: #1a3457;
-
             margin-top: 3px;
         }
 
         .progress-track {
-
             height: 11px;
-
             background: rgba(40,70,105,0.10);
-
             border-radius: 20px;
-
             overflow: hidden;
         }
 
         .progress-bar {
-
             height: 100%;
-
             width: 0%;
-
             border-radius: 20px;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    #2870c1,
-                    #4b9ae7
-                );
-
-            transition:
-                width 0.45s ease;
+            background: linear-gradient(90deg, #2870c1, #4b9ae7);
+            transition: width 0.45s ease;
         }
 
         .performance-card.above .progress-bar {
-
-            background:
-                linear-gradient(
-                    90deg,
-                    #1f9d58,
-                    #59c87d
-                );
+            background: linear-gradient(90deg, #1f9d58, #59c87d);
         }
 
         .performance-card.below .progress-bar {
-
-            background:
-                linear-gradient(
-                    90deg,
-                    #d18a1e,
-                    #efb65c
-                );
+            background: linear-gradient(90deg, #d18a1e, #efb65c);
         }
 
         .performance-footnote {
-
             margin-top: 9px;
-
             font-size: 11px;
-
             color: #748197;
-
             text-align: right;
         }
 
@@ -1374,267 +921,155 @@
         ===================================================== */
 
         .hourly-header {
-
             display: flex;
-
             align-items: center;
-
             justify-content: space-between;
-
             gap: 15px;
-
             margin-bottom: 15px;
         }
 
         .hourly-total {
-
             background: #eef5ff;
-
             color: #17549b;
-
             padding: 8px 12px;
-
             border-radius: 10px;
-
             font-size: 13px;
-
             font-weight: 850;
-
             white-space: nowrap;
         }
 
         .hour-list {
-
             display: grid;
-
-            grid-template-columns:
-                repeat(3, 1fr);
-
+            grid-template-columns: repeat(3, 1fr);
             gap: 12px;
         }
 
         .hour-row {
-
             border: 1px solid #e0e7f0;
-
             border-radius: 14px;
-
             padding: 14px;
-
             background: #fbfdff;
-
             transition: 0.2s;
-
             position: relative;
         }
 
         .hour-row.current {
-
             border-color: #79a8db;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #f0f7ff,
-                    #fbfdff
-                );
-
-            box-shadow:
-                0 5px 16px rgba(49, 105, 170, 0.10);
-
-            animation:
-                hourRowGlow 2.5s ease-in-out infinite;
+            background: linear-gradient(135deg, #f0f7ff, #fbfdff);
+            box-shadow: 0 5px 16px rgba(49, 105, 170, 0.10);
+            animation: hourRowGlow 2.5s ease-in-out infinite;
         }
 
         @keyframes hourRowGlow {
-
-            0%,
-            100% {
-
-                box-shadow:
-                    0 5px 16px rgba(49, 105, 170, 0.10);
-
+            0%, 100% {
+                box-shadow: 0 5px 16px rgba(49, 105, 170, 0.10);
             }
-
             50% {
-
-                box-shadow:
-                    0 5px 22px rgba(49, 105, 170, 0.24);
-
+                box-shadow: 0 5px 22px rgba(49, 105, 170, 0.24);
             }
-
         }
 
         .hour-row.locked {
-
             background: #f3f5f8;
-
             border-color: #dce2e9;
         }
 
         .hour-row.locked .hour-input {
-
             background: #eef1f5;
-
             color: #7e8793;
-
             cursor: not-allowed;
         }
 
         .hour-row.future {
-
             background: #f7f9fc;
-
             border-color: #dfe6f0;
-
             opacity: 0.72;
         }
 
         .hour-row.future .hour-input {
-
             background: #eef1f6;
-
             color: #97a2b3;
-
             cursor: not-allowed;
-
             border-style: dashed;
         }
 
         .hour-row.future .hour-status {
-
             background: #e5eaf2;
-
             color: #6f7c92;
         }
 
         .hour-row.urgent {
-
             border-color: #e08a8a;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #fff2f2,
-                    #fffafa
-                );
+            background: linear-gradient(135deg, #fff2f2, #fffafa);
         }
 
         .hour-row.urgent .hour-status {
-
             background: #fbd5d5;
-
             color: #9e1f1f;
-
-            animation:
-                urgentBlink 1s ease-in-out infinite;
+            animation: urgentBlink 1s ease-in-out infinite;
         }
 
         @keyframes urgentBlink {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.4;
-            }
-
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
 
         .hour-label {
-
             display: flex;
-
             align-items: center;
-
             justify-content: space-between;
-
             gap: 8px;
-
             margin-bottom: 8px;
         }
 
         .hour-time {
-
             font-size: 13px;
-
             font-weight: 850;
-
             color: #314967;
         }
 
         .hour-status {
-
             font-size: 9px;
-
             font-weight: 900;
-
             letter-spacing: 0.4px;
-
             padding: 4px 7px;
-
             border-radius: 7px;
-
             background: #e7eef7;
-
             color: #6d7b8e;
         }
 
         .hour-row.current .hour-status {
-
             background: #d9ebff;
-
             color: #1d61a5;
         }
 
         .hour-row.locked .hour-status {
-
             background: #e5e8ed;
-
             color: #7b8490;
         }
 
         .hour-input {
-
             width: 100%;
-
             padding: 12px;
-
             border-radius: 10px;
-
             border: 1px solid #ccd8e7;
-
             font-size: 18px;
-
             font-weight: 850;
-
             text-align: center;
-
             outline: none;
-
             background: white;
-
             color: #183657;
-
             transition: 0.2s;
         }
 
         .hour-input:focus {
-
             border-color: #3d7fc5;
-
-            box-shadow:
-                0 0 0 3px rgba(61,127,197,0.10);
+            box-shadow: 0 0 0 3px rgba(61,127,197,0.10);
         }
 
         .hour-input:disabled {
-
             background: #eef1f5;
-
             color: #7e8793;
-
             cursor: not-allowed;
         }
 
@@ -1643,53 +1078,35 @@
         ===================================================== */
 
         .quick-actions {
-
             display: flex;
-
             align-items: center;
-
             gap: 8px;
-
             margin-top: 8px;
         }
 
         .quick-btn {
-
             border: 1px solid #d0dbe9;
-
             background: #f8fbff;
-
             color: #305585;
-
             font-size: 11px;
-
             font-weight: 800;
-
             padding: 5px 10px;
-
             border-radius: 8px;
-
             cursor: pointer;
-
             transition: 0.15s;
         }
 
         .quick-btn:hover {
-
             background: #e8f2ff;
-
             border-color: #8eafd5;
         }
 
         .quick-btn:active {
-
             transform: scale(0.96);
         }
 
         .quick-btn:disabled {
-
             opacity: 0.4;
-
             cursor: not-allowed;
         }
 
@@ -1698,88 +1115,53 @@
         ===================================================== */
 
         .bottom-actions {
-
             display: flex;
-
             align-items: center;
-
             justify-content: space-between;
-
             gap: 15px;
-
             flex-wrap: wrap;
         }
 
         .save-status {
-
             display: flex;
-
             align-items: center;
-
             gap: 9px;
-
             font-size: 13px;
-
             color: #66758a;
         }
 
         .save-dot {
-
             width: 9px;
             height: 9px;
-
             border-radius: 50%;
-
             background: #42a568;
-
-            box-shadow:
-                0 0 0 4px rgba(66,165,104,0.10);
+            box-shadow: 0 0 0 4px rgba(66,165,104,0.10);
         }
 
         .save-dot.saving {
-
             background: #e0a02c;
-
-            box-shadow:
-                0 0 0 4px rgba(224,160,44,0.10);
-
+            box-shadow: 0 0 0 4px rgba(224,160,44,0.10);
             animation: pulse 1s infinite;
         }
 
         .save-dot.error {
-
             background: #d74343;
-
-            box-shadow:
-                0 0 0 4px rgba(215,67,67,0.10);
+            box-shadow: 0 0 0 4px rgba(215,67,67,0.10);
         }
 
         @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.35;
-            }
-
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
         }
 
         .logout-button {
-
             padding: 11px 17px;
-
             background: #f1f4f8;
-
             border: 1px solid #dce3eb;
-
             color: #4c5b70;
         }
 
         .logout-button:hover {
-
             background: #e8edf3;
         }
 
@@ -1788,21 +1170,13 @@
         ===================================================== */
 
         .lock-notice {
-
             background: #fff8e8;
-
             border: 1px solid #ecd59f;
-
             color: #765a20;
-
             border-radius: 12px;
-
             padding: 11px 14px;
-
             font-size: 12px;
-
             margin-bottom: 15px;
-
             line-height: 1.45;
         }
 
@@ -1811,67 +1185,51 @@
         ===================================================== */
 
         #celebrationLayer {
-
             position: fixed;
-
             inset: 0;
-
             pointer-events: none;
-
             z-index: 9999;
-
             overflow: hidden;
         }
 
         .confetti {
-
             position: absolute;
-
             top: -25px;
-
             width: 9px;
             height: 15px;
-
             border-radius: 2px;
-
-            animation:
-                confettiFall 2.5s ease-out forwards;
+            animation: confettiFall 2.5s ease-out forwards;
         }
 
         @keyframes confettiFall {
-
             0% {
-
-                transform:
-                    translateY(-20px)
-                    rotate(0deg);
-
+                transform: translateY(-20px) rotate(0deg);
                 opacity: 1;
             }
-
             100% {
-
-                transform:
-                    translateY(110vh)
-                    rotate(720deg);
-
+                transform: translateY(110vh) rotate(720deg);
                 opacity: 0;
             }
-
         }
 
         /* =====================================================
-           DUCK COMPANION
+           YELLOW DUCK COMPANION
+
+           Replaces the emoji with a custom SVG so the duck
+           is genuinely yellow (#FFD93D) rather than the
+           browser's default orange/brown duck emoji.
+
+           The duck walks continuously on the current row,
+           not just when it moves between hours.
         ===================================================== */
 
         .duck {
             position: fixed;
-            width: 52px;
-            height: 52px;
+            width: 54px;
+            height: 54px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 34px;
             transform: translate(-50%, -50%);
             will-change: left, top;
             z-index: 501;
@@ -1886,20 +1244,41 @@
             transition: none !important;
         }
 
-        .duck.sitting {
+        .duck svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            overflow: visible;
+        }
+
+        /* Idle breathing */
+        .duck.sitting svg {
             animation: duckBreathe 2s ease-in-out infinite;
+            transform-origin: center bottom;
         }
 
-        .duck.walking {
+        /* Walking in place on the same row */
+        .duck.walking-in-place svg {
+            animation: duckWalkInPlace 0.6s ease-in-out infinite;
+            transform-origin: center bottom;
+        }
+
+        /* Walking to another row */
+        .duck.walking svg {
             animation: duckWaddle 0.35s ease-in-out infinite;
+            transform-origin: center bottom;
         }
 
-        .duck.jumping {
+        /* Big jump between hours */
+        .duck.jumping svg {
             animation: duckJump 1.2s ease-in-out;
+            transform-origin: center bottom;
         }
 
-        .duck.home {
+        /* Fading away when the shift ends */
+        .duck.home svg {
             animation: duckHome 1.6s ease-in-out forwards;
+            transform-origin: center bottom;
         }
 
         .duck-bubble {
@@ -1915,7 +1294,10 @@
             transform: translate(-50%, -100%);
             white-space: nowrap;
             opacity: 0;
-            transition: opacity 0.4s ease, left 3s linear, top 3s linear;
+            transition:
+                opacity 0.4s ease,
+                left 3s linear,
+                top 3s linear;
             z-index: 502;
             pointer-events: none;
         }
@@ -1943,26 +1325,35 @@
         }
 
         @keyframes duckBreathe {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50%      { transform: translate(-50%, -50%) scale(1.08); }
+            0%, 100% { transform: scale(1); }
+            50%      { transform: scale(1.06); }
+        }
+
+        /* Continuous walking in place — legs + body bob */
+        @keyframes duckWalkInPlace {
+            0%   { transform: translateY(0)     rotate(-3deg); }
+            25%  { transform: translateY(-2px)  rotate(0deg);  }
+            50%  { transform: translateY(0)     rotate(3deg);  }
+            75%  { transform: translateY(-2px)  rotate(0deg);  }
+            100% { transform: translateY(0)     rotate(-3deg); }
         }
 
         @keyframes duckWaddle {
-            0%, 100% { transform: translate(-50%, -50%) rotate(-8deg); }
-            50%      { transform: translate(-50%, -50%) rotate(8deg); }
+            0%, 100% { transform: rotate(-10deg); }
+            50%      { transform: rotate(10deg); }
         }
 
         @keyframes duckJump {
-            0%   { transform: translate(-50%, -50%) scale(1)   rotate(0deg); }
-            30%  { transform: translate(-50%, -90%) scale(1.18) rotate(-12deg); }
-            60%  { transform: translate(-50%, -70%) scale(1.12) rotate(12deg); }
-            100% { transform: translate(-50%, -50%) scale(1)   rotate(0deg); }
+            0%   { transform: translateY(0)     scale(1)   rotate(0deg); }
+            30%  { transform: translateY(-24px) scale(1.18) rotate(-14deg); }
+            60%  { transform: translateY(-14px) scale(1.12) rotate(14deg); }
+            100% { transform: translateY(0)     scale(1)   rotate(0deg); }
         }
 
         @keyframes duckHome {
-            0%   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            70%  { transform: translate(-50%, -50%) scale(1.15) rotate(10deg); }
-            100% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            0%   { transform: scale(1); opacity: 1; }
+            70%  { transform: scale(1.15) rotate(10deg); opacity: 1; }
+            100% { transform: scale(0.5); opacity: 0; }
         }
 
         .duck-trail {
@@ -1970,7 +1361,7 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: rgba(214,167,44,.65);
+            background: rgba(255, 217, 61, 0.75);
             transform: translate(-50%, -50%);
             pointer-events: none;
             z-index: 499;
@@ -1987,13 +1378,9 @@
         ===================================================== */
 
         .footer {
-
             text-align: center;
-
             color: #8b98aa;
-
             font-size: 11px;
-
             padding: 10px 0 25px;
         }
 
@@ -2002,101 +1389,31 @@
         ===================================================== */
 
         @media (max-width: 900px) {
-
             .identity-strip {
-
-                grid-template-columns:
-                    repeat(2, 1fr);
+                grid-template-columns: repeat(2, 1fr);
             }
-
             .hour-list {
-
-                grid-template-columns:
-                    repeat(2, 1fr);
+                grid-template-columns: repeat(2, 1fr);
             }
-
             .performance-metrics {
-
-                grid-template-columns:
-                    repeat(2, 1fr);
+                grid-template-columns: repeat(2, 1fr);
             }
-
         }
 
         @media (max-width: 600px) {
-
-            .page {
-
-                padding: 12px;
-            }
-
-            .header {
-
-                padding: 21px;
-
-                border-radius: 16px;
-            }
-
-            .header-title {
-
-                font-size: 23px;
-            }
-
-            .identity-strip {
-
-                grid-template-columns:
-                    1fr;
-            }
-
-            .attendance-grid {
-
-                grid-template-columns:
-                    1fr;
-            }
-
-            .hour-list {
-
-                grid-template-columns:
-                    1fr;
-            }
-
-            .performance-metrics {
-
-                grid-template-columns:
-                    repeat(2, 1fr);
-            }
-
-            .card {
-
-                padding: 17px;
-            }
-
+            .page { padding: 12px; }
+            .header { padding: 21px; border-radius: 16px; }
+            .header-title { font-size: 23px; }
+            .identity-strip { grid-template-columns: 1fr; }
+            .attendance-grid { grid-template-columns: 1fr; }
+            .hour-list { grid-template-columns: 1fr; }
+            .performance-metrics { grid-template-columns: repeat(2, 1fr); }
+            .card { padding: 17px; }
             .login-card,
-            .password-card {
-
-                padding: 25px;
-            }
-
-            .reminder-content {
-
-                flex-direction: column;
-
-                align-items: flex-start;
-            }
-
-            .notify-permission {
-
-                flex-direction: column;
-
-                align-items: flex-start;
-            }
-
-            .duck {
-                width: 40px;
-                height: 40px;
-                font-size: 26px;
-            }
-
+            .password-card { padding: 25px; }
+            .reminder-content { flex-direction: column; align-items: flex-start; }
+            .notify-permission { flex-direction: column; align-items: flex-start; }
+            .duck { width: 42px; height: 42px; }
         }
 
     </style>
@@ -2520,20 +1837,13 @@
 
                 <div class="spinner"></div>
 
-                <div style="
-                    font-weight:800;
-                    color:#294466;
-                ">
+                <div style="font-weight:800;color:#294466;">
 
                     Loading your production profile...
 
                 </div>
 
-                <div style="
-                    margin-top:7px;
-                    font-size:12px;
-                    color:#8190a4;
-                ">
+                <div style="margin-top:7px;font-size:12px;color:#8190a4;">
 
                     Please wait.
 
@@ -2547,31 +1857,19 @@
             <div id="fatalCard"
                  class="card fatal-card hidden">
 
-                <div style="
-                    font-size:42px;
-                    margin-bottom:10px;
-                ">
+                <div style="font-size:42px;margin-bottom:10px;">
                     ⚠️
                 </div>
 
                 <div id="fatalTitle"
-                     style="
-                        font-size:20px;
-                        font-weight:850;
-                        color:#9b2525;
-                     ">
+                     style="font-size:20px;font-weight:850;color:#9b2525;">
 
                     Unable to load
 
                 </div>
 
                 <div id="fatalMessage"
-                     style="
-                        margin-top:8px;
-                        color:#68778c;
-                        font-size:13px;
-                        line-height:1.5;
-                     ">
+                     style="margin-top:8px;color:#68778c;font-size:13px;line-height:1.5;">
 
                 </div>
 
@@ -2599,63 +1897,23 @@
                      class="identity-strip">
 
                     <div class="identity-item">
-
-                        <div class="identity-label">
-                            Employee
-                        </div>
-
-                        <div id="identityEmployee"
-                             class="identity-value">
-
-                            -
-
-                        </div>
-
+                        <div class="identity-label">Employee</div>
+                        <div id="identityEmployee" class="identity-value">-</div>
                     </div>
 
-
                     <div class="identity-item">
-
-                        <div class="identity-label">
-                            Project
-                        </div>
-
-                        <div id="identityProject"
-                             class="identity-value">
-
-                            -
-
-                        </div>
-
+                        <div class="identity-label">Project</div>
+                        <div id="identityProject" class="identity-value">-</div>
                     </div>
 
-
                     <div class="identity-item">
-
-                        <div class="identity-label">
-                            Sub-Project
-                        </div>
-
-                        <div id="identitySubProject"
-                             class="identity-value">
-
-                            -
-
-                        </div>
-
+                        <div class="identity-label">Sub-Project</div>
+                        <div id="identitySubProject" class="identity-value">-</div>
                     </div>
 
-
                     <div class="identity-item">
-
-                        <div class="identity-label">
-                            Shift
-                        </div>
-
-                        <div class="identity-value">
-                            6 PM – 3 AM
-                        </div>
-
+                        <div class="identity-label">Shift</div>
+                        <div class="identity-value">6 PM – 3 AM</div>
                     </div>
 
                 </div>
@@ -2773,66 +2031,23 @@
                     <div class="performance-metrics">
 
                         <div class="performance-metric">
-
-                            <div class="metric-label">
-                                Target
-                            </div>
-
-                            <div id="performanceTarget"
-                                 class="metric-value">
-
-                                0
-
-                            </div>
-
+                            <div class="metric-label">Target</div>
+                            <div id="performanceTarget" class="metric-value">0</div>
                         </div>
 
-
                         <div class="performance-metric">
-
-                            <div class="metric-label">
-                                Achieved
-                            </div>
-
-                            <div id="performanceAchieved"
-                                 class="metric-value">
-
-                                0
-
-                            </div>
-
+                            <div class="metric-label">Achieved</div>
+                            <div id="performanceAchieved" class="metric-value">0</div>
                         </div>
 
-
                         <div class="performance-metric">
-
-                            <div class="metric-label">
-                                Remaining
-                            </div>
-
-                            <div id="performanceRemaining"
-                                 class="metric-value">
-
-                                0
-
-                            </div>
-
+                            <div class="metric-label">Remaining</div>
+                            <div id="performanceRemaining" class="metric-value">0</div>
                         </div>
 
-
                         <div class="performance-metric">
-
-                            <div class="metric-label">
-                                Achievement
-                            </div>
-
-                            <div id="performancePercentage"
-                                 class="metric-value">
-
-                                0%
-
-                            </div>
-
+                            <div class="metric-label">Achievement</div>
+                            <div id="performancePercentage" class="metric-value">0%</div>
                         </div>
 
                     </div>
@@ -2866,67 +2081,29 @@
 
                     <div class="attendance-grid">
 
-
                         <div class="attendance-option">
-
-                            <input
-                                id="attendancePresent"
-                                name="attendance"
-                                type="radio"
-                                value="Present"
-                                checked
-                                onchange="onAttendanceChange()">
-
-                            <label
-                                for="attendancePresent"
-                                class="attendance-label">
-
+                            <input id="attendancePresent" name="attendance" type="radio"
+                                   value="Present" checked onchange="onAttendanceChange()">
+                            <label for="attendancePresent" class="attendance-label">
                                 Present
-
                             </label>
-
                         </div>
 
-
                         <div class="attendance-option">
-
-                            <input
-                                id="attendanceHalf"
-                                name="attendance"
-                                type="radio"
-                                value="Half Day"
-                                onchange="onAttendanceChange()">
-
-                            <label
-                                for="attendanceHalf"
-                                class="attendance-label">
-
+                            <input id="attendanceHalf" name="attendance" type="radio"
+                                   value="Half Day" onchange="onAttendanceChange()">
+                            <label for="attendanceHalf" class="attendance-label">
                                 Half Day
-
                             </label>
-
                         </div>
-
 
                         <div class="attendance-option">
-
-                            <input
-                                id="attendanceAbsent"
-                                name="attendance"
-                                type="radio"
-                                value="Absent"
-                                onchange="onAttendanceChange()">
-
-                            <label
-                                for="attendanceAbsent"
-                                class="attendance-label">
-
+                            <input id="attendanceAbsent" name="attendance" type="radio"
+                                   value="Absent" onchange="onAttendanceChange()">
+                            <label for="attendanceAbsent" class="attendance-label">
                                 Absent
-
                             </label>
-
                         </div>
-
 
                     </div>
 
@@ -2939,25 +2116,18 @@
 
                     <div class="hourly-header">
 
-                        <div class="card-title"
-                             style="margin:0;">
-
+                        <div class="card-title" style="margin:0;">
                             Hourly Production
-
                         </div>
 
-                        <div id="hourlyTotal"
-                             class="hourly-total">
-
+                        <div id="hourlyTotal" class="hourly-total">
                             Total: 0
-
                         </div>
 
                     </div>
 
 
-                    <div id="hourList"
-                         class="hour-list">
+                    <div id="hourList" class="hour-list">
 
                     </div>
 
@@ -2972,10 +2142,7 @@
 
                         <div class="save-status">
 
-                            <div id="saveDot"
-                                 class="save-dot">
-
-                            </div>
+                            <div id="saveDot" class="save-dot"></div>
 
                             <span id="saveStatusText">
                                 All changes saved
@@ -3049,7 +2216,6 @@ const supabaseClient =
 
 const MANAGER_NAME = "Andy";
 
-
 const LOCK_GRACE_MINUTES = 10;
 
 const REMINDER_MINUTES_BEFORE_END = 10;
@@ -3085,9 +2251,7 @@ const HOUR_LABELS = [
 ];
 
 
-const HOUR_START_HOURS = [
-    18, 19, 20, 21, 22, 23, 0, 1, 2
-];
+const HOUR_START_HOURS = [18, 19, 20, 21, 22, 23, 0, 1, 2];
 
 
 const AUTO_SAVE_DELAY = 700;
@@ -3176,28 +2340,20 @@ function hide(id) {
 function showFatal(title, message) {
 
     hide("loadingCard");
-
     hide("entryScreen");
-
     show("fatalCard");
 
-    $("fatalTitle").textContent =
-        title || "Unable to load";
-
-    $("fatalMessage").textContent =
-        message || "An unexpected error occurred.";
+    $("fatalTitle").textContent = title || "Unable to load";
+    $("fatalMessage").textContent = message || "An unexpected error occurred.";
 
 }
 
 
 function showLoginError(message) {
 
-    const box =
-        $("loginError");
+    const box = $("loginError");
 
-    box.textContent =
-        message;
-
+    box.textContent = message;
     show("loginError");
 
 }
@@ -3214,12 +2370,9 @@ function clearLoginError() {
 
 function showSetPasswordError(message) {
 
-    const box =
-        $("setPasswordError");
+    const box = $("setPasswordError");
 
-    box.textContent =
-        message;
-
+    box.textContent = message;
     show("setPasswordError");
 
 }
@@ -3228,11 +2381,9 @@ function showSetPasswordError(message) {
 function clearSetPasswordMessages() {
 
     hide("setPasswordError");
-
     hide("setPasswordSuccess");
 
     $("setPasswordError").textContent = "";
-
     $("setPasswordSuccess").textContent = "";
 
 }
@@ -3240,12 +2391,9 @@ function clearSetPasswordMessages() {
 
 function showResetPasswordError(message) {
 
-    const box =
-        $("resetPasswordError");
+    const box = $("resetPasswordError");
 
-    box.textContent =
-        message;
-
+    box.textContent = message;
     show("resetPasswordError");
 
 }
@@ -3254,11 +2402,9 @@ function showResetPasswordError(message) {
 function clearResetPasswordMessages() {
 
     hide("resetPasswordError");
-
     hide("resetPasswordSuccess");
 
     $("resetPasswordError").textContent = "";
-
     $("resetPasswordSuccess").textContent = "";
 
 }
@@ -3270,17 +2416,9 @@ function clearResetPasswordMessages() {
 
 function friendlySupabaseError(error) {
 
-    const message =
-        String(
-            error?.message ||
-            error ||
-            ""
-        );
+    const message = String(error?.message || error || "");
 
-
-    const lower =
-        message.toLowerCase();
-
+    const lower = message.toLowerCase();
 
     if (lower.includes("invalid login credentials"))
         return "Invalid email or password.";
@@ -3339,14 +2477,9 @@ function isPasswordRecoveryUrl() {
 }
 
 
-/* =========================================================
-   SHOW FIRST PASSWORD SCREEN
-========================================================= */
-
 function showFirstPasswordScreen() {
 
     passwordChangeRequired = true;
-
     passwordRecoveryMode = false;
 
     hide("loginScreen");
@@ -3371,7 +2504,6 @@ function showFirstPasswordScreen() {
 function showPasswordResetScreen() {
 
     passwordRecoveryMode = true;
-
     passwordChangeRequired = false;
 
     hide("loginScreen");
@@ -3756,7 +2888,6 @@ async function logoutEmployee() {
     passwordRecoveryMode = false;
     reminderFiredFor = {};
 
-    /* Remove the duck companion */
     stopDuckCompanion();
 
     try { await supabaseClient.auth.signOut(); }
@@ -3914,7 +3045,6 @@ async function openAuthenticatedPortal() {
 
         maybeShowNotificationPrompt();
 
-        /* Start the duck AFTER the rows are rendered */
         setTimeout(startDuckCompanion, 500);
 
     }
@@ -4126,10 +3256,6 @@ function getEmployeeBaseTarget() {
 
 }
 
-
-/* =========================================================
-   DAILY TARGET
-========================================================= */
 
 function getDailyTarget() {
 
@@ -4564,10 +3690,6 @@ function getHourStatusText(state) {
 }
 
 
-/* =========================================================
-   APPLY LOCKS
-========================================================= */
-
 function applyLocks() {
 
     const rows = document.querySelectorAll(".hour-row");
@@ -4678,10 +3800,6 @@ function onHourInput(event) {
 
 }
 
-
-/* =========================================================
-   ATTENDANCE CHANGE
-========================================================= */
 
 function onAttendanceChange() {
 
@@ -5129,7 +4247,6 @@ document.addEventListener("visibilitychange", async () => {
         applyLocks();
         checkHourReminder();
 
-        /* Re-anchor the duck */
         if (duckState.active && duckState.currentIndex !== null) {
 
             positionDuckImmediate(duckState.currentIndex);
@@ -5319,10 +4436,6 @@ function checkHourReminder() {
 }
 
 
-/* =========================================================
-   SCROLL TO CURRENT HOUR
-========================================================= */
-
 function scrollToCurrentHour() {
 
     const currentIndex = getCurrentHourIndex();
@@ -5405,9 +4518,7 @@ async function enableBrowserNotifications() {
                     {
                         body:
                             "You will now receive a reminder 10 minutes before each hour closes.",
-                        tag: "hourly-test",
-                        icon:
-                            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' font-size='50'%3E🔔%3C/text%3E%3C/svg%3E"
+                        tag: "hourly-test"
                     }
                 );
 
@@ -5447,9 +4558,7 @@ function sendBrowserNotification(label, minutesRemaining) {
                 body:
                     `${label} closes in ${minutesRemaining} minute${minutesRemaining === 1 ? "" : "s"}. Please enter your production count now.`,
                 tag: "hourly-reminder-" + label,
-                requireInteraction: false,
-                icon:
-                    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' font-size='50'%3E🔔%3C/text%3E%3C/svg%3E"
+                requireInteraction: false
             }
         );
 
@@ -5464,14 +4573,84 @@ function sendBrowserNotification(label, minutesRemaining) {
 
 
 /* =========================================================
-   DUCK COMPANION
+   YELLOW DUCK COMPANION
+
+   A custom SVG duck (not the emoji, which is orange)
+   that walks continuously on the current hour block.
+   When the hour changes, it walks to the next block.
+   When the shift is over, it walks off to a home.
 ========================================================= */
+
+/* ---------------------------------------------------------
+   The yellow duck SVG.
+   Body: yellow (#FFD93D), beak: orange (#F59E0B),
+   eye: black, wing: darker yellow.
+--------------------------------------------------------- */
+
+const DUCK_SVG = `
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- Feet (behind body) -->
+    <g class="duck-feet">
+        <ellipse cx="38" cy="88" rx="9" ry="4" fill="#F59E0B"
+                 stroke="#B45309" stroke-width="1.2"/>
+        <ellipse cx="62" cy="88" rx="9" ry="4" fill="#F59E0B"
+                 stroke="#B45309" stroke-width="1.2"/>
+    </g>
+
+    <!-- Body -->
+    <ellipse cx="50" cy="60" rx="34" ry="26"
+             fill="#FFD93D"
+             stroke="#D97706" stroke-width="2"/>
+
+    <!-- Wing -->
+    <path d="M 30 62 Q 24 50 38 48 Q 50 46 56 58 Q 50 68 30 62 Z"
+          fill="#FBBF24"
+          stroke="#D97706" stroke-width="1.8"/>
+
+    <!-- Wing detail -->
+    <path d="M 34 60 Q 40 52 50 52"
+          fill="none"
+          stroke="#D97706" stroke-width="1.3"
+          stroke-linecap="round" opacity="0.65"/>
+
+    <!-- Neck & head -->
+    <ellipse cx="68" cy="38" rx="18" ry="16"
+             fill="#FFD93D"
+             stroke="#D97706" stroke-width="2"/>
+
+    <!-- Cheek -->
+    <circle cx="72" cy="44" r="4" fill="#FBBF24" opacity="0.6"/>
+
+    <!-- Eye -->
+    <circle cx="74" cy="34" r="3.2" fill="#111827"/>
+    <circle cx="75.2" cy="33" r="1.1" fill="#ffffff"/>
+
+    <!-- Beak -->
+    <path d="M 84 38 Q 96 36 94 42 Q 92 48 84 46 Z"
+          fill="#F59E0B"
+          stroke="#B45309" stroke-width="1.5"
+          stroke-linejoin="round"/>
+
+    <!-- Beak highlight -->
+    <path d="M 86 40 Q 92 39 92 41"
+          fill="none"
+          stroke="#FEF3C7" stroke-width="1"
+          stroke-linecap="round" opacity="0.8"/>
+
+    <!-- Top head tuft -->
+    <path d="M 62 22 Q 66 16 72 20"
+          fill="none"
+          stroke="#D97706" stroke-width="2.2"
+          stroke-linecap="round"/>
+</svg>
+`;
+
 
 const DUCK_MESSAGES = [
 
     "Quack! I'm keeping an eye on this hour 🦆",
     "Don't forget to fill me in! 💛",
-    "Still here, still waiting 🦆",
+    "Still here, still walking 🦆",
     "Every hour counts 🎯",
     "You're doing great! 🌟",
     "Just one more hour, keep going 💪",
@@ -5485,7 +4664,7 @@ const duckState = {
     element: null,
     bubble: null,
     tickerId: null,
-    homeCheckId: null,
+    walkTimerId: null,
     currentIndex: null,
     hasGoneHome: false,
     active: false,
@@ -5494,17 +4673,13 @@ const duckState = {
 };
 
 
-/* ---------------------------------------------------------
-   Create the duck DOM element
---------------------------------------------------------- */
-
 function ensureDuckElements() {
 
     if (!duckState.element) {
 
         duckState.element = document.createElement("div");
         duckState.element.className = "duck sitting";
-        duckState.element.textContent = "🦆";
+        duckState.element.innerHTML = DUCK_SVG;
         duckState.element.style.display = "none";
 
         document.body.appendChild(duckState.element);
@@ -5524,10 +4699,6 @@ function ensureDuckElements() {
 }
 
 
-/* ---------------------------------------------------------
-   Find the hour input element for a given index
---------------------------------------------------------- */
-
 function getHourAnchor(index) {
 
     const row = document.querySelector(
@@ -5544,11 +4715,6 @@ function getHourAnchor(index) {
 
 }
 
-
-/* ---------------------------------------------------------
-   Position the duck above an hour block.
-   When `animate` is true, the transition runs.
---------------------------------------------------------- */
 
 function positionDuckOverHour(index, animate) {
 
@@ -5574,13 +4740,11 @@ function positionDuckOverHour(index, animate) {
     duckState.element.style.left = targetX + "px";
     duckState.element.style.top = targetY + "px";
 
-    /* Keep the bubble above the duck during the walk */
     duckState.bubble.style.left = targetX + "px";
     duckState.bubble.style.top = (targetY - 4) + "px";
 
     if (animate === false) {
 
-        /* Force a reflow, then re-enable transitions */
         void duckState.element.offsetWidth;
 
         duckState.element.classList.remove("no-transition");
@@ -5597,10 +4761,6 @@ function positionDuckImmediate(index) {
 
 }
 
-
-/* ---------------------------------------------------------
-   Speech bubble
---------------------------------------------------------- */
 
 function duckSay(text, durationMs = 3200) {
 
@@ -5632,10 +4792,6 @@ function duckSay(text, durationMs = 3200) {
 }
 
 
-/* ---------------------------------------------------------
-   Sparkle trail when the duck jumps
---------------------------------------------------------- */
-
 function spawnDuckTrail() {
 
     if (!duckState.element) return;
@@ -5665,14 +4821,76 @@ function spawnDuckTrail() {
 
 
 /* ---------------------------------------------------------
-   Send the duck home when the shift is done
+   Switch the duck to a walking-in-place animation.
+   This is what runs continuously while it sits on the
+   current hour block.
 --------------------------------------------------------- */
+
+function startDuckWalkingInPlace() {
+
+    if (!duckState.element) return;
+
+    if (duckState.walkTimerId) {
+
+        clearTimeout(duckState.walkTimerId);
+        duckState.walkTimerId = null;
+
+    }
+
+    /* Walk for a random stretch, then briefly rest, then walk again. */
+
+    duckState.element.classList.remove("sitting", "walking", "jumping", "home");
+    duckState.element.classList.add("walking-in-place");
+
+    const walkDuration = 3000 + Math.random() * 2500;
+
+    duckState.walkTimerId = setTimeout(() => {
+
+        if (!duckState.element) return;
+
+        duckState.element.classList.remove("walking-in-place");
+        duckState.element.classList.add("sitting");
+
+        const restDuration = 800 + Math.random() * 1200;
+
+        duckState.walkTimerId = setTimeout(() => {
+
+            if (!duckState.element) return;
+
+            startDuckWalkingInPlace();
+
+        }, restDuration);
+
+    }, walkDuration);
+
+}
+
+
+function stopDuckWalkingInPlace() {
+
+    if (duckState.walkTimerId) {
+
+        clearTimeout(duckState.walkTimerId);
+        duckState.walkTimerId = null;
+
+    }
+
+    if (duckState.element) {
+
+        duckState.element.classList.remove("walking-in-place");
+
+    }
+
+}
+
 
 function sendDuckHome() {
 
     if (duckState.hasGoneHome) return;
 
     duckState.hasGoneHome = true;
+
+    stopDuckWalkingInPlace();
 
     duckState.element.classList.remove("sitting", "walking", "jumping");
     duckState.element.classList.add("home");
@@ -5695,10 +4913,6 @@ function sendDuckHome() {
 }
 
 
-/* ---------------------------------------------------------
-   Bring the duck back for a fresh shift
---------------------------------------------------------- */
-
 function wakeDuckUp() {
 
     duckState.hasGoneHome = false;
@@ -5714,11 +4928,6 @@ function wakeDuckUp() {
 }
 
 
-/* ---------------------------------------------------------
-   The duck tick: decides where the duck should be.
-   Runs every second.
---------------------------------------------------------- */
-
 function runDuckTick() {
 
     if (!duckState.active) return;
@@ -5729,26 +4938,21 @@ function runDuckTick() {
 
     const currentIndex = getCurrentHourIndex();
 
-    /* -----------------------------------------------------
-       Outside the shift. Duck hides.
-    ----------------------------------------------------- */
-
+    /* Outside shift: duck hides */
     if (currentIndex === -1) {
 
         duckState.element.style.display = "none";
         duckState.bubble.classList.remove("show");
         duckState.bubble.style.display = "none";
+
+        stopDuckWalkingInPlace();
+
         duckState.currentIndex = null;
         duckState.hasGoneHome = false;
 
         return;
 
     }
-
-    /* -----------------------------------------------------
-       If the user manually set attendance to Absent,
-       the duck still sits on the current row.
-    ----------------------------------------------------- */
 
     if (!duckState.hasGoneHome) {
 
@@ -5760,10 +4964,7 @@ function runDuckTick() {
 
     }
 
-    /* -----------------------------------------------------
-       First placement.
-    ----------------------------------------------------- */
-
+    /* First placement */
     if (duckState.currentIndex === null) {
 
         duckState.currentIndex = currentIndex;
@@ -5774,35 +4975,41 @@ function runDuckTick() {
         duckState.element.classList.remove("walking", "jumping", "home");
         duckState.element.classList.add("sitting");
 
-        duckSay("Quack! I'll sit here this hour 🦆", 3200);
+        duckSay("Quack! I'll walk around here this hour 🦆", 3200);
+
+        /* Begin the continuous in-place walking */
+        startDuckWalkingInPlace();
 
         return;
 
     }
 
-    /* -----------------------------------------------------
-       No change. Just keep the duck anchored
-       (in case of scroll/resize).
-    ----------------------------------------------------- */
-
+    /* No hour change: keep anchored and keep walking */
     if (duckState.currentIndex === currentIndex) {
 
         positionDuckImmediate(currentIndex);
 
+        if (!duckState.element.classList.contains("walking-in-place") &&
+            !duckState.element.classList.contains("walking") &&
+            !duckState.element.classList.contains("jumping")) {
+
+            startDuckWalkingInPlace();
+
+        }
+
         return;
 
     }
 
-    /* -----------------------------------------------------
-       Hour changed. Duck walks + jumps to the next row.
-    ----------------------------------------------------- */
+    /* Hour changed: walk + jump to next row */
+
+    stopDuckWalkingInPlace();
 
     duckState.element.classList.remove("sitting", "home");
     duckState.element.classList.add("walking");
 
     positionDuckOverHour(currentIndex, true);
 
-    /* Turn walking into a jump midway */
     setTimeout(() => {
 
         if (!duckState.element) return;
@@ -5814,7 +5021,6 @@ function runDuckTick() {
 
     }, 1500);
 
-    /* Settle into sitting once the walk is done */
     setTimeout(() => {
 
         if (!duckState.element) return;
@@ -5822,9 +5028,10 @@ function runDuckTick() {
         duckState.element.classList.remove("jumping");
         duckState.element.classList.add("sitting");
 
+        startDuckWalkingInPlace();
+
     }, 3000);
 
-    /* Message depends on the new hour */
     if (currentIndex >= HOUR_FIELDS.length - 1) {
 
         duckSay("Last hour! Let's finish strong 💪", 3400);
@@ -5838,9 +5045,7 @@ function runDuckTick() {
     else {
 
         duckSay(
-            DUCK_MESSAGES[
-                Math.floor(Math.random() * DUCK_MESSAGES.length)
-            ],
+            DUCK_MESSAGES[Math.floor(Math.random() * DUCK_MESSAGES.length)],
             3200
         );
 
@@ -5851,10 +5056,6 @@ function runDuckTick() {
 }
 
 
-/* ---------------------------------------------------------
-   Start the duck companion.
---------------------------------------------------------- */
-
 function startDuckCompanion() {
 
     if (duckState.active) return;
@@ -5863,13 +5064,10 @@ function startDuckCompanion() {
 
     ensureDuckElements();
 
-    /* Initial placement */
     setTimeout(runDuckTick, 200);
 
-    /* Continuous movement check */
     duckState.tickerId = setInterval(runDuckTick, 1000);
 
-    /* Anchor duck on scroll */
     window.addEventListener("scroll", () => {
 
         if (duckState.currentIndex !== null &&
@@ -5881,7 +5079,6 @@ function startDuckCompanion() {
 
     }, { passive: true });
 
-    /* Anchor duck on resize */
     window.addEventListener("resize", () => {
 
         if (duckState.currentIndex !== null &&
@@ -5896,10 +5093,6 @@ function startDuckCompanion() {
 }
 
 
-/* ---------------------------------------------------------
-   Stop the duck (logout / cleanup)
---------------------------------------------------------- */
-
 function stopDuckCompanion() {
 
     duckState.active = false;
@@ -5910,6 +5103,8 @@ function stopDuckCompanion() {
         duckState.tickerId = null;
 
     }
+
+    stopDuckWalkingInPlace();
 
     if (duckState.element) {
 
