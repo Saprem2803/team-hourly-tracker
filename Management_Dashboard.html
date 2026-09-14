@@ -416,7 +416,7 @@ body{
 table{
     width:100%;
     border-collapse:collapse;
-    min-width:800px;
+    min-width:900px;
 }
 
 thead{
@@ -503,6 +503,34 @@ tbody tr:hover{
 .badge-neutral{
     background:#e2e8f0;
     color:#334155;
+}
+
+/* Target scope cell */
+.target-scope{
+    font-size:11px;
+    font-weight:700;
+    color:#475569;
+}
+
+.target-scope .target-count{
+    color:#166534;
+}
+
+.target-scope .sep{
+    color:#94a3b8;
+    margin:0 3px;
+}
+
+.target-scope.partial .target-count{
+    color:#b45309;
+}
+
+.target-scope.all .target-count{
+    color:#166534;
+}
+
+.target-scope.none .target-count{
+    color:#94a3b8;
 }
 
 /* =========================================================
@@ -833,9 +861,7 @@ tbody tr:hover{
     <main class="container">
 
 
-        <!-- =====================================================
-             FILTERS
-        ====================================================== -->
+        <!-- FILTERS -->
 
         <div class="toolbar">
 
@@ -907,9 +933,7 @@ tbody tr:hover{
         <div id="pageError" class="error hidden"></div>
 
 
-        <!-- =====================================================
-             EXECUTIVE HEADLINE BANNER
-        ====================================================== -->
+        <!-- HEADLINE BANNER -->
 
         <div class="headline">
 
@@ -972,9 +996,7 @@ tbody tr:hover{
         </div>
 
 
-        <!-- =====================================================
-             KPI GRID
-        ====================================================== -->
+        <!-- KPI GRID -->
 
         <div class="kpi-grid">
 
@@ -1006,7 +1028,7 @@ tbody tr:hover{
 
                 <div id="kpiTarget" class="kpi-value">0</div>
 
-                <div class="kpi-sub">Target × attendance</div>
+                <div class="kpi-sub">Target-based employees only</div>
 
             </div>
 
@@ -1017,7 +1039,7 @@ tbody tr:hover{
 
                 <div id="kpiProduction" class="kpi-value">0</div>
 
-                <div class="kpi-sub">Total units delivered</div>
+                <div class="kpi-sub">All employees</div>
 
             </div>
 
@@ -1046,9 +1068,7 @@ tbody tr:hover{
         </div>
 
 
-        <!-- =====================================================
-             PROJECT SCORECARD
-        ====================================================== -->
+        <!-- PROJECT SCORECARD -->
 
         <section class="section">
 
@@ -1085,6 +1105,7 @@ tbody tr:hover{
                             <th>Team Lead</th>
                             <th>Headcount</th>
                             <th>Effective FTE</th>
+                            <th>Target Scope</th>
                             <th>Target</th>
                             <th>Production</th>
                             <th>Achievement</th>
@@ -1104,9 +1125,7 @@ tbody tr:hover{
         </section>
 
 
-        <!-- =====================================================
-             TEAM LEAD SCORECARD
-        ====================================================== -->
+        <!-- TEAM LEAD SCORECARD -->
 
         <section class="section">
 
@@ -1156,9 +1175,7 @@ tbody tr:hover{
         </section>
 
 
-        <!-- =====================================================
-             CHARTS
-        ====================================================== -->
+        <!-- CHARTS -->
 
         <div class="charts">
 
@@ -1198,9 +1215,7 @@ tbody tr:hover{
         </div>
 
 
-        <!-- =====================================================
-             EXECUTIVE INSIGHTS
-        ====================================================== -->
+        <!-- INSIGHTS -->
 
         <section class="section">
 
@@ -1325,7 +1340,7 @@ let accessRows = [];
 
 let projects = [];
 
-let subProjects = [];   // <-- sub-project targets live here
+let subProjects = [];
 
 let employees = [];
 
@@ -1341,7 +1356,7 @@ let currentUser = null;
 
 let currentDate = null;
 
-let currentPeriod = "day";   // "day" | "mtd"
+let currentPeriod = "day";
 
 
 /* =========================================================
@@ -1786,14 +1801,6 @@ async function loadProjects(){
 }
 
 
-/* =========================================================
-   LOAD SUB-PROJECTS
-
-   This is the missing piece that caused Hopebridge's
-   target to be 0. Sub-project targets must be loaded so
-   employees can be resolved against them.
-========================================================= */
-
 async function loadSubProjects(){
 
     const { data, error } =
@@ -2099,110 +2106,84 @@ function getSubProjectById(subProjectId){
 
    Priority order:
 
-     1. Sub-project assigned directly to the employee
-        (employees.sub_project_id), if target_based = true
-        and daily_target > 0.
+     1. Employee has a sub_project_id:
+          - use that sub-project's target if target_based !== false
+            AND daily_target > 0
+          - otherwise: no target (do NOT fall back to project)
 
-     2. If the employee's project has exactly one active
-        sub-project, use that sub-project's target.
+     2. Employee has no sub_project_id:
+          - if the project has ANY target-based sub-project,
+            this employee has no target
+          - otherwise fall back to project.daily_target
 
-     3. Fall back to projects.daily_target.
+     3. Otherwise: no target
 
-     4. If nothing is configured, return null (no target).
-
-   This is why Hopebridge (sub-project based) previously
-   showed target = 0: its project-level daily_target is
-   blank, and the dashboard was not looking at
-   sub_projects at all.
+   This is what fixes WRMC showing 750 target when only 2
+   of its 7 employees are actually on target-based work
+   (Patient Collection). The other 5 (WRMC AR) contribute
+   production but no target.
 ========================================================= */
 
 function resolveEmployeeTarget(employee, project){
 
-    /*
-       Step 1: employee's directly assigned sub-project
-    */
-
-    const directSp =
-        getSubProjectById(employee?.sub_project_id);
-
+    /* STEP 1: direct sub-project assignment */
 
     if(
-        directSp &&
-        directSp.target_based !== false
+        employee.sub_project_id !== null &&
+        employee.sub_project_id !== undefined &&
+        employee.sub_project_id !== ""
     ){
 
-        const spTarget =
-            num(directSp.daily_target);
+        const sp = getSubProjectById(employee.sub_project_id);
 
+        if(!sp) return null;
 
-        if(spTarget > 0){
+        if(sp.target_based === false) return null;
 
-            return spTarget;
+        const spTarget = num(sp.daily_target);
 
-        }
+        if(spTarget > 0) return spTarget;
 
-    }
-
-
-    /*
-       Step 2: unique active sub-project for the employee's
-       project (conventional match when there is only one)
-    */
-
-    if(project){
-
-        const projectSubProjects =
-            subProjects.filter(
-                sp =>
-                    String(sp.project_id).trim()
-                    === String(project.id).trim()
-                    &&
-                    sp.active !== false
-            );
-
-
-        if(projectSubProjects.length === 1){
-
-            const sp = projectSubProjects[0];
-
-
-            if(sp.target_based !== false){
-
-                const spTarget =
-                    num(sp.daily_target);
-
-
-                if(spTarget > 0){
-
-                    return spTarget;
-
-                }
-
-            }
-
-        }
+        return null;
 
     }
 
 
-    /*
-       Step 3: project-level target
-    */
+    /* STEP 2: no direct sub-project */
 
-    const projectTarget =
-        num(project?.daily_target);
+    if(!project) return null;
 
 
-    if(projectTarget > 0){
+    const projectSubProjects =
+        subProjects.filter(
+            sp =>
+                String(sp.project_id).trim() ===
+                String(project.id).trim()
+                &&
+                sp.active !== false
+        );
 
-        return projectTarget;
+
+    const targetBasedSubProjects =
+        projectSubProjects.filter(
+            sp =>
+                sp.target_based !== false &&
+                num(sp.daily_target) > 0
+        );
+
+
+    if(targetBasedSubProjects.length > 0){
+
+        return null;
 
     }
 
 
-    /*
-       Step 4: nothing configured
-    */
+    /* STEP 3: project-level fallback (legacy projects) */
+
+    const projectTarget = num(project.daily_target);
+
+    if(projectTarget > 0) return projectTarget;
 
     return null;
 
@@ -2347,19 +2328,9 @@ function buildEmployeeMetric(employee){
         getProjectById(employee.project_id);
 
 
-    /*
-       Resolve target from sub-project first, then project.
-       This fixes the Hopebridge target = 0 issue.
-    */
-
     const employeeTarget =
         resolveEmployeeTarget(employee, project);
 
-
-    /*
-       Daily mode uses the single tracker date.
-       MTD mode aggregates all rows in the period.
-    */
 
     let productivityRow = null;
 
@@ -2399,10 +2370,6 @@ function buildEmployeeMetric(employee){
 
     }
     else{
-
-        /*
-           MTD: aggregate all rows in the period.
-        */
 
         const rows =
             productivityRows.filter(
@@ -2448,19 +2415,6 @@ function buildEmployeeMetric(employee){
 
     }
 
-
-    /*
-       Adjusted target:
-
-         Daily view:  projectTarget * attendance factor
-         MTD view:    sum over each day in the period
-                      of (projectTarget * attendance factor)
-                      for the days that have records
-
-       If employeeTarget is null (nothing configured anywhere)
-       the adjusted target is 0 and achievement is reported
-       as "No Target" instead of a fake 0%.
-    */
 
     let adjustedTarget = 0;
 
@@ -2992,7 +2946,11 @@ function buildProjectMetrics(){
 
                         production: 0,
 
-                        hasTarget: false
+                        hasTarget: false,
+
+                        targetBasedEmployees: 0,
+
+                        targetBasedFTE: 0
 
                     }
                 );
@@ -3014,6 +2972,10 @@ function buildProjectMetrics(){
             if(metric.hasTarget){
 
                 item.hasTarget = true;
+
+                item.targetBasedEmployees += 1;
+
+                item.targetBasedFTE += metric.fte;
 
             }
 
@@ -3076,7 +3038,7 @@ function renderProjectTable(){
 
         body.innerHTML =
             `<tr>
-                <td colspan="10" class="empty">
+                <td colspan="11" class="empty">
                     No project data available.
                 </td>
             </tr>`;
@@ -3133,7 +3095,9 @@ function renderProjectTable(){
 
                 <td>${formatNumber(item.fte, 1)}</td>
 
-                <td>${formatNumber(item.target, 1)}</td>
+                <td>${targetScopeCell(item)}</td>
+
+                <td>${item.hasTarget ? formatNumber(item.target, 1) : "N/A"}</td>
 
                 <td>${formatNumber(item.production, 0)}</td>
 
@@ -3150,6 +3114,48 @@ function renderProjectTable(){
 
         }
     );
+
+}
+
+
+/* =========================================================
+   TARGET SCOPE CELL
+========================================================= */
+
+function targetScopeCell(item){
+
+    const total = item.employees;
+
+    const based = item.targetBasedEmployees;
+
+
+    let css = "target-scope";
+
+
+    if(based === 0){
+
+        css += " none";
+
+    }
+    else if(based === total){
+
+        css += " all";
+
+    }
+    else{
+
+        css += " partial";
+
+    }
+
+
+    return `
+        <span class="${css}">
+            <span class="target-count">${based}</span>
+            <span class="sep">/</span>
+            <span class="total-count">${total}</span>
+        </span>
+    `;
 
 }
 
@@ -3332,7 +3338,7 @@ function renderTeamLeadTable(){
 
                 <td>${formatNumber(item.fte, 1)}</td>
 
-                <td>${formatNumber(item.target, 1)}</td>
+                <td>${item.hasTarget ? formatNumber(item.target, 1) : "N/A"}</td>
 
                 <td>${formatNumber(item.production, 0)}</td>
 
@@ -3356,12 +3362,6 @@ function renderTeamLeadTable(){
 ========================================================= */
 
 function achievementBadge(value, hasTarget = true){
-
-    /*
-       When a project has no configured target anywhere
-       (neither sub-project nor project), showing 0.0%
-       is misleading. We show N/A instead.
-    */
 
     if(!hasTarget){
 
@@ -3688,9 +3688,13 @@ function renderInsights(){
     const projectData = buildProjectMetrics();
 
 
-    if(projectData.length){
+    const ranked =
+        projectData.filter(p => p.hasTarget);
 
-        const top = projectData[0];
+
+    if(ranked.length){
+
+        const top = ranked[0];
 
         document
             .getElementById("insightTopProject")
@@ -3699,24 +3703,36 @@ function renderInsights(){
 
 
         const bottom =
-            projectData[projectData.length - 1];
+            ranked[ranked.length - 1];
 
 
-        document
-            .getElementById("insightBottomProject")
-            .textContent =
-                `${bottom.project.project_name} at ${formatPercent(bottom.achievement)} — requires attention`;
+        if(ranked.length > 1){
+
+            document
+                .getElementById("insightBottomProject")
+                .textContent =
+                    `${bottom.project.project_name} at ${formatPercent(bottom.achievement)} — requires attention`;
+
+        }
+        else{
+
+            document
+                .getElementById("insightBottomProject")
+                .textContent =
+                    `Only one target-based project in this view`;
+
+        }
 
     }
     else{
 
         document
             .getElementById("insightTopProject")
-            .textContent = "No project data";
+            .textContent = "No target-based project in this view";
 
         document
             .getElementById("insightBottomProject")
-            .textContent = "No project data";
+            .textContent = "No target-based project in this view";
 
     }
 
@@ -3848,11 +3864,13 @@ function exportCSV(){
         "Project",
         "Team Lead",
         "Headcount",
+        "Target Scope",
         "Effective FTE",
         "Target",
         "Production",
         "Achievement %",
-        "Units / FTE"
+        "Units / FTE",
+        "Status"
     ]);
 
 
@@ -3864,13 +3882,20 @@ function exportCSV(){
                 item.project.project_name || "",
                 item.teamLead,
                 item.employees,
+                `${item.targetBasedEmployees} / ${item.employees}`,
                 item.fte.toFixed(1),
-                item.target.toFixed(1),
+                item.hasTarget ? item.target.toFixed(1) : "N/A",
                 item.production.toFixed(0),
                 item.hasTarget
                     ? item.achievement.toFixed(1)
                     : "N/A",
-                item.average.toFixed(1)
+                item.average.toFixed(1),
+                item.hasTarget
+                    ? (item.achievement >= 95 ? "On Track"
+                        : item.achievement >= 75 ? "Monitor"
+                        : item.achievement > 0 ? "Attention"
+                        : "No Data")
+                    : "No Target"
             ]);
 
         }
@@ -3890,7 +3915,8 @@ function exportCSV(){
         "Effective FTE",
         "Target",
         "Production",
-        "Achievement %"
+        "Achievement %",
+        "Status"
     ]);
 
 
@@ -3903,11 +3929,17 @@ function exportCSV(){
                 item.projectCount,
                 item.employees,
                 item.fte.toFixed(1),
-                item.target.toFixed(1),
+                item.hasTarget ? item.target.toFixed(1) : "N/A",
                 item.production.toFixed(0),
                 item.hasTarget
                     ? item.achievement.toFixed(1)
-                    : "N/A"
+                    : "N/A",
+                item.hasTarget
+                    ? (item.achievement >= 95 ? "On Track"
+                        : item.achievement >= 75 ? "Monitor"
+                        : item.achievement > 0 ? "Attention"
+                        : "No Data")
+                    : "No Target"
             ]);
 
         }
