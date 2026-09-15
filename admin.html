@@ -40,7 +40,6 @@ body{
     min-height:100vh;
 }
 
-/* ---------- HEADER ---------- */
 .header{
     background:rgba(255,255,255,.85); border-bottom:1px solid var(--line);
     padding:16px 32px; display:flex; justify-content:space-between; align-items:center;
@@ -76,7 +75,6 @@ body{
 .btn-icon:hover{background:var(--bg-soft);}
 .btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
 
-/* ---------- TABS ---------- */
 .tabs-bar{
     background:#fff;border-bottom:1px solid var(--line);
     padding:0 32px;display:flex;gap:2px;overflow-x:auto;
@@ -98,7 +96,6 @@ body{
 }
 .tab-btn.active .tab-count{background:var(--brand-2);color:#fff;}
 
-/* ---------- PAGE ---------- */
 .page{max-width:1560px;margin:0 auto;padding:28px 32px 60px;}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;animation:fadeIn .2s ease;}
@@ -124,7 +121,6 @@ body{
 }
 .filter-bar input:focus,.filter-bar select:focus{border-color:var(--brand-2);box-shadow:0 0 0 3px rgba(26,77,122,.08);}
 
-/* ---------- TABLE ---------- */
 .table-shell{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-card);}
 .table-scroll{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
@@ -150,8 +146,8 @@ tbody tr:last-child td{border-bottom:none;}
 .pill-red{background:var(--red-soft);color:var(--red);border:1px solid #fecaca;}
 .pill-amber{background:var(--amber-soft);color:var(--amber);border:1px solid #fde68a;}
 .pill-gray{background:var(--bg-soft);color:var(--ink-4);border:1px solid var(--line);}
+.pill-blue{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;}
 
-/* ---------- MODAL ---------- */
 .modal-overlay{
     position:fixed;inset:0;background:rgba(10,22,40,.5);
     backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
@@ -165,6 +161,7 @@ tbody tr:last-child td{border-bottom:none;}
     max-height:90vh;overflow-y:auto;
     animation:slideUp .2s ease;
 }
+.modal-card.wide{max-width:640px;}
 @keyframes slideUp{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 .modal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;}
 .modal-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
@@ -188,16 +185,33 @@ tbody tr:last-child td{border-bottom:none;}
 .checkbox-row input[type="checkbox"]{width:16px;height:16px;cursor:pointer;}
 .checkbox-row label{font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;}
 
+.section-divider{
+    grid-column:span 2;
+    font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--ink-4);padding:14px 0 6px;border-top:1px solid var(--line-2);
+    margin-top:6px;
+}
+
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line-2);}
 
-/* ---------- ALERTS ---------- */
 .alert{padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start;}
 .alert-error{background:var(--red-soft);color:var(--red);border:1px solid #fecaca;}
 .alert-success{background:var(--green-soft);color:var(--green);border:1px solid #a7f3d0;}
 .alert-info{background:var(--bg-soft);color:var(--ink-3);border:1px solid var(--line);}
 .hidden{display:none !important;}
 
-/* ---------- TOAST ---------- */
+.credential-box{
+    background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;
+    padding:16px 18px;margin-bottom:16px;
+}
+.credential-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:8px 0;border-bottom:1px solid var(--line-2);
+}
+.credential-row:last-child{border-bottom:none;}
+.credential-row .lbl{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-4);}
+.credential-row .val{font-family:'Inter',monospace;font-weight:700;color:var(--ink);font-size:14px;letter-spacing:.3px;}
+
 .toast-stack{position:fixed;bottom:24px;right:24px;z-index:2000;display:flex;flex-direction:column;gap:10px;}
 .toast{
     background:var(--ink);color:#fff;padding:14px 18px;border-radius:10px;
@@ -212,13 +226,11 @@ tbody tr:last-child td{border-bottom:none;}
 .toast.error{background:var(--red);}
 .toast .icon{font-size:16px;}
 
-/* ---------- LOADING ---------- */
 .loading{padding:60px 20px;text-align:center;color:var(--ink-4);font-size:13px;font-weight:600;}
 .spinner{width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--brand-2);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .empty-row{padding:48px 20px;text-align:center;color:var(--ink-4);font-size:13px;font-style:italic;}
 
-/* ---------- LOGIN ---------- */
 .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
 .login-card{
     width:100%;max-width:420px;background:#fff;border:1px solid var(--line);
@@ -244,11 +256,11 @@ tbody tr:last-child td{border-bottom:none;}
 .login-btn:hover{background:var(--brand-2);}
 .login-btn:disabled{opacity:.6;cursor:not-allowed;}
 
-/* ---------- RESPONSIVE ---------- */
 @media (max-width:900px){
     .header,.page,.tabs-bar{padding-left:16px;padding-right:16px;}
     .form-grid{grid-template-columns:1fr;}
     .form-field.full{grid-column:span 1;}
+    .section-divider{grid-column:span 1;}
     .modal-card{padding:22px 20px;}
 }
 </style>
@@ -304,7 +316,6 @@ tbody tr:last-child td{border-bottom:none;}
         </div>
     </header>
 
-    <!-- TABS -->
     <nav class="tabs-bar" id="tabsBar">
         <button class="tab-btn active" data-tab="projects">
             📁 Projects <span class="tab-count" id="tabCountProjects">0</span>
@@ -330,20 +341,19 @@ tbody tr:last-child td{border-bottom:none;}
 
         <div id="pageAlert" class="alert hidden"></div>
 
-        <!-- ================= PROJECTS TAB ================= -->
+        <!-- PROJECTS TAB -->
         <section class="tab-panel active" id="tab-projects">
             <div class="panel-head">
                 <div class="panel-head-left">
                     <div>
                         <div class="panel-title">Projects</div>
-                        <div class="panel-desc">Add, edit, or deactivate projects. Deactivated projects are hidden from dashboards.</div>
+                        <div class="panel-desc">Add, edit, or deactivate projects.</div>
                     </div>
                 </div>
                 <div class="panel-actions">
                     <button class="btn btn-primary" onclick="openProjectModal()">+ Add Project</button>
                 </div>
             </div>
-
             <div class="filter-bar">
                 <div class="field">
                     <label>Search</label>
@@ -358,7 +368,6 @@ tbody tr:last-child td{border-bottom:none;}
                     </select>
                 </div>
             </div>
-
             <div class="table-shell">
                 <div class="table-scroll">
                     <table>
@@ -380,20 +389,19 @@ tbody tr:last-child td{border-bottom:none;}
         </section>
 
 
-        <!-- ================= SUB-PROJECTS TAB ================= -->
+        <!-- SUB-PROJECTS TAB -->
         <section class="tab-panel" id="tab-subProjects">
             <div class="panel-head">
                 <div class="panel-head-left">
                     <div>
                         <div class="panel-title">Sub-Projects</div>
-                        <div class="panel-desc">Sub-projects have their own daily targets and are linked to a parent project.</div>
+                        <div class="panel-desc">Sub-projects have their own daily targets.</div>
                     </div>
                 </div>
                 <div class="panel-actions">
                     <button class="btn btn-primary" onclick="openSubProjectModal()">+ Add Sub-Project</button>
                 </div>
             </div>
-
             <div class="filter-bar">
                 <div class="field">
                     <label>Parent Project</label>
@@ -414,7 +422,6 @@ tbody tr:last-child td{border-bottom:none;}
                     </select>
                 </div>
             </div>
-
             <div class="table-shell">
                 <div class="table-scroll">
                     <table>
@@ -438,13 +445,13 @@ tbody tr:last-child td{border-bottom:none;}
         </section>
 
 
-        <!-- ================= EMPLOYEES TAB ================= -->
+        <!-- EMPLOYEES TAB -->
         <section class="tab-panel" id="tab-employees">
             <div class="panel-head">
                 <div class="panel-head-left">
                     <div>
                         <div class="panel-title">Employees</div>
-                        <div class="panel-desc">Manage employee roster. Assign to projects &amp; sub-projects.</div>
+                        <div class="panel-desc">Manage employee roster and login credentials.</div>
                     </div>
                 </div>
                 <div class="panel-actions">
@@ -471,6 +478,14 @@ tbody tr:last-child td{border-bottom:none;}
                     <input id="empSearch" placeholder="Name or code..." oninput="renderEmployeesTable()">
                 </div>
                 <div class="field">
+                    <label>Login</label>
+                    <select id="empLoginFilter" onchange="renderEmployeesTable()">
+                        <option value="all">All</option>
+                        <option value="with">With login</option>
+                        <option value="without">Without login</option>
+                    </select>
+                </div>
+                <div class="field">
                     <label>Status</label>
                     <select id="empStatusFilter" onchange="renderEmployeesTable()">
                         <option value="active">Active only</option>
@@ -486,16 +501,17 @@ tbody tr:last-child td{border-bottom:none;}
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Employee Code</th>
+                                <th>Code</th>
                                 <th>Name</th>
                                 <th>Project</th>
                                 <th>Sub-Project</th>
+                                <th>Login</th>
                                 <th>Status</th>
                                 <th style="text-align:right;">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="employeesBody">
-                            <tr><td colspan="7" class="loading"><div class="spinner"></div>Loading employees...</td></tr>
+                            <tr><td colspan="8" class="loading"><div class="spinner"></div>Loading employees...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -503,20 +519,19 @@ tbody tr:last-child td{border-bottom:none;}
         </section>
 
 
-        <!-- ================= TEAM LEADS TAB ================= -->
+        <!-- TEAM LEADS TAB -->
         <section class="tab-panel" id="tab-teamLeads">
             <div class="panel-head">
                 <div class="panel-head-left">
                     <div>
                         <div class="panel-title">Team Leads</div>
-                        <div class="panel-desc">Each team lead is assigned to one project. Login account is created automatically.</div>
+                        <div class="panel-desc">Each team lead is assigned to one project.</div>
                     </div>
                 </div>
                 <div class="panel-actions">
                     <button class="btn btn-primary" onclick="openUserModal('team_lead')">+ Add Team Lead</button>
                 </div>
             </div>
-
             <div class="table-shell">
                 <div class="table-scroll">
                     <table>
@@ -539,20 +554,19 @@ tbody tr:last-child td{border-bottom:none;}
         </section>
 
 
-        <!-- ================= TRACKERS TAB ================= -->
+        <!-- TRACKERS TAB -->
         <section class="tab-panel" id="tab-trackers">
             <div class="panel-head">
                 <div class="panel-head-left">
                     <div>
                         <div class="panel-title">Trackers</div>
-                        <div class="panel-desc">Trackers enter hourly productivity for their assigned project's employees.</div>
+                        <div class="panel-desc">Trackers enter hourly productivity for their project.</div>
                     </div>
                 </div>
                 <div class="panel-actions">
                     <button class="btn btn-primary" onclick="openUserModal('tracker')">+ Add Tracker</button>
                 </div>
             </div>
-
             <div class="table-shell">
                 <div class="table-scroll">
                     <table>
@@ -575,20 +589,19 @@ tbody tr:last-child td{border-bottom:none;}
         </section>
 
 
-        <!-- ================= MANAGERS TAB ================= -->
+        <!-- MANAGERS TAB -->
         <section class="tab-panel" id="tab-managers">
             <div class="panel-head">
                 <div class="panel-head-left">
                     <div>
                         <div class="panel-title">Managers</div>
-                        <div class="panel-desc">Managers have full admin access to this portal and view executive dashboards.</div>
+                        <div class="panel-desc">Managers have full admin access.</div>
                     </div>
                 </div>
                 <div class="panel-actions">
                     <button class="btn btn-primary" onclick="openUserModal('management')">+ Add Manager</button>
                 </div>
             </div>
-
             <div class="table-shell">
                 <div class="table-scroll">
                     <table>
@@ -623,9 +636,7 @@ tbody tr:last-child td{border-bottom:none;}
             </div>
             <button class="modal-close" onclick="closeModal('projectModal')">✕</button>
         </div>
-
         <input type="hidden" id="projectId">
-
         <div class="form-grid">
             <div class="form-field full">
                 <label>Project Name *</label>
@@ -643,7 +654,6 @@ tbody tr:last-child td{border-bottom:none;}
                 </div>
             </div>
         </div>
-
         <div class="modal-actions">
             <button class="btn btn-ghost" onclick="closeModal('projectModal')">Cancel</button>
             <button class="btn btn-primary" onclick="saveProject()" id="saveProjectBtn">Save Project</button>
@@ -662,9 +672,7 @@ tbody tr:last-child td{border-bottom:none;}
             </div>
             <button class="modal-close" onclick="closeModal('subProjectModal')">✕</button>
         </div>
-
         <input type="hidden" id="spId">
-
         <div class="form-grid">
             <div class="form-field full">
                 <label>Parent Project *</label>
@@ -685,11 +693,10 @@ tbody tr:last-child td{border-bottom:none;}
                 </div>
                 <div class="checkbox-row">
                     <input type="checkbox" id="spActive" checked>
-                    <label for="spActive">Active (visible on dashboards)</label>
+                    <label for="spActive">Active</label>
                 </div>
             </div>
         </div>
-
         <div class="modal-actions">
             <button class="btn btn-ghost" onclick="closeModal('subProjectModal')">Cancel</button>
             <button class="btn btn-primary" onclick="saveSubProject()" id="saveSpBtn">Save Sub-Project</button>
@@ -708,9 +715,7 @@ tbody tr:last-child td{border-bottom:none;}
             </div>
             <button class="modal-close" onclick="closeModal('employeeModal')">✕</button>
         </div>
-
         <input type="hidden" id="empId">
-
         <div class="form-grid">
             <div class="form-field">
                 <label>Employee Code *</label>
@@ -736,11 +741,72 @@ tbody tr:last-child td{border-bottom:none;}
                     <label for="empActive">Active (appears on rosters)</label>
                 </div>
             </div>
-        </div>
 
+            <div class="section-divider" id="loginSectionDivider">Login Credentials</div>
+
+            <div class="form-field full" id="loginEmailField">
+                <label>Login Email *</label>
+                <input id="empLoginEmail" type="email" placeholder="firstname.lastname@aminfoweb.co.in" maxlength="150">
+                <div class="hint" id="loginEmailHint">Auto-suggested from employee name. Edit if needed.</div>
+            </div>
+            <div class="form-field full" id="loginPasswordField">
+                <label>Password *</label>
+                <input id="empPassword" type="text" placeholder="Minimum 6 characters">
+                <div class="hint">Share this with the employee. They can change it after first login.</div>
+            </div>
+            <div class="form-field full" id="existingLoginNotice" style="display:none;">
+                <div class="alert alert-info" style="margin:0;">
+                    <span>ℹ</span>
+                    <span>This employee already has a login account. Login details are managed from the Actions column.</span>
+                </div>
+            </div>
+        </div>
         <div class="modal-actions">
             <button class="btn btn-ghost" onclick="closeModal('employeeModal')">Cancel</button>
             <button class="btn btn-primary" onclick="saveEmployee()" id="saveEmpBtn">Save Employee</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================= CREDENTIALS MODAL ========================= -->
+<div id="credentialsModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div>
+                <div class="modal-eyebrow">Login Created</div>
+                <div class="modal-title">Share These Credentials</div>
+            </div>
+            <button class="modal-close" onclick="closeModal('credentialsModal')">✕</button>
+        </div>
+
+        <div class="alert alert-success" style="margin-bottom:16px;">
+            <span>✓</span>
+            <span>Employee and login account created successfully.</span>
+        </div>
+
+        <div class="credential-box">
+            <div class="credential-row">
+                <span class="lbl">Name</span>
+                <span class="val" id="credName">—</span>
+            </div>
+            <div class="credential-row">
+                <span class="lbl">Login URL</span>
+                <span class="val" id="credUrl" style="font-size:12px;">Employee_Hourly_Entry.html</span>
+            </div>
+            <div class="credential-row">
+                <span class="lbl">Email</span>
+                <span class="val" id="credEmail">—</span>
+            </div>
+            <div class="credential-row">
+                <span class="lbl">Password</span>
+                <span class="val" id="credPassword">—</span>
+            </div>
+        </div>
+
+        <div class="modal-actions" style="justify-content:space-between;">
+            <button class="btn btn-ghost" onclick="copyCredentials()" id="copyCredBtn">📋 Copy Credentials</button>
+            <button class="btn btn-primary" onclick="closeModal('credentialsModal')">Done</button>
         </div>
     </div>
 </div>
@@ -756,19 +822,15 @@ tbody tr:last-child td{border-bottom:none;}
             </div>
             <button class="modal-close" onclick="closeModal('csvImportModal')">✕</button>
         </div>
-
         <div class="alert alert-info" style="display:block;">
             <strong>CSV format:</strong> <code>employee_code,employee_name,project_name,sub_project_name</code><br>
-            <span style="font-size:12px;">Sub-project column is optional. Project and sub-project names must match existing records.</span>
+            <span style="font-size:12px;">Login accounts are <strong>not</strong> created by CSV import. Add them individually to generate logins.</span>
         </div>
-
         <div class="form-field full">
             <label>Upload CSV File</label>
             <input type="file" id="csvFile" accept=".csv">
         </div>
-
         <div id="csvPreview" style="max-height:280px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;font-family:monospace;background:var(--bg-soft);margin-top:12px;"></div>
-
         <div class="modal-actions">
             <button class="btn btn-ghost" onclick="closeModal('csvImportModal')">Cancel</button>
             <button class="btn btn-primary" onclick="confirmCsvImport()" id="csvImportBtn" disabled>Import</button>
@@ -777,7 +839,7 @@ tbody tr:last-child td{border-bottom:none;}
 </div>
 
 
-<!-- ========================= USER MODAL ========================= -->
+<!-- ========================= USER MODAL (TL / Tracker / Manager) ========================= -->
 <div id="userModal" class="modal-overlay hidden">
     <div class="modal-card">
         <div class="modal-head">
@@ -787,10 +849,8 @@ tbody tr:last-child td{border-bottom:none;}
             </div>
             <button class="modal-close" onclick="closeModal('userModal')">✕</button>
         </div>
-
         <input type="hidden" id="userId">
         <input type="hidden" id="userRole">
-
         <div class="form-grid">
             <div class="form-field full">
                 <label>Full Name *</label>
@@ -807,14 +867,13 @@ tbody tr:last-child td{border-bottom:none;}
             <div class="form-field full" id="userPasswordField">
                 <label>Initial Password *</label>
                 <input id="userPassword" type="text" placeholder="Minimum 6 characters">
-                <div class="hint">Share this password with the user securely. They can change it after first login.</div>
+                <div class="hint">Share securely. User can change after first login.</div>
             </div>
             <div class="form-field full" id="userProjectField">
                 <label>Assign to Project *</label>
                 <select id="userProject"></select>
             </div>
         </div>
-
         <div class="modal-actions">
             <button class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button>
             <button class="btn btn-primary" onclick="saveUser()" id="saveUserBtn">Create User</button>
@@ -823,7 +882,6 @@ tbody tr:last-child td{border-bottom:none;}
 </div>
 
 
-<!-- TOAST STACK -->
 <div class="toast-stack" id="toastStack"></div>
 
 
@@ -836,8 +894,9 @@ const SUPABASE_ANON_KEY = "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Your deployed Edge Function
 const EDGE_FUNCTION_NAME = "supabase-functions-admin-users-index-ts";
+const EMAIL_DOMAIN = "aminfoweb.co.in";
+const HOURLY_ENTRY_URL = "Employee_Hourly_Entry.html";
 
 const AUTHORIZED_MANAGEMENT_EMAILS = [
     "scott.newman@aminfoweb.co.in",
@@ -856,6 +915,7 @@ let teamLeads = [];
 let trackers = [];
 let managers = [];
 let csvPreviewRows = [];
+let lastCreatedCredentials = null;
 
 
 /* =========================================================
@@ -972,7 +1032,7 @@ async function loadAllData(){
 
 
 /* =========================================================
-   TAB NAVIGATION
+   TABS
 ========================================================= */
 function bindTabListeners(){
     document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -991,7 +1051,7 @@ function switchTab(tabName){
 
 
 /* =========================================================
-   DATA LOADERS
+   LOADERS
 ========================================================= */
 async function loadProjects(){
     const { data, error } = await sb.from("projects").select("*").order("id", {ascending: true});
@@ -1109,10 +1169,8 @@ function renderProjectsTable(){
     const status = document.getElementById("projectStatusFilter").value;
 
     let rows = projects;
-
     if(status === "active") rows = rows.filter(p => p.active !== false);
     else if(status === "inactive") rows = rows.filter(p => p.active === false);
-
     if(search) rows = rows.filter(p =>
         String(p.project_name || "").toLowerCase().includes(search));
 
@@ -1120,7 +1178,6 @@ function renderProjectsTable(){
         body.innerHTML = `<tr><td colspan="5" class="empty-row">No projects match your filters.</td></tr>`;
         return;
     }
-
     body.innerHTML = rows.map(p => `
         <tr>
             <td class="cell-muted">${p.id}</td>
@@ -1150,7 +1207,6 @@ function renderSubProjectsTable(){
     const status = document.getElementById("spStatusFilter").value;
 
     let rows = subProjects;
-
     if(projFilter !== "ALL") rows = rows.filter(sp => String(sp.project_id) === String(projFilter));
     if(status === "active") rows = rows.filter(sp => sp.active !== false);
     else if(status === "inactive") rows = rows.filter(sp => sp.active === false);
@@ -1161,7 +1217,6 @@ function renderSubProjectsTable(){
         body.innerHTML = `<tr><td colspan="7" class="empty-row">No sub-projects match your filters.</td></tr>`;
         return;
     }
-
     body.innerHTML = rows.map(sp => {
         const parent = projects.find(p => String(p.id) === String(sp.project_id));
         return `
@@ -1196,6 +1251,7 @@ function renderEmployeesTable(){
     const pFilter = document.getElementById("empProjectFilter").value;
     const spFilter = document.getElementById("empSubProjectFilter").value;
     const search = document.getElementById("empSearch").value.trim().toLowerCase();
+    const loginFilter = document.getElementById("empLoginFilter").value;
     const status = document.getElementById("empStatusFilter").value;
 
     let rows = employees;
@@ -1203,19 +1259,49 @@ function renderEmployeesTable(){
     else if(status === "inactive") rows = rows.filter(e => e.active === false);
     if(pFilter !== "ALL") rows = rows.filter(e => String(e.project_id) === String(pFilter));
     if(spFilter !== "ALL") rows = rows.filter(e => String(e.sub_project_id) === String(spFilter));
+    if(loginFilter === "with") rows = rows.filter(e => !!e.user_id);
+    else if(loginFilter === "without") rows = rows.filter(e => !e.user_id);
     if(search) rows = rows.filter(e =>
         String(e.employee_name || "").toLowerCase().includes(search) ||
         String(e.employee_code || "").toLowerCase().includes(search)
     );
 
     if(!rows.length){
-        body.innerHTML = `<tr><td colspan="7" class="empty-row">No employees match your filters.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="8" class="empty-row">No employees match your filters.</td></tr>`;
         return;
     }
 
     body.innerHTML = rows.map(e => {
         const proj = projects.find(p => String(p.id) === String(e.project_id));
         const sp = subProjects.find(s => String(s.id) === String(e.sub_project_id));
+
+        let loginCell;
+        if(!e.user_id){
+            loginCell = `<span class="pill pill-gray">No login</span>`;
+        }else if(e.login_active === false){
+            loginCell = `<span class="pill pill-red">Disabled</span>`;
+        }else{
+            loginCell = `<span class="pill pill-blue" title="${escapeHTML(e.login_email || "")}">✓ Active</span>`;
+        }
+
+        // Actions vary depending on login state
+        let actionsHTML = `<button class="btn-icon" onclick="openEmployeeModal(${e.id})" title="Edit">✏️</button>`;
+
+        if(e.user_id){
+            actionsHTML += `
+                <button class="btn-icon" onclick="resetEmployeePassword('${e.user_id}', '${escapeHTML(e.login_email || "")}')" title="Reset password">🔑</button>
+                ${e.login_active === false
+                    ? `<button class="btn-icon" onclick="reactivateEmployee('${e.user_id}')" title="Reactivate login">♻️</button>`
+                    : `<button class="btn-icon" onclick="deactivateEmployee('${e.user_id}')" title="Disable login">🚫</button>`}
+            `;
+        }else{
+            actionsHTML += `<button class="btn-icon" onclick="createLoginForEmployee(${e.id})" title="Create login">➕🔑</button>`;
+        }
+
+        actionsHTML += e.active === false
+            ? `<button class="btn-icon" onclick="toggleEmployee(${e.id}, true)" title="Activate">♻️</button>`
+            : `<button class="btn-icon" onclick="toggleEmployee(${e.id}, false)" title="Deactivate">🚫</button>`;
+
         return `
             <tr>
                 <td class="cell-muted">${e.id}</td>
@@ -1223,15 +1309,11 @@ function renderEmployeesTable(){
                 <td>${escapeHTML(e.employee_name || "—")}</td>
                 <td class="cell-muted">${escapeHTML(proj?.project_name || "—")}</td>
                 <td class="cell-muted">${escapeHTML(sp?.sub_project_name || "—")}</td>
+                <td>${loginCell}</td>
                 <td>${e.active === false
                     ? '<span class="pill pill-red">Inactive</span>'
                     : '<span class="pill pill-green">Active</span>'}</td>
-                <td style="text-align:right;">
-                    <button class="btn-icon" onclick="openEmployeeModal(${e.id})">✏️</button>
-                    ${e.active === false
-                        ? `<button class="btn-icon" onclick="toggleEmployee(${e.id}, true)">♻️</button>`
-                        : `<button class="btn-icon" onclick="toggleEmployee(${e.id}, false)">🚫</button>`}
-                </td>
+                <td style="text-align:right;">${actionsHTML}</td>
             </tr>
         `;
     }).join("");
@@ -1244,7 +1326,7 @@ function renderEmployeesTable(){
 function renderTeamLeadsTable(){
     const body = document.getElementById("teamLeadsBody");
     if(!teamLeads.length){
-        body.innerHTML = `<tr><td colspan="6" class="empty-row">No team leads yet. Add the first one.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="6" class="empty-row">No team leads yet.</td></tr>`;
         return;
     }
     body.innerHTML = teamLeads.map(tl => {
@@ -1276,7 +1358,7 @@ function renderTeamLeadsTable(){
 function renderTrackersTable(){
     const body = document.getElementById("trackersBody");
     if(!trackers.length){
-        body.innerHTML = `<tr><td colspan="6" class="empty-row">No trackers yet. Add the first one.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="6" class="empty-row">No trackers yet.</td></tr>`;
         return;
     }
     body.innerHTML = trackers.map(t => {
@@ -1335,31 +1417,25 @@ function renderManagersTable(){
 ========================================================= */
 function openProjectModal(id){
     const modal = document.getElementById("projectModal");
-    const idField = document.getElementById("projectId");
-    const nameField = document.getElementById("projectName");
-    const targetField = document.getElementById("projectTarget");
-    const activeField = document.getElementById("projectActive");
-
     if(id){
         const p = projects.find(x => x.id === id);
         if(!p) return;
         document.getElementById("projectModalEyebrow").textContent = "Edit Project";
         document.getElementById("projectModalTitle").textContent = p.project_name || "Project";
-        idField.value = p.id;
-        nameField.value = p.project_name || "";
-        targetField.value = p.daily_target ?? "";
-        activeField.checked = p.active !== false;
+        document.getElementById("projectId").value = p.id;
+        document.getElementById("projectName").value = p.project_name || "";
+        document.getElementById("projectTarget").value = p.daily_target ?? "";
+        document.getElementById("projectActive").checked = p.active !== false;
     }else{
         document.getElementById("projectModalEyebrow").textContent = "New Project";
         document.getElementById("projectModalTitle").textContent = "Add Project";
-        idField.value = "";
-        nameField.value = "";
-        targetField.value = "";
-        activeField.checked = true;
+        document.getElementById("projectId").value = "";
+        document.getElementById("projectName").value = "";
+        document.getElementById("projectTarget").value = "";
+        document.getElementById("projectActive").checked = true;
     }
-
     modal.classList.remove("hidden");
-    setTimeout(() => nameField.focus(), 80);
+    setTimeout(() => document.getElementById("projectName").focus(), 80);
 }
 
 async function saveProject(){
@@ -1369,16 +1445,13 @@ async function saveProject(){
     const active = document.getElementById("projectActive").checked;
 
     if(!name){ showToast("Project name is required", "error"); return; }
-
     const target = targetRaw === "" ? null : Number(targetRaw);
     if(target !== null && (!Number.isFinite(target) || target < 0)){
-        showToast("Daily target must be a positive number", "error");
-        return;
+        showToast("Daily target must be a positive number", "error"); return;
     }
 
     const btn = document.getElementById("saveProjectBtn");
-    btn.disabled = true;
-    btn.textContent = "Saving...";
+    btn.disabled = true; btn.textContent = "Saving...";
 
     try{
         if(id){
@@ -1393,7 +1466,6 @@ async function saveProject(){
             if(error) throw error;
             showToast("Project added", "success");
         }
-
         closeModal("projectModal");
         await loadProjects();
         renderAllTables();
@@ -1401,8 +1473,7 @@ async function saveProject(){
         console.error(err);
         showToast(err.message || "Save failed", "error");
     }finally{
-        btn.disabled = false;
-        btn.textContent = "Save Project";
+        btn.disabled = false; btn.textContent = "Save Project";
     }
 }
 
@@ -1427,7 +1498,6 @@ async function toggleProject(id, active){
 ========================================================= */
 function openSubProjectModal(id){
     const modal = document.getElementById("subProjectModal");
-
     if(id){
         const sp = subProjects.find(x => x.id === id);
         if(!sp) return;
@@ -1449,7 +1519,6 @@ function openSubProjectModal(id){
         document.getElementById("spTargetBased").checked = true;
         document.getElementById("spActive").checked = true;
     }
-
     modal.classList.remove("hidden");
     setTimeout(() => document.getElementById("spProject").focus(), 80);
 }
@@ -1468,13 +1537,11 @@ async function saveSubProject(){
 
     const target = Number(targetRaw);
     if(!Number.isFinite(target) || target <= 0){
-        showToast("Daily target must be a positive number", "error");
-        return;
+        showToast("Daily target must be a positive number", "error"); return;
     }
 
     const btn = document.getElementById("saveSpBtn");
-    btn.disabled = true;
-    btn.textContent = "Saving...";
+    btn.disabled = true; btn.textContent = "Saving...";
 
     try{
         const payload = {
@@ -1484,7 +1551,6 @@ async function saveSubProject(){
             target_based: targetBased,
             active
         };
-
         if(id){
             const { error } = await sb.from("sub_projects").update(payload).eq("id", Number(id));
             if(error) throw error;
@@ -1494,7 +1560,6 @@ async function saveSubProject(){
             if(error) throw error;
             showToast("Sub-project added", "success");
         }
-
         closeModal("subProjectModal");
         await loadSubProjects();
         renderAllTables();
@@ -1502,8 +1567,7 @@ async function saveSubProject(){
         console.error(err);
         showToast(err.message || "Save failed", "error");
     }finally{
-        btn.disabled = false;
-        btn.textContent = "Save Sub-Project";
+        btn.disabled = false; btn.textContent = "Save Sub-Project";
     }
 }
 
@@ -1547,6 +1611,19 @@ function openEmployeeModal(id){
         document.getElementById("empProject").value = e.project_id ?? "";
         onEmpProjectChange(e.sub_project_id);
         document.getElementById("empActive").checked = e.active !== false;
+
+        // Login section behavior for existing employee
+        if(e.user_id){
+            document.getElementById("loginEmailField").style.display = "none";
+            document.getElementById("loginPasswordField").style.display = "none";
+            document.getElementById("existingLoginNotice").style.display = "block";
+        }else{
+            document.getElementById("loginEmailField").style.display = "";
+            document.getElementById("loginPasswordField").style.display = "";
+            document.getElementById("existingLoginNotice").style.display = "none";
+            document.getElementById("empLoginEmail").value = suggestLoginEmail(e.employee_name);
+            document.getElementById("empPassword").value = "";
+        }
     }else{
         document.getElementById("empModalEyebrow").textContent = "New Employee";
         document.getElementById("empModalTitle").textContent = "Add Employee";
@@ -1556,11 +1633,46 @@ function openEmployeeModal(id){
         document.getElementById("empProject").value = "";
         onEmpProjectChange();
         document.getElementById("empActive").checked = true;
+
+        document.getElementById("loginEmailField").style.display = "";
+        document.getElementById("loginPasswordField").style.display = "";
+        document.getElementById("existingLoginNotice").style.display = "none";
+        document.getElementById("empLoginEmail").value = "";
+        document.getElementById("empPassword").value = "";
     }
 
     modal.classList.remove("hidden");
     setTimeout(() => document.getElementById("empCode").focus(), 80);
 }
+
+function suggestLoginEmail(employeeName){
+    if(!employeeName) return "";
+    const parts = String(employeeName).trim().toLowerCase()
+        .replace(/[^a-z\s]/g, "")
+        .split(/\s+/)
+        .filter(Boolean);
+    if(parts.length === 0) return "";
+    if(parts.length === 1) return `${parts[0]}@${EMAIL_DOMAIN}`;
+    return `${parts[0]}.${parts[parts.length-1]}@${EMAIL_DOMAIN}`;
+}
+
+// Auto-suggest email as admin types the employee name
+document.addEventListener("input", (e) => {
+    if(e.target && e.target.id === "empName"){
+        const isNew = !document.getElementById("empId").value;
+        if(!isNew) return;
+        const emailField = document.getElementById("empLoginEmail");
+        // Only auto-fill if the field is empty or was previously auto-suggested
+        if(!emailField.dataset.userEdited){
+            emailField.value = suggestLoginEmail(e.target.value);
+        }
+    }
+});
+document.addEventListener("input", (e) => {
+    if(e.target && e.target.id === "empLoginEmail"){
+        e.target.dataset.userEdited = "true";
+    }
+});
 
 function onEmpProjectChange(selectedSubId){
     const projId = document.getElementById("empProject").value;
@@ -1590,9 +1702,27 @@ async function saveEmployee(){
     if(!projectId){ showToast("Project is required", "error"); return; }
 
     const btn = document.getElementById("saveEmpBtn");
+
+    // Determine if we need to create a login
+    const emailField = document.getElementById("empLoginEmail");
+    const passwordField = document.getElementById("empPassword");
+    const needsLogin = emailField.style.display !== "none";
+    const loginEmail = emailField.value.trim().toLowerCase();
+    const password = passwordField.value;
+
+    if(needsLogin){
+        if(!loginEmail){ showToast("Login email is required", "error"); return; }
+        if(!password || password.length < 6){
+            showToast("Password must be at least 6 characters", "error"); return;
+        }
+    }
+
     btn.disabled = true; btn.textContent = "Saving...";
 
     try{
+        let employeeId = id ? Number(id) : null;
+
+        // Step 1: Create or update the employee row
         const payload = {
             employee_code: code,
             employee_name: name,
@@ -1600,15 +1730,57 @@ async function saveEmployee(){
             sub_project_id: subId ? Number(subId) : null,
             active
         };
+
         if(id){
             const { error } = await sb.from("employees").update(payload).eq("id", Number(id));
             if(error) throw error;
-            showToast("Employee updated", "success");
         }else{
-            const { error } = await sb.from("employees").insert(payload);
+            const { data, error } = await sb.from("employees").insert(payload).select().single();
             if(error) throw error;
-            showToast("Employee added", "success");
+            employeeId = data.id;
         }
+
+        // Step 2: If new employee, create login via Edge Function
+        if(needsLogin){
+            let finalEmail = loginEmail;
+
+            // If email conflict, append employee code
+            // (We'll check by attempting and catching — Supabase doesn't have a clean pre-check for auth email)
+            // We'll do a simple existence check on user_project_access
+            const { data: existing } = await sb.from("user_project_access")
+                .select("user_id").eq("email", finalEmail).maybeSingle();
+
+            if(existing){
+                // Email already used — append employee code before @
+                const [local, domain] = finalEmail.split("@");
+                finalEmail = `${local}.${code.toLowerCase()}@${domain}`;
+                showToast("Email was taken — added employee code to make it unique", "info");
+            }
+
+            const { data, error } = await sb.functions.invoke(EDGE_FUNCTION_NAME, {
+                body: {
+                    action: "create_employee_login",
+                    employee_id: employeeId,
+                    email: finalEmail,
+                    password
+                }
+            });
+
+            if(error) throw error;
+            if(data && data.error) throw new Error(data.error);
+
+            // Show credentials modal
+            lastCreatedCredentials = {
+                name: name,
+                url: HOURLY_ENTRY_URL,
+                email: finalEmail,
+                password: password
+            };
+            showCredentialsModal(lastCreatedCredentials);
+        }else{
+            showToast("Employee updated", "success");
+        }
+
         closeModal("employeeModal");
         await loadEmployees();
         renderAllTables();
@@ -1633,6 +1805,109 @@ async function toggleEmployee(id, active){
         console.error(err);
         showToast(err.message || "Update failed", "error");
     }
+}
+
+
+/* =========================================================
+   EMPLOYEE LOGIN ACTIONS
+========================================================= */
+function createLoginForEmployee(employeeId){
+    const e = employees.find(x => x.id === employeeId);
+    if(!e) return;
+
+    // Reuse the edit modal in "create login" mode
+    openEmployeeModal(employeeId);
+
+    // Force show the login section for this employee even if not new
+    document.getElementById("loginEmailField").style.display = "";
+    document.getElementById("loginPasswordField").style.display = "";
+    document.getElementById("existingLoginNotice").style.display = "none";
+    document.getElementById("empLoginEmail").value = suggestLoginEmail(e.employee_name);
+    document.getElementById("empPassword").value = "";
+}
+
+async function resetEmployeePassword(userId, email){
+    if(!userId){ showToast("No user account linked", "error"); return; }
+    const newPassword = prompt(`Enter a new password for ${email}:`);
+    if(!newPassword) return;
+    if(newPassword.length < 6){ showToast("Password must be at least 6 characters", "error"); return; }
+
+    try{
+        const { data, error } = await sb.functions.invoke(EDGE_FUNCTION_NAME, {
+            body: { action: "reset_password", user_id: userId, new_password: newPassword }
+        });
+        if(error) throw error;
+        if(data && data.error) throw new Error(data.error);
+        showToast("Password reset", "success");
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Failed to reset password", "error");
+    }
+}
+
+async function deactivateEmployee(userId){
+    if(!userId) return;
+    if(!confirm("Disable this employee's login? They will not be able to log in.")) return;
+    try{
+        const { data, error } = await sb.functions.invoke(EDGE_FUNCTION_NAME, {
+            body: { action: "deactivate", user_id: userId, role: "employee" }
+        });
+        if(error) throw error;
+        if(data && data.error) throw new Error(data.error);
+        showToast("Login disabled", "success");
+        await loadEmployees();
+        renderAllTables();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Failed to deactivate", "error");
+    }
+}
+
+async function reactivateEmployee(userId){
+    if(!userId) return;
+    try{
+        const { data, error } = await sb.functions.invoke(EDGE_FUNCTION_NAME, {
+            body: { action: "reactivate", user_id: userId, role: "employee" }
+        });
+        if(error) throw error;
+        if(data && data.error) throw new Error(data.error);
+        showToast("Login reactivated", "success");
+        await loadEmployees();
+        renderAllTables();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Failed to reactivate", "error");
+    }
+}
+
+
+/* =========================================================
+   CREDENTIALS MODAL
+========================================================= */
+function showCredentialsModal(creds){
+    document.getElementById("credName").textContent = creds.name;
+    document.getElementById("credUrl").textContent = creds.url;
+    document.getElementById("credEmail").textContent = creds.email;
+    document.getElementById("credPassword").textContent = creds.password;
+    document.getElementById("credentialsModal").classList.remove("hidden");
+}
+
+function copyCredentials(){
+    if(!lastCreatedCredentials) return;
+    const text =
+`AMI Hourly Tracker Login
+
+URL:      ${lastCreatedCredentials.url}
+Email:    ${lastCreatedCredentials.email}
+Password: ${lastCreatedCredentials.password}
+
+Please change your password after first login.`;
+    navigator.clipboard.writeText(text).then(() => {
+        showToast("Credentials copied to clipboard", "success");
+    }).catch(err => {
+        console.error(err);
+        showToast("Failed to copy — please copy manually", "error");
+    });
 }
 
 
@@ -1794,21 +2069,15 @@ async function saveUser(){
         const { data, error } = await sb.functions.invoke(EDGE_FUNCTION_NAME, {
             body: {
                 action: "create",
-                email,
-                password,
-                full_name: fullName,
-                phone,
-                role,
+                email, password, full_name: fullName, phone, role,
                 project_id: projectId ? Number(projectId) : null
             }
         });
-
         if(error) throw error;
         if(data && data.error) throw new Error(data.error);
 
         showToast(`${fullName} created successfully`, "success");
         closeModal("userModal");
-
         await loadAllData();
     }catch(err){
         console.error(err);
@@ -1820,7 +2089,7 @@ async function saveUser(){
 
 
 /* =========================================================
-   USER ACTIONS
+   USER ACTIONS (TL / Tracker / Manager)
 ========================================================= */
 async function deactivateUser(userId, role){
     if(!userId){ showToast("No user account linked", "error"); return; }
@@ -1843,7 +2112,7 @@ async function reactivateUser(userId, role){
     if(!userId) return;
     try{
         const { data, error } = await sb.functions.invoke(EDGE_FUNCTION_NAME, {
-            body: { action: "reactivate", user_id: userId }
+            body: { action: "reactivate", user_id: userId, role }
         });
         if(error) throw error;
         if(data && data.error) throw new Error(data.error);
