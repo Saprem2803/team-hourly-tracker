@@ -74,6 +74,7 @@ body{
 .btn-sm{padding:6px 10px;font-size:11px;border-radius:7px;}
 .btn-icon{padding:6px 9px;background:transparent;border:1px solid var(--line);border-radius:7px;cursor:pointer;font-family:inherit;transition:all .12s;}
 .btn-icon:hover{background:var(--bg-soft);}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
 
 /* ---------- TABS ---------- */
 .tabs-bar{
@@ -437,24 +438,175 @@ tbody tr:last-child td{border-bottom:none;}
         </section>
 
 
-        <!-- ================= EMPLOYEES TAB (Part 2) ================= -->
+        <!-- ================= EMPLOYEES TAB ================= -->
         <section class="tab-panel" id="tab-employees">
-            <div class="empty-row">Employees tab will be enabled in the next update.</div>
+            <div class="panel-head">
+                <div class="panel-head-left">
+                    <div>
+                        <div class="panel-title">Employees</div>
+                        <div class="panel-desc">Manage employee roster. Assign to projects &amp; sub-projects.</div>
+                    </div>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn btn-ghost" onclick="openCsvImportModal()">📥 Import CSV</button>
+                    <button class="btn btn-primary" onclick="openEmployeeModal()">+ Add Employee</button>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <div class="field">
+                    <label>Project</label>
+                    <select id="empProjectFilter" onchange="renderEmployeesTable()">
+                        <option value="ALL">All Projects</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Sub-Project</label>
+                    <select id="empSubProjectFilter" onchange="renderEmployeesTable()">
+                        <option value="ALL">All Sub-Projects</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Search</label>
+                    <input id="empSearch" placeholder="Name or code..." oninput="renderEmployeesTable()">
+                </div>
+                <div class="field">
+                    <label>Status</label>
+                    <select id="empStatusFilter" onchange="renderEmployeesTable()">
+                        <option value="active">Active only</option>
+                        <option value="all">All</option>
+                        <option value="inactive">Inactive only</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-shell">
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Employee Code</th>
+                                <th>Name</th>
+                                <th>Project</th>
+                                <th>Sub-Project</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeesBody">
+                            <tr><td colspan="7" class="loading"><div class="spinner"></div>Loading employees...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
 
-        <!-- ================= TEAM LEADS TAB (Part 2) ================= -->
+
+        <!-- ================= TEAM LEADS TAB ================= -->
         <section class="tab-panel" id="tab-teamLeads">
-            <div class="empty-row">Team Leads tab will be enabled in the next update.</div>
+            <div class="panel-head">
+                <div class="panel-head-left">
+                    <div>
+                        <div class="panel-title">Team Leads</div>
+                        <div class="panel-desc">Each team lead is assigned to one project. Login account is created automatically.</div>
+                    </div>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn btn-primary" onclick="openUserModal('team_lead')">+ Add Team Lead</button>
+                </div>
+            </div>
+
+            <div class="table-shell">
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Project</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamLeadsBody">
+                            <tr><td colspan="6" class="loading"><div class="spinner"></div>Loading team leads...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
 
-        <!-- ================= TRACKERS TAB (Part 2) ================= -->
+
+        <!-- ================= TRACKERS TAB ================= -->
         <section class="tab-panel" id="tab-trackers">
-            <div class="empty-row">Trackers tab will be enabled in the next update.</div>
+            <div class="panel-head">
+                <div class="panel-head-left">
+                    <div>
+                        <div class="panel-title">Trackers</div>
+                        <div class="panel-desc">Trackers enter hourly productivity for their assigned project's employees.</div>
+                    </div>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn btn-primary" onclick="openUserModal('tracker')">+ Add Tracker</button>
+                </div>
+            </div>
+
+            <div class="table-shell">
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Project</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trackersBody">
+                            <tr><td colspan="6" class="loading"><div class="spinner"></div>Loading trackers...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
 
-        <!-- ================= MANAGERS TAB (Part 2) ================= -->
+
+        <!-- ================= MANAGERS TAB ================= -->
         <section class="tab-panel" id="tab-managers">
-            <div class="empty-row">Managers tab will be enabled in the next update.</div>
+            <div class="panel-head">
+                <div class="panel-head-left">
+                    <div>
+                        <div class="panel-title">Managers</div>
+                        <div class="panel-desc">Managers have full admin access to this portal and view executive dashboards.</div>
+                    </div>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn btn-primary" onclick="openUserModal('management')">+ Add Manager</button>
+                </div>
+            </div>
+
+            <div class="table-shell">
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="managersBody">
+                            <tr><td colspan="5" class="loading"><div class="spinner"></div>Loading managers...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
 
     </main>
@@ -546,6 +698,131 @@ tbody tr:last-child td{border-bottom:none;}
 </div>
 
 
+<!-- ========================= EMPLOYEE MODAL ========================= -->
+<div id="employeeModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div>
+                <div class="modal-eyebrow" id="empModalEyebrow">New Employee</div>
+                <div class="modal-title" id="empModalTitle">Add Employee</div>
+            </div>
+            <button class="modal-close" onclick="closeModal('employeeModal')">✕</button>
+        </div>
+
+        <input type="hidden" id="empId">
+
+        <div class="form-grid">
+            <div class="form-field">
+                <label>Employee Code *</label>
+                <input id="empCode" placeholder="e.g., EMP123" maxlength="50">
+            </div>
+            <div class="form-field">
+                <label>Employee Name *</label>
+                <input id="empName" placeholder="Full name" maxlength="150">
+            </div>
+            <div class="form-field full">
+                <label>Project *</label>
+                <select id="empProject" onchange="onEmpProjectChange()"></select>
+            </div>
+            <div class="form-field full">
+                <label>Sub-Project</label>
+                <select id="empSubProject">
+                    <option value="">— None (use project target) —</option>
+                </select>
+            </div>
+            <div class="form-field full">
+                <div class="checkbox-row">
+                    <input type="checkbox" id="empActive" checked>
+                    <label for="empActive">Active (appears on rosters)</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal('employeeModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveEmployee()" id="saveEmpBtn">Save Employee</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================= CSV IMPORT MODAL ========================= -->
+<div id="csvImportModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div>
+                <div class="modal-eyebrow">Bulk Import</div>
+                <div class="modal-title">Import Employees from CSV</div>
+            </div>
+            <button class="modal-close" onclick="closeModal('csvImportModal')">✕</button>
+        </div>
+
+        <div class="alert alert-info" style="display:block;">
+            <strong>CSV format:</strong> <code>employee_code,employee_name,project_name,sub_project_name</code><br>
+            <span style="font-size:12px;">Sub-project column is optional. Project and sub-project names must match existing records.</span>
+        </div>
+
+        <div class="form-field full">
+            <label>Upload CSV File</label>
+            <input type="file" id="csvFile" accept=".csv">
+        </div>
+
+        <div id="csvPreview" style="max-height:280px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;font-family:monospace;background:var(--bg-soft);margin-top:12px;"></div>
+
+        <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal('csvImportModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="confirmCsvImport()" id="csvImportBtn" disabled>Import</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================= USER MODAL ========================= -->
+<div id="userModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div>
+                <div class="modal-eyebrow" id="userModalEyebrow">New User</div>
+                <div class="modal-title" id="userModalTitle">Add User</div>
+            </div>
+            <button class="modal-close" onclick="closeModal('userModal')">✕</button>
+        </div>
+
+        <input type="hidden" id="userId">
+        <input type="hidden" id="userRole">
+
+        <div class="form-grid">
+            <div class="form-field full">
+                <label>Full Name *</label>
+                <input id="userFullName" placeholder="Full name" maxlength="150">
+            </div>
+            <div class="form-field">
+                <label>Email *</label>
+                <input id="userEmail" type="email" placeholder="user@aminfoweb.co.in">
+            </div>
+            <div class="form-field">
+                <label>Phone</label>
+                <input id="userPhone" placeholder="+91..." maxlength="20">
+            </div>
+            <div class="form-field full" id="userPasswordField">
+                <label>Initial Password *</label>
+                <input id="userPassword" type="text" placeholder="Minimum 6 characters">
+                <div class="hint">Share this password with the user securely. They can change it after first login.</div>
+            </div>
+            <div class="form-field full" id="userProjectField">
+                <label>Assign to Project *</label>
+                <select id="userProject"></select>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveUser()" id="saveUserBtn">Create User</button>
+        </div>
+    </div>
+</div>
+
+
 <!-- TOAST STACK -->
 <div class="toast-stack" id="toastStack"></div>
 
@@ -559,7 +836,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Your deployed Edge Function (from the "ugly" name we saw)
+// Your deployed Edge Function
 const EDGE_FUNCTION_NAME = "supabase-functions-admin-users-index-ts";
 
 const AUTHORIZED_MANAGEMENT_EMAILS = [
@@ -575,6 +852,10 @@ let currentUser = null;
 let projects = [];
 let subProjects = [];
 let employees = [];
+let teamLeads = [];
+let trackers = [];
+let managers = [];
+let csvPreviewRows = [];
 
 
 /* =========================================================
@@ -681,7 +962,10 @@ async function loadAllData(){
     await Promise.all([
         loadProjects(),
         loadSubProjects(),
-        loadEmployees()
+        loadEmployees(),
+        loadTeamLeads(),
+        loadTrackers(),
+        loadManagers()
     ]);
     renderAllTables();
 }
@@ -722,9 +1006,28 @@ async function loadSubProjects(){
 }
 
 async function loadEmployees(){
-    const { data, error } = await sb.from("employees").select("*").eq("active", true);
+    const { data, error } = await sb.from("employees").select("*").order("employee_name", {ascending: true});
     if(error){ console.warn("employees:", error.message); employees = []; return; }
     employees = data || [];
+}
+
+async function loadTeamLeads(){
+    const { data, error } = await sb.from("team_leads").select("*").order("id", {ascending: true});
+    if(error){ console.warn("team_leads:", error.message); teamLeads = []; return; }
+    teamLeads = data || [];
+}
+
+async function loadTrackers(){
+    const { data, error } = await sb.from("trackers").select("*").order("id", {ascending: true});
+    if(error){ console.warn("trackers:", error.message); trackers = []; return; }
+    trackers = data || [];
+}
+
+async function loadManagers(){
+    const { data, error } = await sb.from("user_project_access")
+        .select("*").eq("role", "management").order("created_at", {ascending: false});
+    if(error){ console.warn("managers:", error.message); managers = []; return; }
+    managers = data || [];
 }
 
 
@@ -734,21 +1037,25 @@ async function loadEmployees(){
 function renderAllTables(){
     renderProjectsTable();
     renderSubProjectsTable();
+    renderEmployeesTable();
+    renderTeamLeadsTable();
+    renderTrackersTable();
+    renderManagersTable();
     updateTabCounts();
     populateProjectDropdowns();
+    populateEmployeeFilters();
 }
 
 function updateTabCounts(){
     document.getElementById("tabCountProjects").textContent = projects.length;
     document.getElementById("tabCountSubProjects").textContent = subProjects.length;
     document.getElementById("tabCountEmployees").textContent = employees.length;
-    document.getElementById("tabCountTeamLeads").textContent = "0";
-    document.getElementById("tabCountTrackers").textContent = "0";
-    document.getElementById("tabCountManagers").textContent = "0";
+    document.getElementById("tabCountTeamLeads").textContent = teamLeads.length;
+    document.getElementById("tabCountTrackers").textContent = trackers.length;
+    document.getElementById("tabCountManagers").textContent = managers.length;
 }
 
 function populateProjectDropdowns(){
-    // Sub-project parent filter
     const filter = document.getElementById("spProjectFilter");
     const curFilter = filter.value;
     filter.innerHTML = `<option value="ALL">All Projects</option>`;
@@ -760,7 +1067,6 @@ function populateProjectDropdowns(){
     });
     if([...filter.options].some(o => o.value === curFilter)) filter.value = curFilter;
 
-    // Sub-project modal parent
     const modal = document.getElementById("spProject");
     modal.innerHTML = `<option value="">— Select a project —</option>`;
     projects.filter(p => p.active !== false).forEach(p => {
@@ -769,6 +1075,28 @@ function populateProjectDropdowns(){
         opt.textContent = p.project_name || `Project ${p.id}`;
         modal.appendChild(opt);
     });
+}
+
+function populateEmployeeFilters(){
+    const pf = document.getElementById("empProjectFilter");
+    const curP = pf.value;
+    pf.innerHTML = `<option value="ALL">All Projects</option>`;
+    projects.forEach(p => {
+        const o = document.createElement("option");
+        o.value = p.id; o.textContent = p.project_name || `Project ${p.id}`;
+        pf.appendChild(o);
+    });
+    if([...pf.options].some(o => o.value === curP)) pf.value = curP;
+
+    const spf = document.getElementById("empSubProjectFilter");
+    const curSP = spf.value;
+    spf.innerHTML = `<option value="ALL">All Sub-Projects</option>`;
+    subProjects.forEach(sp => {
+        const o = document.createElement("option");
+        o.value = sp.id; o.textContent = sp.sub_project_name || `SP ${sp.id}`;
+        spf.appendChild(o);
+    });
+    if([...spf.options].some(o => o.value === curSP)) spf.value = curSP;
 }
 
 
@@ -857,6 +1185,148 @@ function renderSubProjectsTable(){
         </tr>
         `;
     }).join("");
+}
+
+
+/* =========================================================
+   EMPLOYEES TABLE
+========================================================= */
+function renderEmployeesTable(){
+    const body = document.getElementById("employeesBody");
+    const pFilter = document.getElementById("empProjectFilter").value;
+    const spFilter = document.getElementById("empSubProjectFilter").value;
+    const search = document.getElementById("empSearch").value.trim().toLowerCase();
+    const status = document.getElementById("empStatusFilter").value;
+
+    let rows = employees;
+    if(status === "active") rows = rows.filter(e => e.active !== false);
+    else if(status === "inactive") rows = rows.filter(e => e.active === false);
+    if(pFilter !== "ALL") rows = rows.filter(e => String(e.project_id) === String(pFilter));
+    if(spFilter !== "ALL") rows = rows.filter(e => String(e.sub_project_id) === String(spFilter));
+    if(search) rows = rows.filter(e =>
+        String(e.employee_name || "").toLowerCase().includes(search) ||
+        String(e.employee_code || "").toLowerCase().includes(search)
+    );
+
+    if(!rows.length){
+        body.innerHTML = `<tr><td colspan="7" class="empty-row">No employees match your filters.</td></tr>`;
+        return;
+    }
+
+    body.innerHTML = rows.map(e => {
+        const proj = projects.find(p => String(p.id) === String(e.project_id));
+        const sp = subProjects.find(s => String(s.id) === String(e.sub_project_id));
+        return `
+            <tr>
+                <td class="cell-muted">${e.id}</td>
+                <td class="cell-strong">${escapeHTML(e.employee_code || "—")}</td>
+                <td>${escapeHTML(e.employee_name || "—")}</td>
+                <td class="cell-muted">${escapeHTML(proj?.project_name || "—")}</td>
+                <td class="cell-muted">${escapeHTML(sp?.sub_project_name || "—")}</td>
+                <td>${e.active === false
+                    ? '<span class="pill pill-red">Inactive</span>'
+                    : '<span class="pill pill-green">Active</span>'}</td>
+                <td style="text-align:right;">
+                    <button class="btn-icon" onclick="openEmployeeModal(${e.id})">✏️</button>
+                    ${e.active === false
+                        ? `<button class="btn-icon" onclick="toggleEmployee(${e.id}, true)">♻️</button>`
+                        : `<button class="btn-icon" onclick="toggleEmployee(${e.id}, false)">🚫</button>`}
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+
+/* =========================================================
+   TEAM LEADS TABLE
+========================================================= */
+function renderTeamLeadsTable(){
+    const body = document.getElementById("teamLeadsBody");
+    if(!teamLeads.length){
+        body.innerHTML = `<tr><td colspan="6" class="empty-row">No team leads yet. Add the first one.</td></tr>`;
+        return;
+    }
+    body.innerHTML = teamLeads.map(tl => {
+        const proj = projects.find(p => String(p.id) === String(tl.project_id));
+        return `
+            <tr>
+                <td class="cell-strong">${escapeHTML(tl.full_name || "—")}</td>
+                <td class="cell-muted">${escapeHTML(tl.email || "—")}</td>
+                <td class="cell-muted">${escapeHTML(tl.phone || "—")}</td>
+                <td class="cell-muted">${escapeHTML(proj?.project_name || "—")}</td>
+                <td>${tl.active === false
+                    ? '<span class="pill pill-red">Inactive</span>'
+                    : '<span class="pill pill-green">Active</span>'}</td>
+                <td style="text-align:right;">
+                    ${tl.user_id ? `<button class="btn-icon" onclick="resetUserPassword('${tl.user_id}', '${escapeHTML(tl.email)}')" title="Reset password">🔑</button>` : ""}
+                    ${tl.active === false
+                        ? (tl.user_id ? `<button class="btn-icon" onclick="reactivateUser('${tl.user_id}', 'team_lead')" title="Reactivate">♻️</button>` : "")
+                        : (tl.user_id ? `<button class="btn-icon" onclick="deactivateUser('${tl.user_id}', 'team_lead')" title="Deactivate">🚫</button>` : "")}
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+
+/* =========================================================
+   TRACKERS TABLE
+========================================================= */
+function renderTrackersTable(){
+    const body = document.getElementById("trackersBody");
+    if(!trackers.length){
+        body.innerHTML = `<tr><td colspan="6" class="empty-row">No trackers yet. Add the first one.</td></tr>`;
+        return;
+    }
+    body.innerHTML = trackers.map(t => {
+        const proj = projects.find(p => String(p.id) === String(t.project_id));
+        return `
+            <tr>
+                <td class="cell-strong">${escapeHTML(t.full_name || "—")}</td>
+                <td class="cell-muted">${escapeHTML(t.email || "—")}</td>
+                <td class="cell-muted">${escapeHTML(t.phone || "—")}</td>
+                <td class="cell-muted">${escapeHTML(proj?.project_name || "—")}</td>
+                <td>${t.active === false
+                    ? '<span class="pill pill-red">Inactive</span>'
+                    : '<span class="pill pill-green">Active</span>'}</td>
+                <td style="text-align:right;">
+                    ${t.user_id ? `<button class="btn-icon" onclick="resetUserPassword('${t.user_id}', '${escapeHTML(t.email)}')" title="Reset password">🔑</button>` : ""}
+                    ${t.active === false
+                        ? (t.user_id ? `<button class="btn-icon" onclick="reactivateUser('${t.user_id}', 'tracker')" title="Reactivate">♻️</button>` : "")
+                        : (t.user_id ? `<button class="btn-icon" onclick="deactivateUser('${t.user_id}', 'tracker')" title="Deactivate">🚫</button>` : "")}
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+
+/* =========================================================
+   MANAGERS TABLE
+========================================================= */
+function renderManagersTable(){
+    const body = document.getElementById("managersBody");
+    if(!managers.length){
+        body.innerHTML = `<tr><td colspan="5" class="empty-row">No managers yet.</td></tr>`;
+        return;
+    }
+    body.innerHTML = managers.map(m => `
+        <tr>
+            <td class="cell-strong">${escapeHTML(m.full_name || "—")}</td>
+            <td class="cell-muted">${escapeHTML(m.email || "—")}</td>
+            <td class="cell-muted">${escapeHTML(m.phone || "—")}</td>
+            <td>${m.active === false
+                ? '<span class="pill pill-red">Inactive</span>'
+                : '<span class="pill pill-green">Active</span>'}</td>
+            <td style="text-align:right;">
+                <button class="btn-icon" onclick="resetUserPassword('${m.user_id}', '${escapeHTML(m.email)}')" title="Reset password">🔑</button>
+                ${m.active === false
+                    ? `<button class="btn-icon" onclick="reactivateUser('${m.user_id}', 'management')" title="Reactivate">♻️</button>`
+                    : `<button class="btn-icon" onclick="deactivateUser('${m.user_id}', 'management')" title="Deactivate">🚫</button>`}
+            </td>
+        </tr>
+    `).join("");
 }
 
 
@@ -1049,6 +1519,358 @@ async function toggleSubProject(id, active){
     }catch(err){
         console.error(err);
         showToast(err.message || "Update failed", "error");
+    }
+}
+
+
+/* =========================================================
+   EMPLOYEE MODAL
+========================================================= */
+function openEmployeeModal(id){
+    const modal = document.getElementById("employeeModal");
+    const proj = document.getElementById("empProject");
+    proj.innerHTML = `<option value="">— Select a project —</option>`;
+    projects.forEach(p => {
+        const o = document.createElement("option");
+        o.value = p.id; o.textContent = p.project_name || `Project ${p.id}`;
+        proj.appendChild(o);
+    });
+
+    if(id){
+        const e = employees.find(x => x.id === id);
+        if(!e) return;
+        document.getElementById("empModalEyebrow").textContent = "Edit Employee";
+        document.getElementById("empModalTitle").textContent = e.employee_name || "Employee";
+        document.getElementById("empId").value = e.id;
+        document.getElementById("empCode").value = e.employee_code || "";
+        document.getElementById("empName").value = e.employee_name || "";
+        document.getElementById("empProject").value = e.project_id ?? "";
+        onEmpProjectChange(e.sub_project_id);
+        document.getElementById("empActive").checked = e.active !== false;
+    }else{
+        document.getElementById("empModalEyebrow").textContent = "New Employee";
+        document.getElementById("empModalTitle").textContent = "Add Employee";
+        document.getElementById("empId").value = "";
+        document.getElementById("empCode").value = "";
+        document.getElementById("empName").value = "";
+        document.getElementById("empProject").value = "";
+        onEmpProjectChange();
+        document.getElementById("empActive").checked = true;
+    }
+
+    modal.classList.remove("hidden");
+    setTimeout(() => document.getElementById("empCode").focus(), 80);
+}
+
+function onEmpProjectChange(selectedSubId){
+    const projId = document.getElementById("empProject").value;
+    const spSelect = document.getElementById("empSubProject");
+    spSelect.innerHTML = `<option value="">— None (use project target) —</option>`;
+    if(!projId) return;
+    subProjects
+        .filter(sp => String(sp.project_id) === String(projId) && sp.active !== false)
+        .forEach(sp => {
+            const o = document.createElement("option");
+            o.value = sp.id; o.textContent = sp.sub_project_name || `SP ${sp.id}`;
+            spSelect.appendChild(o);
+        });
+    if(selectedSubId) spSelect.value = selectedSubId;
+}
+
+async function saveEmployee(){
+    const id = document.getElementById("empId").value;
+    const code = document.getElementById("empCode").value.trim();
+    const name = document.getElementById("empName").value.trim();
+    const projectId = document.getElementById("empProject").value;
+    const subId = document.getElementById("empSubProject").value;
+    const active = document.getElementById("empActive").checked;
+
+    if(!code){ showToast("Employee code is required", "error"); return; }
+    if(!name){ showToast("Employee name is required", "error"); return; }
+    if(!projectId){ showToast("Project is required", "error"); return; }
+
+    const btn = document.getElementById("saveEmpBtn");
+    btn.disabled = true; btn.textContent = "Saving...";
+
+    try{
+        const payload = {
+            employee_code: code,
+            employee_name: name,
+            project_id: Number(projectId),
+            sub_project_id: subId ? Number(subId) : null,
+            active
+        };
+        if(id){
+            const { error } = await sb.from("employees").update(payload).eq("id", Number(id));
+            if(error) throw error;
+            showToast("Employee updated", "success");
+        }else{
+            const { error } = await sb.from("employees").insert(payload);
+            if(error) throw error;
+            showToast("Employee added", "success");
+        }
+        closeModal("employeeModal");
+        await loadEmployees();
+        renderAllTables();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Save failed", "error");
+    }finally{
+        btn.disabled = false; btn.textContent = "Save Employee";
+    }
+}
+
+async function toggleEmployee(id, active){
+    const action = active ? "reactivate" : "deactivate";
+    if(!confirm(`Are you sure you want to ${action} this employee?`)) return;
+    try{
+        const { error } = await sb.from("employees").update({ active }).eq("id", id);
+        if(error) throw error;
+        showToast(`Employee ${action}d`, "success");
+        await loadEmployees();
+        renderAllTables();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Update failed", "error");
+    }
+}
+
+
+/* =========================================================
+   CSV IMPORT
+========================================================= */
+function openCsvImportModal(){
+    document.getElementById("csvFile").value = "";
+    document.getElementById("csvPreview").innerHTML = "";
+    document.getElementById("csvImportBtn").disabled = true;
+    csvPreviewRows = [];
+    document.getElementById("csvImportModal").classList.remove("hidden");
+
+    document.getElementById("csvFile").onchange = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => parseCsvPreview(evt.target.result);
+        reader.readAsText(file);
+    };
+}
+
+function parseCsvPreview(text){
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if(lines.length < 2){
+        document.getElementById("csvPreview").innerHTML = "Empty file";
+        return;
+    }
+    const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+    const rows = [];
+    for(let i = 1; i < lines.length; i++){
+        const parts = lines[i].split(",");
+        const row = {};
+        headers.forEach((h, idx) => { row[h] = (parts[idx] || "").trim(); });
+        rows.push(row);
+    }
+    csvPreviewRows = rows;
+
+    const previewHtml = `<table style="width:100%;font-size:11px;border-collapse:collapse;">
+        <thead><tr>${headers.map(h => `<th style="padding:4px;border-bottom:1px solid #ccc;text-align:left;">${escapeHTML(h)}</th>`).join("")}</tr></thead>
+        <tbody>${rows.slice(0, 10).map(r => `<tr>${headers.map(h => `<td style="padding:4px;border-bottom:1px solid #eee;">${escapeHTML(r[h] || "")}</td>`).join("")}</tr>`).join("")}</tbody>
+    </table>
+    ${rows.length > 10 ? `<div style="text-align:center;color:#888;padding:6px;">...and ${rows.length - 10} more rows</div>` : ""}`;
+
+    document.getElementById("csvPreview").innerHTML = previewHtml;
+    document.getElementById("csvImportBtn").disabled = rows.length === 0;
+}
+
+async function confirmCsvImport(){
+    if(!csvPreviewRows.length) return;
+    const btn = document.getElementById("csvImportBtn");
+    btn.disabled = true; btn.textContent = "Importing...";
+
+    let success = 0, failed = 0, errors = [];
+
+    for(const row of csvPreviewRows){
+        try{
+            const code = row.employee_code || row.code || "";
+            const name = row.employee_name || row.name || "";
+            const projName = row.project_name || row.project || "";
+            const spName = row.sub_project_name || row.sub_project || row.sp || "";
+
+            if(!code || !name || !projName){
+                failed++; errors.push(`Row missing fields: ${code || "?"}`);
+                continue;
+            }
+
+            const proj = projects.find(p => (p.project_name || "").toLowerCase() === projName.toLowerCase());
+            if(!proj){ failed++; errors.push(`Project not found: ${projName}`); continue; }
+
+            let subId = null;
+            if(spName){
+                const sp = subProjects.find(s =>
+                    String(s.project_id) === String(proj.id) &&
+                    (s.sub_project_name || "").toLowerCase() === spName.toLowerCase());
+                if(sp) subId = sp.id;
+            }
+
+            const { error } = await sb.from("employees").insert({
+                employee_code: code,
+                employee_name: name,
+                project_id: proj.id,
+                sub_project_id: subId,
+                active: true
+            });
+            if(error) throw error;
+            success++;
+        }catch(err){
+            failed++;
+            errors.push(err.message || "Unknown error");
+        }
+    }
+
+    await loadEmployees();
+    renderAllTables();
+    closeModal("csvImportModal");
+    showToast(`Imported ${success}. Failed ${failed}.`, success > 0 ? "success" : "error");
+    if(errors.length) console.warn("CSV import errors:", errors);
+}
+
+
+/* =========================================================
+   USER MODAL (TL / Tracker / Manager)
+========================================================= */
+function openUserModal(role){
+    const modal = document.getElementById("userModal");
+    document.getElementById("userRole").value = role;
+    document.getElementById("userId").value = "";
+    document.getElementById("userFullName").value = "";
+    document.getElementById("userEmail").value = "";
+    document.getElementById("userPhone").value = "";
+    document.getElementById("userPassword").value = "";
+
+    const roleLabel = role === "team_lead" ? "Team Lead" : role === "tracker" ? "Tracker" : "Manager";
+    document.getElementById("userModalEyebrow").textContent = `New ${roleLabel}`;
+    document.getElementById("userModalTitle").textContent = `Add ${roleLabel}`;
+
+    document.getElementById("userPasswordField").style.display = "";
+
+    const projField = document.getElementById("userProjectField");
+    if(role === "management"){
+        projField.style.display = "none";
+    }else{
+        projField.style.display = "";
+        const sel = document.getElementById("userProject");
+        sel.innerHTML = `<option value="">— Select a project —</option>`;
+        projects.filter(p => p.active !== false).forEach(p => {
+            const o = document.createElement("option");
+            o.value = p.id; o.textContent = p.project_name || `Project ${p.id}`;
+            sel.appendChild(o);
+        });
+    }
+
+    modal.classList.remove("hidden");
+    setTimeout(() => document.getElementById("userFullName").focus(), 80);
+}
+
+async function saveUser(){
+    const role = document.getElementById("userRole").value;
+    const fullName = document.getElementById("userFullName").value.trim();
+    const email = document.getElementById("userEmail").value.trim().toLowerCase();
+    const phone = document.getElementById("userPhone").value.trim();
+    const password = document.getElementById("userPassword").value;
+    const projectId = role === "management" ? null : document.getElementById("userProject").value;
+
+    if(!fullName){ showToast("Full name is required", "error"); return; }
+    if(!email){ showToast("Email is required", "error"); return; }
+    if(!password || password.length < 6){
+        showToast("Password must be at least 6 characters", "error"); return;
+    }
+    if(role !== "management" && !projectId){
+        showToast("Please select a project", "error"); return;
+    }
+
+    const btn = document.getElementById("saveUserBtn");
+    btn.disabled = true; btn.textContent = "Creating...";
+
+    try{
+        const { data, error } = await sb.functions.invoke(EDGE_FUNCTION_NAME, {
+            body: {
+                action: "create",
+                email,
+                password,
+                full_name: fullName,
+                phone,
+                role,
+                project_id: projectId ? Number(projectId) : null
+            }
+        });
+
+        if(error) throw error;
+        if(data && data.error) throw new Error(data.error);
+
+        showToast(`${fullName} created successfully`, "success");
+        closeModal("userModal");
+
+        await loadAllData();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Failed to create user", "error");
+    }finally{
+        btn.disabled = false; btn.textContent = "Create User";
+    }
+}
+
+
+/* =========================================================
+   USER ACTIONS
+========================================================= */
+async function deactivateUser(userId, role){
+    if(!userId){ showToast("No user account linked", "error"); return; }
+    if(!confirm("Deactivate this user? They will lose login access.")) return;
+    try{
+        const { data, error } = await sb.functions.invoke(EDGE_FUNCTION_NAME, {
+            body: { action: "deactivate", user_id: userId, role }
+        });
+        if(error) throw error;
+        if(data && data.error) throw new Error(data.error);
+        showToast("User deactivated", "success");
+        await loadAllData();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Failed to deactivate", "error");
+    }
+}
+
+async function reactivateUser(userId, role){
+    if(!userId) return;
+    try{
+        const { data, error } = await sb.functions.invoke(EDGE_FUNCTION_NAME, {
+            body: { action: "reactivate", user_id: userId }
+        });
+        if(error) throw error;
+        if(data && data.error) throw new Error(data.error);
+        showToast("User reactivated", "success");
+        await loadAllData();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Failed to reactivate", "error");
+    }
+}
+
+async function resetUserPassword(userId, email){
+    if(!userId){ showToast("No user account linked", "error"); return; }
+    const newPassword = prompt(`Enter a new password for ${email}:`);
+    if(!newPassword) return;
+    if(newPassword.length < 6){ showToast("Password must be at least 6 characters", "error"); return; }
+
+    try{
+        const { data, error } = await sb.functions.invoke(EDGE_FUNCTION_NAME, {
+            body: { action: "reset_password", user_id: userId, new_password: newPassword }
+        });
+        if(error) throw error;
+        if(data && data.error) throw new Error(data.error);
+        showToast("Password reset", "success");
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Failed to reset password", "error");
     }
 }
 
