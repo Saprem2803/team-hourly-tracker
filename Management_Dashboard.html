@@ -177,7 +177,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 .status-chip.neutral{background:var(--bg-soft);color:var(--muted);}
 .status-chip.neutral .dot{background:var(--muted);}
 
-.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:36px;}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:36px;}
 .chart-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-card);}
 .chart-card-head{margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--line-2);}
 .chart-card-title{font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.2px;}
@@ -249,6 +249,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
     .hero-right{grid-column:span 2;text-align:left;}
     .kpi-strip{grid-template-columns:repeat(3,1fr);}
     .insights-grid{grid-template-columns:1fr;}
+    .chart-grid{grid-template-columns:1fr 1fr;}
 }
 @media (max-width:900px){
     .header,.page,.footer{padding-left:20px;padding-right:20px;}
@@ -331,7 +332,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
         <div class="toolbar">
             <div class="filter-group">
                 <label>Report Date</label>
-                <input id="trackerDate" type="date" onchange="loadDashboard()">
+                <input id="trackerDate" type="date">
             </div>
             <div class="filter-group">
                 <label>Period</label>
@@ -342,13 +343,19 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
             <div class="filter-group">
                 <label>Project</label>
-                <select id="projectFilter" onchange="applyFilters()">
+                <select id="projectFilter">
                     <option value="ALL">All Projects</option>
                 </select>
             </div>
             <div class="filter-group">
+                <label>Sub-Project</label>
+                <select id="subProjectFilter">
+                    <option value="ALL">All Sub-Projects</option>
+                </select>
+            </div>
+            <div class="filter-group">
                 <label>Team Lead</label>
-                <select id="teamLeadFilter" onchange="applyFilters()">
+                <select id="teamLeadFilter">
                     <option value="ALL">All Team Leads</option>
                 </select>
             </div>
@@ -472,11 +479,51 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </section>
 
-        <!-- TEAM LEAD SCORECARD -->
+        <!-- SUB-PROJECT SCORECARD -->
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
                     <span class="section-num">02</span>
+                    <div>
+                        <div class="section-title">Sub-Project Scorecard</div>
+                        <div class="section-desc">Drill-down performance · Targets auto-adjust to Present FTE</div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-shell">
+                <div id="subProjectLoading" class="loading">
+                    <div class="spinner"></div>
+                    Loading sub-project performance...
+                </div>
+                <div class="table-scroll hidden" id="subProjectTableWrap">
+                    <table id="subProjectTable">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Sub-Project</th>
+                                <th>Parent Project</th>
+                                <th>Team Lead</th>
+                                <th>Total FTE</th>
+                                <th>Present</th>
+                                <th>Target / FTE</th>
+                                <th>Target (Present FTE)</th>
+                                <th>Achieved</th>
+                                <th>Achievement</th>
+                                <th>Units / Present FTE</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subProjectTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TEAM LEAD SCORECARD -->
+        <section class="section">
+            <div class="section-head">
+                <div class="section-head-left">
+                    <span class="section-num">03</span>
                     <div>
                         <div class="section-title">Team Lead Scorecard</div>
                         <div class="section-desc">Leadership performance and project coverage</div>
@@ -509,10 +556,10 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
-                    <span class="section-num">03</span>
+                    <span class="section-num">04</span>
                     <div>
                         <div class="section-title">Performance Analytics</div>
-                        <div class="section-desc">Visual comparison across projects and hours</div>
+                        <div class="section-desc">Visual comparison across projects, sub-projects and hours</div>
                     </div>
                 </div>
             </div>
@@ -523,6 +570,13 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                         <div class="chart-card-desc">Achievement % against adjusted target</div>
                     </div>
                     <div class="chart-box"><canvas id="projectAchievementChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-head">
+                        <div class="chart-card-title">Sub-Project Achievement Ranking</div>
+                        <div class="chart-card-desc">Top 10 sub-projects by achievement %</div>
+                    </div>
+                    <div class="chart-box"><canvas id="subProjectAchievementChart"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-card-head">
@@ -538,7 +592,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
-                    <span class="section-num">04</span>
+                    <span class="section-num">05</span>
                     <div>
                         <div class="section-title">Executive Insights</div>
                         <div class="section-desc">Auto-generated observations</div>
@@ -547,7 +601,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
             <div class="insights-grid">
                 <div class="insight-card good">
-                    <div class="insight-label">Top Performer</div>
+                    <div class="insight-label">Top Project</div>
                     <div class="insight-text" id="insightTopProject">&mdash;</div>
                 </div>
                 <div class="insight-card warn">
@@ -557,6 +611,18 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                 <div class="insight-card">
                     <div class="insight-label">Peak Production Hour</div>
                     <div class="insight-text" id="insightPeakHour">&mdash;</div>
+                </div>
+                <div class="insight-card good">
+                    <div class="insight-label">Top Sub-Project</div>
+                    <div class="insight-text" id="insightTopSubProject">&mdash;</div>
+                </div>
+                <div class="insight-card warn">
+                    <div class="insight-label">Weakest Sub-Project</div>
+                    <div class="insight-text" id="insightBottomSubProject">&mdash;</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-label">Sub-Project Coverage</div>
+                    <div class="insight-text" id="insightSubProjectCount">&mdash;</div>
                 </div>
             </div>
         </section>
@@ -643,6 +709,7 @@ let employees = [];
 let productivityRows = [];
 let filteredEmployees = [];
 let projectChart = null;
+let subProjectChart = null;
 let hourlyChart = null;
 let currentUser = null;
 let currentDate = null;
@@ -664,6 +731,7 @@ const HOUR_LABELS = ["6–7 PM","7–8 PM","8–9 PM","9–10 PM","10–11 PM","
 ========================================================= */
 document.addEventListener("DOMContentLoaded", async function(){
     setDefaultDate();
+    bindListeners();
     await checkSession();
 });
 
@@ -858,7 +926,7 @@ function hidePageError(){ document.getElementById("pageError").classList.add("hi
 
 
 /* =========================================================
-   TEAM LEAD LOOKUP
+   TEAM LEAD / PROJECT / SUB-PROJECT LOOKUP
 ========================================================= */
 function getTeamLeadForProject(projectId){
     const pid = String(projectId ?? "").trim();
@@ -877,6 +945,9 @@ function getProjectById(projectId){
 function getSubProjectById(spId){
     if(spId === null || spId === undefined || spId === "") return null;
     return subProjects.find(sp => String(sp.id).trim() === String(spId).trim());
+}
+function spName(sp){
+    return sp?.sub_project_name || sp?.name || sp?.sub_project || `Sub-Project ${sp?.id}`;
 }
 
 
@@ -1011,37 +1082,91 @@ function populateFilters(){
         pf.appendChild(opt);
     });
     if([...pf.options].some(o => o.value === current)) pf.value = current;
+
+    updateSubProjectFilter();
     updateTeamLeadFilter();
 }
 
-function updateTeamLeadFilter(){
+function updateSubProjectFilter(){
     const pv = document.getElementById("projectFilter").value;
-    const tf = document.getElementById("teamLeadFilter");
+    const spf = document.getElementById("subProjectFilter");
+    const current = spf.value;
+
+    spf.innerHTML = `<option value="ALL">All Sub-Projects</option>`;
+
+    const relevant = subProjects
+        .filter(sp => {
+            if(sp.active === false) return false;
+            if(pv !== "ALL" && String(sp.project_id) !== String(pv)) return false;
+            return true;
+        })
+        .sort((a,b) => spName(a).localeCompare(spName(b)));
+
+    relevant.forEach(sp => {
+        const opt = document.createElement("option");
+        opt.value = String(sp.id);
+        opt.textContent = spName(sp);
+        spf.appendChild(opt);
+    });
+
+    if([...spf.options].some(o => o.value === current)) spf.value = current;
+    else spf.value = "ALL";
+}
+
+function updateTeamLeadFilter(){
+    const pv  = document.getElementById("projectFilter").value;
+    const spv = document.getElementById("subProjectFilter").value;
+    const tf  = document.getElementById("teamLeadFilter");
     const current = tf.value;
+
     tf.innerHTML = `<option value="ALL">All Team Leads</option>`;
+
+    const projectIdsInScope = new Set();
+    if(spv !== "ALL"){
+        const sp = getSubProjectById(spv);
+        if(sp) projectIdsInScope.add(String(sp.project_id));
+    }else if(pv !== "ALL"){
+        projectIdsInScope.add(String(pv));
+    }else{
+        projects.forEach(p => projectIdsInScope.add(String(p.id)));
+    }
+
     const names = new Set();
     projects.forEach(p => {
-        if(pv !== "ALL" && String(p.id) !== String(pv)) return;
+        if(!projectIdsInScope.has(String(p.id))) return;
         const n = getTeamLeadForProject(p.id);
         if(n && n !== "Unassigned"){
             n.split(",").map(x => x.trim()).filter(Boolean).forEach(x => names.add(x));
         }
     });
+
     [...names].sort().forEach(n => {
         const opt = document.createElement("option");
         opt.value = n; opt.textContent = n;
         tf.appendChild(opt);
     });
+
     if([...tf.options].some(o => o.value === current)) tf.value = current;
+    else tf.value = "ALL";
 }
 
 function applyFilters(){
+    updateSubProjectFilter();
     updateTeamLeadFilter();
-    const pv = document.getElementById("projectFilter").value;
-    const tv = document.getElementById("teamLeadFilter").value;
+
+    const pv  = document.getElementById("projectFilter").value;
+    const spv = document.getElementById("subProjectFilter").value;
+    const tv  = document.getElementById("teamLeadFilter").value;
 
     filteredEmployees = employees.map(buildEmployeeMetric).filter(metric => {
         if(pv !== "ALL" && String(metric.employee.project_id) !== String(pv)) return false;
+
+        if(spv !== "ALL"){
+            const empSp = metric.employee.sub_project_id;
+            if(empSp === null || empSp === undefined || empSp === "") return false;
+            if(String(empSp) !== String(spv)) return false;
+        }
+
         if(tv !== "ALL"){
             const lead = getTeamLeadForProject(metric.employee.project_id);
             if(!lead.split(",").map(x => x.trim()).includes(tv)) return false;
@@ -1060,6 +1185,7 @@ function renderAll(){
     renderKPIs();
     renderHero();
     renderProjectTable();
+    renderSubProjectTable();
     renderTeamLeadTable();
     renderCharts();
     renderInsights();
@@ -1172,6 +1298,56 @@ function buildProjectMetrics(){
 
 
 /* =========================================================
+   SUB-PROJECT METRICS
+========================================================= */
+function buildSubProjectMetrics(){
+    const map = new Map();
+
+    filteredEmployees.forEach(metric => {
+        const spId = metric.employee.sub_project_id;
+        if(spId === null || spId === undefined || spId === "") return;
+
+        const sp = getSubProjectById(spId);
+        if(!sp) return;
+
+        const key = String(sp.id);
+        if(!map.has(key)){
+            map.set(key, {
+                subProject: sp,
+                project: getProjectById(sp.project_id),
+                teamLead: getTeamLeadForProject(sp.project_id),
+                employees: 0,
+                fte: 0,
+                target: 0,
+                production: 0,
+                hasTarget: false,
+                targetBasedFTE: 0
+            });
+        }
+
+        const item = map.get(key);
+        item.employees += 1;
+        item.fte += metric.fte;
+        item.target += metric.adjustedTarget;
+        item.production += metric.production;
+        if(metric.hasTarget){
+            item.hasTarget = true;
+            item.targetBasedFTE += metric.fte;
+        }
+    });
+
+    return [...map.values()]
+        .map(item => {
+            item.achievement = item.hasTarget && item.target > 0
+                ? (item.production / item.target) * 100 : 0;
+            item.average = item.fte > 0 ? item.production / item.fte : 0;
+            return item;
+        })
+        .sort((a,b) => b.achievement - a.achievement);
+}
+
+
+/* =========================================================
    PROJECT TABLE
 ========================================================= */
 function renderProjectTable(){
@@ -1205,6 +1381,52 @@ function renderProjectTable(){
             <td class="num-cell">${item.employees}</td>
             <td class="num-cell">${formatNumber(item.fte, 1)}</td>
             <td class="num-cell">${formatNumber(item.employees - item.fte, 1)}</td>
+            <td class="num-cell">${targetPerFTE === null ? "–" : formatNumber(targetPerFTE, 1)}</td>
+            <td class="num-cell strong">${item.hasTarget ? formatNumber(item.target, 1) : "N/A"}</td>
+            <td class="num-cell strong">${formatNumber(item.production, 0)}</td>
+            <td>${achievementBadge(item.achievement, item.hasTarget)}</td>
+            <td class="num-cell">${formatNumber(unitsPerFTE, 1)}</td>
+            <td>${statusChip(item.achievement, item.hasTarget)}</td>
+        `;
+        body.appendChild(tr);
+    });
+}
+
+
+/* =========================================================
+   SUB-PROJECT TABLE
+========================================================= */
+function renderSubProjectTable(){
+    const body = document.getElementById("subProjectTableBody");
+    document.getElementById("subProjectLoading").classList.add("hidden");
+    document.getElementById("subProjectTableWrap").classList.remove("hidden");
+    body.innerHTML = "";
+
+    const data = buildSubProjectMetrics();
+
+    if(!data.length){
+        body.innerHTML = `<tr><td colspan="12" class="empty">No sub-project data available for the current filter.</td></tr>`;
+        return;
+    }
+
+    data.forEach((item, index) => {
+        const rank = index + 1;
+        const rankClass = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "";
+
+        const targetPerFTE = item.targetBasedFTE > 0
+            ? (item.target / item.targetBasedFTE)
+            : null;
+
+        const unitsPerFTE = item.fte > 0 ? item.production / item.fte : 0;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td class="rank-cell"><span class="rank-badge ${rankClass}">${rank}</span></td>
+            <td class="project-cell">${escapeHTML(spName(item.subProject))}</td>
+            <td class="lead-cell">${escapeHTML(item.project?.project_name || "—")}</td>
+            <td class="lead-cell">${escapeHTML(item.teamLead)}</td>
+            <td class="num-cell">${item.employees}</td>
+            <td class="num-cell">${formatNumber(item.fte, 1)}</td>
             <td class="num-cell">${targetPerFTE === null ? "–" : formatNumber(targetPerFTE, 1)}</td>
             <td class="num-cell strong">${item.hasTarget ? formatNumber(item.target, 1) : "N/A"}</td>
             <td class="num-cell strong">${formatNumber(item.production, 0)}</td>
@@ -1322,6 +1544,7 @@ function statusChip(value, hasTarget = true){
 ========================================================= */
 function renderCharts(){
     renderProjectAchievementChart();
+    renderSubProjectAchievementChart();
     renderHourlyProductionChart();
 }
 
@@ -1375,6 +1598,97 @@ function renderProjectAchievementChart(){
     });
 }
 
+function renderSubProjectAchievementChart(){
+    const canvas = document.getElementById("subProjectAchievementChart");
+    if(!canvas) return;
+
+    const data = buildSubProjectMetrics()
+        .filter(item => item.hasTarget)
+        .slice(0, 10);
+
+    if(subProjectChart) subProjectChart.destroy();
+
+    if(!data.length){
+        subProjectChart = new Chart(canvas, {
+            type: "bar",
+            data: { labels: [], datasets: [] },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: "No target-based sub-projects in current view",
+                        color: "#94a3b8",
+                        font: { family: "Inter", size: 12, weight: "600" }
+                    }
+                },
+                scales: { x: { display: false }, y: { display: false } }
+            }
+        });
+        return;
+    }
+
+    const colors = data.map(item => {
+        if(item.achievement >= 95) return "#0d7a4a";
+        if(item.achievement >= 75) return "#b45309";
+        if(item.achievement > 0)    return "#b91c1c";
+        return "#94a3b8";
+    });
+
+    subProjectChart = new Chart(canvas, {
+        type: "bar",
+        data: {
+            labels: data.map(item => spName(item.subProject)),
+            datasets: [{
+                label: "Achievement %",
+                data: data.map(item => Number(item.achievement.toFixed(1))),
+                backgroundColor: colors,
+                borderRadius: 8,
+                maxBarThickness: 32
+            }]
+        },
+        options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: "#0a1628", padding: 12, cornerRadius: 8,
+                    titleFont: { family: "Inter", size: 12, weight: "700" },
+                    bodyFont: { family: "Inter", size: 12, weight: "500" },
+                    callbacks: {
+                        label: ctx => ctx.parsed.x.toFixed(1) + "%",
+                        afterLabel: ctx => {
+                            const item = data[ctx.dataIndex];
+                            return `Target: ${formatNumber(item.target, 0)} · Achieved: ${formatNumber(item.production, 0)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { color: "#f1f5f9", drawBorder: false },
+                    ticks: {
+                        color: "#94a3b8",
+                        font: { family: "Inter", size: 11, weight: "600" },
+                        callback: v => v + "%"
+                    }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: {
+                        color: "#475569",
+                        font: { family: "Inter", size: 11, weight: "600" }
+                    }
+                }
+            }
+        }
+    });
+}
+
 function renderHourlyProductionChart(){
     const canvas = document.getElementById("hourlyProductionChart");
     const totals = HOUR_FIELDS.map(() => 0);
@@ -1417,6 +1731,7 @@ function renderHourlyProductionChart(){
    INSIGHTS
 ========================================================= */
 function renderInsights(){
+    // Project insights
     const projectData = buildProjectMetrics();
     const ranked = projectData.filter(p => p.hasTarget);
 
@@ -1438,6 +1753,7 @@ function renderInsights(){
         document.getElementById("insightBottomProject").textContent = "No target-based project in this view";
     }
 
+    // Peak hour
     const totals = HOUR_FIELDS.map(() => 0);
     filteredEmployees.forEach(metric => metric.hours.forEach((v,i) => { totals[i] += v; }));
     const peakValue = Math.max(...totals);
@@ -1445,6 +1761,32 @@ function renderInsights(){
     document.getElementById("insightPeakHour").innerHTML = peakValue > 0
         ? `<span class="insight-accent">${HOUR_LABELS[peakIndex]}</span> with <span class="insight-accent">${formatNumber(peakValue, 0)}</span> units`
         : "No hourly data yet";
+
+    // Sub-project insights
+    const spData = buildSubProjectMetrics().filter(s => s.hasTarget);
+    const topSubEl    = document.getElementById("insightTopSubProject");
+    const bottomSubEl = document.getElementById("insightBottomSubProject");
+    const countEl     = document.getElementById("insightSubProjectCount");
+
+    if(spData.length){
+        const top = spData[0];
+        topSubEl.innerHTML =
+            `<span class="insight-accent">${escapeHTML(spName(top.subProject))}</span> under ` +
+            `<span class="insight-accent">${escapeHTML(top.project?.project_name || "—")}</span> at ` +
+            `<span class="insight-accent">${formatPercent(top.achievement)}</span>`;
+
+        const bottom = spData[spData.length - 1];
+        bottomSubEl.innerHTML =
+            `<span class="insight-accent">${escapeHTML(spName(bottom.subProject))}</span> at ` +
+            `<span class="insight-accent">${formatPercent(bottom.achievement)}</span> — requires attention`;
+
+        countEl.innerHTML =
+            `<span class="insight-accent">${spData.length}</span> target-based sub-projects in current view`;
+    }else{
+        topSubEl.textContent = "No sub-project data in current view";
+        bottomSubEl.textContent = "No sub-project data in current view";
+        countEl.textContent = "—";
+    }
 }
 
 
@@ -1532,9 +1874,15 @@ async function exportReportRange(fromDate, toDate, scope){
         let scopedEmployees = employees;
         if(scope === "current"){
             const pv = document.getElementById("projectFilter").value;
+            const spv = document.getElementById("subProjectFilter").value;
             const tv = document.getElementById("teamLeadFilter").value;
             scopedEmployees = employees.filter(emp => {
                 if(pv !== "ALL" && String(emp.project_id) !== String(pv)) return false;
+                if(spv !== "ALL"){
+                    const empSp = emp.sub_project_id;
+                    if(empSp === null || empSp === undefined || empSp === "") return false;
+                    if(String(empSp) !== String(spv)) return false;
+                }
                 if(tv !== "ALL"){
                     const lead = getTeamLeadForProject(emp.project_id);
                     if(!lead.split(",").map(x => x.trim()).includes(tv)) return false;
@@ -1548,7 +1896,7 @@ async function exportReportRange(fromDate, toDate, scope){
         csvRows.push(["Scope", scope === "all" ? "All Projects" : "Current filter"]);
         csvRows.push(["Generated at", new Date().toLocaleString("en-IN")]);
         csvRows.push([]);
-        csvRows.push(["Date","Employee","EMP ID","Project","Sub-Project","Team Lead","Attendance","FTE","Target","Achieved","Remaining","Achievement %"]);
+        csvRows.push(["Date","Employee","EMP ID","Project","Sub-Project","Sub-Project Target/FTE","Team Lead","Attendance","FTE","Adjusted Target","Achieved","Remaining","Achievement %"]);
 
         const dates = [];
         let cursor = new Date(fromDate + "T00:00:00");
@@ -1576,9 +1924,18 @@ async function exportReportRange(fromDate, toDate, scope){
                 const hasAnyData = record && (attendance !== "Present" || production > 0);
                 if(!hasAnyData) return;
                 csvRows.push([
-                    date, emp.employee_name || "", emp.employee_code || "",
-                    project?.project_name || "", sp?.sub_project_name || "", teamLead,
-                    attendance, fte, target.toFixed(1), production, remaining,
+                    date,
+                    emp.employee_name || "",
+                    emp.employee_code || "",
+                    project?.project_name || "",
+                    sp ? spName(sp) : "",
+                    (employeeTarget !== null && employeeTarget > 0) ? employeeTarget : "",
+                    teamLead,
+                    attendance,
+                    fte,
+                    target.toFixed(1),
+                    production,
+                    remaining,
                     target > 0 ? achievement.toFixed(1) : "N/A"
                 ]);
             });
@@ -1626,26 +1983,46 @@ function csvEscape(value){
 
 
 /* =========================================================
+   LISTENERS
+========================================================= */
+function bindListeners(){
+    document.getElementById("trackerDate").addEventListener("change", async function(){ await loadDashboard(); });
+
+    document.getElementById("projectFilter").addEventListener("change", function(){
+        updateSubProjectFilter();
+        updateTeamLeadFilter();
+        applyFilters();
+    });
+
+    document.getElementById("subProjectFilter").addEventListener("change", function(){
+        updateTeamLeadFilter();
+        applyFilters();
+    });
+
+    document.getElementById("teamLeadFilter").addEventListener("change", function(){
+        applyFilters();
+    });
+
+    document.getElementById("exportModal").addEventListener("click", function(e){
+        if(e.target === this) closeExportModal();
+    });
+
+    document.addEventListener("keydown", function(e){
+        if(e.key === "Escape"){
+            const m = document.getElementById("exportModal");
+            if(!m.classList.contains("hidden")) closeExportModal();
+        }
+    });
+}
+
+
+/* =========================================================
    AUTH STATE
 ========================================================= */
 sb.auth.onAuthStateChange(async (event) => {
     if(event === "SIGNED_OUT"){
         document.getElementById("dashboardScreen").classList.add("hidden");
         document.getElementById("loginScreen").classList.remove("hidden");
-    }
-});
-
-
-/* =========================================================
-   LISTENERS
-========================================================= */
-document.getElementById("trackerDate").addEventListener("change", async function(){ await loadDashboard(); });
-document.getElementById("projectFilter").addEventListener("change", function(){ updateTeamLeadFilter(); applyFilters(); });
-document.getElementById("exportModal").addEventListener("click", function(e){ if(e.target === this) closeExportModal(); });
-document.addEventListener("keydown", function(e){
-    if(e.key === "Escape"){
-        const m = document.getElementById("exportModal");
-        if(!m.classList.contains("hidden")) closeExportModal();
     }
 });
 </script>
