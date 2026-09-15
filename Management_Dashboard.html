@@ -169,6 +169,12 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
     display:inline-flex;align-items:center;
     font-weight:700;color:var(--ink);font-size:14px;
 }
+
+/* Projects without sub-projects: no pointer, no hover highlight */
+.project-row.no-children{cursor:default;}
+.project-row.no-children:hover{background:transparent;}
+.project-row.no-children .project-name{padding-left:26px;}
+
 .sub-row{background:linear-gradient(90deg,#fcfcfb 0%,#fbfaf5 100%);}
 .sub-row td{color:var(--ink-3);font-size:12.5px;padding-top:12px;padding-bottom:12px;}
 .sub-row .sub-indent{display:inline-block;width:26px;color:var(--muted);font-weight:600;}
@@ -460,14 +466,14 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </div>
 
-        <!-- PROJECT SCORECARD (with expandable sub-project rows) -->
+        <!-- PROJECT SCORECARD -->
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
                     <span class="section-num">01</span>
                     <div>
                         <div class="section-title">Project Scorecard</div>
-                        <div class="section-desc">Click any project to expand its sub-projects · Targets auto-adjust to Present FTE</div>
+                        <div class="section-desc">Click any project with sub-projects to expand · Targets auto-adjust to Present FTE</div>
                     </div>
                 </div>
             </div>
@@ -500,7 +506,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </section>
 
-        <!-- SUB-PROJECT SCORECARD (cross-project ranking) -->
+        <!-- SUB-PROJECT SCORECARD -->
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
@@ -1378,7 +1384,7 @@ function buildSubProjectMetrics(){
 
 
 /* =========================================================
-   PROJECT TABLE (with expandable sub-project rows)
+   PROJECT TABLE (with conditional expandable rows)
 ========================================================= */
 function renderProjectTable(){
     const body = document.getElementById("projectTableBody");
@@ -1398,7 +1404,14 @@ function renderProjectTable(){
         const rank = index + 1;
         const rankClass = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "";
         const projectKey = String(item.project.id);
-        const isExpanded = expandedProjects.has(projectKey);
+
+        // Determine children FIRST so we know if this project is expandable
+        const children = spData
+            .filter(sp => String(sp.project?.id) === projectKey)
+            .sort((a,b) => b.achievement - a.achievement);
+
+        const hasChildren = children.length > 0;
+        const isExpanded = hasChildren && expandedProjects.has(projectKey);
 
         const targetPerFTE = item.targetBasedFTE > 0
             ? (item.target / item.targetBasedFTE)
@@ -1407,13 +1420,21 @@ function renderProjectTable(){
 
         // --- Parent row ---
         const tr = document.createElement("tr");
-        tr.className = "project-row" + (isExpanded ? " expanded" : "");
-        tr.dataset.projectId = projectKey;
+
+        if(hasChildren){
+            tr.className = "project-row" + (isExpanded ? " expanded" : "");
+            tr.dataset.projectId = projectKey;
+        }else{
+            tr.className = "project-row no-children";
+        }
+
+        const chevronHTML = hasChildren ? `<span class="chev">▶</span>` : ``;
+
         tr.innerHTML = `
             <td class="rank-cell"><span class="rank-badge ${rankClass}">${rank}</span></td>
             <td class="project-cell">
                 <span class="project-name">
-                    <span class="chev">▶</span>
+                    ${chevronHTML}
                     ${escapeHTML(item.project.project_name || `Project ${item.project.id}`)}
                 </span>
             </td>
@@ -1428,52 +1449,47 @@ function renderProjectTable(){
             <td class="num-cell">${formatNumber(unitsPerFTE, 1)}</td>
             <td>${statusChip(item.achievement, item.hasTarget)}</td>
         `;
-        tr.addEventListener("click", function(){ toggleProjectRow(projectKey); });
+
+        // Only attach click handler if the project can expand
+        if(hasChildren){
+            tr.addEventListener("click", function(){ toggleProjectRow(projectKey); });
+        }
+
         body.appendChild(tr);
 
-        // --- Sub-project child rows ---
-        const children = spData
-            .filter(sp => String(sp.project?.id) === projectKey)
-            .sort((a,b) => b.achievement - a.achievement);
+        // --- Sub-project child rows (skip if no children) ---
+        if(!hasChildren) return;
 
-        if(children.length === 0){
-            const noChild = document.createElement("tr");
-            noChild.className = "sub-row" + (isExpanded ? "" : " hidden-sub");
-            noChild.dataset.parentId = projectKey;
-            noChild.innerHTML = `<td colspan="12" style="padding-left:56px;color:var(--muted);font-style:italic;">No sub-project breakdown available</td>`;
-            body.appendChild(noChild);
-        }else{
-            children.forEach((sp, spIdx) => {
-                const spTargetPerFTE = sp.targetBasedFTE > 0
-                    ? (sp.target / sp.targetBasedFTE)
-                    : null;
-                const spUnitsPerFTE = sp.fte > 0 ? sp.production / sp.fte : 0;
-                const isLast = spIdx === children.length - 1;
-                const branch = isLast ? "└" : "├";
+        children.forEach((sp, spIdx) => {
+            const spTargetPerFTE = sp.targetBasedFTE > 0
+                ? (sp.target / sp.targetBasedFTE)
+                : null;
+            const spUnitsPerFTE = sp.fte > 0 ? sp.production / sp.fte : 0;
+            const isLast = spIdx === children.length - 1;
+            const branch = isLast ? "└" : "├";
 
-                const subTr = document.createElement("tr");
-                subTr.className = "sub-row" + (isExpanded ? "" : " hidden-sub");
-                subTr.dataset.parentId = projectKey;
-                subTr.innerHTML = `
-                    <td></td>
-                    <td>
-                        <span class="sub-indent">${branch}</span>
-                        <span class="sub-name">${escapeHTML(spName(sp.subProject))}</span>
-                    </td>
-                    <td class="lead-cell">${escapeHTML(sp.teamLead)}</td>
-                    <td class="num-cell">${sp.employees}</td>
-                    <td class="num-cell">${formatNumber(sp.fte, 1)}</td>
-                    <td class="num-cell">${formatNumber(sp.employees - sp.fte, 1)}</td>
-                    <td class="num-cell">${spTargetPerFTE === null ? "–" : formatNumber(spTargetPerFTE, 1)}</td>
-                    <td class="num-cell strong">${sp.hasTarget ? formatNumber(sp.target, 1) : "N/A"}</td>
-                    <td class="num-cell strong">${formatNumber(sp.production, 0)}</td>
-                    <td>${achievementBadge(sp.achievement, sp.hasTarget)}</td>
-                    <td class="num-cell">${formatNumber(spUnitsPerFTE, 1)}</td>
-                    <td>${statusChip(sp.achievement, sp.hasTarget)}</td>
-                `;
-                body.appendChild(subTr);
-            });
-        }
+            const subTr = document.createElement("tr");
+            subTr.className = "sub-row" + (isExpanded ? "" : " hidden-sub");
+            subTr.dataset.parentId = projectKey;
+            subTr.innerHTML = `
+                <td></td>
+                <td>
+                    <span class="sub-indent">${branch}</span>
+                    <span class="sub-name">${escapeHTML(spName(sp.subProject))}</span>
+                </td>
+                <td class="lead-cell">${escapeHTML(sp.teamLead)}</td>
+                <td class="num-cell">${sp.employees}</td>
+                <td class="num-cell">${formatNumber(sp.fte, 1)}</td>
+                <td class="num-cell">${formatNumber(sp.employees - sp.fte, 1)}</td>
+                <td class="num-cell">${spTargetPerFTE === null ? "–" : formatNumber(spTargetPerFTE, 1)}</td>
+                <td class="num-cell strong">${sp.hasTarget ? formatNumber(sp.target, 1) : "N/A"}</td>
+                <td class="num-cell strong">${formatNumber(sp.production, 0)}</td>
+                <td>${achievementBadge(sp.achievement, sp.hasTarget)}</td>
+                <td class="num-cell">${formatNumber(spUnitsPerFTE, 1)}</td>
+                <td>${statusChip(sp.achievement, sp.hasTarget)}</td>
+            `;
+            body.appendChild(subTr);
+        });
     });
 }
 
