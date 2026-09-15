@@ -155,6 +155,27 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 .num-cell{font-family:'Inter',sans-serif;font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums;}
 .num-cell.strong{font-weight:700;color:var(--ink);}
 
+/* Expandable project rows */
+.project-row{cursor:pointer;user-select:none;}
+.project-row:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
+.project-row .chev{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:18px;height:18px;margin-right:8px;
+    color:var(--ink-4);font-size:10px;
+    transition:transform .18s ease;
+}
+.project-row.expanded .chev{transform:rotate(90deg);color:var(--brand-2);}
+.project-row .project-name{
+    display:inline-flex;align-items:center;
+    font-weight:700;color:var(--ink);font-size:14px;
+}
+.sub-row{background:linear-gradient(90deg,#fcfcfb 0%,#fbfaf5 100%);}
+.sub-row td{color:var(--ink-3);font-size:12.5px;padding-top:12px;padding-bottom:12px;}
+.sub-row .sub-indent{display:inline-block;width:26px;color:var(--muted);font-weight:600;}
+.sub-row .sub-name{font-weight:600;color:var(--ink-2);}
+.sub-row.hidden-sub{display:none;}
+.sub-row:hover{background:linear-gradient(90deg,#f8f7f2 0%,#f6f5ef 100%);}
+
 .scope-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;background:var(--bg-soft);color:var(--ink-4);border:1px solid var(--line);font-size:11px;font-weight:700;}
 .scope-pill.partial{background:var(--amber-soft);color:var(--amber);border-color:#fde68a;}
 .scope-pill.all{background:var(--green-soft);color:var(--green);border-color:#a7f3d0;}
@@ -439,14 +460,14 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </div>
 
-        <!-- PROJECT SCORECARD -->
+        <!-- PROJECT SCORECARD (with expandable sub-project rows) -->
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
                     <span class="section-num">01</span>
                     <div>
                         <div class="section-title">Project Scorecard</div>
-                        <div class="section-desc">Consolidated performance · Targets auto-adjust to Present FTE</div>
+                        <div class="section-desc">Click any project to expand its sub-projects · Targets auto-adjust to Present FTE</div>
                     </div>
                 </div>
             </div>
@@ -460,7 +481,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                         <thead>
                             <tr>
                                 <th>Rank</th>
-                                <th>Project</th>
+                                <th>Project / Sub-Project</th>
                                 <th>Team Lead</th>
                                 <th>Total FTE</th>
                                 <th>Present</th>
@@ -479,14 +500,14 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </section>
 
-        <!-- SUB-PROJECT SCORECARD -->
+        <!-- SUB-PROJECT SCORECARD (cross-project ranking) -->
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
                     <span class="section-num">02</span>
                     <div>
                         <div class="section-title">Sub-Project Scorecard</div>
-                        <div class="section-desc">Drill-down performance · Targets auto-adjust to Present FTE</div>
+                        <div class="section-desc">Cross-project ranking · Targets auto-adjust to Present FTE</div>
                     </div>
                 </div>
             </div>
@@ -714,6 +735,7 @@ let hourlyChart = null;
 let currentUser = null;
 let currentDate = null;
 let currentPeriod = "day";
+let expandedProjects = new Set();
 
 const TEAM_LEAD_FALLBACK = {
     "19": "Moses Aitiwadekar",
@@ -1174,6 +1196,14 @@ function applyFilters(){
         return true;
     });
 
+    // Auto-expand projects based on active filter
+    if(spv !== "ALL"){
+        const selSp = getSubProjectById(spv);
+        if(selSp) expandedProjects.add(String(selSp.project_id));
+    }else if(pv !== "ALL"){
+        expandedProjects.add(String(pv));
+    }
+
     renderAll();
 }
 
@@ -1348,7 +1378,7 @@ function buildSubProjectMetrics(){
 
 
 /* =========================================================
-   PROJECT TABLE
+   PROJECT TABLE (with expandable sub-project rows)
 ========================================================= */
 function renderProjectTable(){
     const body = document.getElementById("projectTableBody");
@@ -1357,6 +1387,7 @@ function renderProjectTable(){
     body.innerHTML = "";
 
     const data = buildProjectMetrics();
+    const spData = buildSubProjectMetrics();
 
     if(!data.length){
         body.innerHTML = `<tr><td colspan="12" class="empty">No project data available.</td></tr>`;
@@ -1366,17 +1397,26 @@ function renderProjectTable(){
     data.forEach((item, index) => {
         const rank = index + 1;
         const rankClass = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "";
+        const projectKey = String(item.project.id);
+        const isExpanded = expandedProjects.has(projectKey);
 
         const targetPerFTE = item.targetBasedFTE > 0
             ? (item.target / item.targetBasedFTE)
             : null;
-
         const unitsPerFTE = item.fte > 0 ? item.production / item.fte : 0;
 
+        // --- Parent row ---
         const tr = document.createElement("tr");
+        tr.className = "project-row" + (isExpanded ? " expanded" : "");
+        tr.dataset.projectId = projectKey;
         tr.innerHTML = `
             <td class="rank-cell"><span class="rank-badge ${rankClass}">${rank}</span></td>
-            <td class="project-cell">${escapeHTML(item.project.project_name || `Project ${item.project.id}`)}</td>
+            <td class="project-cell">
+                <span class="project-name">
+                    <span class="chev">▶</span>
+                    ${escapeHTML(item.project.project_name || `Project ${item.project.id}`)}
+                </span>
+            </td>
             <td class="lead-cell">${escapeHTML(item.teamLead)}</td>
             <td class="num-cell">${item.employees}</td>
             <td class="num-cell">${formatNumber(item.fte, 1)}</td>
@@ -1388,13 +1428,74 @@ function renderProjectTable(){
             <td class="num-cell">${formatNumber(unitsPerFTE, 1)}</td>
             <td>${statusChip(item.achievement, item.hasTarget)}</td>
         `;
+        tr.addEventListener("click", function(){ toggleProjectRow(projectKey); });
         body.appendChild(tr);
+
+        // --- Sub-project child rows ---
+        const children = spData
+            .filter(sp => String(sp.project?.id) === projectKey)
+            .sort((a,b) => b.achievement - a.achievement);
+
+        if(children.length === 0){
+            const noChild = document.createElement("tr");
+            noChild.className = "sub-row" + (isExpanded ? "" : " hidden-sub");
+            noChild.dataset.parentId = projectKey;
+            noChild.innerHTML = `<td colspan="12" style="padding-left:56px;color:var(--muted);font-style:italic;">No sub-project breakdown available</td>`;
+            body.appendChild(noChild);
+        }else{
+            children.forEach((sp, spIdx) => {
+                const spTargetPerFTE = sp.targetBasedFTE > 0
+                    ? (sp.target / sp.targetBasedFTE)
+                    : null;
+                const spUnitsPerFTE = sp.fte > 0 ? sp.production / sp.fte : 0;
+                const isLast = spIdx === children.length - 1;
+                const branch = isLast ? "└" : "├";
+
+                const subTr = document.createElement("tr");
+                subTr.className = "sub-row" + (isExpanded ? "" : " hidden-sub");
+                subTr.dataset.parentId = projectKey;
+                subTr.innerHTML = `
+                    <td></td>
+                    <td>
+                        <span class="sub-indent">${branch}</span>
+                        <span class="sub-name">${escapeHTML(spName(sp.subProject))}</span>
+                    </td>
+                    <td class="lead-cell">${escapeHTML(sp.teamLead)}</td>
+                    <td class="num-cell">${sp.employees}</td>
+                    <td class="num-cell">${formatNumber(sp.fte, 1)}</td>
+                    <td class="num-cell">${formatNumber(sp.employees - sp.fte, 1)}</td>
+                    <td class="num-cell">${spTargetPerFTE === null ? "–" : formatNumber(spTargetPerFTE, 1)}</td>
+                    <td class="num-cell strong">${sp.hasTarget ? formatNumber(sp.target, 1) : "N/A"}</td>
+                    <td class="num-cell strong">${formatNumber(sp.production, 0)}</td>
+                    <td>${achievementBadge(sp.achievement, sp.hasTarget)}</td>
+                    <td class="num-cell">${formatNumber(spUnitsPerFTE, 1)}</td>
+                    <td>${statusChip(sp.achievement, sp.hasTarget)}</td>
+                `;
+                body.appendChild(subTr);
+            });
+        }
+    });
+}
+
+function toggleProjectRow(projectKey){
+    if(expandedProjects.has(projectKey)){
+        expandedProjects.delete(projectKey);
+    }else{
+        expandedProjects.add(projectKey);
+    }
+
+    document.querySelectorAll(`.project-row[data-project-id="${projectKey}"]`).forEach(row => {
+        row.classList.toggle("expanded", expandedProjects.has(projectKey));
+    });
+
+    document.querySelectorAll(`.sub-row[data-parent-id="${projectKey}"]`).forEach(row => {
+        row.classList.toggle("hidden-sub", !expandedProjects.has(projectKey));
     });
 }
 
 
 /* =========================================================
-   SUB-PROJECT TABLE
+   SUB-PROJECT TABLE (cross-project ranking)
 ========================================================= */
 function renderSubProjectTable(){
     const body = document.getElementById("subProjectTableBody");
