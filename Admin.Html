@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMI | Admin Portal</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+    --ink:#0a1628; --ink-2:#1e293b; --ink-3:#475569; --ink-4:#64748b;
+    --muted:#94a3b8; --line:#e2e8f0; --line-2:#f1f5f9;
+    --bg:#ffffff; --bg-soft:#f8fafc;
+    --brand:#0f2a4a; --brand-2:#1a4d7a;
+    --gold:#c9a227; --gold-soft:#f5e6b8;
+    --green:#0d7a4a; --green-soft:#e6f4ec;
+    --amber:#b45309; --amber-soft:#fef3c7;
+    --red:#b91c1c; --red-soft:#fee2e2;
+    --shadow-card:0 1px 2px rgba(15,42,74,.04),0 8px 24px -8px rgba(15,42,74,.06),inset 0 1px 0 rgba(255,255,255,.9);
+    --radius:14px; --radius-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    color:var(--ink-2); font-size:14px; line-height:1.5;
+    background-color:#fdfdfb;
+    background-image:
+        linear-gradient(rgba(15,42,74,.022) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(15,42,74,.022) 1px,transparent 1px),
+        radial-gradient(ellipse 900px 600px at 0% 0%,rgba(201,162,39,.045) 0%,transparent 60%),
+        linear-gradient(180deg,#fefefc 0%,#fbfbf8 45%,#f9f9f6 100%);
+    background-size:48px 48px,48px 48px,100% 100%,100% 100%;
+    background-attachment:fixed,fixed,fixed,fixed;
+    min-height:100vh;
+}
+
+/* ---------- HEADER ---------- */
+.header{
+    background:rgba(255,255,255,.85); border-bottom:1px solid var(--line);
+    padding:16px 32px; display:flex; justify-content:space-between; align-items:center;
+    gap:24px; flex-wrap:wrap; position:sticky; top:0; z-index:100;
+    backdrop-filter:saturate(180%) blur(16px); -webkit-backdrop-filter:saturate(180%) blur(16px);
+    box-shadow:0 1px 0 rgba(201,162,39,.12),0 4px 20px rgba(10,22,40,.03);
+}
+.header-left{display:flex;align-items:center;gap:14px;}
+.brand-mark{
+    width:40px;height:40px;border-radius:10px;
+    background:linear-gradient(135deg,var(--brand),var(--brand-2));
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    font-weight:800;font-size:14px;letter-spacing:.5px;
+    box-shadow:0 6px 18px rgba(15,42,74,.24);
+}
+.header-title-block{display:flex;flex-direction:column;}
+.header-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;}
+.header h1{font-family:'Playfair Display',Georgia,serif;font-size:19px;font-weight:700;color:var(--ink);letter-spacing:-.3px;line-height:1.15;}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.user-chip{display:flex;align-items:center;gap:10px;padding:6px 12px;background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;font-size:12px;font-weight:600;color:var(--ink-2);}
+.user-chip .avatar-mini{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;}
+.user-chip .role-pill{font-size:9px;font-weight:800;letter-spacing:.6px;padding:2px 6px;border-radius:4px;background:var(--gold);color:var(--ink);}
+
+.btn{border:none;border-radius:9px;padding:9px 15px;cursor:pointer;font-weight:600;font-size:12px;font-family:inherit;transition:all .15s ease;display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+.btn-primary{background:var(--ink);color:#fff;box-shadow:0 4px 12px rgba(10,22,40,.15);}
+.btn-primary:hover{background:var(--brand-2);transform:translateY(-1px);}
+.btn-ghost{background:#fff;color:var(--ink-2);border:1px solid var(--line);}
+.btn-ghost:hover{background:var(--bg-soft);}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-danger:hover{background:#991b1b;}
+.btn-sm{padding:6px 10px;font-size:11px;border-radius:7px;}
+.btn-icon{padding:6px 9px;background:transparent;border:1px solid var(--line);border-radius:7px;cursor:pointer;font-family:inherit;transition:all .12s;}
+.btn-icon:hover{background:var(--bg-soft);}
+
+/* ---------- TABS ---------- */
+.tabs-bar{
+    background:#fff;border-bottom:1px solid var(--line);
+    padding:0 32px;display:flex;gap:2px;overflow-x:auto;
+    position:sticky;top:73px;z-index:99;
+    box-shadow:0 1px 3px rgba(10,22,40,.03);
+}
+.tab-btn{
+    border:none;background:transparent;padding:14px 20px;
+    font-size:13px;font-weight:700;color:var(--ink-4);cursor:pointer;
+    font-family:inherit;border-bottom:2px solid transparent;
+    transition:all .15s;white-space:nowrap;
+    display:inline-flex;align-items:center;gap:7px;
+}
+.tab-btn:hover{color:var(--ink-2);}
+.tab-btn.active{color:var(--brand-2);border-bottom-color:var(--brand-2);}
+.tab-btn .tab-count{
+    font-size:10px;font-weight:800;padding:1px 6px;border-radius:999px;
+    background:var(--bg-soft);color:var(--ink-4);
+}
+.tab-btn.active .tab-count{background:var(--brand-2);color:#fff;}
+
+/* ---------- PAGE ---------- */
+.page{max-width:1560px;margin:0 auto;padding:28px 32px 60px;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+.panel-head{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    gap:16px;flex-wrap:wrap;margin-bottom:20px;
+    padding-bottom:16px;border-bottom:1px solid var(--line);
+}
+.panel-head-left{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
+.panel-title{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:var(--ink);letter-spacing:-.3px;}
+.panel-desc{font-size:12px;color:var(--ink-4);margin-top:2px;}
+.panel-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+
+.filter-bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end;}
+.filter-bar .field{display:flex;flex-direction:column;gap:5px;}
+.filter-bar label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink-4);}
+.filter-bar input,.filter-bar select{
+    padding:8px 11px;border:1px solid var(--line);border-radius:8px;
+    font-size:13px;font-family:inherit;color:var(--ink-2);
+    outline:none;transition:border-color .15s;background:#fff;min-width:180px;
+}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--brand-2);box-shadow:0 0 0 3px rgba(26,77,122,.08);}
+
+/* ---------- TABLE ---------- */
+.table-shell{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-card);}
+.table-scroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{
+    background:var(--bg-soft);color:var(--ink-3);padding:12px 14px;
+    text-align:left;font-size:10px;font-weight:800;letter-spacing:1.1px;
+    text-transform:uppercase;border-bottom:1px solid var(--line);white-space:nowrap;
+}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap;}
+tbody tr:hover{background:#fdfcf7;}
+tbody tr:last-child td{border-bottom:none;}
+
+.cell-strong{font-weight:700;color:var(--ink);}
+.cell-muted{color:var(--ink-4);font-weight:500;}
+.cell-num{font-variant-numeric:tabular-nums;font-weight:600;}
+
+.pill{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:4px 10px;border-radius:6px;
+    font-size:11px;font-weight:700;letter-spacing:.2px;
+}
+.pill-green{background:var(--green-soft);color:var(--green);border:1px solid #a7f3d0;}
+.pill-red{background:var(--red-soft);color:var(--red);border:1px solid #fecaca;}
+.pill-amber{background:var(--amber-soft);color:var(--amber);border:1px solid #fde68a;}
+.pill-gray{background:var(--bg-soft);color:var(--ink-4);border:1px solid var(--line);}
+
+/* ---------- MODAL ---------- */
+.modal-overlay{
+    position:fixed;inset:0;background:rgba(10,22,40,.5);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;
+    padding:24px;z-index:1000;animation:fadeIn .15s ease;
+}
+.modal-card{
+    background:#fff;border-radius:16px;
+    box-shadow:0 24px 80px rgba(10,22,40,.3);
+    width:100%;max-width:560px;padding:26px 28px;
+    max-height:90vh;overflow-y:auto;
+    animation:slideUp .2s ease;
+}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;}
+.modal-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
+.modal-title{font-family:'Playfair Display',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);}
+.modal-close{background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--ink-4);}
+.modal-close:hover{background:var(--line);color:var(--ink);}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+.form-field{display:flex;flex-direction:column;gap:6px;}
+.form-field.full{grid-column:span 2;}
+.form-field label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink-4);}
+.form-field input,.form-field select,.form-field textarea{
+    padding:10px 12px;border:1px solid var(--line);border-radius:9px;
+    font-size:13px;font-family:inherit;color:var(--ink-2);
+    outline:none;transition:all .15s;background:#fff;
+}
+.form-field input:focus,.form-field select:focus{border-color:var(--brand-2);box-shadow:0 0 0 3px rgba(26,77,122,.08);}
+.form-field .hint{font-size:11px;color:var(--ink-4);margin-top:2px;}
+
+.checkbox-row{display:flex;align-items:center;gap:8px;padding:8px 0;}
+.checkbox-row input[type="checkbox"]{width:16px;height:16px;cursor:pointer;}
+.checkbox-row label{font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;}
+
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line-2);}
+
+/* ---------- ALERTS ---------- */
+.alert{padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start;}
+.alert-error{background:var(--red-soft);color:var(--red);border:1px solid #fecaca;}
+.alert-success{background:var(--green-soft);color:var(--green);border:1px solid #a7f3d0;}
+.alert-info{background:var(--bg-soft);color:var(--ink-3);border:1px solid var(--line);}
+.hidden{display:none !important;}
+
+/* ---------- TOAST ---------- */
+.toast-stack{position:fixed;bottom:24px;right:24px;z-index:2000;display:flex;flex-direction:column;gap:10px;}
+.toast{
+    background:var(--ink);color:#fff;padding:14px 18px;border-radius:10px;
+    box-shadow:0 12px 32px rgba(10,22,40,.35);
+    font-size:13px;font-weight:600;
+    display:flex;align-items:center;gap:10px;
+    min-width:260px;max-width:420px;
+    animation:toastIn .25s ease;
+}
+@keyframes toastIn{from{transform:translateX(40px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.toast.success{background:var(--green);}
+.toast.error{background:var(--red);}
+.toast .icon{font-size:16px;}
+
+/* ---------- LOADING ---------- */
+.loading{padding:60px 20px;text-align:center;color:var(--ink-4);font-size:13px;font-weight:600;}
+.spinner{width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--brand-2);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty-row{padding:48px 20px;text-align:center;color:var(--ink-4);font-size:13px;font-style:italic;}
+
+/* ---------- LOGIN ---------- */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.login-card{
+    width:100%;max-width:420px;background:#fff;border:1px solid var(--line);
+    border-radius:18px;padding:40px 36px;
+    box-shadow:0 24px 60px rgba(15,42,74,.08);
+}
+.login-brand{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+.login-brand-mark{
+    width:48px;height:48px;border-radius:12px;
+    background:linear-gradient(135deg,var(--brand),var(--brand-2));
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:800;font-size:16px;
+}
+.login-brand-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;}
+.login-brand-title{font-family:'Playfair Display',Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);}
+.login-heading{font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.login-desc{font-size:13px;color:var(--ink-4);margin-bottom:24px;line-height:1.5;}
+.login-field{margin-bottom:14px;}
+.login-field label{display:block;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-4);margin-bottom:6px;}
+.login-field input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;color:var(--ink-2);background:#fff;outline:none;transition:all .15s;}
+.login-field input:focus{border-color:var(--brand-2);box-shadow:0 0 0 4px rgba(26,77,122,.08);}
+.login-btn{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:6px;transition:all .15s;}
+.login-btn:hover{background:var(--brand-2);}
+.login-btn:disabled{opacity:.6;cursor:not-allowed;}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:900px){
+    .header,.page,.tabs-bar{padding-left:16px;padding-right:16px;}
+    .form-grid{grid-template-columns:1fr;}
+    .form-field.full{grid-column:span 1;}
+    .modal-card{padding:22px 20px;}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ========================= LOGIN SCREEN ========================= -->
+<div id="loginScreen" class="login-page">
+    <div class="login-card">
+        <div class="login-brand">
+            <div class="login-brand-mark">AMI</div>
+            <div>
+                <div class="login-brand-eyebrow">Administration</div>
+                <div class="login-brand-title">Admin Portal</div>
+            </div>
+        </div>
+        <h2 class="login-heading">Sign In</h2>
+        <p class="login-desc">Management access only. Contact your administrator if you need access.</p>
+        <div class="login-field">
+            <label>Email</label>
+            <input id="loginEmail" type="email" placeholder="you@aminfoweb.co.in" autocomplete="username">
+        </div>
+        <div class="login-field">
+            <label>Password</label>
+            <input id="loginPassword" type="password" placeholder="Enter password" autocomplete="current-password">
+        </div>
+        <button class="login-btn" onclick="loginUser()" id="loginBtn">Sign In</button>
+        <div id="loginError" class="alert alert-error hidden" style="margin-top:16px;"></div>
+    </div>
+</div>
+
+
+<!-- ========================= DASHBOARD ========================= -->
+<div id="adminScreen" class="hidden">
+
+    <header class="header">
+        <div class="header-left">
+            <div class="brand-mark">AMI</div>
+            <div class="header-title-block">
+                <div class="header-eyebrow">Administration</div>
+                <h1>Admin Portal</h1>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="user-chip">
+                <div class="avatar-mini" id="userInitials">MG</div>
+                <span id="loggedUserName">Management</span>
+                <span class="role-pill">ADMIN</span>
+            </div>
+            <a class="btn btn-ghost" href="Management_Dashboard.html">Executive View</a>
+            <button class="btn btn-ghost" onclick="logoutUser()">Sign Out</button>
+        </div>
+    </header>
+
+    <!-- TABS -->
+    <nav class="tabs-bar" id="tabsBar">
+        <button class="tab-btn active" data-tab="projects">
+            📁 Projects <span class="tab-count" id="tabCountProjects">0</span>
+        </button>
+        <button class="tab-btn" data-tab="subProjects">
+            📂 Sub-Projects <span class="tab-count" id="tabCountSubProjects">0</span>
+        </button>
+        <button class="tab-btn" data-tab="employees">
+            👥 Employees <span class="tab-count" id="tabCountEmployees">0</span>
+        </button>
+        <button class="tab-btn" data-tab="teamLeads">
+            🎯 Team Leads <span class="tab-count" id="tabCountTeamLeads">0</span>
+        </button>
+        <button class="tab-btn" data-tab="trackers">
+            ⏱ Trackers <span class="tab-count" id="tabCountTrackers">0</span>
+        </button>
+        <button class="tab-btn" data-tab="managers">
+            👔 Managers <span class="tab-count" id="tabCountManagers">0</span>
+        </button>
+    </nav>
+
+    <main class="page">
+
+        <div id="pageAlert" class="alert hidden"></div>
+
+        <!-- ================= PROJECTS TAB ================= -->
+        <section class="tab-panel active" id="tab-projects">
+            <div class="panel-head">
+                <div class="panel-head-left">
+                    <div>
+                        <div class="panel-title">Projects</div>
+                        <div class="panel-desc">Add, edit, or deactivate projects. Deactivated projects are hidden from dashboards.</div>
+                    </div>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn btn-primary" onclick="openProjectModal()">+ Add Project</button>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <div class="field">
+                    <label>Search</label>
+                    <input id="projectSearch" placeholder="Project name..." oninput="renderProjectsTable()">
+                </div>
+                <div class="field">
+                    <label>Status</label>
+                    <select id="projectStatusFilter" onchange="renderProjectsTable()">
+                        <option value="active">Active only</option>
+                        <option value="all">All</option>
+                        <option value="inactive">Inactive only</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-shell">
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Project Name</th>
+                                <th>Daily Target</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projectsBody">
+                            <tr><td colspan="5" class="loading"><div class="spinner"></div>Loading projects...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SUB-PROJECTS TAB ================= -->
+        <section class="tab-panel" id="tab-subProjects">
+            <div class="panel-head">
+                <div class="panel-head-left">
+                    <div>
+                        <div class="panel-title">Sub-Projects</div>
+                        <div class="panel-desc">Sub-projects have their own daily targets and are linked to a parent project.</div>
+                    </div>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn btn-primary" onclick="openSubProjectModal()">+ Add Sub-Project</button>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <div class="field">
+                    <label>Parent Project</label>
+                    <select id="spProjectFilter" onchange="renderSubProjectsTable()">
+                        <option value="ALL">All Projects</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Search</label>
+                    <input id="spSearch" placeholder="Sub-project name..." oninput="renderSubProjectsTable()">
+                </div>
+                <div class="field">
+                    <label>Status</label>
+                    <select id="spStatusFilter" onchange="renderSubProjectsTable()">
+                        <option value="active">Active only</option>
+                        <option value="all">All</option>
+                        <option value="inactive">Inactive only</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-shell">
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Sub-Project</th>
+                                <th>Parent Project</th>
+                                <th>Daily Target</th>
+                                <th>Target-Based</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subProjectsBody">
+                            <tr><td colspan="7" class="loading"><div class="spinner"></div>Loading sub-projects...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= EMPLOYEES TAB (Part 2) ================= -->
+        <section class="tab-panel" id="tab-employees">
+            <div class="empty-row">Employees tab will be enabled in the next update.</div>
+        </section>
+
+        <!-- ================= TEAM LEADS TAB (Part 2) ================= -->
+        <section class="tab-panel" id="tab-teamLeads">
+            <div class="empty-row">Team Leads tab will be enabled in the next update.</div>
+        </section>
+
+        <!-- ================= TRACKERS TAB (Part 2) ================= -->
+        <section class="tab-panel" id="tab-trackers">
+            <div class="empty-row">Trackers tab will be enabled in the next update.</div>
+        </section>
+
+        <!-- ================= MANAGERS TAB (Part 2) ================= -->
+        <section class="tab-panel" id="tab-managers">
+            <div class="empty-row">Managers tab will be enabled in the next update.</div>
+        </section>
+
+    </main>
+</div>
+
+
+<!-- ========================= PROJECT MODAL ========================= -->
+<div id="projectModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div>
+                <div class="modal-eyebrow" id="projectModalEyebrow">New Project</div>
+                <div class="modal-title" id="projectModalTitle">Add Project</div>
+            </div>
+            <button class="modal-close" onclick="closeModal('projectModal')">✕</button>
+        </div>
+
+        <input type="hidden" id="projectId">
+
+        <div class="form-grid">
+            <div class="form-field full">
+                <label>Project Name *</label>
+                <input id="projectName" placeholder="e.g., WRMC" maxlength="100">
+            </div>
+            <div class="form-field full">
+                <label>Daily Target (per FTE)</label>
+                <input id="projectTarget" type="number" min="0" placeholder="Leave blank if using sub-project targets">
+                <div class="hint">Used only when the project has no target-based sub-projects.</div>
+            </div>
+            <div class="form-field full">
+                <div class="checkbox-row">
+                    <input type="checkbox" id="projectActive" checked>
+                    <label for="projectActive">Active (visible on dashboards)</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal('projectModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveProject()" id="saveProjectBtn">Save Project</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================= SUB-PROJECT MODAL ========================= -->
+<div id="subProjectModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div>
+                <div class="modal-eyebrow" id="spModalEyebrow">New Sub-Project</div>
+                <div class="modal-title" id="spModalTitle">Add Sub-Project</div>
+            </div>
+            <button class="modal-close" onclick="closeModal('subProjectModal')">✕</button>
+        </div>
+
+        <input type="hidden" id="spId">
+
+        <div class="form-grid">
+            <div class="form-field full">
+                <label>Parent Project *</label>
+                <select id="spProject"></select>
+            </div>
+            <div class="form-field full">
+                <label>Sub-Project Name *</label>
+                <input id="spName" placeholder="e.g., WRMC AR" maxlength="100">
+            </div>
+            <div class="form-field full">
+                <label>Daily Target (per FTE) *</label>
+                <input id="spTarget" type="number" min="0" placeholder="e.g., 60">
+            </div>
+            <div class="form-field full">
+                <div class="checkbox-row">
+                    <input type="checkbox" id="spTargetBased" checked>
+                    <label for="spTargetBased">Target-based (counts toward achievement %)</label>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="spActive" checked>
+                    <label for="spActive">Active (visible on dashboards)</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal('subProjectModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveSubProject()" id="saveSpBtn">Save Sub-Project</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- TOAST STACK -->
+<div class="toast-stack" id="toastStack"></div>
+
+
+<script>
+/* =========================================================
+   CONFIG
+========================================================= */
+const SUPABASE_URL = "https://yhoblmvujfqnspaxdfav.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_fiXzds8sZeg1f5cNcnzhlQ_Gm_x71af";
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Your deployed Edge Function (from the "ugly" name we saw)
+const EDGE_FUNCTION_NAME = "supabase-functions-admin-users-index-ts";
+
+const AUTHORIZED_MANAGEMENT_EMAILS = [
+    "scott.newman@aminfoweb.co.in",
+    "andy.banks@aminfoweb.co.in"
+];
+
+
+/* =========================================================
+   STATE
+========================================================= */
+let currentUser = null;
+let projects = [];
+let subProjects = [];
+let employees = [];
+
+
+/* =========================================================
+   INIT
+========================================================= */
+document.addEventListener("DOMContentLoaded", async () => {
+    bindTabListeners();
+    await checkSession();
+});
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+async function checkSession(){
+    try{
+        const { data } = await sb.auth.getSession();
+        if(data && data.session){
+            currentUser = data.session.user;
+            await initAdminPortal();
+        }
+    }catch(e){ console.error("Session check:", e); }
+}
+
+async function loginUser(){
+    const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+    const password = document.getElementById("loginPassword").value;
+    const btn = document.getElementById("loginBtn");
+    hideLoginError();
+
+    if(!email || !password){ showLoginError("Please enter email and password."); return; }
+
+    btn.disabled = true;
+    btn.textContent = "Signing in...";
+
+    try{
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if(error) throw error;
+        if(!data || !data.user) throw new Error("Login failed.");
+
+        currentUser = data.user;
+        await initAdminPortal();
+    }catch(err){
+        console.error(err);
+        showLoginError(err.message || "Unable to login.");
+    }finally{
+        btn.disabled = false;
+        btn.textContent = "Sign In";
+    }
+}
+
+async function logoutUser(){
+    await sb.auth.signOut();
+    location.reload();
+}
+
+function showLoginError(msg){
+    const el = document.getElementById("loginError");
+    el.textContent = msg;
+    el.classList.remove("hidden");
+}
+function hideLoginError(){
+    document.getElementById("loginError").classList.add("hidden");
+}
+
+
+/* =========================================================
+   INIT ADMIN PORTAL
+========================================================= */
+async function initAdminPortal(){
+    const email = String(currentUser.email || "").trim().toLowerCase();
+    let isManagement = AUTHORIZED_MANAGEMENT_EMAILS.includes(email);
+
+    if(!isManagement){
+        try{
+            const { data } = await sb
+                .from("user_project_access")
+                .select("role, active")
+                .eq("user_id", currentUser.id)
+                .eq("role", "management")
+                .eq("active", true)
+                .maybeSingle();
+            if(data) isManagement = true;
+        }catch(e){ console.warn(e); }
+    }
+
+    if(!isManagement){
+        alert("Access denied. Management only.");
+        await sb.auth.signOut();
+        return;
+    }
+
+    document.getElementById("loginScreen").classList.add("hidden");
+    document.getElementById("adminScreen").classList.remove("hidden");
+
+    const initials = email.split("@")[0].split(/[._-]/).map(p => p[0]).join("").substring(0,2).toUpperCase();
+    document.getElementById("userInitials").textContent = initials;
+    document.getElementById("loggedUserName").textContent = email;
+
+    await loadAllData();
+}
+
+async function loadAllData(){
+    await Promise.all([
+        loadProjects(),
+        loadSubProjects(),
+        loadEmployees()
+    ]);
+    renderAllTables();
+}
+
+
+/* =========================================================
+   TAB NAVIGATION
+========================================================= */
+function bindTabListeners(){
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+    });
+}
+
+function switchTab(tabName){
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === tabName);
+    });
+    document.querySelectorAll(".tab-panel").forEach(panel => {
+        panel.classList.toggle("active", panel.id === `tab-${tabName}`);
+    });
+}
+
+
+/* =========================================================
+   DATA LOADERS
+========================================================= */
+async function loadProjects(){
+    const { data, error } = await sb.from("projects").select("*").order("id", {ascending: true});
+    if(error){ showToast("Failed to load projects", "error"); throw error; }
+    projects = data || [];
+}
+
+async function loadSubProjects(){
+    const { data, error } = await sb.from("sub_projects").select("*").order("id", {ascending: true});
+    if(error){ console.warn("sub_projects:", error.message); subProjects = []; return; }
+    subProjects = data || [];
+}
+
+async function loadEmployees(){
+    const { data, error } = await sb.from("employees").select("*").eq("active", true);
+    if(error){ console.warn("employees:", error.message); employees = []; return; }
+    employees = data || [];
+}
+
+
+/* =========================================================
+   RENDER ALL
+========================================================= */
+function renderAllTables(){
+    renderProjectsTable();
+    renderSubProjectsTable();
+    updateTabCounts();
+    populateProjectDropdowns();
+}
+
+function updateTabCounts(){
+    document.getElementById("tabCountProjects").textContent = projects.length;
+    document.getElementById("tabCountSubProjects").textContent = subProjects.length;
+    document.getElementById("tabCountEmployees").textContent = employees.length;
+    document.getElementById("tabCountTeamLeads").textContent = "0";
+    document.getElementById("tabCountTrackers").textContent = "0";
+    document.getElementById("tabCountManagers").textContent = "0";
+}
+
+function populateProjectDropdowns(){
+    // Sub-project parent filter
+    const filter = document.getElementById("spProjectFilter");
+    const curFilter = filter.value;
+    filter.innerHTML = `<option value="ALL">All Projects</option>`;
+    projects.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = p.project_name || `Project ${p.id}`;
+        filter.appendChild(opt);
+    });
+    if([...filter.options].some(o => o.value === curFilter)) filter.value = curFilter;
+
+    // Sub-project modal parent
+    const modal = document.getElementById("spProject");
+    modal.innerHTML = `<option value="">— Select a project —</option>`;
+    projects.filter(p => p.active !== false).forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = p.project_name || `Project ${p.id}`;
+        modal.appendChild(opt);
+    });
+}
+
+
+/* =========================================================
+   PROJECTS TABLE
+========================================================= */
+function renderProjectsTable(){
+    const body = document.getElementById("projectsBody");
+    const search = document.getElementById("projectSearch").value.trim().toLowerCase();
+    const status = document.getElementById("projectStatusFilter").value;
+
+    let rows = projects;
+
+    if(status === "active") rows = rows.filter(p => p.active !== false);
+    else if(status === "inactive") rows = rows.filter(p => p.active === false);
+
+    if(search) rows = rows.filter(p =>
+        String(p.project_name || "").toLowerCase().includes(search));
+
+    if(!rows.length){
+        body.innerHTML = `<tr><td colspan="5" class="empty-row">No projects match your filters.</td></tr>`;
+        return;
+    }
+
+    body.innerHTML = rows.map(p => `
+        <tr>
+            <td class="cell-muted">${p.id}</td>
+            <td class="cell-strong">${escapeHTML(p.project_name || "—")}</td>
+            <td class="cell-num">${p.daily_target ? Number(p.daily_target).toLocaleString("en-IN") : "—"}</td>
+            <td>${p.active === false
+                ? '<span class="pill pill-red">Inactive</span>'
+                : '<span class="pill pill-green">Active</span>'}</td>
+            <td style="text-align:right;">
+                <button class="btn-icon" onclick="openProjectModal(${p.id})" title="Edit">✏️</button>
+                ${p.active === false
+                    ? `<button class="btn-icon" onclick="toggleProject(${p.id}, true)" title="Reactivate">♻️</button>`
+                    : `<button class="btn-icon" onclick="toggleProject(${p.id}, false)" title="Deactivate">🚫</button>`}
+            </td>
+        </tr>
+    `).join("");
+}
+
+
+/* =========================================================
+   SUB-PROJECTS TABLE
+========================================================= */
+function renderSubProjectsTable(){
+    const body = document.getElementById("subProjectsBody");
+    const projFilter = document.getElementById("spProjectFilter").value;
+    const search = document.getElementById("spSearch").value.trim().toLowerCase();
+    const status = document.getElementById("spStatusFilter").value;
+
+    let rows = subProjects;
+
+    if(projFilter !== "ALL") rows = rows.filter(sp => String(sp.project_id) === String(projFilter));
+    if(status === "active") rows = rows.filter(sp => sp.active !== false);
+    else if(status === "inactive") rows = rows.filter(sp => sp.active === false);
+    if(search) rows = rows.filter(sp =>
+        String(sp.sub_project_name || "").toLowerCase().includes(search));
+
+    if(!rows.length){
+        body.innerHTML = `<tr><td colspan="7" class="empty-row">No sub-projects match your filters.</td></tr>`;
+        return;
+    }
+
+    body.innerHTML = rows.map(sp => {
+        const parent = projects.find(p => String(p.id) === String(sp.project_id));
+        return `
+        <tr>
+            <td class="cell-muted">${sp.id}</td>
+            <td class="cell-strong">${escapeHTML(sp.sub_project_name || "—")}</td>
+            <td class="cell-muted">${escapeHTML(parent?.project_name || "—")}</td>
+            <td class="cell-num">${sp.daily_target ? Number(sp.daily_target).toLocaleString("en-IN") : "—"}</td>
+            <td>${sp.target_based === false
+                ? '<span class="pill pill-gray">No</span>'
+                : '<span class="pill pill-green">Yes</span>'}</td>
+            <td>${sp.active === false
+                ? '<span class="pill pill-red">Inactive</span>'
+                : '<span class="pill pill-green">Active</span>'}</td>
+            <td style="text-align:right;">
+                <button class="btn-icon" onclick="openSubProjectModal(${sp.id})" title="Edit">✏️</button>
+                ${sp.active === false
+                    ? `<button class="btn-icon" onclick="toggleSubProject(${sp.id}, true)" title="Reactivate">♻️</button>`
+                    : `<button class="btn-icon" onclick="toggleSubProject(${sp.id}, false)" title="Deactivate">🚫</button>`}
+            </td>
+        </tr>
+        `;
+    }).join("");
+}
+
+
+/* =========================================================
+   PROJECT MODAL
+========================================================= */
+function openProjectModal(id){
+    const modal = document.getElementById("projectModal");
+    const idField = document.getElementById("projectId");
+    const nameField = document.getElementById("projectName");
+    const targetField = document.getElementById("projectTarget");
+    const activeField = document.getElementById("projectActive");
+
+    if(id){
+        const p = projects.find(x => x.id === id);
+        if(!p) return;
+        document.getElementById("projectModalEyebrow").textContent = "Edit Project";
+        document.getElementById("projectModalTitle").textContent = p.project_name || "Project";
+        idField.value = p.id;
+        nameField.value = p.project_name || "";
+        targetField.value = p.daily_target ?? "";
+        activeField.checked = p.active !== false;
+    }else{
+        document.getElementById("projectModalEyebrow").textContent = "New Project";
+        document.getElementById("projectModalTitle").textContent = "Add Project";
+        idField.value = "";
+        nameField.value = "";
+        targetField.value = "";
+        activeField.checked = true;
+    }
+
+    modal.classList.remove("hidden");
+    setTimeout(() => nameField.focus(), 80);
+}
+
+async function saveProject(){
+    const id = document.getElementById("projectId").value;
+    const name = document.getElementById("projectName").value.trim();
+    const targetRaw = document.getElementById("projectTarget").value.trim();
+    const active = document.getElementById("projectActive").checked;
+
+    if(!name){ showToast("Project name is required", "error"); return; }
+
+    const target = targetRaw === "" ? null : Number(targetRaw);
+    if(target !== null && (!Number.isFinite(target) || target < 0)){
+        showToast("Daily target must be a positive number", "error");
+        return;
+    }
+
+    const btn = document.getElementById("saveProjectBtn");
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+
+    try{
+        if(id){
+            const { error } = await sb.from("projects")
+                .update({ project_name: name, daily_target: target, active })
+                .eq("id", Number(id));
+            if(error) throw error;
+            showToast("Project updated", "success");
+        }else{
+            const { error } = await sb.from("projects")
+                .insert({ project_name: name, daily_target: target, active });
+            if(error) throw error;
+            showToast("Project added", "success");
+        }
+
+        closeModal("projectModal");
+        await loadProjects();
+        renderAllTables();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Save failed", "error");
+    }finally{
+        btn.disabled = false;
+        btn.textContent = "Save Project";
+    }
+}
+
+async function toggleProject(id, active){
+    const action = active ? "reactivate" : "deactivate";
+    if(!confirm(`Are you sure you want to ${action} this project?`)) return;
+    try{
+        const { error } = await sb.from("projects").update({ active }).eq("id", id);
+        if(error) throw error;
+        showToast(`Project ${action}d`, "success");
+        await loadProjects();
+        renderAllTables();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Update failed", "error");
+    }
+}
+
+
+/* =========================================================
+   SUB-PROJECT MODAL
+========================================================= */
+function openSubProjectModal(id){
+    const modal = document.getElementById("subProjectModal");
+
+    if(id){
+        const sp = subProjects.find(x => x.id === id);
+        if(!sp) return;
+        document.getElementById("spModalEyebrow").textContent = "Edit Sub-Project";
+        document.getElementById("spModalTitle").textContent = sp.sub_project_name || "Sub-Project";
+        document.getElementById("spId").value = sp.id;
+        document.getElementById("spProject").value = sp.project_id ?? "";
+        document.getElementById("spName").value = sp.sub_project_name || "";
+        document.getElementById("spTarget").value = sp.daily_target ?? "";
+        document.getElementById("spTargetBased").checked = sp.target_based !== false;
+        document.getElementById("spActive").checked = sp.active !== false;
+    }else{
+        document.getElementById("spModalEyebrow").textContent = "New Sub-Project";
+        document.getElementById("spModalTitle").textContent = "Add Sub-Project";
+        document.getElementById("spId").value = "";
+        document.getElementById("spProject").value = "";
+        document.getElementById("spName").value = "";
+        document.getElementById("spTarget").value = "";
+        document.getElementById("spTargetBased").checked = true;
+        document.getElementById("spActive").checked = true;
+    }
+
+    modal.classList.remove("hidden");
+    setTimeout(() => document.getElementById("spProject").focus(), 80);
+}
+
+async function saveSubProject(){
+    const id = document.getElementById("spId").value;
+    const projectId = document.getElementById("spProject").value;
+    const name = document.getElementById("spName").value.trim();
+    const targetRaw = document.getElementById("spTarget").value.trim();
+    const targetBased = document.getElementById("spTargetBased").checked;
+    const active = document.getElementById("spActive").checked;
+
+    if(!projectId){ showToast("Please select a parent project", "error"); return; }
+    if(!name){ showToast("Sub-project name is required", "error"); return; }
+    if(targetRaw === ""){ showToast("Daily target is required", "error"); return; }
+
+    const target = Number(targetRaw);
+    if(!Number.isFinite(target) || target <= 0){
+        showToast("Daily target must be a positive number", "error");
+        return;
+    }
+
+    const btn = document.getElementById("saveSpBtn");
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+
+    try{
+        const payload = {
+            project_id: Number(projectId),
+            sub_project_name: name,
+            daily_target: target,
+            target_based: targetBased,
+            active
+        };
+
+        if(id){
+            const { error } = await sb.from("sub_projects").update(payload).eq("id", Number(id));
+            if(error) throw error;
+            showToast("Sub-project updated", "success");
+        }else{
+            const { error } = await sb.from("sub_projects").insert(payload);
+            if(error) throw error;
+            showToast("Sub-project added", "success");
+        }
+
+        closeModal("subProjectModal");
+        await loadSubProjects();
+        renderAllTables();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Save failed", "error");
+    }finally{
+        btn.disabled = false;
+        btn.textContent = "Save Sub-Project";
+    }
+}
+
+async function toggleSubProject(id, active){
+    const action = active ? "reactivate" : "deactivate";
+    if(!confirm(`Are you sure you want to ${action} this sub-project?`)) return;
+    try{
+        const { error } = await sb.from("sub_projects").update({ active }).eq("id", id);
+        if(error) throw error;
+        showToast(`Sub-project ${action}d`, "success");
+        await loadSubProjects();
+        renderAllTables();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Update failed", "error");
+    }
+}
+
+
+/* =========================================================
+   MODAL UTILITIES
+========================================================= */
+function closeModal(modalId){
+    document.getElementById(modalId).classList.add("hidden");
+}
+document.addEventListener("click", (e) => {
+    if(e.target.classList.contains("modal-overlay")){
+        e.target.classList.add("hidden");
+    }
+});
+document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape"){
+        document.querySelectorAll(".modal-overlay:not(.hidden)").forEach(m => {
+            m.classList.add("hidden");
+        });
+    }
+});
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+function showToast(message, type = "info"){
+    const stack = document.getElementById("toastStack");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    const icon = type === "success" ? "✓" : type === "error" ? "✕" : "ℹ";
+    toast.innerHTML = `<span class="icon">${icon}</span><span>${escapeHTML(message)}</span>`;
+    stack.appendChild(toast);
+    setTimeout(() => {
+        toast.style.transition = "opacity .2s, transform .2s";
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(40px)";
+        setTimeout(() => toast.remove(), 250);
+    }, 3200);
+}
+
+
+/* =========================================================
+   UTILITIES
+========================================================= */
+function escapeHTML(v){
+    return String(v ?? "")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+sb.auth.onAuthStateChange((event) => {
+    if(event === "SIGNED_OUT"){
+        document.getElementById("adminScreen").classList.add("hidden");
+        document.getElementById("loginScreen").classList.remove("hidden");
+    }
+});
+</script>
+
+</body>
+</html>
