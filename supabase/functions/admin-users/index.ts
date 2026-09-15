@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -47,7 +46,7 @@ serve(async (req) => {
         const { action } = body;
 
         // ============================================================
-        // CREATE USER (for team_lead / tracker / management)
+        // CREATE USER (team_lead / tracker / management)
         // ============================================================
         if (action === "create") {
             const { email, password, full_name, phone, role, project_id } = body;
@@ -128,7 +127,6 @@ serve(async (req) => {
                 throw new Error("Password must be at least 6 characters");
             }
 
-            // Check if employee already has a login
             const { data: emp } = await adminClient
                 .from("employees")
                 .select("user_id, login_email")
@@ -138,7 +136,6 @@ serve(async (req) => {
             if (!emp) throw new Error("Employee not found");
             if (emp.user_id) throw new Error("Employee already has a login account");
 
-            // Create auth user
             const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
                 email,
                 password,
@@ -149,7 +146,6 @@ serve(async (req) => {
 
             const userId = newUser.user.id;
 
-            // Link to employee row
             const { error: linkError } = await adminClient
                 .from("employees")
                 .update({
@@ -165,7 +161,6 @@ serve(async (req) => {
                 throw linkError;
             }
 
-            // Assign employee role
             const { error: roleError } = await adminClient
                 .from("user_project_access")
                 .insert({
@@ -186,7 +181,7 @@ serve(async (req) => {
         }
 
         // ============================================================
-        // RESET PASSWORD (any role)
+        // RESET PASSWORD
         // ============================================================
         if (action === "reset_password") {
             const { user_id, new_password } = body;
