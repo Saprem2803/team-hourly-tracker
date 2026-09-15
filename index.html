@@ -55,51 +55,6 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 .kpi-value { font-size: 27px; font-weight: bold; margin-top: 7px; color: #172b4d; }
 .kpi-sub { margin-top: 5px; font-size: 12px; color: #64748b; }
 
-/* =========================================================
-   WRMC BIFURCATION — target input + sub rows
-========================================================= */
-.project-card.wrmc-card { border-left-color: #9333ea; }
-.bifurcation-block { margin-top: 14px; border-top: 1px dashed #cbd5e1; padding-top: 14px; }
-.bifurcation-title { font-size: 13px; font-weight: 700; color: #6b21a8; margin-bottom: 10px; letter-spacing: .02em; text-transform: uppercase; }
-.bifurcation-sub { font-size: 12px; color: #64748b; margin-bottom: 10px; }
-
-.float-task-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 8px 10px;
-    border-bottom: 1px solid #f1f5f9;
-    font-size: 12.5px;
-}
-.float-task-row:last-child { border-bottom: none; }
-.float-task-row.task-total {
-    background: #f8fafc;
-    font-weight: 700;
-    border-top: 1px solid #e2e8f0;
-    margin-top: 4px;
-}
-.float-task-name { flex: 1; color: #374151; }
-.float-task-input {
-    width: 78px !important;
-    height: 30px !important;
-    padding: 0 6px !important;
-    border: 1px solid #facc15 !important;
-    background: #fffbeb !important;
-    color: #78350f !important;
-    font-weight: 700;
-    text-align: right;
-    font-size: 12.5px;
-    border-radius: 6px;
-    transition: background .15s;
-}
-.float-task-input:focus { background: #fff !important; outline: 2px solid #fbbf24; }
-.float-task-input.saving { background: #fef3c7 !important; }
-.float-task-unit { font-size: 11px; color: #64748b; min-width: 24px; text-align: right; }
-
-/* =========================================================
-   MANAGER CONTROL CENTER
-========================================================= */
 .manager-control-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
 .manager-control-header { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
 .manager-control-note { font-size:11px; color:#64748b; margin-top:4px; }
@@ -403,7 +358,6 @@ td.left { text-align: left; }
     <div class="section">
         <div class="section-title">Hourly Production</div>
 
-        <!-- ADMIN DATE LOCK -->
         <div class="lock-control-bar app-hidden" id="lockControlBar">
             <span class="lock-control-title">Date Lock</span>
             <span class="lock-state-badge auto" id="lockStateBadge">AUTO</span>
@@ -485,7 +439,7 @@ td.left { text-align: left; }
                 <br>
                 <button class="btn-primary" onclick="addProject()">Add Project</button>
                 <div class="setup-note">
-                    For BFW, leave the project target blank and set AR target to 55 under Sub-Project Setup.
+                    For BFW, leave the project target blank and set AR target to 55 under Sub-Project Setup. For WRMC, add AR sub-project with target 40.
                 </div>
             </div>
 
@@ -572,21 +526,6 @@ const supabaseClient = window.supabase.createClient(
 );
 
 /* =========================================================
-   WRMC FLOATING TEAM CONFIGURATION
-========================================================= */
-const WRMC_PROJECT_NAME = "WRMC";
-const WRMC_FLOATING_TASKS = [
-    "Dallas Soft Collection",
-    "Houston PT - Secondary INS Calling",
-    "WMS Write-off",
-    "Houston Statements",
-    "WMS Secondary Unbilled Claims",
-    "WMS Medicare RTP Claims",
-    "Houston AR",
-    "WMS Burn Down – AR"
-];
-
-/* =========================================================
    GLOBAL DATA
 ========================================================= */
 let projects = [];
@@ -594,7 +533,6 @@ let employees = [];
 let subProjects = [];
 let employeeProjects = [];
 let dailyProduction = [];
-let manualTargets = {}; // key = `${date}|${projectId}|${taskName}` -> number
 
 let currentUser = null;
 let currentRole = null;
@@ -1168,21 +1106,6 @@ async function loadEmployeeProjects() {
     return true;
 }
 
-async function loadManualTargets() {
-    manualTargets = {};
-    const trackerDate = document.getElementById("trackerDate")?.value;
-    if (!trackerDate) return;
-    try {
-        const { data, error } = await supabaseClient
-            .from("manual_targets").select("*").eq("tracker_date", trackerDate);
-        if (error) { console.warn("manual_targets:", error.message); return; }
-        (data || []).forEach(row => {
-            const key = `${row.tracker_date}|${row.project_id}|${row.task_name}`;
-            manualTargets[key] = Number(row.manual_target) || 0;
-        });
-    } catch (e) { console.warn("manual_targets load failed:", e); }
-}
-
 async function loadDailyTracker() {
     const date = document.getElementById("trackerDate").value;
     if (!date) return;
@@ -1192,38 +1115,10 @@ async function loadDailyTracker() {
     if (error) { console.error("Daily Productivity:", error); showMessage("Unable to load daily productivity", "error"); return; }
     dailyProduction = (data || []).filter(record =>
         employees.some(employee => Number(employee.id) === Number(record.employee_id)));
-    // Load manual targets (WRMC floating team)
-    await loadManualTargets();
     buildDailyTracker();
     applyHourlyLocks();
     updateHourlyReminder();
     updateDashboard();
-}
-
-/* =========================================================
-   MANUAL TARGETS STORAGE
-========================================================= */
-function manualTargetKey(projectId, taskName) {
-    const date = document.getElementById("trackerDate")?.value;
-    return `${date}|${projectId}|${taskName}`;
-}
-
-function getManualTarget(projectId, taskName) {
-    return Number(manualTargets[manualTargetKey(projectId, taskName)]) || 0;
-}
-
-async function saveManualTarget(projectId, taskName, value) {
-    const date = document.getElementById("trackerDate")?.value;
-    if (!date) return;
-    const key = manualTargetKey(projectId, taskName);
-    manualTargets[key] = value;
-    try {
-        const { error } = await supabaseClient.from("manual_targets").upsert(
-            { tracker_date: date, project_id: String(projectId), task_name: taskName, manual_target: value },
-            { onConflict: "tracker_date,project_id,task_name" }
-        );
-        if (error) console.warn("save manual target:", error.message);
-    } catch (e) { console.warn("save manual target failed:", e); }
 }
 
 /* =========================================================
@@ -1235,10 +1130,6 @@ function getSubProjectById(id) {
     return subProjects.find(s => Number(s.id) === Number(id));
 }
 function getEmployeeById(id) { return employees.find(e => Number(e.id) === Number(id)); }
-function isWRMCProject(project) {
-    if (!project) return false;
-    return String(project.project_name || "").trim().toUpperCase() === WRMC_PROJECT_NAME;
-}
 
 function getEmployeeSubProject(employee) {
     if (!employee) return null;
@@ -1531,14 +1422,9 @@ function getRowData(row) {
         achieved += value;
     });
     record.achieved = achieved;
-    if (target === null) {
-        record.remaining = null;
-        record.achievement_percentage = null;
-    } else {
-        record.remaining = Math.max(target - achieved, 0);
-        const pct = computeAchievementPercent(achieved, target);
-        record.achievement_percentage = pct === null ? 0 : Number(pct.toFixed(2));
-    }
+    record.remaining = Math.max(target - achieved, 0);
+    const pct = computeAchievementPercent(achieved, target);
+    record.achievement_percentage = pct === null ? 0 : Number(pct.toFixed(2));
     return record;
 }
 
@@ -1560,7 +1446,7 @@ async function flushAllAutosaves() {
 }
 
 /* =========================================================
-   PROJECT METRICS — Now with WRMC bifurcation
+   PROJECT METRICS
 ========================================================= */
 function getProjectMetrics(projectId = null) {
     const list = projectId === null
@@ -1618,7 +1504,7 @@ function getSubProjectMetrics(subProjectId) {
 }
 
 /* =========================================================
-   PROJECT DASHBOARD — with WRMC bifurcation
+   PROJECT DASHBOARD
 ========================================================= */
 function renderProjectDashboard() {
     const container = document.getElementById("projectDashboard");
@@ -1631,23 +1517,14 @@ function renderProjectDashboard() {
             container.appendChild(createProjectCard("All Projects", allMetrics));
         }
         projects.forEach(project => {
-            if (isWRMCProject(project)) {
-                container.appendChild(createWrmcCard(project, getProjectMetrics(project.id)));
-            } else {
-                container.appendChild(createProjectCard(project.project_name, getProjectMetrics(project.id)));
-            }
+            container.appendChild(createProjectCard(project.project_name, getProjectMetrics(project.id)));
         });
         return;
     }
 
     const project = getProjectById(selectedProject);
     if (!project) return;
-
-    if (isWRMCProject(project)) {
-        container.appendChild(createWrmcCard(project, getProjectMetrics(project.id)));
-    } else {
-        container.appendChild(createProjectCard(project.project_name, getProjectMetrics(project.id)));
-    }
+    container.appendChild(createProjectCard(project.project_name, getProjectMetrics(project.id)));
 }
 
 function createProjectCard(title, metrics) {
@@ -1664,139 +1541,6 @@ function createProjectCard(title, metrics) {
             <div class="metric-box"><span>Achievement</span><strong>${metrics.achievement === null ? "N/A" : metrics.achievement.toFixed(1) + "%"}</strong></div>
         </div>
     `;
-    return card;
-}
-
-/* =========================================================
-   WRMC BIFURCATION CARD
-   Shows Patient Collection (target-based) as a summary and
-   the No Target Task floating team with editable manual targets.
-========================================================= */
-function createWrmcCard(project, metrics) {
-    const card = document.createElement("div");
-    card.className = "project-card wrmc-card";
-
-    // Split employees into target-based and floating
-    const wrmcEmployees = employees.filter(e => Number(e.project_id) === Number(project.id));
-    const targetBased = wrmcEmployees.filter(e => getDailyTarget(e, (getProductionRecord(e.id)?.attendance || "Present")) !== null);
-    const floating = wrmcEmployees.filter(e => getDailyTarget(e, (getProductionRecord(e.id)?.attendance || "Present")) === null);
-
-    // Aggregate counts
-    const targetFTE = targetBased.length;
-    const targetPresent = targetBased.filter(e => (getProductionRecord(e.id)?.attendance || "Present") !== "Absent").length;
-    const floatingFTE = floating.length;
-    const floatingPresent = floating.filter(e => (getProductionRecord(e.id)?.attendance || "Present") !== "Absent").length;
-
-    // Patient Collection target + achieved (target-based employees only)
-    let pcTarget = 0, pcAchieved = 0;
-    targetBased.forEach(e => {
-        const rec = getProductionRecord(e.id);
-        const att = rec?.attendance || "Present";
-        const t = getDailyTarget(e, att);
-        if (t !== null) pcTarget += t;
-        pcAchieved += computeAchievedFromRecord(rec);
-    });
-
-    // Floating team achieved (all floating employees)
-    let floatAchieved = 0;
-    floating.forEach(e => { floatAchieved += computeAchievedFromRecord(getProductionRecord(e.id)); });
-
-    // Floating team manual target total
-    let floatTargetTotal = 0;
-    WRMC_FLOATING_TASKS.forEach(task => { floatTargetTotal += getManualTarget(project.id, task); });
-    // Pro-rate by present FTE ratio (present / total) 
-    const floatPresentRatio = floatingFTE > 0 ? floatingPresent / floatingFTE : 0;
-    floatTargetTotal = floatTargetTotal * floatPresentRatio;
-
-    const pcPct = pcTarget > 0 ? (pcAchieved / pcTarget) * 100 : null;
-    const floatPct = floatTargetTotal > 0 ? (floatAchieved / floatTargetTotal) * 100 : null;
-
-    card.innerHTML = `
-        <div class="project-card-title">${escapeHtml(project.project_name)}</div>
-        <div class="project-metrics">
-            <div class="metric-box"><span>Employees</span><strong>${metrics.totalEmployees}</strong></div>
-            <div class="metric-box"><span>Present</span><strong>${metrics.present}</strong></div>
-            <div class="metric-box"><span>Target (total)</span><strong>${(pcTarget + floatTargetTotal).toFixed(0)}</strong></div>
-            <div class="metric-box"><span>Achieved (total)</span><strong>${metrics.totalAchieved}</strong></div>
-            <div class="metric-box"><span>Remaining</span><strong>${Math.max((pcTarget + floatTargetTotal) - metrics.totalAchieved, 0).toFixed(0)}</strong></div>
-            <div class="metric-box"><span>Achievement</span><strong>${
-                (pcTarget + floatTargetTotal) > 0
-                    ? (((metrics.totalAchieved) / (pcTarget + floatTargetTotal)) * 100).toFixed(1) + "%"
-                    : "N/A"
-            }</strong></div>
-        </div>
-
-        <!-- Patient Collection -->
-        <div class="bifurcation-block">
-            <div class="bifurcation-title">Patient Collection (Target-Based)</div>
-            <div class="float-task-row">
-                <span class="float-task-name">Present FTE</span>
-                <span class="float-task-unit">${targetPresent} / ${targetFTE}</span>
-            </div>
-            <div class="float-task-row">
-                <span class="float-task-name">Adjusted Target</span>
-                <span class="float-task-unit">${pcTarget}</span>
-            </div>
-            <div class="float-task-row">
-                <span class="float-task-name">Achieved</span>
-                <span class="float-task-unit">${pcAchieved}</span>
-            </div>
-            <div class="float-task-row task-total">
-                <span class="float-task-name">Achievement</span>
-                <span class="float-task-unit">${pcPct === null ? "N/A" : pcPct.toFixed(1) + "%"}</span>
-            </div>
-        </div>
-
-        <!-- No Target Task — floating team with editable manual targets -->
-        <div class="bifurcation-block">
-            <div class="bifurcation-title">No Target Task (Floating Team)</div>
-            <div class="bifurcation-sub">
-                Present FTE: <strong>${floatingPresent} / ${floatingFTE}</strong> &middot;
-                Enter daily target per task below. Saved automatically.
-            </div>
-            <div id="wrmc-float-list-${project.id}">
-                ${WRMC_FLOATING_TASKS.map(task => `
-                    <div class="float-task-row">
-                        <span class="float-task-name">${escapeHtml(task)}</span>
-                        <input type="number" min="0" step="1" class="float-task-input"
-                               data-project-id="${project.id}"
-                               data-task="${escapeHtml(task)}"
-                               value="${getManualTarget(project.id, task)}">
-                        <span class="float-task-unit">u</span>
-                    </div>
-                `).join("")}
-            </div>
-            <div class="float-task-row task-total">
-                <span class="float-task-name">Total Target (Present FTE adjusted)</span>
-                <span class="float-task-unit">${floatTargetTotal.toFixed(0)}</span>
-            </div>
-            <div class="float-task-row task-total">
-                <span class="float-task-name">Achieved</span>
-                <span class="float-task-unit">${floatAchieved}</span>
-            </div>
-            <div class="float-task-row task-total">
-                <span class="float-task-name">Achievement</span>
-                <span class="float-task-unit">${floatPct === null ? "N/A" : floatPct.toFixed(1) + "%"}</span>
-            </div>
-        </div>
-    `;
-
-    // Attach change listeners for manual targets
-    card.querySelectorAll(".float-task-input").forEach(inp => {
-        inp.addEventListener("change", async (e) => {
-            const projectId = e.target.dataset.projectId;
-            const task = e.target.dataset.task;
-            const val = Math.max(Number(e.target.value) || 0, 0);
-            e.target.value = val;
-            e.target.classList.add("saving");
-            await saveManualTarget(projectId, task, val);
-            e.target.classList.remove("saving");
-            showMessage(`Target saved for ${task}`, "success");
-            // Refresh just the WRMC card so totals recalculate
-            renderProjectDashboard();
-        });
-    });
-
     return card;
 }
 
@@ -1875,22 +1619,6 @@ function renderPerformanceSummary() {
 /* =========================================================
    SHRINKAGE
 ========================================================= */
-function getCurrentMonthDateRange() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const dates = [];
-    for (let date = new Date(firstDay); date <= lastDay; date.setDate(date.getDate() + 1)) {
-        const day = date.getDay();
-        if (day !== 0 && day !== 6) {
-            dates.push(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`);
-        }
-    }
-    return dates;
-}
-
 async function calculateCurrentMonthShrinkage() {
     const visibleEmployees = getFilteredEmployees();
     if (!visibleEmployees.length) return { shrinkageDays: 0, scheduledDays: 0, shrinkagePercentage: 0, absentDays: 0, halfDays: 0, presentDays: 0 };
@@ -2128,7 +1856,7 @@ async function refreshDashboard() {
 }
 
 /* =========================================================
-   CSV
+   CSV EXPORT
 ========================================================= */
 function csvEscape(value) {
     if (value === null || value === undefined) return "";
@@ -2267,7 +1995,7 @@ async function downloadMTDCSV() {
 }
 
 /* =========================================================
-   SETUP FUNCTIONS
+   SETUP
 ========================================================= */
 async function addProject() {
     const name = document.getElementById("projectName").value.trim();
