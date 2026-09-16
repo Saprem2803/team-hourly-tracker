@@ -110,7 +110,40 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .brand-mark::after{content:'';position:absolute;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,39,.45),transparent 70%);top:-30px;right:-30px;}
 .header-title-block{display:flex;flex-direction:column;}
 .header-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;}
-.header h1{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:-.3px;line-height:1.15;}
+
+/* === Executive Operations Dashboard — golden shine every 5s === */
+.header h1{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:22px;font-weight:700;
+    letter-spacing:-.3px;line-height:1.15;
+    background-image:linear-gradient(
+        90deg,
+        #ffffff 0%,
+        #ffffff 36%,
+        #fef3c7 44%,
+        #fcd34d 48%,
+        #ffd966 50%,
+        #fcd34d 52%,
+        #fef3c7 56%,
+        #ffffff 64%,
+        #ffffff 100%
+    );
+    background-size:300% 100%;
+    background-position:200% 0;
+    background-repeat:no-repeat;
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+    animation:titleShine 5s ease-in-out infinite;
+    will-change:background-position;
+}
+@keyframes titleShine{
+    0%,18%  { background-position:200% 0; }
+    55%     { background-position:-100% 0; }
+    100%    { background-position:-100% 0; }
+}
+
 .header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .user-chip{
     display:flex;align-items:center;gap:10px;padding:7px 14px;
@@ -2160,7 +2193,7 @@ sb.auth.onAuthStateChange(async (event) => {
 
 
 <!-- =========================================================
-     LIVE WALLPAPER — Floating Golden Dots
+     LIVE WALLPAPER — Floating Golden Dots (larger ambers)
      Only the wallpaper animation is changed.
 ========================================================= -->
 <script>
@@ -2202,7 +2235,8 @@ sb.auth.onAuthStateChange(async (event) => {
                 y: Math.random() * H,
                 vx: (Math.random() - 0.5) * 0.28,
                 vy: (Math.random() - 0.5) * 0.28,
-                r: Math.random() * 2.1 + 0.8,
+                /* === Larger amber size (was 0.8–2.9, now 3.5–9.5) === */
+                r: Math.random() * 6 + 3.5,
                 phase: Math.random() * Math.PI * 2,
                 speed: Math.random() * 0.018 + 0.008,
                 drift: Math.random() * 0.18 + 0.05
@@ -2225,35 +2259,50 @@ sb.auth.onAuthStateChange(async (event) => {
             p.y += Math.cos(p.phase * 0.55) * p.drift * 0.08;
 
             /* Wrap around screen edges */
-            if(p.x < -12) p.x = W + 12;
-            if(p.x > W + 12) p.x = -12;
-            if(p.y < -12) p.y = H + 12;
-            if(p.y > H + 12) p.y = -12;
+            if(p.x < -20) p.x = W + 20;
+            if(p.x > W + 20) p.x = -20;
+            if(p.y < -20) p.y = H + 20;
+            if(p.y > H + 20) p.y = -20;
 
             /* Soft glowing pulse */
             var pulse = 0.58 + Math.sin(p.phase) * 0.32;
             var radius = p.r * (0.9 + pulse * 0.22);
 
+            /* Outer soft glow — bigger for larger dots */
             var glow = ctx.createRadialGradient(
                 p.x, p.y, 0,
-                p.x, p.y, radius * 7
+                p.x, p.y, radius * 6
             );
 
-            glow.addColorStop(0, 'rgba(255,220,95,' + (0.42 * pulse).toFixed(3) + ')');
-            glow.addColorStop(0.28, 'rgba(201,162,39,' + (0.22 * pulse).toFixed(3) + ')');
+            glow.addColorStop(0, 'rgba(255,220,95,' + (0.38 * pulse).toFixed(3) + ')');
+            glow.addColorStop(0.28, 'rgba(201,162,39,' + (0.20 * pulse).toFixed(3) + ')');
             glow.addColorStop(1, 'rgba(201,162,39,0)');
 
             ctx.fillStyle = glow;
             ctx.beginPath();
-            ctx.arc(p.x, p.y, radius * 7, 0, Math.PI * 2);
+            ctx.arc(p.x, p.y, radius * 6, 0, Math.PI * 2);
             ctx.fill();
 
+            /* Bright shiny dot with golden halo */
             ctx.shadowColor = 'rgba(255,210,70,0.95)';
-            ctx.shadowBlur = 10 + pulse * 7;
+            ctx.shadowBlur = 14 + pulse * 8;
             ctx.fillStyle = 'rgba(242,199,62,' + (0.62 + pulse * 0.32).toFixed(3) + ')';
 
             ctx.beginPath();
             ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            /* Tiny inner specular for "shiny" look */
+            ctx.shadowBlur = 0;
+            var spec = ctx.createRadialGradient(
+                p.x - radius * 0.3, p.y - radius * 0.3, 0,
+                p.x - radius * 0.3, p.y - radius * 0.3, radius * 0.5
+            );
+            spec.addColorStop(0, 'rgba(255,255,240,' + (0.85 * pulse).toFixed(3) + ')');
+            spec.addColorStop(1, 'rgba(255,255,240,0)');
+            ctx.fillStyle = spec;
+            ctx.beginPath();
+            ctx.arc(p.x - radius * 0.3, p.y - radius * 0.3, radius * 0.5, 0, Math.PI * 2);
             ctx.fill();
         }
 
