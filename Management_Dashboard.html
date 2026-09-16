@@ -45,6 +45,24 @@ body{
     min-height:100vh;
 }
 
+/* ============================================================
+   LIVE WALLPAPER — Gradient Mesh canvas
+============================================================ */
+#liveWallpaper{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:0;
+    opacity:1;
+}
+.header{position:sticky;z-index:100;}
+.page{position:relative;z-index:1;}
+.login-page{position:relative;z-index:1;}
+.footer{position:relative;z-index:1;}
+.modal-overlay{z-index:1000;}
+
 .header{
     background:rgba(255,255,255,.78); border-bottom:1px solid var(--line);
     padding:20px 40px; display:flex; justify-content:space-between; align-items:center;
@@ -298,6 +316,9 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 </head>
 
 <body>
+
+<!-- LIVE WALLPAPER -->
+<canvas id="liveWallpaper"></canvas>
 
 <!-- LOGIN -->
 <div id="loginScreen" class="login-page">
@@ -1065,11 +1086,6 @@ function getActualProduction(productivity){
 
 /* =========================================================
    MONTHLY SHRINKAGE HELPERS
-   ---------------------------------------------------------
-   Formula (matches operational dashboard):
-     scheduled_days = active_employees × days_elapsed_in_month
-     shrinkage_days = Σ (1 − attendance_factor)
-     shrinkage_%    = (shrinkage_days ÷ scheduled_days) × 100
 ========================================================= */
 function computeShrinkageBreakdown(employeeIds){
     const empty = { pct: 0, shrinkDays: 0, scheduledDays: 0 };
@@ -1374,7 +1390,7 @@ function renderHero(){
 
 
 /* =========================================================
-   KPIs  (aggregate monthly shrinkage + breakdown sub-text)
+   KPIs
 ========================================================= */
 function renderKPIs(){
     const totalEmployees = filteredEmployees.length;
@@ -2374,6 +2390,104 @@ sb.auth.onAuthStateChange(async (event) => {
         document.getElementById("loginScreen").classList.remove("hidden");
     }
 });
+
+
+/* =========================================================
+   LIVE WALLPAPER — Gradient Mesh
+   Soft floating color blobs behind the dashboard
+========================================================= */
+(function(){
+    const canvas = document.getElementById('liveWallpaper');
+    if(!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let width, height, dpr;
+    let animationId = null;
+    let t = 0;
+
+    // 6 soft floating blobs — navy + gold + teal
+    const BLOBS = [
+        { color: [15, 42, 74],   alpha: 0.10,  baseX: 0.15, baseY: 0.20, radius: 0.55,
+          xAmp: 0.08, yAmp: 0.06, xFreq: 0.00022, yFreq: 0.00018, phase: 0.0 },
+        { color: [26, 77, 122],  alpha: 0.08,  baseX: 0.85, baseY: 0.78, radius: 0.60,
+          xAmp: 0.10, yAmp: 0.08, xFreq: 0.00019, yFreq: 0.00023, phase: 1.3 },
+        { color: [10, 22, 40],   alpha: 0.055, baseX: 0.55, baseY: 0.42, radius: 0.45,
+          xAmp: 0.12, yAmp: 0.10, xFreq: 0.00017, yFreq: 0.00019, phase: 2.6 },
+        { color: [201, 162, 39], alpha: 0.065, baseX: 0.72, baseY: 0.15, radius: 0.36,
+          xAmp: 0.09, yAmp: 0.07, xFreq: 0.00025, yFreq: 0.00022, phase: 3.9 },
+        { color: [201, 162, 39], alpha: 0.050, baseX: 0.25, baseY: 0.85, radius: 0.42,
+          xAmp: 0.11, yAmp: 0.09, xFreq: 0.00018, yFreq: 0.00026, phase: 5.2 },
+        { color: [13, 122, 74],  alpha: 0.040, baseX: 0.50, baseY: 0.55, radius: 0.38,
+          xAmp: 0.13, yAmp: 0.11, xFreq: 0.00021, yFreq: 0.00024, phase: 6.5 }
+    ];
+
+    function resize(){
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function draw(){
+        ctx.clearRect(0, 0, width, height);
+        const minDim = Math.min(width, height);
+
+        for(const blob of BLOBS){
+            const cx = (blob.baseX + Math.sin(t * blob.xFreq + blob.phase) * blob.xAmp) * width;
+            const cy = (blob.baseY + Math.cos(t * blob.yFreq + blob.phase) * blob.yAmp) * height;
+            const r  = blob.radius * minDim;
+
+            const [cr, cg, cb] = blob.color;
+            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+            grad.addColorStop(0,    `rgba(${cr},${cg},${cb},${blob.alpha})`);
+            grad.addColorStop(0.55, `rgba(${cr},${cg},${cb},${(blob.alpha * 0.4).toFixed(3)})`);
+            grad.addColorStop(1,    `rgba(${cr},${cg},${cb},0)`);
+
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function loop(){
+        t += 16;
+        draw();
+        animationId = requestAnimationFrame(loop);
+    }
+
+    function start(){
+        if(animationId) return;
+        if(prefersReducedMotion){ draw(); return; }
+        loop();
+    }
+
+    function stop(){
+        if(animationId){
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
+    }
+
+    window.addEventListener('resize', () => {
+        resize();
+        if(prefersReducedMotion) draw();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if(document.hidden) stop();
+        else start();
+    });
+
+    resize();
+    start();
+})();
 </script>
 
 </body>
