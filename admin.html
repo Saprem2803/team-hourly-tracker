@@ -375,13 +375,12 @@ tbody tr:last-child td{border-bottom:none;}
                             <tr>
                                 <th>ID</th>
                                 <th>Project Name</th>
-                                <th>Daily Target</th>
                                 <th>Status</th>
                                 <th style="text-align:right;">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="projectsBody">
-                            <tr><td colspan="5" class="loading"><div class="spinner"></div>Loading projects...</td></tr>
+                            <tr><td colspan="4" class="loading"><div class="spinner"></div>Loading projects...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1161,7 +1160,7 @@ function populateEmployeeFilters(){
 
 
 /* =========================================================
-   PROJECTS TABLE
+   PROJECTS TABLE  (Daily Target column removed)
 ========================================================= */
 function renderProjectsTable(){
     const body = document.getElementById("projectsBody");
@@ -1175,14 +1174,13 @@ function renderProjectsTable(){
         String(p.project_name || "").toLowerCase().includes(search));
 
     if(!rows.length){
-        body.innerHTML = `<tr><td colspan="5" class="empty-row">No projects match your filters.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="4" class="empty-row">No projects match your filters.</td></tr>`;
         return;
     }
     body.innerHTML = rows.map(p => `
         <tr>
             <td class="cell-muted">${p.id}</td>
             <td class="cell-strong">${escapeHTML(p.project_name || "—")}</td>
-            <td class="cell-num">${p.daily_target ? Number(p.daily_target).toLocaleString("en-IN") : "—"}</td>
             <td>${p.active === false
                 ? '<span class="pill pill-red">Inactive</span>'
                 : '<span class="pill pill-green">Active</span>'}</td>
@@ -1284,7 +1282,6 @@ function renderEmployeesTable(){
             loginCell = `<span class="pill pill-blue" title="${escapeHTML(e.login_email || "")}">✓ Active</span>`;
         }
 
-        // Actions vary depending on login state
         let actionsHTML = `<button class="btn-icon" onclick="openEmployeeModal(${e.id})" title="Edit">✏️</button>`;
 
         if(e.user_id){
@@ -1612,7 +1609,6 @@ function openEmployeeModal(id){
         onEmpProjectChange(e.sub_project_id);
         document.getElementById("empActive").checked = e.active !== false;
 
-        // Login section behavior for existing employee
         if(e.user_id){
             document.getElementById("loginEmailField").style.display = "none";
             document.getElementById("loginPasswordField").style.display = "none";
@@ -1656,13 +1652,11 @@ function suggestLoginEmail(employeeName){
     return `${parts[0]}.${parts[parts.length-1]}@${EMAIL_DOMAIN}`;
 }
 
-// Auto-suggest email as admin types the employee name
 document.addEventListener("input", (e) => {
     if(e.target && e.target.id === "empName"){
         const isNew = !document.getElementById("empId").value;
         if(!isNew) return;
         const emailField = document.getElementById("empLoginEmail");
-        // Only auto-fill if the field is empty or was previously auto-suggested
         if(!emailField.dataset.userEdited){
             emailField.value = suggestLoginEmail(e.target.value);
         }
@@ -1703,7 +1697,6 @@ async function saveEmployee(){
 
     const btn = document.getElementById("saveEmpBtn");
 
-    // Determine if we need to create a login
     const emailField = document.getElementById("empLoginEmail");
     const passwordField = document.getElementById("empPassword");
     const needsLogin = emailField.style.display !== "none";
@@ -1722,7 +1715,6 @@ async function saveEmployee(){
     try{
         let employeeId = id ? Number(id) : null;
 
-        // Step 1: Create or update the employee row
         const payload = {
             employee_code: code,
             employee_name: name,
@@ -1740,18 +1732,13 @@ async function saveEmployee(){
             employeeId = data.id;
         }
 
-        // Step 2: If new employee, create login via Edge Function
         if(needsLogin){
             let finalEmail = loginEmail;
 
-            // If email conflict, append employee code
-            // (We'll check by attempting and catching — Supabase doesn't have a clean pre-check for auth email)
-            // We'll do a simple existence check on user_project_access
             const { data: existing } = await sb.from("user_project_access")
                 .select("user_id").eq("email", finalEmail).maybeSingle();
 
             if(existing){
-                // Email already used — append employee code before @
                 const [local, domain] = finalEmail.split("@");
                 finalEmail = `${local}.${code.toLowerCase()}@${domain}`;
                 showToast("Email was taken — added employee code to make it unique", "info");
@@ -1769,7 +1756,6 @@ async function saveEmployee(){
             if(error) throw error;
             if(data && data.error) throw new Error(data.error);
 
-            // Show credentials modal
             lastCreatedCredentials = {
                 name: name,
                 url: HOURLY_ENTRY_URL,
@@ -1815,10 +1801,8 @@ function createLoginForEmployee(employeeId){
     const e = employees.find(x => x.id === employeeId);
     if(!e) return;
 
-    // Reuse the edit modal in "create login" mode
     openEmployeeModal(employeeId);
 
-    // Force show the login section for this employee even if not new
     document.getElementById("loginEmailField").style.display = "";
     document.getElementById("loginPasswordField").style.display = "";
     document.getElementById("existingLoginNotice").style.display = "none";
