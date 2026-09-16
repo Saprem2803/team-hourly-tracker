@@ -114,7 +114,8 @@ body{
 .health-badge.critical{background:rgba(185,28,28,.2);color:#fca5a5;border:1px solid rgba(252,165,165,.3);}
 .health-badge.critical .hb-dot{background:#fca5a5;box-shadow:0 0 12px #fca5a5;}
 
-.kpi-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:32px;}
+/* KPI STRIP — 7 columns now (added Shrinkage) */
+.kpi-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:16px;margin-bottom:32px;}
 .kpi-card{background:linear-gradient(180deg,#fff 0%,#fefefc 100%);border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;position:relative;overflow:hidden;transition:all .2s ease;box-shadow:var(--shadow-card);}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--ink);opacity:.85;}
 .kpi-card.good::before{background:var(--green);}
@@ -274,7 +275,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 @media (max-width:1280px){
     .hero-inner{grid-template-columns:1fr 1.4fr;}
     .hero-right{grid-column:span 2;text-align:left;}
-    .kpi-strip{grid-template-columns:repeat(3,1fr);}
+    .kpi-strip{grid-template-columns:repeat(4,1fr);}
     .insights-grid{grid-template-columns:1fr;}
     .chart-grid{grid-template-columns:1fr 1fr;}
 }
@@ -426,7 +427,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </div>
 
-        <!-- KPI STRIP -->
+        <!-- KPI STRIP (7 cards now — includes Shrinkage) -->
         <div class="kpi-strip">
             <div class="kpi-card neutral">
                 <div class="kpi-icon">👥</div>
@@ -439,6 +440,12 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                 <div class="kpi-label">Present FTE</div>
                 <div class="kpi-value" id="kpiPresent">0</div>
                 <div class="kpi-sub">Attendance weighted</div>
+            </div>
+            <div class="kpi-card neutral">
+                <div class="kpi-icon">📉</div>
+                <div class="kpi-label">Shrinkage</div>
+                <div class="kpi-value" id="kpiShrinkage">0<span class="kpi-unit">%</span></div>
+                <div class="kpi-sub">Total FTE − Present FTE</div>
             </div>
             <div class="kpi-card neutral">
                 <div class="kpi-icon">🎯</div>
@@ -491,6 +498,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                                 <th>Team Lead</th>
                                 <th>Total FTE</th>
                                 <th>Present</th>
+                                <th>Shrinkage %</th>
                                 <th>Absent</th>
                                 <th>Target / FTE</th>
                                 <th>Target (Present FTE)</th>
@@ -532,6 +540,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                                 <th>Team Lead</th>
                                 <th>Total FTE</th>
                                 <th>Present</th>
+                                <th>Shrinkage %</th>
                                 <th>Target / FTE</th>
                                 <th>Target (Present FTE)</th>
                                 <th>Achieved</th>
@@ -567,6 +576,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                                 <th>Projects</th>
                                 <th>Total FTE</th>
                                 <th>Present</th>
+                                <th>Shrinkage %</th>
                                 <th>Team Target</th>
                                 <th>Achieved</th>
                                 <th>Achievement</th>
@@ -1202,7 +1212,6 @@ function applyFilters(){
         return true;
     });
 
-    // Auto-expand projects based on active filter
     if(spv !== "ALL"){
         const selSp = getSubProjectById(spv);
         if(selSp) expandedProjects.add(String(selSp.project_id));
@@ -1256,7 +1265,7 @@ function renderHero(){
 
 
 /* =========================================================
-   KPIs
+   KPIs  (added Shrinkage card)
 ========================================================= */
 function renderKPIs(){
     const totalEmployees = filteredEmployees.length;
@@ -1265,14 +1274,19 @@ function renderKPIs(){
     const production = filteredEmployees.reduce((t,m) => t + m.production, 0);
     const achievement = target > 0 ? (production / target) * 100 : 0;
     const average = presentFTE > 0 ? production / presentFTE : 0;
+    const shrinkage = totalEmployees > 0
+        ? ((totalEmployees - presentFTE) / totalEmployees) * 100
+        : 0;
 
     document.getElementById("kpiEmployees").textContent = totalEmployees;
     document.getElementById("kpiPresent").textContent = formatNumber(presentFTE, 1);
+    document.getElementById("kpiShrinkage").innerHTML = formatNumber(shrinkage, 1) + '<span class="kpi-unit">%</span>';
     document.getElementById("kpiTarget").textContent = formatNumber(target, 1);
     document.getElementById("kpiProduction").textContent = formatNumber(production, 0);
     document.getElementById("kpiAchievement").innerHTML = formatNumber(achievement, 1) + '<span class="kpi-unit">%</span>';
     document.getElementById("kpiAverage").textContent = formatNumber(average, 1);
 
+    // Achievement card colour
     const achCard = document.getElementById("kpiAchievement").closest(".kpi-card");
     achCard.classList.remove("good","warn","bad","neutral");
     if(achievement >= 95) achCard.classList.add("good");
@@ -1280,15 +1294,23 @@ function renderKPIs(){
     else if(achievement > 0) achCard.classList.add("bad");
     else achCard.classList.add("neutral");
 
+    // Production card colour
     const prodCard = document.getElementById("kpiProduction").closest(".kpi-card");
     prodCard.classList.remove("good","warn","bad","neutral");
     if(production > 0) prodCard.classList.add("good");
     else prodCard.classList.add("neutral");
+
+    // Shrinkage card colour: ≤5% good, 5-15% warn, >15% bad
+    const shrinkCard = document.getElementById("kpiShrinkage").closest(".kpi-card");
+    shrinkCard.classList.remove("good","warn","bad","neutral");
+    if(shrinkage <= 5)       shrinkCard.classList.add("good");
+    else if(shrinkage <= 15) shrinkCard.classList.add("warn");
+    else                     shrinkCard.classList.add("bad");
 }
 
 
 /* =========================================================
-   PROJECT METRICS
+   PROJECT METRICS (added shrinkage)
 ========================================================= */
 function buildProjectMetrics(){
     const map = new Map();
@@ -1327,6 +1349,9 @@ function buildProjectMetrics(){
             item.achievement = item.hasTarget && item.target > 0
                 ? (item.production / item.target) * 100 : 0;
             item.average = item.fte > 0 ? item.production / item.fte : 0;
+            item.shrinkage = item.employees > 0
+                ? ((item.employees - item.fte) / item.employees) * 100
+                : 0;
             return item;
         })
         .sort((a,b) => b.achievement - a.achievement);
@@ -1334,7 +1359,7 @@ function buildProjectMetrics(){
 
 
 /* =========================================================
-   SUB-PROJECT METRICS
+   SUB-PROJECT METRICS (added shrinkage)
 ========================================================= */
 function buildSubProjectMetrics(){
     const map = new Map();
@@ -1377,6 +1402,9 @@ function buildSubProjectMetrics(){
             item.achievement = item.hasTarget && item.target > 0
                 ? (item.production / item.target) * 100 : 0;
             item.average = item.fte > 0 ? item.production / item.fte : 0;
+            item.shrinkage = item.employees > 0
+                ? ((item.employees - item.fte) / item.employees) * 100
+                : 0;
             return item;
         })
         .sort((a,b) => b.achievement - a.achievement);
@@ -1384,7 +1412,7 @@ function buildSubProjectMetrics(){
 
 
 /* =========================================================
-   PROJECT TABLE (with conditional expandable rows)
+   PROJECT TABLE (with shrinkage column)
 ========================================================= */
 function renderProjectTable(){
     const body = document.getElementById("projectTableBody");
@@ -1396,7 +1424,7 @@ function renderProjectTable(){
     const spData = buildSubProjectMetrics();
 
     if(!data.length){
-        body.innerHTML = `<tr><td colspan="12" class="empty">No project data available.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="13" class="empty">No project data available.</td></tr>`;
         return;
     }
 
@@ -1405,7 +1433,6 @@ function renderProjectTable(){
         const rankClass = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "";
         const projectKey = String(item.project.id);
 
-        // Determine children FIRST so we know if this project is expandable
         const children = spData
             .filter(sp => String(sp.project?.id) === projectKey)
             .sort((a,b) => b.achievement - a.achievement);
@@ -1418,7 +1445,6 @@ function renderProjectTable(){
             : null;
         const unitsPerFTE = item.fte > 0 ? item.production / item.fte : 0;
 
-        // --- Parent row ---
         const tr = document.createElement("tr");
 
         if(hasChildren){
@@ -1441,6 +1467,7 @@ function renderProjectTable(){
             <td class="lead-cell">${escapeHTML(item.teamLead)}</td>
             <td class="num-cell">${item.employees}</td>
             <td class="num-cell">${formatNumber(item.fte, 1)}</td>
+            <td>${shrinkageBadge(item.shrinkage)}</td>
             <td class="num-cell">${formatNumber(item.employees - item.fte, 1)}</td>
             <td class="num-cell">${targetPerFTE === null ? "–" : formatNumber(targetPerFTE, 1)}</td>
             <td class="num-cell strong">${item.hasTarget ? formatNumber(item.target, 1) : "N/A"}</td>
@@ -1450,14 +1477,12 @@ function renderProjectTable(){
             <td>${statusChip(item.achievement, item.hasTarget)}</td>
         `;
 
-        // Only attach click handler if the project can expand
         if(hasChildren){
             tr.addEventListener("click", function(){ toggleProjectRow(projectKey); });
         }
 
         body.appendChild(tr);
 
-        // --- Sub-project child rows (skip if no children) ---
         if(!hasChildren) return;
 
         children.forEach((sp, spIdx) => {
@@ -1480,6 +1505,7 @@ function renderProjectTable(){
                 <td class="lead-cell">${escapeHTML(sp.teamLead)}</td>
                 <td class="num-cell">${sp.employees}</td>
                 <td class="num-cell">${formatNumber(sp.fte, 1)}</td>
+                <td>${shrinkageBadge(sp.shrinkage)}</td>
                 <td class="num-cell">${formatNumber(sp.employees - sp.fte, 1)}</td>
                 <td class="num-cell">${spTargetPerFTE === null ? "–" : formatNumber(spTargetPerFTE, 1)}</td>
                 <td class="num-cell strong">${sp.hasTarget ? formatNumber(sp.target, 1) : "N/A"}</td>
@@ -1511,7 +1537,7 @@ function toggleProjectRow(projectKey){
 
 
 /* =========================================================
-   SUB-PROJECT TABLE (cross-project ranking)
+   SUB-PROJECT TABLE (added shrinkage column)
 ========================================================= */
 function renderSubProjectTable(){
     const body = document.getElementById("subProjectTableBody");
@@ -1522,7 +1548,7 @@ function renderSubProjectTable(){
     const data = buildSubProjectMetrics();
 
     if(!data.length){
-        body.innerHTML = `<tr><td colspan="12" class="empty">No sub-project data available for the current filter.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="13" class="empty">No sub-project data available for the current filter.</td></tr>`;
         return;
     }
 
@@ -1544,6 +1570,7 @@ function renderSubProjectTable(){
             <td class="lead-cell">${escapeHTML(item.teamLead)}</td>
             <td class="num-cell">${item.employees}</td>
             <td class="num-cell">${formatNumber(item.fte, 1)}</td>
+            <td>${shrinkageBadge(item.shrinkage)}</td>
             <td class="num-cell">${targetPerFTE === null ? "–" : formatNumber(targetPerFTE, 1)}</td>
             <td class="num-cell strong">${item.hasTarget ? formatNumber(item.target, 1) : "N/A"}</td>
             <td class="num-cell strong">${formatNumber(item.production, 0)}</td>
@@ -1557,7 +1584,7 @@ function renderSubProjectTable(){
 
 
 /* =========================================================
-   TEAM LEAD TABLE
+   TEAM LEAD TABLE (added shrinkage column)
 ========================================================= */
 function buildTeamLeadMetrics(){
     const map = new Map();
@@ -1598,6 +1625,9 @@ function buildTeamLeadMetrics(){
             item.achievement = item.hasTarget && item.target > 0
                 ? (item.production / item.target) * 100 : 0;
             item.projectCount = item.projects.size;
+            item.shrinkage = item.employees > 0
+                ? ((item.employees - item.fte) / item.employees) * 100
+                : 0;
             return item;
         })
         .sort((a,b) => b.achievement - a.achievement);
@@ -1609,7 +1639,7 @@ function renderTeamLeadTable(){
     const data = buildTeamLeadMetrics();
 
     if(!data.length){
-        body.innerHTML = `<tr><td colspan="9" class="empty">No Team Lead data available.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="10" class="empty">No Team Lead data available.</td></tr>`;
         return;
     }
 
@@ -1623,6 +1653,7 @@ function renderTeamLeadTable(){
             <td class="num-cell">${item.projectCount}</td>
             <td class="num-cell">${item.employees}</td>
             <td class="num-cell">${formatNumber(item.fte, 1)}</td>
+            <td>${shrinkageBadge(item.shrinkage)}</td>
             <td class="num-cell strong">${item.hasTarget ? formatNumber(item.target, 1) : "N/A"}</td>
             <td class="num-cell strong">${formatNumber(item.production, 0)}</td>
             <td>${achievementBadge(item.achievement, item.hasTarget)}</td>
@@ -1643,6 +1674,15 @@ function achievementBadge(value, hasTarget = true){
     if(p >= 95) css = "badge-good";
     else if(p >= 75) css = "badge-mid";
     else if(p > 0) css = "badge-low";
+    return `<span class="badge ${css}">${formatPercent(p)}</span>`;
+}
+
+function shrinkageBadge(value){
+    const p = num(value);
+    let css = "badge-neutral";
+    if(p <= 5)       css = "badge-good";
+    else if(p <= 15) css = "badge-mid";
+    else             css = "badge-low";
     return `<span class="badge ${css}">${formatPercent(p)}</span>`;
 }
 
@@ -1848,7 +1888,6 @@ function renderHourlyProductionChart(){
    INSIGHTS
 ========================================================= */
 function renderInsights(){
-    // Project insights
     const projectData = buildProjectMetrics();
     const ranked = projectData.filter(p => p.hasTarget);
 
@@ -1870,7 +1909,6 @@ function renderInsights(){
         document.getElementById("insightBottomProject").textContent = "No target-based project in this view";
     }
 
-    // Peak hour
     const totals = HOUR_FIELDS.map(() => 0);
     filteredEmployees.forEach(metric => metric.hours.forEach((v,i) => { totals[i] += v; }));
     const peakValue = Math.max(...totals);
@@ -1879,7 +1917,6 @@ function renderInsights(){
         ? `<span class="insight-accent">${HOUR_LABELS[peakIndex]}</span> with <span class="insight-accent">${formatNumber(peakValue, 0)}</span> units`
         : "No hourly data yet";
 
-    // Sub-project insights
     const spData = buildSubProjectMetrics().filter(s => s.hasTarget);
     const topSubEl    = document.getElementById("insightTopSubProject");
     const bottomSubEl = document.getElementById("insightBottomSubProject");
