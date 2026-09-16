@@ -39,8 +39,7 @@ body{
 }
 
 /* ============================
-   WALLPAPER — Faint AMI LOGO
-   Recreates the brand-mark as a huge, faint backdrop.
+   AMI LOGO WATERMARK (behind particles)
 ============================ */
 .wallpaper{
     position:fixed;
@@ -52,19 +51,6 @@ body{
     z-index:1;
     overflow:hidden;
 }
-
-/* Subtle grid texture */
-.wallpaper::before{
-    content:'';
-    position:absolute;inset:0;
-    background-image:
-        linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
-    background-size:48px 48px,48px 48px;
-    pointer-events:none;
-}
-
-/* The giant logo mark */
 .wallpaper-logo{
     position:relative;
     width:min(72vw,72vh);
@@ -72,11 +58,11 @@ body{
     border-radius:24%;
     background:linear-gradient(
         135deg,
-        rgba(255,255,255,.055) 0%,
-        rgba(26,77,122,.10) 55%,
-        rgba(15,42,74,.13) 100%
+        rgba(255,255,255,.05) 0%,
+        rgba(26,77,122,.09) 55%,
+        rgba(15,42,74,.12) 100%
     );
-    border:2px solid rgba(255,255,255,.055);
+    border:2px solid rgba(255,255,255,.05);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -87,8 +73,6 @@ body{
     animation:wallpaperFloat 20s ease-in-out infinite;
     overflow:hidden;
 }
-
-/* Gold accent glow (mimics the ::after on the real brand mark) */
 .wallpaper-logo::after{
     content:'';
     position:absolute;
@@ -97,15 +81,13 @@ body{
     border-radius:50%;
     background:radial-gradient(
         circle,
-        rgba(201,162,39,.14) 0%,
+        rgba(201,162,39,.13) 0%,
         rgba(201,162,39,.05) 40%,
         transparent 70%
     );
     top:-20%;
     right:-20%;
 }
-
-/* The AMI text */
 .wallpaper-text{
     font-family:'Playfair Display',Georgia,serif;
     font-weight:900;
@@ -115,9 +97,9 @@ body{
     color:transparent;
     background:linear-gradient(
         135deg,
-        rgba(255,255,255,.09) 0%,
-        rgba(255,255,255,.05) 45%,
-        rgba(201,162,39,.08) 100%
+        rgba(255,255,255,.08) 0%,
+        rgba(255,255,255,.04) 45%,
+        rgba(201,162,39,.07) 100%
     );
     -webkit-background-clip:text;
     background-clip:text;
@@ -127,10 +109,22 @@ body{
     z-index:2;
     transform:translateY(-2%);
 }
-
 @keyframes wallpaperFloat{
     0%,100%{transform:rotate(-8deg) scale(1);}
     50%{transform:rotate(-8deg) scale(1.02);}
+}
+
+/* ============================
+   LIVE WALLPAPER (canvas)
+============================ */
+#liveWallpaper{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:2;
+    opacity:.9;
 }
 
 /* ============================
@@ -138,7 +132,7 @@ body{
 ============================ */
 .hub{
     position:relative;
-    z-index:2;
+    z-index:3;
     width:100%;
     max-width:1100px;
     max-height:calc(100vh - 40px);
@@ -183,14 +177,9 @@ body{
     height:3px;
     background:linear-gradient(90deg,transparent 0%,rgba(201,162,39,.7) 20%,rgba(201,162,39,.95) 50%,rgba(201,162,39,.7) 80%,transparent 100%);
 }
-
 .banner-left{
-    display:flex;
-    align-items:center;
-    gap:16px;
-    position:relative;
-    z-index:2;
-    min-width:0;
+    display:flex;align-items:center;gap:16px;
+    position:relative;z-index:2;min-width:0;
 }
 .brand-mark{
     display:flex;align-items:center;justify-content:center;
@@ -238,7 +227,6 @@ body{
    SECTIONS
 ============================ */
 .hub-body{display:flex;flex-direction:column;gap:10px;}
-
 .section{
     background:rgba(255,255,255,.06);
     border:1px solid rgba(255,255,255,.1);
@@ -249,27 +237,22 @@ body{
     display:flex;align-items:center;gap:16px;
     box-shadow:0 4px 20px rgba(0,0,0,.2);
 }
-
 .section-badge{
     width:48px;height:48px;border-radius:12px;
     display:flex;align-items:center;justify-content:center;
     flex-shrink:0;
-    position:relative;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 4px 16px rgba(0,0,0,.25);
 }
 .section-badge svg{width:26px;height:26px;stroke-width:2.4;}
-
 .section-badge.gold{background:linear-gradient(135deg,#fcd34d,#c9a227);color:#3d2b00;}
 .section-badge.green{background:linear-gradient(135deg,#34d399,#0d7a4a);color:#ffffff;}
 .section-badge.blue{background:linear-gradient(135deg,#38bdf8,#0369a1);color:#ffffff;}
 .section-badge.violet{background:linear-gradient(135deg,#a78bfa,#6d28d9);color:#ffffff;}
-
 .section-content{flex:1;display:flex;align-items:center;gap:16px;min-width:0;}
 .section-label{
     font-family:'Playfair Display',Georgia,serif;
     font-size:16px;font-weight:700;color:#ffffff;
-    letter-spacing:-.1px;white-space:nowrap;
-    min-width:130px;
+    letter-spacing:-.1px;white-space:nowrap;min-width:130px;
 }
 
 /* ============================
@@ -278,11 +261,8 @@ body{
 .tile-grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:10px;
-    flex:1;
-    min-width:0;
+    gap:10px;flex:1;min-width:0;
 }
-
 .tile{
     background:linear-gradient(180deg,#ffffff 0%,#fbfcfe 100%);
     border:1px solid rgba(255,255,255,.15);
@@ -290,8 +270,7 @@ body{
     padding:12px 14px;
     text-decoration:none;
     color:inherit;
-    display:flex;align-items:center;
-    gap:14px;
+    display:flex;align-items:center;gap:14px;
     position:relative;overflow:hidden;
     box-shadow:0 4px 16px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.9);
     transition:all .2s cubic-bezier(.4,0,.2,1);
@@ -305,14 +284,12 @@ body{
 .tile.green::before{background:var(--green);}
 .tile.blue::before{background:var(--blue);}
 .tile.violet::before{background:var(--violet);}
-
 .tile:hover{
     transform:translateY(-3px);
     box-shadow:0 12px 32px rgba(0,0,0,.35),0 4px 8px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.9);
     border-color:rgba(255,255,255,.35);
 }
 .tile:hover::before{width:6px;}
-
 .tile-icon{
     width:48px;height:48px;border-radius:12px;
     display:flex;align-items:center;justify-content:center;
@@ -322,16 +299,11 @@ body{
 }
 .tile-icon svg{width:26px;height:26px;stroke-width:2.2;}
 .tile:hover .tile-icon{transform:scale(1.08) rotate(-4deg);}
-
 .tile.gold .tile-icon{background:linear-gradient(135deg,#fef3c7,#fcd34d);color:#78350f;border:1px solid #fbbf24;}
 .tile.green .tile-icon{background:linear-gradient(135deg,#d1fae5,#6ee7b7);color:#065f46;border:1px solid #34d399;}
 .tile.blue .tile-icon{background:linear-gradient(135deg,#e0f2fe,#7dd3fc);color:#075985;border:1px solid #38bdf8;}
 .tile.violet .tile-icon{background:linear-gradient(135deg,#ede9fe,#c4b5fd);color:#4c1d95;border:1px solid #a78bfa;}
-
-.tile-text{
-    display:flex;flex-direction:column;gap:2px;
-    min-width:0;flex:1;
-}
+.tile-text{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
 .tile-name{
     font-size:14px;font-weight:800;color:#0a1628;
     letter-spacing:-.1px;line-height:1.25;
@@ -371,7 +343,6 @@ body{
     .tile-name{font-size:13px;}
     .tile-desc{font-size:10.5px;}
 }
-
 @media (max-width:900px){
     html,body{overflow:auto;}
     .section{flex-direction:column;align-items:flex-start;}
@@ -381,7 +352,6 @@ body{
     .wallpaper-logo{width:min(110vw,110vh);height:min(110vw,110vh);}
     .wallpaper-text{font-size:min(32vw,32vh);}
 }
-
 @media (max-width:600px){
     body{padding:12px;align-items:flex-start;}
     .tile-grid{grid-template-columns:1fr;}
@@ -390,19 +360,25 @@ body{
     .banner-right{display:flex;align-self:flex-start;}
     .brand-title{font-size:20px;white-space:normal;}
 }
+@media (prefers-reduced-motion: reduce){
+    #liveWallpaper{display:none;}
+    .wallpaper-logo{animation:none;}
+    .banner-dot{animation:none;}
+}
 </style>
 </head>
 
 <body>
 
-<!-- ============================================
-     WALLPAPER — Faint AMI Logo (behind everything)
-============================================ -->
+<!-- AMI logo watermark (behind particles) -->
 <div class="wallpaper">
     <div class="wallpaper-logo">
         <div class="wallpaper-text">AMI</div>
     </div>
 </div>
+
+<!-- Live wallpaper (animated particles) -->
+<canvas id="liveWallpaper"></canvas>
 
 <div class="hub">
 
@@ -525,6 +501,191 @@ body{
     </div>
 
 </div>
+
+<!-- ============================================
+     LIVE WALLPAPER — Animated particle network
+============================================ -->
+<script>
+(function(){
+    const canvas = document.getElementById('liveWallpaper');
+    if(!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let width, height, dpr;
+    let particles = [];
+    let animationId = null;
+    let mouse = { x: null, y: null };
+
+    // Tuning knobs
+    const CONFIG = {
+        density: 26000,          // lower = more particles
+        maxParticles: 90,
+        minRadius: 0.6,
+        maxRadius: 2.0,
+        speed: 0.35,             // px per frame
+        connectionDist: 130,     // px
+        goldRatio: 0.30,         // 30% gold, 70% white
+        whiteDotAlpha: 0.45,
+        goldDotAlpha: 0.60,
+        lineAlpha: 0.16
+    };
+
+    function resize(){
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        initParticles();
+    }
+
+    function initParticles(){
+        const count = Math.min(
+            CONFIG.maxParticles,
+            Math.floor((width * height) / CONFIG.density)
+        );
+        particles = [];
+        for(let i = 0; i < count; i++){
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * CONFIG.speed,
+                vy: (Math.random() - 0.5) * CONFIG.speed,
+                r: CONFIG.minRadius + Math.random() * (CONFIG.maxRadius - CONFIG.minRadius),
+                gold: Math.random() < CONFIG.goldRatio
+            });
+        }
+    }
+
+    function update(){
+        for(const p of particles){
+            p.x += p.vx;
+            p.y += p.vy;
+
+            // Gently bend away from mouse
+            if(mouse.x !== null){
+                const dx = p.x - mouse.x;
+                const dy = p.y - mouse.y;
+                const distSq = dx*dx + dy*dy;
+                const radius = 140;
+                if(distSq < radius*radius && distSq > 1){
+                    const dist = Math.sqrt(distSq);
+                    const force = (1 - dist / radius) * 0.6;
+                    p.x += (dx / dist) * force;
+                    p.y += (dy / dist) * force;
+                }
+            }
+
+            // Wrap around edges
+            if(p.x < -10) p.x = width + 10;
+            else if(p.x > width + 10) p.x = -10;
+            if(p.y < -10) p.y = height + 10;
+            else if(p.y > height + 10) p.y = -10;
+        }
+    }
+
+    function draw(){
+        ctx.clearRect(0, 0, width, height);
+
+        // Draw connections first (so dots sit on top)
+        for(let i = 0; i < particles.length; i++){
+            for(let j = i + 1; j < particles.length; j++){
+                const a = particles[i];
+                const b = particles[j];
+                const dx = a.x - b.x;
+                const dy = a.y - b.y;
+                const distSq = dx*dx + dy*dy;
+                const maxD = CONFIG.connectionDist;
+                if(distSq < maxD * maxD){
+                    const dist = Math.sqrt(distSq);
+                    const alpha = (1 - dist / maxD) * CONFIG.lineAlpha;
+                    ctx.beginPath();
+                    ctx.moveTo(a.x, a.y);
+                    ctx.lineTo(b.x, b.y);
+                    ctx.strokeStyle = 'rgba(255, 255, 255, ' + alpha.toFixed(3) + ')';
+                    ctx.lineWidth = 0.7;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Draw dots
+        for(const p of particles){
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+
+            if(p.gold){
+                ctx.fillStyle = 'rgba(201, 162, 39, ' + CONFIG.goldDotAlpha + ')';
+                ctx.shadowColor = 'rgba(201, 162, 39, 0.7)';
+                ctx.shadowBlur = 8;
+            } else {
+                ctx.fillStyle = 'rgba(255, 255, 255, ' + CONFIG.whiteDotAlpha + ')';
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+                ctx.shadowBlur = 5;
+            }
+
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+    }
+
+    function loop(){
+        update();
+        draw();
+        animationId = requestAnimationFrame(loop);
+    }
+
+    function start(){
+        if(animationId) return;
+        if(prefersReducedMotion){
+            // Just draw once — no motion
+            draw();
+            return;
+        }
+        loop();
+    }
+
+    function stop(){
+        if(animationId){
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
+    }
+
+    // Event listeners
+    window.addEventListener('resize', () => {
+        resize();
+        if(prefersReducedMotion) draw();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+
+    window.addEventListener('mouseleave', () => {
+        mouse.x = null;
+        mouse.y = null;
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if(document.hidden){
+            stop();
+        } else {
+            start();
+        }
+    });
+
+    // Go
+    resize();
+    start();
+})();
+</script>
 
 </body>
 </html>
