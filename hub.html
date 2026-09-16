@@ -11,37 +11,31 @@
 
 <style>
 :root{
-    --ink:#0a1628; --ink-2:#1e293b; --ink-3:#475569; --ink-4:#64748b;
-    --muted:#94a3b8; --line:#e2e8f0;
-    --brand:#0f2a4a; --brand-2:#1a4d7a;
+    --ink:#0a1628; --ink-3:#475569; --ink-4:#64748b;
+    --line:#e2e8f0;
     --gold:#c9a227; --gold-soft:#f5e6b8;
-    --green:#0d7a4a; --green-soft:#e6f4ec;
-    --amber:#b45309; --amber-soft:#fef3c7;
-    --red:#b91c1c; --red-soft:#fee2e2;
-    --violet:#6d28d9; --violet-soft:#ede9fe;
-    --blue:#0369a1; --blue-soft:#e0f2fe;
-    --shadow-card:0 1px 2px rgba(15,42,74,.04),0 12px 32px -8px rgba(15,42,74,.10),inset 0 1px 0 rgba(255,255,255,.9);
-    --radius:18px;
-
-    --navy-900:#050d1a;
+    --green:#0d7a4a;
+    --blue:#0369a1;
+    --violet:#6d28d9;
     --navy-800:#0a1628;
-    --navy-700:#0f2a4a;
-    --navy-600:#1a4d7a;
-    --navy-100:#e8eef5;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
 body{
     font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-    color:var(--ink-2); font-size:14px; line-height:1.5;
+    color:#1e293b; font-size:14px; line-height:1.5;
     background-color:var(--navy-800);
     background-image:
         radial-gradient(ellipse 1000px 800px at 0% 0%,rgba(201,162,39,.10) 0%,transparent 55%),
         radial-gradient(ellipse 900px 800px at 100% 100%,rgba(26,77,122,.35) 0%,transparent 60%),
         linear-gradient(135deg,#0a1628 0%,#0f2a4a 55%,#12335c 100%);
     background-attachment:fixed;
-    min-height:100vh;
     position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
 }
 body::before{
     content:'';
@@ -53,326 +47,398 @@ body::before{
     pointer-events:none;
     z-index:1;
 }
-body::after{
-    content:'';
-    position:fixed;inset:0;
-    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-size:200px 200px;
-    pointer-events:none;
-    opacity:.4;
-    z-index:1;
-}
 
-.page{max-width:1280px;margin:0 auto;padding:56px 32px 80px;position:relative;z-index:2;}
-
-.brand-hero{
-    text-align:center;
-    margin-bottom:56px;
+/* ============================
+   MAIN CONTAINER
+============================ */
+.hub{
     position:relative;
+    z-index:2;
+    width:100%;
+    max-width:1100px;
+    max-height:calc(100vh - 40px);
+    display:flex;
+    flex-direction:column;
+    gap:14px;
 }
+
+/* ============================
+   BANNER
+============================ */
+.banner{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:16px 24px;
+    border-radius:16px;
+    background:linear-gradient(135deg,#0a1628 0%,#0f2a4a 55%,#1a4d7a 100%);
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:
+        0 12px 40px rgba(0,0,0,.4),
+        inset 0 1px 0 rgba(255,255,255,.08);
+    overflow:hidden;
+}
+.banner::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(circle at 92% 15%,rgba(201,162,39,.22) 0%,transparent 40%),
+        radial-gradient(circle at 8% 85%,rgba(255,255,255,.05) 0%,transparent 45%);
+    pointer-events:none;
+}
+.banner::after{
+    content:'';
+    position:absolute;
+    left:0;right:0;bottom:0;
+    height:3px;
+    background:linear-gradient(90deg,transparent 0%,rgba(201,162,39,.7) 20%,rgba(201,162,39,.95) 50%,rgba(201,162,39,.7) 80%,transparent 100%);
+}
+
+.banner-left{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    position:relative;
+    z-index:2;
+    min-width:0;
+}
+
 .brand-mark{
-    display:inline-flex;align-items:center;justify-content:center;
-    width:72px;height:72px;border-radius:20px;
+    display:flex;align-items:center;justify-content:center;
+    width:56px;height:56px;border-radius:14px;
     background:linear-gradient(135deg,#ffffff,#e8eef5);
-    color:var(--navy-800);font-weight:800;font-size:24px;letter-spacing:.5px;
-    box-shadow:0 16px 48px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.9);
+    color:var(--navy-800);font-weight:800;font-size:20px;letter-spacing:.5px;
+    box-shadow:
+        0 10px 32px rgba(0,0,0,.35),
+        inset 0 1px 0 rgba(255,255,255,.9);
     position:relative;overflow:hidden;
-    margin-bottom:24px;
+    flex-shrink:0;
 }
 .brand-mark::after{
-    content:'';position:absolute;width:90px;height:90px;border-radius:50%;
-    background:radial-gradient(circle,rgba(201,162,39,.45),transparent 70%);
-    top:-45px;right:-45px;
+    content:'';position:absolute;width:70px;height:70px;border-radius:50%;
+    background:radial-gradient(circle,rgba(201,162,39,.5),transparent 70%);
+    top:-35px;right:-35px;
 }
+
+.brand-text{display:flex;flex-direction:column;gap:3px;min-width:0;}
 .brand-eyebrow{
-    font-size:11px;font-weight:800;letter-spacing:3px;text-transform:uppercase;
-    color:var(--gold);margin-bottom:12px;
+    font-size:10px;font-weight:800;letter-spacing:2.6px;text-transform:uppercase;
+    color:var(--gold);
 }
 .brand-title{
     font-family:'Playfair Display',Georgia,serif;
-    font-size:48px;font-weight:700;color:#ffffff;
-    letter-spacing:-1px;line-height:1.05;margin-bottom:16px;
-    text-shadow:0 2px 24px rgba(0,0,0,.2);
-}
-.brand-sub{
-    font-size:15px;color:rgba(255,255,255,.7);max-width:600px;margin:0 auto;
-    line-height:1.6;
+    font-size:26px;font-weight:700;color:#ffffff;
+    letter-spacing:-.5px;line-height:1.05;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 
-.section{margin-bottom:52px;}
+/* Right side of banner — decorative tag */
+.banner-right{
+    position:relative;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 14px;
+    border-radius:999px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.12);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+}
+.banner-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:#6ee7b7;
+    box-shadow:0 0 12px #6ee7b7;
+    animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{
+    0%,100%{opacity:1;transform:scale(1);}
+    50%{opacity:.5;transform:scale(1.2);}
+}
+.banner-status{
+    font-size:11px;font-weight:700;color:rgba(255,255,255,.9);
+    letter-spacing:.6px;text-transform:uppercase;white-space:nowrap;
+}
+
+/* ============================
+   SECTIONS
+============================ */
+.hub-body{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.section{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;
+    padding:12px 16px;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+}
 .section-head{
-    display:flex;align-items:center;gap:14px;
-    margin-bottom:24px;padding-bottom:16px;
-    border-bottom:1px solid rgba(255,255,255,.1);
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:10px;
+    padding-bottom:8px;
+    border-bottom:1px solid rgba(255,255,255,.08);
 }
 .section-icon{
-    width:38px;height:38px;border-radius:11px;
+    width:24px;height:24px;border-radius:7px;
     display:flex;align-items:center;justify-content:center;
-    font-size:18px;flex-shrink:0;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.15);
+    font-size:13px;flex-shrink:0;
 }
-.section-icon.gold{background:linear-gradient(135deg,rgba(201,162,39,.28),rgba(201,162,39,.18));border:1px solid rgba(201,162,39,.35);}
-.section-icon.green{background:linear-gradient(135deg,rgba(13,122,74,.28),rgba(13,122,74,.18));border:1px solid rgba(110,231,183,.3);}
-.section-icon.blue{background:linear-gradient(135deg,rgba(26,77,122,.4),rgba(26,77,122,.25));border:1px solid rgba(125,211,252,.3);}
-.section-icon.violet{background:linear-gradient(135deg,rgba(109,40,217,.28),rgba(109,40,217,.18));border:1px solid rgba(196,181,253,.3);}
+.section-icon.gold{background:linear-gradient(135deg,rgba(201,162,39,.3),rgba(201,162,39,.18));border:1px solid rgba(201,162,39,.4);}
+.section-icon.green{background:linear-gradient(135deg,rgba(13,122,74,.3),rgba(13,122,74,.18));border:1px solid rgba(110,231,183,.3);}
+.section-icon.blue{background:linear-gradient(135deg,rgba(26,77,122,.45),rgba(26,77,122,.28));border:1px solid rgba(125,211,252,.35);}
+.section-icon.violet{background:linear-gradient(135deg,rgba(109,40,217,.3),rgba(109,40,217,.18));border:1px solid rgba(196,181,253,.35);}
 
 .section-title{
     font-family:'Playfair Display',Georgia,serif;
-    font-size:24px;font-weight:700;color:#ffffff;
-    letter-spacing:-.3px;
+    font-size:14px;font-weight:700;color:#ffffff;
+    letter-spacing:-.1px;line-height:1;
 }
 .section-desc{
-    font-size:12px;color:rgba(255,255,255,.55);margin-top:3px;font-weight:500;
+    font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;font-weight:600;
+    letter-spacing:.3px;
 }
 
-.card-grid{
+/* ============================
+   TILE GRID
+============================ */
+.tile-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-    gap:20px;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:10px;
 }
 
-.portal-card{
+.tile{
     background:linear-gradient(180deg,#ffffff 0%,#fbfcfe 100%);
     border:1px solid rgba(255,255,255,.15);
-    border-radius:var(--radius);
-    padding:28px 26px 24px;
+    border-radius:11px;
+    padding:12px 14px;
     text-decoration:none;
     color:inherit;
-    display:flex;flex-direction:column;
+    display:flex;align-items:center;
+    gap:12px;
     position:relative;overflow:hidden;
-    box-shadow:0 8px 32px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.9);
-    transition:all .25s cubic-bezier(.4,0,.2,1);
+    box-shadow:0 4px 16px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.9);
+    transition:all .2s cubic-bezier(.4,0,.2,1);
     cursor:pointer;
 }
-.portal-card::before{
-    content:'';position:absolute;top:0;left:0;width:5px;height:100%;
-    background:var(--brand);transition:width .25s;
+.tile::before{
+    content:'';position:absolute;top:0;left:0;width:3px;height:100%;
+    background:var(--navy-800);transition:width .2s;
 }
-.portal-card.gold::before{background:var(--gold);}
-.portal-card.green::before{background:var(--green);}
-.portal-card.blue::before{background:var(--blue);}
-.portal-card.violet::before{background:var(--violet);}
+.tile.gold::before{background:var(--gold);}
+.tile.green::before{background:var(--green);}
+.tile.blue::before{background:var(--blue);}
+.tile.violet::before{background:var(--violet);}
 
-.portal-card:hover{
-    transform:translateY(-6px);
-    box-shadow:0 16px 48px rgba(0,0,0,.4),0 4px 12px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.9);
+.tile:hover{
+    transform:translateY(-3px);
+    box-shadow:0 12px 32px rgba(0,0,0,.35),0 4px 8px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.9);
     border-color:rgba(255,255,255,.35);
 }
-.portal-card:hover::before{width:7px;}
+.tile:hover::before{width:5px;}
 
-.portal-icon{
-    width:56px;height:56px;border-radius:16px;
+.tile-icon{
+    width:42px;height:42px;border-radius:10px;
     display:flex;align-items:center;justify-content:center;
-    font-size:26px;margin-bottom:20px;
+    font-size:20px;flex-shrink:0;
     background:linear-gradient(135deg,#f8fafc,#f1f5f9);
     border:1px solid var(--line);
-    transition:transform .25s;
+    transition:transform .2s;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
 }
-.portal-card:hover .portal-icon{transform:scale(1.08) rotate(-3deg);}
+.tile:hover .tile-icon{transform:scale(1.08) rotate(-4deg);}
 
-.portal-card.gold .portal-icon{background:linear-gradient(135deg,#fef3c7,#fde68a);border-color:#fcd34d;}
-.portal-card.green .portal-icon{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-color:#6ee7b7;}
-.portal-card.blue .portal-icon{background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-color:#7dd3fc;}
-.portal-card.violet .portal-icon{background:linear-gradient(135deg,#ede9fe,#ddd6fe);border-color:#c4b5fd;}
+.tile.gold .tile-icon{background:linear-gradient(135deg,#fef3c7,#fde68a);border-color:#fcd34d;}
+.tile.green .tile-icon{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-color:#6ee7b7;}
+.tile.blue .tile-icon{background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-color:#7dd3fc;}
+.tile.violet .tile-icon{background:linear-gradient(135deg,#ede9fe,#ddd6fe);border-color:#c4b5fd;}
 
-.portal-name{
-    font-family:'Playfair Display',Georgia,serif;
-    font-size:20px;font-weight:700;color:var(--ink);
-    letter-spacing:-.2px;margin-bottom:10px;line-height:1.2;
+.tile-text{
+    display:flex;flex-direction:column;gap:2px;
+    min-width:0;flex:1;
 }
-.portal-desc{
-    font-size:13px;color:var(--ink-4);line-height:1.6;
-    flex:1;margin-bottom:20px;
+.tile-name{
+    font-size:13px;font-weight:800;color:#0a1628;
+    letter-spacing:-.1px;line-height:1.25;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.portal-meta{
-    display:flex;align-items:center;justify-content:space-between;
-    padding-top:18px;border-top:1px solid var(--line);
+.tile-desc{
+    font-size:10.5px;color:#64748b;line-height:1.3;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.portal-tag{
-    font-size:10px;font-weight:800;letter-spacing:.9px;
-    text-transform:uppercase;padding:5px 11px;border-radius:6px;
-}
-.portal-tag.management{background:var(--gold-soft);color:#92400e;}
-.portal-tag.employee{background:var(--green-soft);color:var(--green);}
-.portal-tag.operations{background:var(--blue-soft);color:var(--blue);}
-.portal-tag.tools{background:var(--violet-soft);color:var(--violet);}
 
-.portal-arrow{
-    display:inline-flex;align-items:center;gap:6px;
-    font-size:12px;font-weight:800;color:var(--brand-2);
-    transition:transform .25s;
+/* ============================
+   FOOTER
+============================ */
+.hub-footer{
+    text-align:center;
+    font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.6px;
 }
-.portal-card:hover .portal-arrow{transform:translateX(6px);}
-.portal-arrow svg{width:14px;height:14px;}
+.hub-footer strong{color:rgba(255,255,255,.7);font-weight:700;}
 
-.footer{
-    text-align:center;padding-top:44px;
-    border-top:1px solid rgba(255,255,255,.1);
-    font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.5px;
+/* ============================
+   RESPONSIVE
+============================ */
+@media (max-height:720px){
+    body{padding:14px;}
+    .hub{gap:10px;max-height:calc(100vh - 28px);}
+    .banner{padding:12px 18px;border-radius:14px;}
+    .brand-mark{width:46px;height:46px;font-size:17px;border-radius:12px;}
+    .brand-title{font-size:22px;}
+    .hub-body{gap:8px;}
+    .section{padding:9px 13px;border-radius:12px;}
+    .section-head{margin-bottom:8px;padding-bottom:7px;}
+    .tile{padding:10px 12px;gap:10px;}
+    .tile-icon{width:36px;height:36px;font-size:17px;border-radius:9px;}
+    .tile-name{font-size:12px;}
+    .tile-desc{font-size:10px;}
 }
-.footer strong{color:rgba(255,255,255,.75);font-weight:700;}
 
-@media (max-width:768px){
-    .page{padding:36px 20px 60px;}
-    .brand-mark{width:60px;height:60px;font-size:20px;border-radius:16px;}
-    .brand-title{font-size:34px;}
-    .brand-sub{font-size:14px;}
-    .card-grid{grid-template-columns:1fr;}
-    .section-title{font-size:20px;}
-    .portal-card{padding:24px 22px 22px;}
+@media (max-width:900px){
+    html,body{overflow:auto;}
+    .tile-grid{grid-template-columns:1fr 1fr;}
+    .banner-right{display:none;}
+}
+
+@media (max-width:600px){
+    body{padding:12px;align-items:flex-start;}
+    .tile-grid{grid-template-columns:1fr;}
+    .tile-name,.tile-desc{white-space:normal;}
+    .banner{flex-direction:column;align-items:flex-start;gap:12px;}
+    .banner-right{display:flex;align-self:flex-start;}
+    .brand-title{font-size:20px;white-space:normal;}
 }
 </style>
 </head>
 
 <body>
 
-<div class="page">
+<div class="hub">
 
     <!-- ============================
-         HERO
+         BANNER
     ============================ -->
-    <div class="brand-hero">
-        <div class="brand-mark">AMI</div>
-        <div class="brand-eyebrow">Revenue Cycle Management</div>
-        <h1 class="brand-title">Portal Hub</h1>
-        <p class="brand-sub">
-            One place to access all AMI operational portals. Click any card below to open that portal.
-        </p>
+    <div class="banner">
+        <div class="banner-left">
+            <div class="brand-mark">AMI</div>
+            <div class="brand-text">
+                <div class="brand-eyebrow">Revenue Cycle Management</div>
+                <div class="brand-title">Portal Hub</div>
+            </div>
+        </div>
+        <div class="banner-right">
+            <span class="banner-dot"></span>
+            <span class="banner-status">All Systems Operational</span>
+        </div>
     </div>
 
     <!-- ============================
-         MANAGEMENT PORTALS
+         SECTIONS
     ============================ -->
-    <section class="section">
-        <div class="section-head">
-            <div class="section-icon gold">👔</div>
-            <div>
-                <div class="section-title">Management Portals</div>
-                <div class="section-desc">Executive oversight &amp; consolidated reporting</div>
+    <div class="hub-body">
+
+        <!-- MANAGEMENT -->
+        <section class="section">
+            <div class="section-head">
+                <div class="section-icon gold">👔</div>
+                <div>
+                    <div class="section-title">Management</div>
+                    <div class="section-desc">Executive oversight</div>
+                </div>
             </div>
-        </div>
-
-        <div class="card-grid">
-
-            <a class="portal-card gold" href="Management_Dashboard.html">
-                <div class="portal-icon">📊</div>
-                <div class="portal-name">Executive Operations Dashboard</div>
-                <div class="portal-desc">
-                    Consolidated performance across all projects — achievement, shrinkage, targets, charts, and executive insights.
-                </div>
-                <div class="portal-meta">
-                    <span class="portal-tag management">Management</span>
-                    <span class="portal-arrow">Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-                </div>
-            </a>
-
-        </div>
-    </section>
-
-    <!-- ============================
-         ADMIN TOOLS
-    ============================ -->
-    <section class="section">
-        <div class="section-head">
-            <div class="section-icon violet">🛠️</div>
-            <div>
-                <div class="section-title">Admin Tools</div>
-                <div class="section-desc">Master data management &amp; user administration</div>
+            <div class="tile-grid">
+                <a class="tile gold" href="Management_Dashboard.html">
+                    <div class="tile-icon">📊</div>
+                    <div class="tile-text">
+                        <div class="tile-name">Executive Dashboard</div>
+                        <div class="tile-desc">Consolidated performance &amp; insights</div>
+                    </div>
+                </a>
             </div>
-        </div>
+        </section>
 
-        <div class="card-grid">
-
-            <a class="portal-card violet" href="admin.html">
-                <div class="portal-icon">⚙️</div>
-                <div class="portal-name">Admin Portal</div>
-                <div class="portal-desc">
-                    Manage projects, sub-projects, employees, team leads, trackers, and managers. Create logins and manage access.
+        <!-- ADMIN TOOLS -->
+        <section class="section">
+            <div class="section-head">
+                <div class="section-icon violet">🛠️</div>
+                <div>
+                    <div class="section-title">Admin Tools</div>
+                    <div class="section-desc">Master data &amp; user management</div>
                 </div>
-                <div class="portal-meta">
-                    <span class="portal-tag tools">Admin Tool</span>
-                    <span class="portal-arrow">Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-                </div>
-            </a>
-
-            <a class="portal-card violet" href="admin-reset-password.html">
-                <div class="portal-icon">🔑</div>
-                <div class="portal-name">Password Reset</div>
-                <div class="portal-desc">
-                    Reset a user's password or send recovery links. For management use when employees lose access.
-                </div>
-                <div class="portal-meta">
-                    <span class="portal-tag tools">Admin Tool</span>
-                    <span class="portal-arrow">Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-                </div>
-            </a>
-
-        </div>
-    </section>
-
-    <!-- ============================
-         OPERATIONS PORTALS
-    ============================ -->
-    <section class="section">
-        <div class="section-head">
-            <div class="section-icon blue">⚡</div>
-            <div>
-                <div class="section-title">Operations Portals</div>
-                <div class="section-desc">Team leads &amp; hourly tracking</div>
             </div>
-        </div>
-
-        <div class="card-grid">
-
-            <a class="portal-card blue" href="index.html">
-                <div class="portal-icon">🎯</div>
-                <div class="portal-name">Operational Dashboard</div>
-                <div class="portal-desc">
-                    Team lead view — monitor hourly production, attendance, and daily achievement for their assigned project.
-                </div>
-                <div class="portal-meta">
-                    <span class="portal-tag operations">Team Lead</span>
-                    <span class="portal-arrow">Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-                </div>
-            </a>
-
-        </div>
-    </section>
-
-    <!-- ============================
-         EMPLOYEE PORTALS
-    ============================ -->
-    <section class="section">
-        <div class="section-head">
-            <div class="section-icon green">👥</div>
-            <div>
-                <div class="section-title">Employee Portals</div>
-                <div class="section-desc">Self-service entry</div>
+            <div class="tile-grid">
+                <a class="tile violet" href="admin.html">
+                    <div class="tile-icon">⚙️</div>
+                    <div class="tile-text">
+                        <div class="tile-name">Admin Portal</div>
+                        <div class="tile-desc">Projects · Employees · Users</div>
+                    </div>
+                </a>
+                <a class="tile violet" href="admin-reset-password.html">
+                    <div class="tile-icon">🔑</div>
+                    <div class="tile-text">
+                        <div class="tile-name">Password Reset</div>
+                        <div class="tile-desc">Recover or reset user logins</div>
+                    </div>
+                </a>
             </div>
-        </div>
+        </section>
 
-        <div class="card-grid">
-
-            <a class="portal-card green" href="Employee_Hourly_Entry.html">
-                <div class="portal-icon">⏱️</div>
-                <div class="portal-name">Hourly Production Tracker</div>
-                <div class="portal-desc">
-                    Employees log their own hourly production, mark attendance, and view their personal achievement vs. target.
+        <!-- OPERATIONS -->
+        <section class="section">
+            <div class="section-head">
+                <div class="section-icon blue">⚡</div>
+                <div>
+                    <div class="section-title">Operations</div>
+                    <div class="section-desc">Team leads &amp; hourly tracking</div>
                 </div>
-                <div class="portal-meta">
-                    <span class="portal-tag employee">Employee</span>
-                    <span class="portal-arrow">Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-                </div>
-            </a>
+            </div>
+            <div class="tile-grid">
+                <a class="tile blue" href="index.html">
+                    <div class="tile-icon">🎯</div>
+                    <div class="tile-text">
+                        <div class="tile-name">Operational Dashboard</div>
+                        <div class="tile-desc">Team lead view · Project scope</div>
+                    </div>
+                </a>
+            </div>
+        </section>
 
-        </div>
-    </section>
+        <!-- EMPLOYEE -->
+        <section class="section">
+            <div class="section-head">
+                <div class="section-icon green">👥</div>
+                <div>
+                    <div class="section-title">Employee</div>
+                    <div class="section-desc">Self-service entry</div>
+                </div>
+            </div>
+            <div class="tile-grid">
+                <a class="tile green" href="Employee_Hourly_Entry.html">
+                    <div class="tile-icon">⏱️</div>
+                    <div class="tile-text">
+                        <div class="tile-name">Hourly Production Tracker</div>
+                        <div class="tile-desc">Log production &amp; view achievement</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+    </div>
 
     <!-- ============================
          FOOTER
     ============================ -->
-    <div class="footer">
+    <div class="hub-footer">
         <strong>AMI Revenue Cycle Management</strong> · Portal Hub · Confidential
     </div>
 
