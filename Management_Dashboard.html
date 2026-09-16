@@ -114,7 +114,6 @@ body{
 .health-badge.critical{background:rgba(185,28,28,.2);color:#fca5a5;border:1px solid rgba(252,165,165,.3);}
 .health-badge.critical .hb-dot{background:#fca5a5;box-shadow:0 0 12px #fca5a5;}
 
-/* KPI STRIP — 7 columns now (added Shrinkage) */
 .kpi-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:16px;margin-bottom:32px;}
 .kpi-card{background:linear-gradient(180deg,#fff 0%,#fefefc 100%);border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;position:relative;overflow:hidden;transition:all .2s ease;box-shadow:var(--shadow-card);}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--ink);opacity:.85;}
@@ -156,7 +155,6 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 .num-cell{font-family:'Inter',sans-serif;font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums;}
 .num-cell.strong{font-weight:700;color:var(--ink);}
 
-/* Expandable project rows */
 .project-row{cursor:pointer;user-select:none;}
 .project-row:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 .project-row .chev{
@@ -170,8 +168,6 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
     display:inline-flex;align-items:center;
     font-weight:700;color:var(--ink);font-size:14px;
 }
-
-/* Projects without sub-projects: no pointer, no hover highlight */
 .project-row.no-children{cursor:default;}
 .project-row.no-children:hover{background:transparent;}
 .project-row.no-children .project-name{padding-left:26px;}
@@ -205,7 +201,8 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 .status-chip.neutral{background:var(--bg-soft);color:var(--muted);}
 .status-chip.neutral .dot{background:var(--muted);}
 
-.chart-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:36px;}
+/* CHART GRID — 2x2 layout for 4 charts */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:36px;}
 .chart-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-card);}
 .chart-card-head{margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--line-2);}
 .chart-card-title{font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.2px;}
@@ -277,7 +274,6 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
     .hero-right{grid-column:span 2;text-align:left;}
     .kpi-strip{grid-template-columns:repeat(4,1fr);}
     .insights-grid{grid-template-columns:1fr;}
-    .chart-grid{grid-template-columns:1fr 1fr;}
 }
 @media (max-width:900px){
     .header,.page,.footer{padding-left:20px;padding-right:20px;}
@@ -427,7 +423,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </div>
 
-        <!-- KPI STRIP (7 cards now — includes Shrinkage) -->
+        <!-- KPI STRIP -->
         <div class="kpi-strip">
             <div class="kpi-card neutral">
                 <div class="kpi-icon">👥</div>
@@ -445,7 +441,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                 <div class="kpi-icon">📉</div>
                 <div class="kpi-label">Shrinkage</div>
                 <div class="kpi-value" id="kpiShrinkage">0<span class="kpi-unit">%</span></div>
-                <div class="kpi-sub">Total FTE − Present FTE</div>
+                <div class="kpi-sub">Month-to-date · All days</div>
             </div>
             <div class="kpi-card neutral">
                 <div class="kpi-icon">🎯</div>
@@ -480,7 +476,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">01</span>
                     <div>
                         <div class="section-title">Project Scorecard</div>
-                        <div class="section-desc">Click any project with sub-projects to expand · Targets auto-adjust to Present FTE</div>
+                        <div class="section-desc">Click any project with sub-projects to expand · Shrinkage is month-to-date</div>
                     </div>
                 </div>
             </div>
@@ -521,7 +517,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">02</span>
                     <div>
                         <div class="section-title">Sub-Project Scorecard</div>
-                        <div class="section-desc">Cross-project ranking · Targets auto-adjust to Present FTE</div>
+                        <div class="section-desc">Cross-project ranking · Shrinkage is month-to-date</div>
                     </div>
                 </div>
             </div>
@@ -562,7 +558,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">03</span>
                     <div>
                         <div class="section-title">Team Lead Scorecard</div>
-                        <div class="section-desc">Leadership performance and project coverage</div>
+                        <div class="section-desc">Leadership performance and project coverage · Shrinkage is month-to-date</div>
                     </div>
                 </div>
             </div>
@@ -589,14 +585,14 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </section>
 
-        <!-- CHARTS -->
+        <!-- CHARTS (2x2 grid — 4 charts) -->
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
                     <span class="section-num">04</span>
                     <div>
                         <div class="section-title">Performance Analytics</div>
-                        <div class="section-desc">Visual comparison across projects, sub-projects and hours</div>
+                        <div class="section-desc">Visual comparison across projects, sub-projects, hours, and shrinkage</div>
                     </div>
                 </div>
             </div>
@@ -621,6 +617,13 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                         <div class="chart-card-desc">Aggregate output across 6 PM – 3 AM shift</div>
                     </div>
                     <div class="chart-box"><canvas id="hourlyProductionChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-head">
+                        <div class="chart-card-title">Daily Shrinkage Trend</div>
+                        <div class="chart-card-desc">Shrinkage % per day across current month</div>
+                    </div>
+                    <div class="chart-box"><canvas id="shrinkageTrendChart"></canvas></div>
                 </div>
             </div>
         </section>
@@ -744,10 +747,12 @@ let projects = [];
 let subProjects = [];
 let employees = [];
 let productivityRows = [];
+let monthlyProductivityRows = [];
 let filteredEmployees = [];
 let projectChart = null;
 let subProjectChart = null;
 let hourlyChart = null;
+let shrinkageTrendChart = null;
 let currentUser = null;
 let currentDate = null;
 let currentPeriod = "day";
@@ -878,6 +883,7 @@ async function loadDashboard(){
         await loadSubProjects();
         await loadEmployees();
         await loadProductivity();
+        await loadMonthlyProductivity();
         await loadDateLock();
 
         populateFilters();
@@ -929,6 +935,20 @@ async function loadProductivity(){
         .gte("tracker_date", fromDate).lte("tracker_date", currentDate).limit(50000);
     if(error) throw error;
     productivityRows = data || [];
+}
+
+async function loadMonthlyProductivity(){
+    const parts = currentDate.split("-");
+    const fromDate = `${parts[0]}-${parts[1]}-01`;
+    const { data, error } = await sb
+        .from("daily_productivity").select("*")
+        .gte("tracker_date", fromDate).lte("tracker_date", currentDate).limit(50000);
+    if(error){
+        console.warn("Monthly productivity:", error.message);
+        monthlyProductivityRows = [];
+        return;
+    }
+    monthlyProductivityRows = data || [];
 }
 
 async function loadDateLock(){
@@ -1041,6 +1061,81 @@ function getHourlyValues(productivity){
 }
 function getActualProduction(productivity){
     return getHourlyValues(productivity).reduce((t,v) => t + v, 0);
+}
+
+
+/* =========================================================
+   MONTHLY SHRINKAGE HELPERS
+========================================================= */
+function getMonthDaysCount(){
+    if(!currentDate) return 1;
+    const parts = currentDate.split("-");
+    const dayOfMonth = Number(parts[2]) || 1;
+    return Math.max(1, dayOfMonth);
+}
+
+function computeMonthlyShrinkage(employeeIds){
+    if(!employeeIds || !employeeIds.length) return 0;
+
+    const days = getMonthDaysCount();
+    const possibleFTEDays = employeeIds.length * days;
+    if(possibleFTEDays === 0) return 0;
+
+    const idSet = new Set(employeeIds.map(id => String(id).trim()));
+    let presentFTEDays = 0;
+
+    monthlyProductivityRows.forEach(row => {
+        if(idSet.has(String(row.employee_id ?? "").trim())){
+            presentFTEDays += getAttendanceFactor(row.attendance);
+        }
+    });
+
+    const shrink = ((possibleFTEDays - presentFTEDays) / possibleFTEDays) * 100;
+    return Math.max(0, shrink);
+}
+
+function computeDailyShrinkageSeries(employeeIds){
+    if(!currentDate) return { labels: [], values: [], colors: [] };
+    if(!employeeIds || !employeeIds.length) return { labels: [], values: [], colors: [] };
+
+    const parts = currentDate.split("-");
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const endDay = Number(parts[2]);
+
+    const idSet = new Set(employeeIds.map(id => String(id).trim()));
+    const employeeCount = idSet.size;
+    if(employeeCount === 0) return { labels: [], values: [], colors: [] };
+
+    const byDate = new Map();
+    monthlyProductivityRows.forEach(row => {
+        if(!idSet.has(String(row.employee_id ?? "").trim())) return;
+        const date = row.tracker_date;
+        if(!byDate.has(date)) byDate.set(date, 0);
+        byDate.set(date, byDate.get(date) + getAttendanceFactor(row.attendance));
+    });
+
+    const labels = [];
+    const values = [];
+    const colors = [];
+
+    for(let day = 1; day <= endDay; day++){
+        const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const presentFTE = byDate.get(dateStr);
+        if(presentFTE === undefined || presentFTE === null) continue;
+
+        const shrinkage = ((employeeCount - presentFTE) / employeeCount) * 100;
+        const rounded = Math.max(0, Math.round(shrinkage * 10) / 10);
+
+        labels.push(String(day));
+        values.push(rounded);
+
+        if(rounded <= 5)       colors.push("#0d7a4a");
+        else if(rounded <= 15) colors.push("#b45309");
+        else                   colors.push("#b91c1c");
+    }
+
+    return { labels, values, colors };
 }
 
 
@@ -1265,7 +1360,7 @@ function renderHero(){
 
 
 /* =========================================================
-   KPIs  (added Shrinkage card)
+   KPIs  (monthly shrinkage)
 ========================================================= */
 function renderKPIs(){
     const totalEmployees = filteredEmployees.length;
@@ -1274,9 +1369,7 @@ function renderKPIs(){
     const production = filteredEmployees.reduce((t,m) => t + m.production, 0);
     const achievement = target > 0 ? (production / target) * 100 : 0;
     const average = presentFTE > 0 ? production / presentFTE : 0;
-    const shrinkage = totalEmployees > 0
-        ? ((totalEmployees - presentFTE) / totalEmployees) * 100
-        : 0;
+    const shrinkage = computeMonthlyShrinkage(filteredEmployees.map(m => m.employee.id));
 
     document.getElementById("kpiEmployees").textContent = totalEmployees;
     document.getElementById("kpiPresent").textContent = formatNumber(presentFTE, 1);
@@ -1286,7 +1379,6 @@ function renderKPIs(){
     document.getElementById("kpiAchievement").innerHTML = formatNumber(achievement, 1) + '<span class="kpi-unit">%</span>';
     document.getElementById("kpiAverage").textContent = formatNumber(average, 1);
 
-    // Achievement card colour
     const achCard = document.getElementById("kpiAchievement").closest(".kpi-card");
     achCard.classList.remove("good","warn","bad","neutral");
     if(achievement >= 95) achCard.classList.add("good");
@@ -1294,13 +1386,11 @@ function renderKPIs(){
     else if(achievement > 0) achCard.classList.add("bad");
     else achCard.classList.add("neutral");
 
-    // Production card colour
     const prodCard = document.getElementById("kpiProduction").closest(".kpi-card");
     prodCard.classList.remove("good","warn","bad","neutral");
     if(production > 0) prodCard.classList.add("good");
     else prodCard.classList.add("neutral");
 
-    // Shrinkage card colour: ≤5% good, 5-15% warn, >15% bad
     const shrinkCard = document.getElementById("kpiShrinkage").closest(".kpi-card");
     shrinkCard.classList.remove("good","warn","bad","neutral");
     if(shrinkage <= 5)       shrinkCard.classList.add("good");
@@ -1310,7 +1400,7 @@ function renderKPIs(){
 
 
 /* =========================================================
-   PROJECT METRICS (added shrinkage)
+   PROJECT METRICS (monthly shrinkage)
 ========================================================= */
 function buildProjectMetrics(){
     const map = new Map();
@@ -1329,7 +1419,8 @@ function buildProjectMetrics(){
                 production: 0,
                 hasTarget: false,
                 targetBasedEmployees: 0,
-                targetBasedFTE: 0
+                targetBasedFTE: 0,
+                employeeIds: []
             });
         }
         const item = map.get(key);
@@ -1337,6 +1428,7 @@ function buildProjectMetrics(){
         item.fte += metric.fte;
         item.target += metric.adjustedTarget;
         item.production += metric.production;
+        item.employeeIds.push(metric.employee.id);
         if(metric.hasTarget){
             item.hasTarget = true;
             item.targetBasedEmployees += 1;
@@ -1349,9 +1441,7 @@ function buildProjectMetrics(){
             item.achievement = item.hasTarget && item.target > 0
                 ? (item.production / item.target) * 100 : 0;
             item.average = item.fte > 0 ? item.production / item.fte : 0;
-            item.shrinkage = item.employees > 0
-                ? ((item.employees - item.fte) / item.employees) * 100
-                : 0;
+            item.shrinkage = computeMonthlyShrinkage(item.employeeIds);
             return item;
         })
         .sort((a,b) => b.achievement - a.achievement);
@@ -1359,7 +1449,7 @@ function buildProjectMetrics(){
 
 
 /* =========================================================
-   SUB-PROJECT METRICS (added shrinkage)
+   SUB-PROJECT METRICS (monthly shrinkage)
 ========================================================= */
 function buildSubProjectMetrics(){
     const map = new Map();
@@ -1382,7 +1472,8 @@ function buildSubProjectMetrics(){
                 target: 0,
                 production: 0,
                 hasTarget: false,
-                targetBasedFTE: 0
+                targetBasedFTE: 0,
+                employeeIds: []
             });
         }
 
@@ -1391,6 +1482,7 @@ function buildSubProjectMetrics(){
         item.fte += metric.fte;
         item.target += metric.adjustedTarget;
         item.production += metric.production;
+        item.employeeIds.push(metric.employee.id);
         if(metric.hasTarget){
             item.hasTarget = true;
             item.targetBasedFTE += metric.fte;
@@ -1402,9 +1494,7 @@ function buildSubProjectMetrics(){
             item.achievement = item.hasTarget && item.target > 0
                 ? (item.production / item.target) * 100 : 0;
             item.average = item.fte > 0 ? item.production / item.fte : 0;
-            item.shrinkage = item.employees > 0
-                ? ((item.employees - item.fte) / item.employees) * 100
-                : 0;
+            item.shrinkage = computeMonthlyShrinkage(item.employeeIds);
             return item;
         })
         .sort((a,b) => b.achievement - a.achievement);
@@ -1412,7 +1502,7 @@ function buildSubProjectMetrics(){
 
 
 /* =========================================================
-   PROJECT TABLE (with shrinkage column)
+   PROJECT TABLE
 ========================================================= */
 function renderProjectTable(){
     const body = document.getElementById("projectTableBody");
@@ -1537,7 +1627,7 @@ function toggleProjectRow(projectKey){
 
 
 /* =========================================================
-   SUB-PROJECT TABLE (added shrinkage column)
+   SUB-PROJECT TABLE
 ========================================================= */
 function renderSubProjectTable(){
     const body = document.getElementById("subProjectTableBody");
@@ -1584,7 +1674,7 @@ function renderSubProjectTable(){
 
 
 /* =========================================================
-   TEAM LEAD TABLE (added shrinkage column)
+   TEAM LEAD TABLE (monthly shrinkage)
 ========================================================= */
 function buildTeamLeadMetrics(){
     const map = new Map();
@@ -1607,7 +1697,8 @@ function buildTeamLeadMetrics(){
                         fte: 0,
                         target: 0,
                         production: 0,
-                        hasTarget: false
+                        hasTarget: false,
+                        employeeIds: []
                     });
                 }
                 const item = map.get(name);
@@ -1616,6 +1707,7 @@ function buildTeamLeadMetrics(){
                 item.fte += metric.fte;
                 item.target += metric.adjustedTarget;
                 item.production += metric.production;
+                item.employeeIds.push(metric.employee.id);
                 if(metric.hasTarget) item.hasTarget = true;
             });
     });
@@ -1625,9 +1717,7 @@ function buildTeamLeadMetrics(){
             item.achievement = item.hasTarget && item.target > 0
                 ? (item.production / item.target) * 100 : 0;
             item.projectCount = item.projects.size;
-            item.shrinkage = item.employees > 0
-                ? ((item.employees - item.fte) / item.employees) * 100
-                : 0;
+            item.shrinkage = computeMonthlyShrinkage(item.employeeIds);
             return item;
         })
         .sort((a,b) => b.achievement - a.achievement);
@@ -1703,6 +1793,7 @@ function renderCharts(){
     renderProjectAchievementChart();
     renderSubProjectAchievementChart();
     renderHourlyProductionChart();
+    renderShrinkageTrendChart();
 }
 
 function renderProjectAchievementChart(){
@@ -1878,6 +1969,91 @@ function renderHourlyProductionChart(){
                     ticks: { color: "#94a3b8", font: { family: "Inter", size: 11, weight: "600" } } },
                 x: { grid: { display: false },
                     ticks: { color: "#475569", font: { family: "Inter", size: 11, weight: "600" } } }
+            }
+        }
+    });
+}
+
+function renderShrinkageTrendChart(){
+    const canvas = document.getElementById("shrinkageTrendChart");
+    if(!canvas) return;
+
+    const employeeIds = filteredEmployees.map(m => m.employee.id);
+    const series = computeDailyShrinkageSeries(employeeIds);
+
+    if(shrinkageTrendChart) shrinkageTrendChart.destroy();
+
+    if(!series.labels.length){
+        shrinkageTrendChart = new Chart(canvas, {
+            type: "bar",
+            data: { labels: [], datasets: [] },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: "No productivity data for current month",
+                        color: "#94a3b8",
+                        font: { family: "Inter", size: 12, weight: "600" }
+                    }
+                },
+                scales: { x: { display: false }, y: { display: false } }
+            }
+        });
+        return;
+    }
+
+    // Calculate average for reference line
+    const avg = series.values.reduce((t,v) => t + v, 0) / series.values.length;
+
+    shrinkageTrendChart = new Chart(canvas, {
+        type: "bar",
+        data: {
+            labels: series.labels,
+            datasets: [{
+                label: "Shrinkage %",
+                data: series.values,
+                backgroundColor: series.colors,
+                borderRadius: 5,
+                maxBarThickness: 40
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: "#0a1628", padding: 12, cornerRadius: 8,
+                    titleFont: { family: "Inter", size: 12, weight: "700" },
+                    bodyFont: { family: "Inter", size: 12, weight: "500" },
+                    callbacks: {
+                        title: items => `Day ${items[0].label}`,
+                        label: ctx => `Shrinkage: ${ctx.parsed.y.toFixed(1)}%`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: "#f1f5f9", drawBorder: false },
+                    ticks: {
+                        color: "#94a3b8",
+                        font: { family: "Inter", size: 11, weight: "600" },
+                        callback: v => v + "%"
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        color: "#475569",
+                        font: { family: "Inter", size: 11, weight: "600" },
+                        callback: function(val, idx){
+                            return "Day " + this.getLabelForValue(val);
+                        }
+                    }
+                }
             }
         }
     });
