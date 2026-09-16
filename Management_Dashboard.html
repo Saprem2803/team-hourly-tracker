@@ -2160,228 +2160,138 @@ sb.auth.onAuthStateChange(async (event) => {
 
 
 <!-- =========================================================
-     LIVE WALLPAPER — Aurora Mesh + Particles + Constellation
-     Isolated script so it always runs even if dashboard fails
+     LIVE WALLPAPER — Floating Golden Dots
+     Only the wallpaper animation is changed.
 ========================================================= -->
 <script>
 (function(){
     var canvas = document.getElementById('liveWallpaper');
     if(!canvas) return;
+
     var ctx = canvas.getContext('2d');
     if(!ctx) return;
 
+    var W = 0, H = 0, DPR = 1;
+    var particles = [];
+    var COUNT = 85;
+    var rafId = null;
+    var lastFrame = 0;
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    /* ------------------ Aurora blobs ------------------ */
-    /* Bigger + brighter so they're clearly visible on navy */
-    var BLOBS = [
-        { c:[59,130,190],  a:0.22, bx:0.15, by:0.20, r:0.65, ax:0.09, ay:0.07, sx:0.00022, sy:0.00018, p:0.0 },
-        { c:[26,77,122],   a:0.26, bx:0.85, by:0.78, r:0.70, ax:0.11, ay:0.09, sx:0.00019, sy:0.00023, p:1.3 },
-        { c:[36,99,160],   a:0.18, bx:0.55, by:0.42, r:0.55, ax:0.13, ay:0.11, sx:0.00017, sy:0.00019, p:2.6 },
-        { c:[201,162,39],  a:0.16, bx:0.72, by:0.15, r:0.42, ax:0.10, ay:0.08, sx:0.00025, sy:0.00022, p:3.9 },
-        { c:[201,162,39],  a:0.12, bx:0.25, by:0.85, r:0.48, ax:0.12, ay:0.10, sx:0.00018, sy:0.00026, p:5.2 },
-        { c:[13,180,120],  a:0.10, bx:0.50, by:0.55, r:0.45, ax:0.14, ay:0.12, sx:0.00021, sy:0.00024, p:6.5 }
-    ];
-
-    /* ------------------ Particles ------------------ */
-    var PARTICLES = [];
-    var PARTICLE_COUNT = 60;
-    var LINK_DIST = 130;      /* px — connect particles closer than this */
-    var MOUSE_LINK_DIST = 180;
-
-    function initParticles(){
-        PARTICLES = [];
-        for(var i = 0; i < PARTICLE_COUNT; i++){
-            PARTICLES.push({
-                x: Math.random() * W,
-                y: Math.random() * H,
-                vx: (Math.random() - 0.5) * 0.35,
-                vy: (Math.random() - 0.5) * 0.35,
-                r: Math.random() * 1.6 + 0.7,
-                /* half gold, half light-blue */
-                gold: Math.random() < 0.5,
-                tw: Math.random() * Math.PI * 2   /* twinkle phase */
-            });
-        }
-    }
-
-    /* ------------------ State ------------------ */
-    var W = 0, H = 0, DPR = 1, minDim = 0;
-    var t = 0, rafId = null, lastFrame = 0;
-    var P = { x:0, y:0, tx:0, ty:0 };
-    var mouse = { x:-9999, y:-9999 };
 
     function resize(){
         DPR = Math.min(window.devicePixelRatio || 1, 1.5);
         W = window.innerWidth;
         H = window.innerHeight;
-        minDim = Math.min(W, H);
-        canvas.width  = Math.round(W * DPR);
+
+        canvas.width = Math.round(W * DPR);
         canvas.height = Math.round(H * DPR);
-        canvas.style.width  = W + 'px';
+        canvas.style.width = W + 'px';
         canvas.style.height = H + 'px';
+
         ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-        if(PARTICLES.length === 0) initParticles();
-        draw(performance.now());
+
+        if(!particles.length) initParticles();
     }
 
-    function drawBlobs(){
-        for(var i = 0; i < BLOBS.length; i++){
-            var b = BLOBS[i];
-            /* organic two-sine drift */
-            var dx = Math.sin(t * b.sx + b.p) * b.ax
-                   + Math.sin(t * b.sx * 0.41 + b.p * 1.7) * b.ax * 0.5;
-            var dy = Math.cos(t * b.sy + b.p) * b.ay
-                   + Math.cos(t * b.sy * 0.33 + b.p * 2.1) * b.ay * 0.5;
+    function initParticles(){
+        particles = [];
 
-            var cx = (b.bx + dx) * W + P.x * 24 * (0.4 + b.r);
-            var cy = (b.by + dy) * H + P.y * 24 * (0.4 + b.r);
-
-            /* breathing radius */
-            var breathe = 1 + Math.sin(t * b.sx * 0.6 + b.p * 1.3) * 0.10;
-            var r = b.r * minDim * breathe;
-
-            var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-            grad.addColorStop(0,    'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',' + b.a + ')');
-            grad.addColorStop(0.5,  'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',' + (b.a * 0.42).toFixed(3) + ')');
-            grad.addColorStop(1,    'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',0)');
-
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI * 2);
-            ctx.fill();
+        for(var i = 0; i < COUNT; i++){
+            particles.push({
+                x: Math.random() * W,
+                y: Math.random() * H,
+                vx: (Math.random() - 0.5) * 0.28,
+                vy: (Math.random() - 0.5) * 0.28,
+                r: Math.random() * 2.1 + 0.8,
+                phase: Math.random() * Math.PI * 2,
+                speed: Math.random() * 0.018 + 0.008,
+                drift: Math.random() * 0.18 + 0.05
+            });
         }
-    }
-
-    function drawParticles(){
-        /* 1) update + draw links first */
-        ctx.lineWidth = 0.6;
-        for(var i = 0; i < PARTICLES.length; i++){
-            var p = PARTICLES[i];
-            /* move */
-            p.x += p.vx;
-            p.y += p.vy;
-            p.tw += 0.03;
-
-            /* wrap around edges */
-            if(p.x < -10) p.x = W + 10;
-            if(p.x > W + 10) p.x = -10;
-            if(p.y < -10) p.y = H + 10;
-            if(p.y > H + 10) p.y = -10;
-
-            /* links to nearby particles */
-            for(var j = i + 1; j < PARTICLES.length; j++){
-                var q = PARTICLES[j];
-                var ddx = p.x - q.x, ddy = p.y - q.y;
-                var d2 = ddx * ddx + ddy * ddy;
-                if(d2 < LINK_DIST * LINK_DIST){
-                    var d = Math.sqrt(d2);
-                    var alpha = (1 - d / LINK_DIST) * 0.22;
-                    ctx.strokeStyle = 'rgba(201,162,39,' + alpha.toFixed(3) + ')';
-                    ctx.beginPath();
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(q.x, q.y);
-                    ctx.stroke();
-                }
-            }
-
-            /* link to mouse pointer */
-            var mdx = p.x - mouse.x, mdy = p.y - mouse.y;
-            var md2 = mdx * mdx + mdy * mdy;
-            if(md2 < MOUSE_LINK_DIST * MOUSE_LINK_DIST){
-                var md = Math.sqrt(md2);
-                var malpha = (1 - md / MOUSE_LINK_DIST) * 0.35;
-                ctx.strokeStyle = 'rgba(120,180,255,' + malpha.toFixed(3) + ')';
-                ctx.beginPath();
-                ctx.moveTo(p.x, p.y);
-                ctx.lineTo(mouse.x, mouse.y);
-                ctx.stroke();
-            }
-        }
-
-        /* 2) draw particles on top with twinkle */
-        for(var k = 0; k < PARTICLES.length; k++){
-            var pt = PARTICLES[k];
-            var twinkle = 0.55 + Math.sin(pt.tw) * 0.45;   /* 0.1 .. 1.0 */
-            if(pt.gold){
-                ctx.fillStyle = 'rgba(201,162,39,' + (0.85 * twinkle).toFixed(3) + ')';
-                ctx.shadowColor = 'rgba(201,162,39,0.9)';
-            }else{
-                ctx.fillStyle = 'rgba(120,180,255,' + (0.80 * twinkle).toFixed(3) + ')';
-                ctx.shadowColor = 'rgba(120,180,255,0.85)';
-            }
-            ctx.shadowBlur = 8;
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.shadowBlur = 0;
-    }
-
-    /* soft moving grid pulse for extra "alive" feel */
-    function drawGrid(){
-        ctx.save();
-        ctx.strokeStyle = 'rgba(255,255,255,0.028)';
-        ctx.lineWidth = 1;
-        var step = 60;
-        var offset = (t * 0.012) % step;
-        ctx.beginPath();
-        for(var x = -offset; x < W; x += step){
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, H);
-        }
-        for(var y = -offset; y < H; y += step){
-            ctx.moveTo(0, y);
-            ctx.lineTo(W, y);
-        }
-        ctx.stroke();
-        ctx.restore();
     }
 
     function draw(now){
-        /* ease pointer */
-        P.x += (P.tx - P.x) * 0.05;
-        P.y += (P.ty - P.y) * 0.05;
-
         ctx.clearRect(0, 0, W, H);
 
-        drawGrid();
-        drawBlobs();
-        drawParticles();
+        for(var i = 0; i < particles.length; i++){
+            var p = particles[i];
+
+            p.x += p.vx;
+            p.y += p.vy;
+            p.phase += p.speed;
+
+            /* Gentle floating motion */
+            p.x += Math.sin(p.phase * 0.7) * p.drift * 0.08;
+            p.y += Math.cos(p.phase * 0.55) * p.drift * 0.08;
+
+            /* Wrap around screen edges */
+            if(p.x < -12) p.x = W + 12;
+            if(p.x > W + 12) p.x = -12;
+            if(p.y < -12) p.y = H + 12;
+            if(p.y > H + 12) p.y = -12;
+
+            /* Soft glowing pulse */
+            var pulse = 0.58 + Math.sin(p.phase) * 0.32;
+            var radius = p.r * (0.9 + pulse * 0.22);
+
+            var glow = ctx.createRadialGradient(
+                p.x, p.y, 0,
+                p.x, p.y, radius * 7
+            );
+
+            glow.addColorStop(0, 'rgba(255,220,95,' + (0.42 * pulse).toFixed(3) + ')');
+            glow.addColorStop(0.28, 'rgba(201,162,39,' + (0.22 * pulse).toFixed(3) + ')');
+            glow.addColorStop(1, 'rgba(201,162,39,0)');
+
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, radius * 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.shadowColor = 'rgba(255,210,70,0.95)';
+            ctx.shadowBlur = 10 + pulse * 7;
+            ctx.fillStyle = 'rgba(242,199,62,' + (0.62 + pulse * 0.32).toFixed(3) + ')';
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.shadowBlur = 0;
     }
 
     function loop(now){
         rafId = requestAnimationFrame(loop);
-        if(now - lastFrame < 32) return;   /* ~30 FPS cap */
+
+        if(now - lastFrame < 32) return;
         lastFrame = now;
-        t += 16;
+
         draw(now);
     }
 
     function start(){
         if(rafId) return;
-        if(reduceMotion){ draw(performance.now()); return; }
+
+        if(reduceMotion){
+            draw(performance.now());
+            return;
+        }
+
         lastFrame = 0;
         rafId = requestAnimationFrame(loop);
     }
 
     function stop(){
-        if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
+        if(rafId){
+            cancelAnimationFrame(rafId);
+            rafId = null;
+        }
     }
 
-    window.addEventListener('resize', resize, { passive:true });
-
-    window.addEventListener('pointermove', function(e){
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-        P.tx = (e.clientX / W) * 2 - 1;
-        P.ty = (e.clientY / H) * 2 - 1;
-    }, { passive:true });
-
-    window.addEventListener('pointerleave', function(){
-        mouse.x = -9999; mouse.y = -9999;
-        P.tx = 0; P.ty = 0;
-    }, { passive:true });
+    window.addEventListener('resize', function(){
+        resize();
+        draw(performance.now());
+    }, {passive:true});
 
     document.addEventListener('visibilitychange', function(){
         if(document.hidden) stop();
@@ -2399,11 +2309,12 @@ sb.auth.onAuthStateChange(async (event) => {
 
 
 /* =========================================================
-   WALLPAPER TOGGLE — floating control, persisted
+   WALLPAPER TOGGLE — existing control retained
 ========================================================= */
 (function(){
     var btn = document.getElementById('wallpaperToggle');
     if(!btn) return;
+
     var KEY = 'ami.wallpaper';
 
     function apply(on){
@@ -2411,7 +2322,10 @@ sb.auth.onAuthStateChange(async (event) => {
         btn.classList.toggle('off', !on);
         btn.textContent = on ? '◐' : '○';
         btn.setAttribute('aria-pressed', String(on));
-        window.dispatchEvent(new CustomEvent('wallpaper:toggle', { detail:{ on: on } }));
+
+        window.dispatchEvent(
+            new CustomEvent('wallpaper:toggle', { detail:{ on:on } })
+        );
     }
 
     var on = localStorage.getItem(KEY) !== 'off';
