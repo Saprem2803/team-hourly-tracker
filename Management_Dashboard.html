@@ -25,7 +25,6 @@
     --shadow-card:0 1px 2px rgba(15,42,74,.04),0 8px 24px -8px rgba(15,42,74,.06),inset 0 1px 0 rgba(255,255,255,.9);
     --radius:14px; --radius-sm:10px;
 
-    /* Navy page palette */
     --page-navy:#0a1628;
     --page-navy-2:#0c1c33;
     --glass:rgba(255,255,255,.06);
@@ -42,19 +41,16 @@ body{
     color:var(--ink-2); font-size:14px; line-height:1.5;
     background-color:var(--page-navy);
     background-image:
-        linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px),
         radial-gradient(ellipse 900px 600px at 0% 0%,rgba(201,162,39,.06) 0%,transparent 55%),
-        radial-gradient(ellipse 900px 600px at 100% 100%,rgba(26,77,122,.38) 0%,transparent 60%),
-        radial-gradient(ellipse 1200px 800px at 50% 0%,rgba(15,42,74,.55) 0%,transparent 70%);
-    background-size:48px 48px,48px 48px,100% 100%,100% 100%,100% 100%;
-    background-repeat:repeat,repeat,no-repeat,no-repeat,no-repeat;
-    background-attachment:fixed,fixed,fixed,fixed,fixed;
+        radial-gradient(ellipse 900px 600px at 100% 100%,rgba(26,77,122,.35) 0%,transparent 60%);
+    background-repeat:no-repeat,no-repeat;
+    background-attachment:fixed,fixed;
     min-height:100vh;
+    overflow-x:hidden;
 }
 
 /* ============================================================
-   LIVE WALLPAPER — Gradient Mesh canvas
+   LIVE WALLPAPER — animated canvas
 ============================================================ */
 #liveWallpaper{
     position:fixed;
@@ -63,8 +59,9 @@ body{
     height:100%;
     pointer-events:none;
     z-index:0;
+    display:block;
     opacity:1;
-    transition:opacity .35s ease;
+    transition:opacity .4s ease;
 }
 body.wp-off #liveWallpaper{ opacity:0; }
 
@@ -92,10 +89,10 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .modal-overlay{z-index:1000;}
 
 /* ============================================================
-   HEADER — dark glass over navy
+   HEADER
 ============================================================ */
 .header{
-    background:rgba(10,22,40,.78);
+    background:rgba(10,22,40,.72);
     border-bottom:1px solid var(--hair);
     padding:20px 40px; display:flex; justify-content:space-between; align-items:center;
     gap:24px; flex-wrap:wrap; position:sticky; top:0; z-index:100;
@@ -132,7 +129,7 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .page{max-width:1560px;margin:0 auto;padding:32px 40px 60px;}
 
 /* ============================================================
-   TOOLBAR — labels light for navy
+   TOOLBAR
 ============================================================ */
 .toolbar{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--hair);}
 .filter-group{display:flex;flex-direction:column;gap:6px;}
@@ -149,9 +146,9 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .lock-chip.unlocked{background:rgba(13,122,74,.22);color:#6ee7b7;border:1px solid rgba(110,231,183,.25);}
 
 /* ============================================================
-   HERO — unchanged dark gradient, blends with navy page
+   HERO
 ============================================================ */
-.hero{background:linear-gradient(135deg,#0a1628 0%,#0f2a4a 55%,#1a4d7a 100%);color:#fff;border-radius:20px;padding:36px 40px;margin-bottom:28px;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);}
+.hero{background:linear-gradient(135deg,rgba(10,22,40,.85) 0%,rgba(15,42,74,.85) 55%,rgba(26,77,122,.85) 100%);color:#fff;border-radius:20px;padding:36px 40px;margin-bottom:28px;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 90% 10%,rgba(201,162,39,.20) 0%,transparent 45%),radial-gradient(circle at 15% 90%,rgba(255,255,255,.06) 0%,transparent 40%);pointer-events:none;}
 .hero::after{content:'';position:absolute;width:2px;height:80%;background:linear-gradient(180deg,transparent,rgba(201,162,39,.5),transparent);right:33%;top:10%;pointer-events:none;}
 .hero-inner{position:relative;z-index:2;display:grid;grid-template-columns:1.1fr 1.6fr 0.9fr;gap:40px;align-items:center;}
@@ -177,7 +174,7 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .health-badge.critical .hb-dot{background:#fca5a5;box-shadow:0 0 12px #fca5a5;}
 
 /* ============================================================
-   KPI STRIP — white cards pop on navy
+   KPI STRIP
 ============================================================ */
 .kpi-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:16px;margin-bottom:32px;}
 .kpi-card{background:linear-gradient(180deg,#fff 0%,#fefefc 100%);border:1px solid rgba(255,255,255,.9);border-radius:var(--radius);padding:22px 20px;position:relative;overflow:hidden;transition:all .2s ease;box-shadow:0 6px 24px -6px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.9);}
@@ -193,9 +190,6 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .kpi-value .kpi-unit{font-size:16px;font-weight:600;color:var(--ink-3);margin-left:2px;letter-spacing:0;}
 .kpi-sub{font-size:11px;color:var(--ink-4);line-height:1.4;}
 
-/* ============================================================
-   SECTIONS — headings on navy
-============================================================ */
 .section{margin-bottom:36px;}
 .section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--hair);}
 .section-head-left{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
@@ -247,11 +241,6 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 .sub-row.hidden-sub{display:none;}
 .sub-row:hover{background:linear-gradient(90deg,#f8f7f2 0%,#f6f5ef 100%);}
 
-.scope-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;background:var(--bg-soft);color:var(--ink-4);border:1px solid var(--line);font-size:11px;font-weight:700;}
-.scope-pill.partial{background:var(--amber-soft);color:var(--amber);border-color:#fde68a;}
-.scope-pill.all{background:var(--green-soft);color:var(--green);border-color:#a7f3d0;}
-.scope-pill.none{background:var(--bg-soft);color:var(--muted);}
-
 .badge{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:8px;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.2px;}
 .badge-good{background:var(--green-soft);color:var(--green);border:1px solid #a7f3d0;}
 .badge-mid{background:var(--amber-soft);color:var(--amber);border:1px solid #fde68a;}
@@ -295,13 +284,9 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 .login-card .error-banner{background:var(--red-soft);color:var(--red);border:1px solid #fecaca;}
 .hidden{display:none !important;}
 
-/* ============================================================
-   LOGIN
-============================================================ */
 .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:transparent;position:relative;overflow:hidden;}
 .login-page::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent 0%,rgba(201,162,39,.5) 20%,rgba(201,162,39,.85) 50%,rgba(201,162,39,.5) 80%,transparent 100%);z-index:3;}
-.login-page::after{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,190,.14),transparent 70%);top:-200px;left:-200px;pointer-events:none;}
-.login-card{width:100%;max-width:440px;background:linear-gradient(180deg,#fff 0%,#fefefc 100%);border:1px solid rgba(255,255,255,.9);border-radius:20px;padding:44px 40px;box-shadow:0 24px 60px rgba(0,0,0,.5),0 8px 24px -8px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.9);position:relative;z-index:2;}
+.login-card{width:100%;max-width:440px;background:linear-gradient(180deg,rgba(255,255,255,.97) 0%,rgba(254,254,252,.97) 100%);border:1px solid rgba(255,255,255,.9);border-radius:20px;padding:44px 40px;box-shadow:0 24px 60px rgba(0,0,0,.5),0 8px 24px -8px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.9);position:relative;z-index:2;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
 .login-brand{display:flex;align-items:center;gap:14px;margin-bottom:32px;}
 .login-brand-mark{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:17px;letter-spacing:.5px;box-shadow:0 10px 24px rgba(15,42,74,.24);}
 .login-brand-title{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:var(--ink);letter-spacing:-.3px;line-height:1.1;}
@@ -316,15 +301,9 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 .login-btn:hover{background:var(--brand-2);transform:translateY(-1px);box-shadow:0 10px 24px rgba(15,42,74,.22);}
 .login-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
 
-/* ============================================================
-   FOOTER — light text on navy
-============================================================ */
 .footer{padding:32px 40px;border-top:1px solid var(--hair);margin-top:40px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--on-navy-mute);letter-spacing:.3px;}
 .footer strong{color:#cbd5e1;font-weight:700;}
 
-/* ============================================================
-   MODAL
-============================================================ */
 .modal-overlay{position:fixed;inset:0;background:rgba(5,12,24,.62);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);display:flex;align-items:center;justify-content:center;padding:24px;z-index:1000;animation:fadeIn .15s ease;}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 .modal-card{background:linear-gradient(180deg,#fff 0%,#fefefc 100%);border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.9);width:100%;max-width:540px;padding:28px 30px;animation:slideUp .2s ease;}
@@ -434,7 +413,6 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 
     <main class="page">
 
-        <!-- TOOLBAR -->
         <div class="toolbar">
             <div class="filter-group">
                 <label>Report Date</label>
@@ -473,7 +451,6 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 
         <div id="pageError" class="error-banner hidden"></div>
 
-        <!-- HERO -->
         <div class="hero">
             <div class="hero-inner">
                 <div class="hero-left">
@@ -505,7 +482,6 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </div>
 
-        <!-- KPI STRIP -->
         <div class="kpi-strip">
             <div class="kpi-card neutral">
                 <div class="kpi-icon">👥</div>
@@ -551,7 +527,6 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </div>
 
-        <!-- PROJECT SCORECARD -->
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
@@ -592,7 +567,6 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </section>
 
-        <!-- SUB-PROJECT SCORECARD -->
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
@@ -633,7 +607,6 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </section>
 
-        <!-- TEAM LEAD SCORECARD -->
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
@@ -667,7 +640,6 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </section>
 
-        <!-- CHARTS -->
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
@@ -710,7 +682,6 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </section>
 
-        <!-- INSIGHTS -->
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
@@ -817,9 +788,7 @@ const AUTHORIZED_MANAGEMENT_EMAILS = [
 ];
 
 const OPERATIONAL_DASHBOARD_FILE = "index.html";
-
 function openOperationalDashboard(){ window.location.href = OPERATIONAL_DASHBOARD_FILE; }
-
 
 /* =========================================================
    STATE
@@ -850,7 +819,6 @@ const TEAM_LEAD_FALLBACK = {
 const HOUR_FIELDS = ["hour_6_7","hour_7_8","hour_8_9","hour_9_10","hour_10_11","hour_11_12","hour_12_1","hour_1_2","hour_2_3"];
 const HOUR_LABELS = ["6–7 PM","7–8 PM","8–9 PM","9–10 PM","10–11 PM","11–12 AM","12–1 AM","1–2 AM","2–3 AM"];
 
-
 /* =========================================================
    INIT
 ========================================================= */
@@ -874,7 +842,6 @@ function setPeriod(period){
     loadDashboard();
 }
 
-
 /* =========================================================
    LOGIN
 ========================================================= */
@@ -894,10 +861,8 @@ async function loginUser(){
         showLoginError(error.message || "Unable to login.");
     }
 }
-
 function showLoginError(m){ const el = document.getElementById("loginError"); el.textContent = m; el.classList.remove("hidden"); }
 function hideLoginError(){ document.getElementById("loginError").classList.add("hidden"); }
-
 
 /* =========================================================
    SESSION
@@ -911,7 +876,6 @@ async function checkSession(){
         }
     }catch(e){ console.error("Session check failed:", e); }
 }
-
 
 /* =========================================================
    INIT DASHBOARD
@@ -949,7 +913,6 @@ async function initializeDashboard(){
     await loadDashboard();
 }
 
-
 /* =========================================================
    LOAD DASHBOARD
 ========================================================= */
@@ -978,7 +941,6 @@ async function loadDashboard(){
     }
 }
 
-
 /* =========================================================
    LOADERS
 ========================================================= */
@@ -987,25 +949,21 @@ async function loadAccessRows(){
     if(error) throw error;
     accessRows = data || [];
 }
-
 async function loadProjects(){
     const { data, error } = await sb.from("projects").select("*").order("id",{ascending:true});
     if(error) throw error;
     projects = data || [];
 }
-
 async function loadSubProjects(){
     const { data, error } = await sb.from("sub_projects").select("*").order("id",{ascending:true});
     if(error){ console.warn("sub_projects:", error.message); subProjects = []; return; }
     subProjects = data || [];
 }
-
 async function loadEmployees(){
     const { data, error } = await sb.from("employees").select("*").eq("active", true).order("employee_name",{ascending:true});
     if(error) throw error;
     employees = data || [];
 }
-
 async function loadProductivity(){
     let fromDate = currentDate;
     if(currentPeriod === "mtd"){
@@ -1018,21 +976,15 @@ async function loadProductivity(){
     if(error) throw error;
     productivityRows = data || [];
 }
-
 async function loadMonthlyProductivity(){
     const parts = currentDate.split("-");
     const fromDate = `${parts[0]}-${parts[1]}-01`;
     const { data, error } = await sb
         .from("daily_productivity").select("*")
         .gte("tracker_date", fromDate).lte("tracker_date", currentDate).limit(50000);
-    if(error){
-        console.warn("Monthly productivity:", error.message);
-        monthlyProductivityRows = [];
-        return;
-    }
+    if(error){ console.warn("Monthly productivity:", error.message); monthlyProductivityRows = []; return; }
     monthlyProductivityRows = data || [];
 }
-
 async function loadDateLock(){
     const element = document.getElementById("lockStatus");
     const { data, error } = await sb
@@ -1043,14 +995,10 @@ async function loadDateLock(){
     else{ element.textContent = "Date Unlocked"; element.className = "lock-chip unlocked"; }
 }
 
-
 /* =========================================================
    HELPERS
 ========================================================= */
-function num(value){
-    const n = Number(value);
-    return Number.isFinite(n) ? n : 0;
-}
+function num(value){ const n = Number(value); return Number.isFinite(n) ? n : 0; }
 function formatNumber(value, decimals = 0){
     return num(value).toLocaleString("en-IN",{minimumFractionDigits:decimals,maximumFractionDigits:decimals});
 }
@@ -1064,9 +1012,8 @@ function showStatus(m){ document.getElementById("status").textContent = m; }
 function showPageError(m){ const el = document.getElementById("pageError"); el.textContent = m; el.classList.remove("hidden"); }
 function hidePageError(){ document.getElementById("pageError").classList.add("hidden"); }
 
-
 /* =========================================================
-   TEAM LEAD / PROJECT / SUB-PROJECT LOOKUP
+   LOOKUPS
 ========================================================= */
 function getTeamLeadForProject(projectId){
     const pid = String(projectId ?? "").trim();
@@ -1078,18 +1025,12 @@ function getTeamLeadForProject(projectId){
     if(names.length > 0) return [...new Set(names)].join(", ");
     return (TEAM_LEAD_FALLBACK[pid] || "Unassigned");
 }
-
-function getProjectById(projectId){
-    return projects.find(p => String(p.id).trim() === String(projectId).trim());
-}
+function getProjectById(projectId){ return projects.find(p => String(p.id).trim() === String(projectId).trim()); }
 function getSubProjectById(spId){
     if(spId === null || spId === undefined || spId === "") return null;
     return subProjects.find(sp => String(sp.id).trim() === String(spId).trim());
 }
-function spName(sp){
-    return sp?.sub_project_name || sp?.name || sp?.sub_project || `Sub-Project ${sp?.id}`;
-}
-
+function spName(sp){ return sp?.sub_project_name || sp?.name || sp?.sub_project || `Sub-Project ${sp?.id}`; }
 
 /* =========================================================
    RESOLVE EMPLOYEE TARGET
@@ -1114,7 +1055,6 @@ function resolveEmployeeTarget(employee, project){
     return null;
 }
 
-
 /* =========================================================
    PRODUCTIVITY / ATTENDANCE
 ========================================================= */
@@ -1124,7 +1064,6 @@ function findProductivity(employee, dateFilter){
     if(dateFilter) rows = rows.filter(item => item.tracker_date === dateFilter);
     return rows.find(item => employeeId !== "" && String(item.employee_id ?? "").trim() === employeeId) || null;
 }
-
 function getAttendanceFactor(value){
     const a = String(value ?? "").trim().toLowerCase();
     if(a === "half day" || a === "halfday" || a === "half" || a === "0.5" || a === "0,5") return 0.5;
@@ -1145,9 +1084,8 @@ function getActualProduction(productivity){
     return getHourlyValues(productivity).reduce((t,v) => t + v, 0);
 }
 
-
 /* =========================================================
-   MONTHLY SHRINKAGE HELPERS
+   SHRINKAGE HELPERS
 ========================================================= */
 function computeShrinkageBreakdown(employeeIds){
     const empty = { pct: 0, shrinkDays: 0, scheduledDays: 0 };
@@ -1163,7 +1101,6 @@ function computeShrinkageBreakdown(employeeIds){
     if(employeeCount === 0) return empty;
 
     const scheduledDays = employeeCount * daysElapsed;
-
     let shrinkDays = 0;
     monthlyProductivityRows.forEach(row => {
         if(!idSet.has(String(row.employee_id ?? "").trim())) return;
@@ -1171,20 +1108,10 @@ function computeShrinkageBreakdown(employeeIds){
         shrinkDays += (1 - factor);
     });
 
-    const pct = scheduledDays > 0
-        ? (shrinkDays / scheduledDays) * 100
-        : 0;
-
-    return {
-        pct: Math.max(0, pct),
-        shrinkDays: Math.max(0, shrinkDays),
-        scheduledDays
-    };
+    const pct = scheduledDays > 0 ? (shrinkDays / scheduledDays) * 100 : 0;
+    return { pct: Math.max(0, pct), shrinkDays: Math.max(0, shrinkDays), scheduledDays };
 }
-
-function computeMonthlyShrinkage(employeeIds){
-    return computeShrinkageBreakdown(employeeIds).pct;
-}
+function computeMonthlyShrinkage(employeeIds){ return computeShrinkageBreakdown(employeeIds).pct; }
 
 function computeDailyShrinkageSeries(employeeIds){
     if(!currentDate) return { labels: [], values: [], colors: [] };
@@ -1207,29 +1134,21 @@ function computeDailyShrinkageSeries(employeeIds){
         byDate.set(date, byDate.get(date) + getAttendanceFactor(row.attendance));
     });
 
-    const labels = [];
-    const values = [];
-    const colors = [];
-
+    const labels = [], values = [], colors = [];
     for(let day = 1; day <= endDay; day++){
         const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         const presentFTE = byDate.get(dateStr);
         if(presentFTE === undefined || presentFTE === null) continue;
-
         const shrinkage = ((employeeCount - presentFTE) / employeeCount) * 100;
         const rounded = Math.max(0, Math.round(shrinkage * 10) / 10);
-
         labels.push(String(day));
         values.push(rounded);
-
         if(rounded <= 5)       colors.push("#0d7a4a");
         else if(rounded <= 15) colors.push("#b45309");
         else                   colors.push("#b91c1c");
     }
-
     return { labels, values, colors };
 }
-
 
 /* =========================================================
    EMPLOYEE METRIC
@@ -1292,7 +1211,6 @@ function buildEmployeeMetric(employee){
     };
 }
 
-
 /* =========================================================
    FILTERS
 ========================================================= */
@@ -1307,18 +1225,14 @@ function populateFilters(){
         pf.appendChild(opt);
     });
     if([...pf.options].some(o => o.value === current)) pf.value = current;
-
     updateSubProjectFilter();
     updateTeamLeadFilter();
 }
-
 function updateSubProjectFilter(){
     const pv = document.getElementById("projectFilter").value;
     const spf = document.getElementById("subProjectFilter");
     const current = spf.value;
-
     spf.innerHTML = `<option value="ALL">All Sub-Projects</option>`;
-
     const relevant = subProjects
         .filter(sp => {
             if(sp.active === false) return false;
@@ -1326,26 +1240,21 @@ function updateSubProjectFilter(){
             return true;
         })
         .sort((a,b) => spName(a).localeCompare(spName(b)));
-
     relevant.forEach(sp => {
         const opt = document.createElement("option");
         opt.value = String(sp.id);
         opt.textContent = spName(sp);
         spf.appendChild(opt);
     });
-
     if([...spf.options].some(o => o.value === current)) spf.value = current;
     else spf.value = "ALL";
 }
-
 function updateTeamLeadFilter(){
     const pv  = document.getElementById("projectFilter").value;
     const spv = document.getElementById("subProjectFilter").value;
     const tf  = document.getElementById("teamLeadFilter");
     const current = tf.value;
-
     tf.innerHTML = `<option value="ALL">All Team Leads</option>`;
-
     const projectIdsInScope = new Set();
     if(spv !== "ALL"){
         const sp = getSubProjectById(spv);
@@ -1355,7 +1264,6 @@ function updateTeamLeadFilter(){
     }else{
         projects.forEach(p => projectIdsInScope.add(String(p.id)));
     }
-
     const names = new Set();
     projects.forEach(p => {
         if(!projectIdsInScope.has(String(p.id))) return;
@@ -1364,51 +1272,41 @@ function updateTeamLeadFilter(){
             n.split(",").map(x => x.trim()).filter(Boolean).forEach(x => names.add(x));
         }
     });
-
     [...names].sort().forEach(n => {
         const opt = document.createElement("option");
         opt.value = n; opt.textContent = n;
         tf.appendChild(opt);
     });
-
     if([...tf.options].some(o => o.value === current)) tf.value = current;
     else tf.value = "ALL";
 }
-
 function applyFilters(){
     updateSubProjectFilter();
     updateTeamLeadFilter();
-
     const pv  = document.getElementById("projectFilter").value;
     const spv = document.getElementById("subProjectFilter").value;
     const tv  = document.getElementById("teamLeadFilter").value;
-
     filteredEmployees = employees.map(buildEmployeeMetric).filter(metric => {
         if(pv !== "ALL" && String(metric.employee.project_id) !== String(pv)) return false;
-
         if(spv !== "ALL"){
             const empSp = metric.employee.sub_project_id;
             if(empSp === null || empSp === undefined || empSp === "") return false;
             if(String(empSp) !== String(spv)) return false;
         }
-
         if(tv !== "ALL"){
             const lead = getTeamLeadForProject(metric.employee.project_id);
             if(!lead.split(",").map(x => x.trim()).includes(tv)) return false;
         }
         return true;
     });
-
     if(spv !== "ALL"){
         const selSp = getSubProjectById(spv);
         if(selSp) expandedProjects.add(String(selSp.project_id));
     }else if(pv !== "ALL"){
         expandedProjects.add(String(pv));
     }
-
     renderAll();
 }
-
 
 /* =========================================================
    RENDER
@@ -1422,26 +1320,17 @@ function renderAll(){
     renderCharts();
     renderInsights();
 }
-
-
-/* =========================================================
-   HERO
-========================================================= */
 function renderHero(){
     const totalProduction = filteredEmployees.reduce((t,m) => t + m.production, 0);
     const totalTarget = filteredEmployees.reduce((t,m) => t + m.adjustedTarget, 0);
     const achievement = totalTarget > 0 ? (totalProduction / totalTarget) * 100 : 0;
-
     document.getElementById("heroProduction").textContent = formatNumber(totalProduction, 0);
     document.getElementById("heroTarget").textContent = formatNumber(totalTarget, 0);
     document.getElementById("heroAchievement").innerHTML = formatNumber(achievement, 1) + '<span class="unit">%</span>';
-
     document.getElementById("heroEyebrow").textContent = currentPeriod === "mtd" ? "Month to Date Operations" : "Daily Operations";
-
     const projectCount = buildProjectMetrics().length;
     document.getElementById("heroSub").textContent =
         `As of ${currentDate} · ${filteredEmployees.length} employees · ${projectCount} projects`;
-
     const badge = document.getElementById("healthBadge");
     const label = document.getElementById("healthLabel");
     badge.classList.remove("healthy","monitor","critical");
@@ -1449,11 +1338,6 @@ function renderHero(){
     else if(achievement >= 75){ badge.classList.add("monitor"); label.textContent = "Monitor"; }
     else{ badge.classList.add("critical"); label.textContent = "Critical"; }
 }
-
-
-/* =========================================================
-   KPIs
-========================================================= */
 function renderKPIs(){
     const totalEmployees = filteredEmployees.length;
     const presentFTE = filteredEmployees.reduce((t,m) => t + m.fte, 0);
@@ -1461,7 +1345,6 @@ function renderKPIs(){
     const production = filteredEmployees.reduce((t,m) => t + m.production, 0);
     const achievement = target > 0 ? (production / target) * 100 : 0;
     const average = presentFTE > 0 ? production / presentFTE : 0;
-
     const shrinkageDetails = computeShrinkageBreakdown(filteredEmployees.map(m => m.employee.id));
     const shrinkage = shrinkageDetails.pct;
 
@@ -1478,19 +1361,16 @@ function renderKPIs(){
         shrinkSubEl.textContent =
             `${formatNumber(shrinkageDetails.shrinkDays, 1)} shrinkage days / ${formatNumber(shrinkageDetails.scheduledDays, 0)} scheduled days`;
     }
-
     const achCard = document.getElementById("kpiAchievement").closest(".kpi-card");
     achCard.classList.remove("good","warn","bad","neutral");
     if(achievement >= 95) achCard.classList.add("good");
     else if(achievement >= 75) achCard.classList.add("warn");
     else if(achievement > 0) achCard.classList.add("bad");
     else achCard.classList.add("neutral");
-
     const prodCard = document.getElementById("kpiProduction").closest(".kpi-card");
     prodCard.classList.remove("good","warn","bad","neutral");
     if(production > 0) prodCard.classList.add("good");
     else prodCard.classList.add("neutral");
-
     const shrinkCard = document.getElementById("kpiShrinkage").closest(".kpi-card");
     shrinkCard.classList.remove("good","warn","bad","neutral");
     if(shrinkage <= 5)       shrinkCard.classList.add("good");
@@ -1498,13 +1378,11 @@ function renderKPIs(){
     else                     shrinkCard.classList.add("bad");
 }
 
-
 /* =========================================================
    PROJECT METRICS
 ========================================================= */
 function buildProjectMetrics(){
     const map = new Map();
-
     filteredEmployees.forEach(metric => {
         const project = metric.project;
         if(!project) return;
@@ -1513,13 +1391,8 @@ function buildProjectMetrics(){
             map.set(key, {
                 project,
                 teamLead: getTeamLeadForProject(project.id),
-                employees: 0,
-                fte: 0,
-                target: 0,
-                production: 0,
-                hasTarget: false,
-                targetBasedEmployees: 0,
-                targetBasedFTE: 0,
+                employees: 0, fte: 0, target: 0, production: 0,
+                hasTarget: false, targetBasedEmployees: 0, targetBasedFTE: 0,
                 employeeIds: []
             });
         }
@@ -1535,11 +1408,9 @@ function buildProjectMetrics(){
             item.targetBasedFTE += metric.fte;
         }
     });
-
     return [...map.values()]
         .map(item => {
-            item.achievement = item.hasTarget && item.target > 0
-                ? (item.production / item.target) * 100 : 0;
+            item.achievement = item.hasTarget && item.target > 0 ? (item.production / item.target) * 100 : 0;
             item.average = item.fte > 0 ? item.production / item.fte : 0;
             item.shrinkage = computeMonthlyShrinkage(item.employeeIds);
             return item;
@@ -1547,36 +1418,27 @@ function buildProjectMetrics(){
         .sort((a,b) => b.achievement - a.achievement);
 }
 
-
 /* =========================================================
    SUB-PROJECT METRICS
 ========================================================= */
 function buildSubProjectMetrics(){
     const map = new Map();
-
     filteredEmployees.forEach(metric => {
         const spId = metric.employee.sub_project_id;
         if(spId === null || spId === undefined || spId === "") return;
-
         const sp = getSubProjectById(spId);
         if(!sp) return;
-
         const key = String(sp.id);
         if(!map.has(key)){
             map.set(key, {
                 subProject: sp,
                 project: getProjectById(sp.project_id),
                 teamLead: getTeamLeadForProject(sp.project_id),
-                employees: 0,
-                fte: 0,
-                target: 0,
-                production: 0,
-                hasTarget: false,
-                targetBasedFTE: 0,
+                employees: 0, fte: 0, target: 0, production: 0,
+                hasTarget: false, targetBasedFTE: 0,
                 employeeIds: []
             });
         }
-
         const item = map.get(key);
         item.employees += 1;
         item.fte += metric.fte;
@@ -1588,18 +1450,15 @@ function buildSubProjectMetrics(){
             item.targetBasedFTE += metric.fte;
         }
     });
-
     return [...map.values()]
         .map(item => {
-            item.achievement = item.hasTarget && item.target > 0
-                ? (item.production / item.target) * 100 : 0;
+            item.achievement = item.hasTarget && item.target > 0 ? (item.production / item.target) * 100 : 0;
             item.average = item.fte > 0 ? item.production / item.fte : 0;
             item.shrinkage = computeMonthlyShrinkage(item.employeeIds);
             return item;
         })
         .sort((a,b) => b.achievement - a.achievement);
 }
-
 
 /* =========================================================
    PROJECT TABLE
@@ -1609,43 +1468,31 @@ function renderProjectTable(){
     document.getElementById("projectLoading").classList.add("hidden");
     document.getElementById("projectTableWrap").classList.remove("hidden");
     body.innerHTML = "";
-
     const data = buildProjectMetrics();
     const spData = buildSubProjectMetrics();
-
     if(!data.length){
         body.innerHTML = `<tr><td colspan="13" class="empty">No project data available.</td></tr>`;
         return;
     }
-
     data.forEach((item, index) => {
         const rank = index + 1;
         const rankClass = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "";
         const projectKey = String(item.project.id);
-
         const children = spData
             .filter(sp => String(sp.project?.id) === projectKey)
             .sort((a,b) => b.achievement - a.achievement);
-
         const hasChildren = children.length > 0;
         const isExpanded = hasChildren && expandedProjects.has(projectKey);
-
-        const targetPerFTE = item.targetBasedFTE > 0
-            ? (item.target / item.targetBasedFTE)
-            : null;
+        const targetPerFTE = item.targetBasedFTE > 0 ? (item.target / item.targetBasedFTE) : null;
         const unitsPerFTE = item.fte > 0 ? item.production / item.fte : 0;
-
         const tr = document.createElement("tr");
-
         if(hasChildren){
             tr.className = "project-row" + (isExpanded ? " expanded" : "");
             tr.dataset.projectId = projectKey;
         }else{
             tr.className = "project-row no-children";
         }
-
         const chevronHTML = hasChildren ? `<span class="chev">▶</span>` : ``;
-
         tr.innerHTML = `
             <td class="rank-cell"><span class="rank-badge ${rankClass}">${rank}</span></td>
             <td class="project-cell">
@@ -1666,23 +1513,16 @@ function renderProjectTable(){
             <td class="num-cell">${formatNumber(unitsPerFTE, 1)}</td>
             <td>${statusChip(item.achievement, item.hasTarget)}</td>
         `;
-
         if(hasChildren){
             tr.addEventListener("click", function(){ toggleProjectRow(projectKey); });
         }
-
         body.appendChild(tr);
-
         if(!hasChildren) return;
-
         children.forEach((sp, spIdx) => {
-            const spTargetPerFTE = sp.targetBasedFTE > 0
-                ? (sp.target / sp.targetBasedFTE)
-                : null;
+            const spTargetPerFTE = sp.targetBasedFTE > 0 ? (sp.target / sp.targetBasedFTE) : null;
             const spUnitsPerFTE = sp.fte > 0 ? sp.production / sp.fte : 0;
             const isLast = spIdx === children.length - 1;
             const branch = isLast ? "└" : "├";
-
             const subTr = document.createElement("tr");
             subTr.className = "sub-row" + (isExpanded ? "" : " hidden-sub");
             subTr.dataset.parentId = projectKey;
@@ -1708,23 +1548,16 @@ function renderProjectTable(){
         });
     });
 }
-
 function toggleProjectRow(projectKey){
-    if(expandedProjects.has(projectKey)){
-        expandedProjects.delete(projectKey);
-    }else{
-        expandedProjects.add(projectKey);
-    }
-
+    if(expandedProjects.has(projectKey)) expandedProjects.delete(projectKey);
+    else expandedProjects.add(projectKey);
     document.querySelectorAll(`.project-row[data-project-id="${projectKey}"]`).forEach(row => {
         row.classList.toggle("expanded", expandedProjects.has(projectKey));
     });
-
     document.querySelectorAll(`.sub-row[data-parent-id="${projectKey}"]`).forEach(row => {
         row.classList.toggle("hidden-sub", !expandedProjects.has(projectKey));
     });
 }
-
 
 /* =========================================================
    SUB-PROJECT TABLE
@@ -1734,24 +1567,16 @@ function renderSubProjectTable(){
     document.getElementById("subProjectLoading").classList.add("hidden");
     document.getElementById("subProjectTableWrap").classList.remove("hidden");
     body.innerHTML = "";
-
     const data = buildSubProjectMetrics();
-
     if(!data.length){
         body.innerHTML = `<tr><td colspan="13" class="empty">No sub-project data available for the current filter.</td></tr>`;
         return;
     }
-
     data.forEach((item, index) => {
         const rank = index + 1;
         const rankClass = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "";
-
-        const targetPerFTE = item.targetBasedFTE > 0
-            ? (item.target / item.targetBasedFTE)
-            : null;
-
+        const targetPerFTE = item.targetBasedFTE > 0 ? (item.target / item.targetBasedFTE) : null;
         const unitsPerFTE = item.fte > 0 ? item.production / item.fte : 0;
-
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td class="rank-cell"><span class="rank-badge ${rankClass}">${rank}</span></td>
@@ -1772,67 +1597,49 @@ function renderSubProjectTable(){
     });
 }
 
-
 /* =========================================================
    TEAM LEAD TABLE
 ========================================================= */
 function buildTeamLeadMetrics(){
     const map = new Map();
-
     filteredEmployees.forEach(metric => {
         const project = metric.project;
         if(!project) return;
         const teamLead = getTeamLeadForProject(project.id);
         if(!teamLead || teamLead === "Unassigned") return;
-
-        teamLead.split(",")
-            .map(x => x.trim())
-            .filter(Boolean)
-            .forEach(name => {
-                if(!map.has(name)){
-                    map.set(name, {
-                        teamLead: name,
-                        projects: new Set(),
-                        employees: 0,
-                        fte: 0,
-                        target: 0,
-                        production: 0,
-                        hasTarget: false,
-                        employeeIds: []
-                    });
-                }
-                const item = map.get(name);
-                item.projects.add(project.id);
-                item.employees += 1;
-                item.fte += metric.fte;
-                item.target += metric.adjustedTarget;
-                item.production += metric.production;
-                item.employeeIds.push(metric.employee.id);
-                if(metric.hasTarget) item.hasTarget = true;
-            });
+        teamLead.split(",").map(x => x.trim()).filter(Boolean).forEach(name => {
+            if(!map.has(name)){
+                map.set(name, {
+                    teamLead: name, projects: new Set(),
+                    employees: 0, fte: 0, target: 0, production: 0,
+                    hasTarget: false, employeeIds: []
+                });
+            }
+            const item = map.get(name);
+            item.projects.add(project.id);
+            item.employees += 1;
+            item.fte += metric.fte;
+            item.target += metric.adjustedTarget;
+            item.production += metric.production;
+            item.employeeIds.push(metric.employee.id);
+            if(metric.hasTarget) item.hasTarget = true;
+        });
     });
-
-    return [...map.values()]
-        .map(item => {
-            item.achievement = item.hasTarget && item.target > 0
-                ? (item.production / item.target) * 100 : 0;
-            item.projectCount = item.projects.size;
-            item.shrinkage = computeMonthlyShrinkage(item.employeeIds);
-            return item;
-        })
-        .sort((a,b) => b.achievement - a.achievement);
+    return [...map.values()].map(item => {
+        item.achievement = item.hasTarget && item.target > 0 ? (item.production / item.target) * 100 : 0;
+        item.projectCount = item.projects.size;
+        item.shrinkage = computeMonthlyShrinkage(item.employeeIds);
+        return item;
+    }).sort((a,b) => b.achievement - a.achievement);
 }
-
 function renderTeamLeadTable(){
     const body = document.getElementById("teamLeadTableBody");
     body.innerHTML = "";
     const data = buildTeamLeadMetrics();
-
     if(!data.length){
         body.innerHTML = `<tr><td colspan="10" class="empty">No Team Lead data available.</td></tr>`;
         return;
     }
-
     data.forEach((item, index) => {
         const rank = index + 1;
         const rankClass = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "";
@@ -1853,7 +1660,6 @@ function renderTeamLeadTable(){
     });
 }
 
-
 /* =========================================================
    BADGES
 ========================================================= */
@@ -1866,7 +1672,6 @@ function achievementBadge(value, hasTarget = true){
     else if(p > 0) css = "badge-low";
     return `<span class="badge ${css}">${formatPercent(p)}</span>`;
 }
-
 function shrinkageBadge(value){
     const p = num(value);
     let css = "badge-neutral";
@@ -1875,7 +1680,6 @@ function shrinkageBadge(value){
     else             css = "badge-low";
     return `<span class="badge ${css}">${formatPercent(p)}</span>`;
 }
-
 function statusChip(value, hasTarget = true){
     if(!hasTarget) return `<span class="status-chip neutral"><span class="dot"></span>No Target</span>`;
     const p = num(value);
@@ -1884,7 +1688,6 @@ function statusChip(value, hasTarget = true){
     if(p > 0) return `<span class="status-chip low"><span class="dot"></span>Attention</span>`;
     return `<span class="status-chip neutral"><span class="dot"></span>No Data</span>`;
 }
-
 
 /* =========================================================
    CHARTS
@@ -1895,12 +1698,10 @@ function renderCharts(){
     renderHourlyProductionChart();
     renderShrinkageTrendChart();
 }
-
 function renderProjectAchievementChart(){
     const canvas = document.getElementById("projectAchievementChart");
     const data = buildProjectMetrics();
     if(projectChart) projectChart.destroy();
-
     const colors = data.map(item => {
         if(!item.hasTarget) return "#cbd5e1";
         if(item.achievement >= 95) return "#0d7a4a";
@@ -1908,7 +1709,6 @@ function renderProjectAchievementChart(){
         if(item.achievement > 0) return "#b91c1c";
         return "#94a3b8";
     });
-
     projectChart = new Chart(canvas, {
         type: "bar",
         data: {
@@ -1933,57 +1733,37 @@ function renderProjectAchievementChart(){
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
+                y: { beginAtZero: true,
                     grid: { color: "#f1f5f9", drawBorder: false },
-                    ticks: { color: "#94a3b8", font: { family: "Inter", size: 11, weight: "600" },
-                        callback: v => v + "%" }
-                },
+                    ticks: { color: "#94a3b8", font: { family: "Inter", size: 11, weight: "600" }, callback: v => v + "%" } },
                 x: { grid: { display: false },
                     ticks: { color: "#475569", font: { family: "Inter", size: 11, weight: "600" } } }
             }
         }
     });
 }
-
 function renderSubProjectAchievementChart(){
     const canvas = document.getElementById("subProjectAchievementChart");
     if(!canvas) return;
-
-    const data = buildSubProjectMetrics()
-        .filter(item => item.hasTarget)
-        .slice(0, 10);
-
+    const data = buildSubProjectMetrics().filter(item => item.hasTarget).slice(0, 10);
     if(subProjectChart) subProjectChart.destroy();
-
     if(!data.length){
         subProjectChart = new Chart(canvas, {
-            type: "bar",
-            data: { labels: [], datasets: [] },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    title: {
-                        display: true,
-                        text: "No target-based sub-projects in current view",
-                        color: "#94a3b8",
-                        font: { family: "Inter", size: 12, weight: "600" }
-                    }
-                },
-                scales: { x: { display: false }, y: { display: false } }
-            }
+            type: "bar", data: { labels: [], datasets: [] },
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false },
+                    title: { display: true, text: "No target-based sub-projects in current view",
+                        color: "#94a3b8", font: { family: "Inter", size: 12, weight: "600" } } },
+                scales: { x: { display: false }, y: { display: false } } }
         });
         return;
     }
-
     const colors = data.map(item => {
         if(item.achievement >= 95) return "#0d7a4a";
         if(item.achievement >= 75) return "#b45309";
-        if(item.achievement > 0)    return "#b91c1c";
+        if(item.achievement > 0) return "#b91c1c";
         return "#94a3b8";
     });
-
     subProjectChart = new Chart(canvas, {
         type: "bar",
         data: {
@@ -1997,9 +1777,7 @@ function renderSubProjectAchievementChart(){
             }]
         },
         options: {
-            indexAxis: "y",
-            responsive: true,
-            maintainAspectRatio: false,
+            indexAxis: "y", responsive: true, maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -2016,27 +1794,15 @@ function renderSubProjectAchievementChart(){
                 }
             },
             scales: {
-                x: {
-                    beginAtZero: true,
+                x: { beginAtZero: true,
                     grid: { color: "#f1f5f9", drawBorder: false },
-                    ticks: {
-                        color: "#94a3b8",
-                        font: { family: "Inter", size: 11, weight: "600" },
-                        callback: v => v + "%"
-                    }
-                },
-                y: {
-                    grid: { display: false },
-                    ticks: {
-                        color: "#475569",
-                        font: { family: "Inter", size: 11, weight: "600" }
-                    }
-                }
+                    ticks: { color: "#94a3b8", font: { family: "Inter", size: 11, weight: "600" }, callback: v => v + "%" } },
+                y: { grid: { display: false },
+                    ticks: { color: "#475569", font: { family: "Inter", size: 11, weight: "600" } } }
             }
         }
     });
 }
-
 function renderHourlyProductionChart(){
     const canvas = document.getElementById("hourlyProductionChart");
     const totals = HOUR_FIELDS.map(() => 0);
@@ -2073,37 +1839,23 @@ function renderHourlyProductionChart(){
         }
     });
 }
-
 function renderShrinkageTrendChart(){
     const canvas = document.getElementById("shrinkageTrendChart");
     if(!canvas) return;
-
     const employeeIds = filteredEmployees.map(m => m.employee.id);
     const series = computeDailyShrinkageSeries(employeeIds);
-
     if(shrinkageTrendChart) shrinkageTrendChart.destroy();
-
     if(!series.labels.length){
         shrinkageTrendChart = new Chart(canvas, {
-            type: "bar",
-            data: { labels: [], datasets: [] },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    title: {
-                        display: true,
-                        text: "No productivity data for current month",
-                        color: "#94a3b8",
-                        font: { family: "Inter", size: 12, weight: "600" }
-                    }
-                },
-                scales: { x: { display: false }, y: { display: false } }
-            }
+            type: "bar", data: { labels: [], datasets: [] },
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false },
+                    title: { display: true, text: "No productivity data for current month",
+                        color: "#94a3b8", font: { family: "Inter", size: 12, weight: "600" } } },
+                scales: { x: { display: false }, y: { display: false } } }
         });
         return;
     }
-
     shrinkageTrendChart = new Chart(canvas, {
         type: "bar",
         data: {
@@ -2117,8 +1869,7 @@ function renderShrinkageTrendChart(){
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -2132,30 +1883,15 @@ function renderShrinkageTrendChart(){
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: "#f1f5f9", drawBorder: false },
-                    ticks: {
-                        color: "#94a3b8",
-                        font: { family: "Inter", size: 11, weight: "600" },
-                        callback: v => v + "%"
-                    }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: {
-                        color: "#475569",
-                        font: { family: "Inter", size: 11, weight: "600" },
-                        callback: function(val, idx){
-                            return "Day " + this.getLabelForValue(val);
-                        }
-                    }
-                }
+                y: { beginAtZero: true, grid: { color: "#f1f5f9", drawBorder: false },
+                    ticks: { color: "#94a3b8", font: { family: "Inter", size: 11, weight: "600" }, callback: v => v + "%" } },
+                x: { grid: { display: false },
+                    ticks: { color: "#475569", font: { family: "Inter", size: 11, weight: "600" },
+                        callback: function(val, idx){ return "Day " + this.getLabelForValue(val); } } }
             }
         }
     });
 }
-
 
 /* =========================================================
    INSIGHTS
@@ -2163,12 +1899,10 @@ function renderShrinkageTrendChart(){
 function renderInsights(){
     const projectData = buildProjectMetrics();
     const ranked = projectData.filter(p => p.hasTarget);
-
     if(ranked.length){
         const top = ranked[0];
         document.getElementById("insightTopProject").innerHTML =
             `<span class="insight-accent">${escapeHTML(top.project.project_name)}</span> leading with <span class="insight-accent">${formatPercent(top.achievement)}</span> achievement`;
-
         const bottom = ranked[ranked.length - 1];
         if(ranked.length > 1){
             document.getElementById("insightBottomProject").innerHTML =
@@ -2181,7 +1915,6 @@ function renderInsights(){
         document.getElementById("insightTopProject").textContent = "No target-based project in this view";
         document.getElementById("insightBottomProject").textContent = "No target-based project in this view";
     }
-
     const totals = HOUR_FIELDS.map(() => 0);
     filteredEmployees.forEach(metric => metric.hours.forEach((v,i) => { totals[i] += v; }));
     const peakValue = Math.max(...totals);
@@ -2194,19 +1927,16 @@ function renderInsights(){
     const topSubEl    = document.getElementById("insightTopSubProject");
     const bottomSubEl = document.getElementById("insightBottomSubProject");
     const countEl     = document.getElementById("insightSubProjectCount");
-
     if(spData.length){
         const top = spData[0];
         topSubEl.innerHTML =
             `<span class="insight-accent">${escapeHTML(spName(top.subProject))}</span> under ` +
             `<span class="insight-accent">${escapeHTML(top.project?.project_name || "—")}</span> at ` +
             `<span class="insight-accent">${formatPercent(top.achievement)}</span>`;
-
         const bottom = spData[spData.length - 1];
         bottomSubEl.innerHTML =
             `<span class="insight-accent">${escapeHTML(spName(bottom.subProject))}</span> at ` +
             `<span class="insight-accent">${formatPercent(bottom.achievement)}</span> — requires attention`;
-
         countEl.innerHTML =
             `<span class="insight-accent">${spData.length}</span> target-based sub-projects in current view`;
     }else{
@@ -2216,13 +1946,11 @@ function renderInsights(){
     }
 }
 
-
 /* =========================================================
    REFRESH / LOGOUT
 ========================================================= */
 async function refreshDashboard(){ await loadDashboard(); }
 async function logoutUser(){ await sb.auth.signOut(); location.reload(); }
-
 
 /* =========================================================
    EXPORT
@@ -2236,7 +1964,6 @@ function shiftDate(dateStr, days){
     d.setDate(d.getDate() + days);
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
-
 function openExportModal(){
     document.getElementById("exportFromDate").value = currentDate;
     document.getElementById("exportToDate").value = currentDate;
@@ -2248,7 +1975,6 @@ function openExportModal(){
     });
 }
 function closeExportModal(){ document.getElementById("exportModal").classList.add("hidden"); }
-
 function setExportPreset(preset){
     const today = todayStr();
     let from = today, to = today;
@@ -2268,7 +1994,6 @@ function setExportPreset(preset){
     document.getElementById("exportToDate").value = to;
     updateExportInfo();
 }
-
 function updateExportInfo(){
     const from = document.getElementById("exportFromDate").value;
     const to = document.getElementById("exportToDate").value;
@@ -2279,7 +2004,6 @@ function updateExportInfo(){
     info.innerHTML = `Report will include <strong>${days} day${days===1?"":"s"}</strong> from <strong>${from}</strong> to <strong>${to}</strong>. ` +
         `Scope: <strong>${document.getElementById("exportScope").value === "all" ? "All Projects" : "Current filter"}</strong>.`;
 }
-
 async function confirmExport(){
     const from = document.getElementById("exportFromDate").value;
     const to = document.getElementById("exportToDate").value;
@@ -2289,7 +2013,6 @@ async function confirmExport(){
     closeExportModal();
     await exportReportRange(from, to, scope);
 }
-
 async function exportReportRange(fromDate, toDate, scope){
     try{
         const { data: productivity, error } = await sb
@@ -2297,7 +2020,6 @@ async function exportReportRange(fromDate, toDate, scope){
             .gte("tracker_date", fromDate).lte("tracker_date", toDate).limit(50000);
         if(error) throw error;
         const rows = productivity || [];
-
         let scopedEmployees = employees;
         if(scope === "current"){
             const pv = document.getElementById("projectFilter").value;
@@ -2317,14 +2039,12 @@ async function exportReportRange(fromDate, toDate, scope){
                 return true;
             });
         }
-
         const csvRows = [];
         csvRows.push(["AMI Executive Report", `${fromDate} to ${toDate}`]);
         csvRows.push(["Scope", scope === "all" ? "All Projects" : "Current filter"]);
         csvRows.push(["Generated at", new Date().toLocaleString("en-IN")]);
         csvRows.push([]);
         csvRows.push(["Date","Employee","EMP ID","Project","Sub-Project","Sub-Project Target/FTE","Team Lead","Attendance","FTE","Adjusted Target","Achieved","Remaining","Achievement %"]);
-
         const dates = [];
         let cursor = new Date(fromDate + "T00:00:00");
         const endDate = new Date(toDate + "T00:00:00");
@@ -2332,13 +2052,11 @@ async function exportReportRange(fromDate, toDate, scope){
             dates.push(`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,"0")}-${String(cursor.getDate()).padStart(2,"0")}`);
             cursor.setDate(cursor.getDate() + 1);
         }
-
         scopedEmployees.forEach(emp => {
             const project = getProjectById(emp.project_id);
             const sp = emp.sub_project_id ? getSubProjectById(emp.sub_project_id) : null;
             const teamLead = getTeamLeadForProject(emp.project_id);
             const employeeTarget = resolveEmployeeTarget(emp, project);
-
             dates.forEach(date => {
                 const record = rows.find(r => Number(r.employee_id) === Number(emp.id) && r.tracker_date === date);
                 const attendance = getAttendanceLabel(record?.attendance);
@@ -2357,17 +2075,12 @@ async function exportReportRange(fromDate, toDate, scope){
                     project?.project_name || "",
                     sp ? spName(sp) : "",
                     (employeeTarget !== null && employeeTarget > 0) ? employeeTarget : "",
-                    teamLead,
-                    attendance,
-                    fte,
-                    target.toFixed(1),
-                    production,
-                    remaining,
+                    teamLead, attendance, fte,
+                    target.toFixed(1), production, remaining,
                     target > 0 ? achievement.toFixed(1) : "N/A"
                 ]);
             });
         });
-
         csvRows.push([]);
         csvRows.push(["Summary"]);
         let totalTarget = 0, totalProduction = 0;
@@ -2385,7 +2098,6 @@ async function exportReportRange(fromDate, toDate, scope){
         csvRows.push(["Total Target", totalTarget.toFixed(1)]);
         csvRows.push(["Total Production", totalProduction.toFixed(0)]);
         csvRows.push(["Total Achievement %", totalAchievement.toFixed(1) + "%"]);
-
         const csv = csvRows.map(row => row.map(v => csvEscape(v)).join(",")).join("\n");
         const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
@@ -2399,7 +2111,6 @@ async function exportReportRange(fromDate, toDate, scope){
         alert("Could not generate report: " + (error.message || error));
     }
 }
-
 function csvEscape(value){
     const text = String(value ?? "");
     if(text.includes(",") || text.includes('"') || text.includes("\n")){
@@ -2408,32 +2119,26 @@ function csvEscape(value){
     return text;
 }
 
-
 /* =========================================================
    LISTENERS
 ========================================================= */
 function bindListeners(){
     document.getElementById("trackerDate").addEventListener("change", async function(){ await loadDashboard(); });
-
     document.getElementById("projectFilter").addEventListener("change", function(){
         updateSubProjectFilter();
         updateTeamLeadFilter();
         applyFilters();
     });
-
     document.getElementById("subProjectFilter").addEventListener("change", function(){
         updateTeamLeadFilter();
         applyFilters();
     });
-
     document.getElementById("teamLeadFilter").addEventListener("change", function(){
         applyFilters();
     });
-
     document.getElementById("exportModal").addEventListener("click", function(e){
         if(e.target === this) closeExportModal();
     });
-
     document.addEventListener("keydown", function(e){
         if(e.key === "Escape"){
             const m = document.getElementById("exportModal");
@@ -2441,7 +2146,6 @@ function bindListeners(){
         }
     });
 }
-
 
 /* =========================================================
    AUTH STATE
@@ -2454,15 +2158,12 @@ sb.auth.onAuthStateChange(async (event) => {
 });
 </script>
 
+
 <!-- =========================================================
-     LIVE WALLPAPER — Aurora Mesh (isolated script)
-     Blob colors tuned for navy background
+     LIVE WALLPAPER — Aurora Mesh + Particles + Constellation
+     Isolated script so it always runs even if dashboard fails
 ========================================================= -->
 <script>
-/* =========================================================
-   LIVE WALLPAPER — Aurora Mesh (direct render)
-   Isolated from dashboard code so it always runs.
-========================================================= */
 (function(){
     var canvas = document.getElementById('liveWallpaper');
     if(!canvas) return;
@@ -2471,19 +2172,44 @@ sb.auth.onAuthStateChange(async (event) => {
 
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* Blobs tuned for navy: light blue + gold + teal glows */
+    /* ------------------ Aurora blobs ------------------ */
+    /* Bigger + brighter so they're clearly visible on navy */
     var BLOBS = [
-        { c:[59,130,190],  a:0.10,  bx:0.15, by:0.20, r:0.55, ax:0.08, ay:0.06, sx:0.00022, sy:0.00018, p:0.0 },  /* light blue */
-        { c:[26,77,122],   a:0.14,  bx:0.85, by:0.78, r:0.60, ax:0.10, ay:0.08, sx:0.00019, sy:0.00023, p:1.3 },  /* brand blue */
-        { c:[15,42,74],    a:0.12,  bx:0.55, by:0.42, r:0.45, ax:0.12, ay:0.10, sx:0.00017, sy:0.00019, p:2.6 },  /* deep navy */
-        { c:[201,162,39],  a:0.09,  bx:0.72, by:0.15, r:0.36, ax:0.09, ay:0.07, sx:0.00025, sy:0.00022, p:3.9 },  /* gold */
-        { c:[201,162,39],  a:0.06,  bx:0.25, by:0.85, r:0.42, ax:0.11, ay:0.09, sx:0.00018, sy:0.00026, p:5.2 },  /* gold */
-        { c:[13,122,74],   a:0.05,  bx:0.50, by:0.55, r:0.38, ax:0.13, ay:0.11, sx:0.00021, sy:0.00024, p:6.5 }   /* emerald */
+        { c:[59,130,190],  a:0.22, bx:0.15, by:0.20, r:0.65, ax:0.09, ay:0.07, sx:0.00022, sy:0.00018, p:0.0 },
+        { c:[26,77,122],   a:0.26, bx:0.85, by:0.78, r:0.70, ax:0.11, ay:0.09, sx:0.00019, sy:0.00023, p:1.3 },
+        { c:[36,99,160],   a:0.18, bx:0.55, by:0.42, r:0.55, ax:0.13, ay:0.11, sx:0.00017, sy:0.00019, p:2.6 },
+        { c:[201,162,39],  a:0.16, bx:0.72, by:0.15, r:0.42, ax:0.10, ay:0.08, sx:0.00025, sy:0.00022, p:3.9 },
+        { c:[201,162,39],  a:0.12, bx:0.25, by:0.85, r:0.48, ax:0.12, ay:0.10, sx:0.00018, sy:0.00026, p:5.2 },
+        { c:[13,180,120],  a:0.10, bx:0.50, by:0.55, r:0.45, ax:0.14, ay:0.12, sx:0.00021, sy:0.00024, p:6.5 }
     ];
 
+    /* ------------------ Particles ------------------ */
+    var PARTICLES = [];
+    var PARTICLE_COUNT = 60;
+    var LINK_DIST = 130;      /* px — connect particles closer than this */
+    var MOUSE_LINK_DIST = 180;
+
+    function initParticles(){
+        PARTICLES = [];
+        for(var i = 0; i < PARTICLE_COUNT; i++){
+            PARTICLES.push({
+                x: Math.random() * W,
+                y: Math.random() * H,
+                vx: (Math.random() - 0.5) * 0.35,
+                vy: (Math.random() - 0.5) * 0.35,
+                r: Math.random() * 1.6 + 0.7,
+                /* half gold, half light-blue */
+                gold: Math.random() < 0.5,
+                tw: Math.random() * Math.PI * 2   /* twinkle phase */
+            });
+        }
+    }
+
+    /* ------------------ State ------------------ */
     var W = 0, H = 0, DPR = 1, minDim = 0;
     var t = 0, rafId = null, lastFrame = 0;
     var P = { x:0, y:0, tx:0, ty:0 };
+    var mouse = { x:-9999, y:-9999 };
 
     function resize(){
         DPR = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -2495,24 +2221,29 @@ sb.auth.onAuthStateChange(async (event) => {
         canvas.style.width  = W + 'px';
         canvas.style.height = H + 'px';
         ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        if(PARTICLES.length === 0) initParticles();
         draw(performance.now());
     }
 
-    function draw(now){
-        P.x += (P.tx - P.x) * 0.05;
-        P.y += (P.ty - P.y) * 0.05;
-
-        ctx.clearRect(0, 0, W, H);
-
+    function drawBlobs(){
         for(var i = 0; i < BLOBS.length; i++){
             var b = BLOBS[i];
-            var cx = (b.bx + Math.sin(t * b.sx + b.p) * b.ax) * W + P.x * 20 * (0.4 + b.r);
-            var cy = (b.by + Math.cos(t * b.sy + b.p) * b.ay) * H + P.y * 20 * (0.4 + b.r);
-            var r  = b.r * minDim;
+            /* organic two-sine drift */
+            var dx = Math.sin(t * b.sx + b.p) * b.ax
+                   + Math.sin(t * b.sx * 0.41 + b.p * 1.7) * b.ax * 0.5;
+            var dy = Math.cos(t * b.sy + b.p) * b.ay
+                   + Math.cos(t * b.sy * 0.33 + b.p * 2.1) * b.ay * 0.5;
+
+            var cx = (b.bx + dx) * W + P.x * 24 * (0.4 + b.r);
+            var cy = (b.by + dy) * H + P.y * 24 * (0.4 + b.r);
+
+            /* breathing radius */
+            var breathe = 1 + Math.sin(t * b.sx * 0.6 + b.p * 1.3) * 0.10;
+            var r = b.r * minDim * breathe;
 
             var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
             grad.addColorStop(0,    'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',' + b.a + ')');
-            grad.addColorStop(0.55, 'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',' + (b.a * 0.4).toFixed(3) + ')');
+            grad.addColorStop(0.5,  'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',' + (b.a * 0.42).toFixed(3) + ')');
             grad.addColorStop(1,    'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',0)');
 
             ctx.fillStyle = grad;
@@ -2520,6 +2251,103 @@ sb.auth.onAuthStateChange(async (event) => {
             ctx.arc(cx, cy, r, 0, Math.PI * 2);
             ctx.fill();
         }
+    }
+
+    function drawParticles(){
+        /* 1) update + draw links first */
+        ctx.lineWidth = 0.6;
+        for(var i = 0; i < PARTICLES.length; i++){
+            var p = PARTICLES[i];
+            /* move */
+            p.x += p.vx;
+            p.y += p.vy;
+            p.tw += 0.03;
+
+            /* wrap around edges */
+            if(p.x < -10) p.x = W + 10;
+            if(p.x > W + 10) p.x = -10;
+            if(p.y < -10) p.y = H + 10;
+            if(p.y > H + 10) p.y = -10;
+
+            /* links to nearby particles */
+            for(var j = i + 1; j < PARTICLES.length; j++){
+                var q = PARTICLES[j];
+                var ddx = p.x - q.x, ddy = p.y - q.y;
+                var d2 = ddx * ddx + ddy * ddy;
+                if(d2 < LINK_DIST * LINK_DIST){
+                    var d = Math.sqrt(d2);
+                    var alpha = (1 - d / LINK_DIST) * 0.22;
+                    ctx.strokeStyle = 'rgba(201,162,39,' + alpha.toFixed(3) + ')';
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(q.x, q.y);
+                    ctx.stroke();
+                }
+            }
+
+            /* link to mouse pointer */
+            var mdx = p.x - mouse.x, mdy = p.y - mouse.y;
+            var md2 = mdx * mdx + mdy * mdy;
+            if(md2 < MOUSE_LINK_DIST * MOUSE_LINK_DIST){
+                var md = Math.sqrt(md2);
+                var malpha = (1 - md / MOUSE_LINK_DIST) * 0.35;
+                ctx.strokeStyle = 'rgba(120,180,255,' + malpha.toFixed(3) + ')';
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(mouse.x, mouse.y);
+                ctx.stroke();
+            }
+        }
+
+        /* 2) draw particles on top with twinkle */
+        for(var k = 0; k < PARTICLES.length; k++){
+            var pt = PARTICLES[k];
+            var twinkle = 0.55 + Math.sin(pt.tw) * 0.45;   /* 0.1 .. 1.0 */
+            if(pt.gold){
+                ctx.fillStyle = 'rgba(201,162,39,' + (0.85 * twinkle).toFixed(3) + ')';
+                ctx.shadowColor = 'rgba(201,162,39,0.9)';
+            }else{
+                ctx.fillStyle = 'rgba(120,180,255,' + (0.80 * twinkle).toFixed(3) + ')';
+                ctx.shadowColor = 'rgba(120,180,255,0.85)';
+            }
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.shadowBlur = 0;
+    }
+
+    /* soft moving grid pulse for extra "alive" feel */
+    function drawGrid(){
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.028)';
+        ctx.lineWidth = 1;
+        var step = 60;
+        var offset = (t * 0.012) % step;
+        ctx.beginPath();
+        for(var x = -offset; x < W; x += step){
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, H);
+        }
+        for(var y = -offset; y < H; y += step){
+            ctx.moveTo(0, y);
+            ctx.lineTo(W, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function draw(now){
+        /* ease pointer */
+        P.x += (P.tx - P.x) * 0.05;
+        P.y += (P.ty - P.y) * 0.05;
+
+        ctx.clearRect(0, 0, W, H);
+
+        drawGrid();
+        drawBlobs();
+        drawParticles();
     }
 
     function loop(now){
@@ -2544,11 +2372,14 @@ sb.auth.onAuthStateChange(async (event) => {
     window.addEventListener('resize', resize, { passive:true });
 
     window.addEventListener('pointermove', function(e){
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
         P.tx = (e.clientX / W) * 2 - 1;
         P.ty = (e.clientY / H) * 2 - 1;
     }, { passive:true });
 
     window.addEventListener('pointerleave', function(){
+        mouse.x = -9999; mouse.y = -9999;
         P.tx = 0; P.ty = 0;
     }, { passive:true });
 
