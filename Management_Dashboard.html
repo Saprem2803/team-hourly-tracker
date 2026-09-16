@@ -201,7 +201,6 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 .status-chip.neutral{background:var(--bg-soft);color:var(--muted);}
 .status-chip.neutral .dot{background:var(--muted);}
 
-/* CHART GRID — 2x2 layout for 4 charts */
 .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:36px;}
 .chart-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-card);}
 .chart-card-head{margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--line-2);}
@@ -441,7 +440,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                 <div class="kpi-icon">📉</div>
                 <div class="kpi-label">Shrinkage</div>
                 <div class="kpi-value" id="kpiShrinkage">0<span class="kpi-unit">%</span></div>
-                <div class="kpi-sub">Month-to-date · All days</div>
+                <div class="kpi-sub">Avg of daily · Month-to-date</div>
             </div>
             <div class="kpi-card neutral">
                 <div class="kpi-icon">🎯</div>
@@ -476,7 +475,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">01</span>
                     <div>
                         <div class="section-title">Project Scorecard</div>
-                        <div class="section-desc">Click any project with sub-projects to expand · Shrinkage is month-to-date</div>
+                        <div class="section-desc">Click any project with sub-projects to expand · Shrinkage = avg of daily % (month-to-date)</div>
                     </div>
                 </div>
             </div>
@@ -517,7 +516,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">02</span>
                     <div>
                         <div class="section-title">Sub-Project Scorecard</div>
-                        <div class="section-desc">Cross-project ranking · Shrinkage is month-to-date</div>
+                        <div class="section-desc">Cross-project ranking · Shrinkage = avg of daily % (month-to-date)</div>
                     </div>
                 </div>
             </div>
@@ -558,7 +557,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">03</span>
                     <div>
                         <div class="section-title">Team Lead Scorecard</div>
-                        <div class="section-desc">Leadership performance and project coverage · Shrinkage is month-to-date</div>
+                        <div class="section-desc">Leadership performance and project coverage · Shrinkage = avg of daily %</div>
                     </div>
                 </div>
             </div>
@@ -585,7 +584,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
         </section>
 
-        <!-- CHARTS (2x2 grid — 4 charts) -->
+        <!-- CHARTS -->
         <section class="section">
             <div class="section-head">
                 <div class="section-head-left">
@@ -1066,6 +1065,10 @@ function getActualProduction(productivity){
 
 /* =========================================================
    MONTHLY SHRINKAGE HELPERS
+   ---------------------------------------------------------
+   computeMonthlyShrinkage: AVERAGE of daily shrinkage %
+   For each day D in month: daily_shrinkage = (FTE - present_D)/FTE * 100
+   Average = sum(daily_shrinkage) / days_with_data
 ========================================================= */
 function getMonthDaysCount(){
     if(!currentDate) return 1;
@@ -1075,23 +1078,45 @@ function getMonthDaysCount(){
 }
 
 function computeMonthlyShrinkage(employeeIds){
+    if(!currentDate) return 0;
     if(!employeeIds || !employeeIds.length) return 0;
 
-    const days = getMonthDaysCount();
-    const possibleFTEDays = employeeIds.length * days;
-    if(possibleFTEDays === 0) return 0;
+    const parts = currentDate.split("-");
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const endDay = Number(parts[2]);
 
     const idSet = new Set(employeeIds.map(id => String(id).trim()));
-    let presentFTEDays = 0;
+    const employeeCount = idSet.size;
+    if(employeeCount === 0) return 0;
 
+    // Group present FTE by date for this scope
+    const presentByDate = new Map();
     monthlyProductivityRows.forEach(row => {
-        if(idSet.has(String(row.employee_id ?? "").trim())){
-            presentFTEDays += getAttendanceFactor(row.attendance);
-        }
+        if(!idSet.has(String(row.employee_id ?? "").trim())) return;
+        const date = row.tracker_date;
+        const factor = getAttendanceFactor(row.attendance);
+        presentByDate.set(date, (presentByDate.get(date) || 0) + factor);
     });
 
-    const shrink = ((possibleFTEDays - presentFTEDays) / possibleFTEDays) * 100;
-    return Math.max(0, shrink);
+    // Average of daily shrinkage percentages
+    let sumShrinkage = 0;
+    let dayCount = 0;
+
+    for(let day = 1; day <= endDay; day++){
+        const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const presentFTE = presentByDate.get(dateStr);
+
+        // Skip days with no productivity data
+        if(presentFTE === undefined || presentFTE === null) continue;
+
+        const dayShrinkage = ((employeeCount - presentFTE) / employeeCount) * 100;
+        sumShrinkage += Math.max(0, dayShrinkage);
+        dayCount++;
+    }
+
+    if(dayCount === 0) return 0;
+    return sumShrinkage / dayCount;
 }
 
 function computeDailyShrinkageSeries(employeeIds){
@@ -1360,7 +1385,7 @@ function renderHero(){
 
 
 /* =========================================================
-   KPIs  (monthly shrinkage)
+   KPIs  (avg daily shrinkage)
 ========================================================= */
 function renderKPIs(){
     const totalEmployees = filteredEmployees.length;
@@ -1400,7 +1425,7 @@ function renderKPIs(){
 
 
 /* =========================================================
-   PROJECT METRICS (monthly shrinkage)
+   PROJECT METRICS
 ========================================================= */
 function buildProjectMetrics(){
     const map = new Map();
@@ -1449,7 +1474,7 @@ function buildProjectMetrics(){
 
 
 /* =========================================================
-   SUB-PROJECT METRICS (monthly shrinkage)
+   SUB-PROJECT METRICS
 ========================================================= */
 function buildSubProjectMetrics(){
     const map = new Map();
@@ -1674,7 +1699,7 @@ function renderSubProjectTable(){
 
 
 /* =========================================================
-   TEAM LEAD TABLE (monthly shrinkage)
+   TEAM LEAD TABLE
 ========================================================= */
 function buildTeamLeadMetrics(){
     const map = new Map();
@@ -2003,9 +2028,6 @@ function renderShrinkageTrendChart(){
         });
         return;
     }
-
-    // Calculate average for reference line
-    const avg = series.values.reduce((t,v) => t + v, 0) / series.values.length;
 
     shrinkageTrendChart = new Chart(canvas, {
         type: "bar",
