@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMI | Portal Hub</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --ink:#0a1628; --ink-2:#1e293b; --ink-3:#475569; --ink-4:#64748b;
+    --muted:#94a3b8; --line:#e2e8f0;
+    --brand:#0f2a4a; --brand-2:#1a4d7a;
+    --gold:#c9a227; --gold-soft:#f5e6b8;
+    --green:#0d7a4a; --green-soft:#e6f4ec;
+    --amber:#b45309; --amber-soft:#fef3c7;
+    --red:#b91c1c; --red-soft:#fee2e2;
+    --violet:#6d28d9; --violet-soft:#ede9fe;
+    --blue:#0369a1; --blue-soft:#e0f2fe;
+    --shadow-card:0 1px 2px rgba(15,42,74,.04),0 12px 32px -8px rgba(15,42,74,.10),inset 0 1px 0 rgba(255,255,255,.9);
+    --radius:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    color:var(--ink-2); font-size:14px; line-height:1.5;
+    background-color:#fdfdfb;
+    background-image:
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+        radial-gradient(ellipse 900px 700px at 0% 0%,rgba(201,162,39,.06) 0%,transparent 60%),
+        radial-gradient(ellipse 800px 700px at 100% 100%,rgba(15,42,74,.05) 0%,transparent 65%),
+        linear-gradient(180deg,#fefefc 0%,#fbfbf8 45%,#f9f9f6 100%);
+    background-size:200px 200px,100% 100%,100% 100%,100% 100%;
+    background-repeat:repeat,no-repeat,no-repeat,no-repeat;
+    background-attachment:fixed;
+    background-blend-mode:multiply,normal,normal,normal;
+    min-height:100vh;
+}
+
+.page{max-width:1280px;margin:0 auto;padding:48px 32px 80px;}
+
+/* ============================
+   HEADER
+============================ */
+.brand-hero{
+    text-align:center;
+    margin-bottom:56px;
+    position:relative;
+}
+.brand-mark{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:68px;height:68px;border-radius:18px;
+    background:linear-gradient(135deg,var(--brand),var(--brand-2));
+    color:#fff;font-weight:800;font-size:22px;letter-spacing:.5px;
+    box-shadow:0 12px 36px rgba(15,42,74,.28);position:relative;overflow:hidden;
+    margin-bottom:22px;
+}
+.brand-mark::after{
+    content:'';position:absolute;width:80px;height:80px;border-radius:50%;
+    background:radial-gradient(circle,rgba(201,162,39,.4),transparent 70%);
+    top:-40px;right:-40px;
+}
+.brand-eyebrow{
+    font-size:11px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;
+    color:var(--gold);margin-bottom:10px;
+}
+.brand-title{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:42px;font-weight:700;color:var(--ink);
+    letter-spacing:-.8px;line-height:1.1;margin-bottom:14px;
+}
+.brand-sub{
+    font-size:15px;color:var(--ink-4);max-width:560px;margin:0 auto;
+    line-height:1.55;
+}
+
+/* ============================
+   SECTION HEADINGS
+============================ */
+.section{margin-bottom:52px;}
+.section-head{
+    display:flex;align-items:center;gap:12px;
+    margin-bottom:22px;padding-bottom:14px;
+    border-bottom:1px solid var(--line);
+}
+.section-icon{
+    width:32px;height:32px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;
+}
+.section-icon.gold{background:var(--gold-soft);color:#92400e;}
+.section-icon.green{background:var(--green-soft);color:var(--green);}
+.section-icon.blue{background:var(--blue-soft);color:var(--blue);}
+.section-icon.violet{background:var(--violet-soft);color:var(--violet);}
+.section-title{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:22px;font-weight:700;color:var(--ink);
+    letter-spacing:-.3px;
+}
+.section-desc{
+    font-size:12px;color:var(--ink-4);margin-top:3px;font-weight:500;
+}
+
+/* ============================
+   PORTAL CARDS
+============================ */
+.card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:20px;
+}
+
+.portal-card{
+    background:linear-gradient(180deg,#fff 0%,#fefefc 100%);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px 24px 24px;
+    text-decoration:none;
+    color:inherit;
+    display:flex;flex-direction:column;
+    position:relative;overflow:hidden;
+    box-shadow:var(--shadow-card);
+    transition:all .2s ease;
+    cursor:pointer;
+}
+.portal-card::before{
+    content:'';position:absolute;top:0;left:0;width:4px;height:100%;
+    background:var(--brand);opacity:.85;transition:opacity .2s;
+}
+.portal-card.gold::before{background:var(--gold);}
+.portal-card.green::before{background:var(--green);}
+.portal-card.blue::before{background:var(--blue);}
+.portal-card.violet::before{background:var(--violet);}
+.portal-card.red::before{background:var(--red);}
+.portal-card.amber::before{background:var(--amber);}
+
+.portal-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 4px 8px rgba(15,42,74,.06),0 24px 56px -12px rgba(15,42,74,.18),inset 0 1px 0 rgba(255,255,255,.9);
+    border-color:#cbd5e1;
+}
+
+.portal-icon{
+    width:52px;height:52px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;margin-bottom:18px;
+    background:linear-gradient(135deg,#f8fafc,#f1f5f9);
+    border:1px solid var(--line);
+    transition:transform .2s;
+}
+.portal-card:hover .portal-icon{transform:scale(1.06);}
+
+.portal-card.gold .portal-icon{background:linear-gradient(135deg,#fef3c7,#fde68a);border-color:#fcd34d;}
+.portal-card.green .portal-icon{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-color:#6ee7b7;}
+.portal-card.blue .portal-icon{background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-color:#7dd3fc;}
+.portal-card.violet .portal-icon{background:linear-gradient(135deg,#ede9fe,#ddd6fe);border-color:#c4b5fd;}
+.portal-card.red .portal-icon{background:linear-gradient(135deg,#fee2e2,#fecaca);border-color:#fca5a5;}
+.portal-card.amber .portal-icon{background:linear-gradient(135deg,#fef3c7,#fde68a);border-color:#fcd34d;}
+
+.portal-name{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:19px;font-weight:700;color:var(--ink);
+    letter-spacing:-.2px;margin-bottom:8px;line-height:1.2;
+}
+.portal-desc{
+    font-size:13px;color:var(--ink-4);line-height:1.55;
+    flex:1;margin-bottom:18px;
+}
+.portal-meta{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-top:16px;border-top:1px solid var(--line);
+}
+.portal-tag{
+    font-size:10px;font-weight:800;letter-spacing:.8px;
+    text-transform:uppercase;padding:5px 10px;border-radius:6px;
+}
+.portal-tag.management{background:var(--gold-soft);color:#92400e;}
+.portal-tag.employee{background:var(--green-soft);color:var(--green);}
+.portal-tag.operations{background:var(--blue-soft);color:var(--blue);}
+.portal-tag.tools{background:var(--violet-soft);color:var(--violet);}
+.portal-tag.public{background:#f1f5f9;color:var(--ink-3);}
+
+.portal-arrow{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:700;color:var(--brand-2);
+    transition:transform .2s;
+}
+.portal-card:hover .portal-arrow{transform:translateX(4px);}
+.portal-arrow svg{width:14px;height:14px;}
+
+/* ============================
+   FOOTER
+============================ */
+.footer{
+    text-align:center;padding-top:40px;
+    border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);letter-spacing:.4px;
+}
+.footer strong{color:var(--ink-3);font-weight:700;}
+
+/* ============================
+   RESPONSIVE
+============================ */
+@media (max-width:768px){
+    .page{padding:32px 20px 60px;}
+    .brand-title{font-size:30px;}
+    .brand-sub{font-size:14px;}
+    .card-grid{grid-template-columns:1fr;}
+    .section-title{font-size:19px;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <!-- ============================
+         HERO
+    ============================ -->
+    <div class="brand-hero">
+        <div class="brand-mark">AMI</div>
+        <div class="brand-eyebrow">Revenue Cycle Management</div>
+        <h1 class="brand-title">Portal Hub</h1>
+        <p class="brand-sub">
+            One place to access all AMI operational portals. Click any card below to open that portal.
+        </p>
+    </div>
+
+    <!-- ============================
+         MANAGEMENT PORTALS
+    ============================ -->
+    <section class="section">
+        <div class="section-head">
+            <div class="section-icon gold">👔</div>
+            <div>
+                <div class="section-title">Management Portals</div>
+                <div class="section-desc">Executive &amp; administrative access</div>
+            </div>
+        </div>
+
+        <div class="card-grid">
+
+            <a class="portal-card gold" href="Management_Dashboard.html">
+                <div class="portal-icon">📊</div>
+                <div class="portal-name">Executive Operations Dashboard</div>
+                <div class="portal-desc">
+                    Consolidated performance across all projects — achievement, shrinkage, targets, charts, and executive insights.
+                </div>
+                <div class="portal-meta">
+                    <span class="portal-tag management">Management</span>
+                    <span class="portal-arrow">Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                </div>
+            </a>
+
+            <a class="portal-card gold" href="admin.html">
+                <div class="portal-icon">⚙️</div>
+                <div class="portal-name">Admin Portal</div>
+                <div class="portal-desc">
+                    Manage projects, sub-projects, employees, team leads, trackers, and managers. Create logins, reset passwords.
+                </div>
+                <div class="portal-meta">
+                    <span class="portal-tag management">Management</span>
+                    <span class="portal-arrow">Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                </div>
+            </a>
+
+            <a class="portal-card gold" href="admin-reset-password.html">
+                <div class="portal-icon">🔑</div>
+                <div class="portal-name">Password Reset</div>
+                <div class="portal-desc">
+                    Reset a user's password or send recovery links. For management use when employees lose access.
+                </div>
+                <div class="portal-meta">
+                    <span class="portal-tag management">Management</span>
+                    <span class="portal-arrow">Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                </div>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- ============================
+         OPERATIONS PORTALS
+    ============================ -->
+    <section class="section">
+        <div class="section-head">
+            <div class="section-icon blue">⚡</div>
+            <div>
+                <div class="section-title">Operations Portals</div>
+                <div class="section-desc">Team leads &amp; tracking</div>
+            </div>
+        </div>
+
+        <div class="card-grid">
+
+            <a class="portal-card blue" href="index.html">
+                <div class="portal-icon">🎯</div>
+                <div class="portal-name">Operational Dashboard</div>
+                <div class="portal-desc">
+                    Team lead view — monitor hourly production, attendance, and daily achievement for their assigned project.
+                </div>
+                <div class="portal-meta">
+                    <span class="portal-tag operations">Team Lead</span>
+                    <span class="portal-arrow">Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                </div>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- ============================
+         EMPLOYEE PORTALS
+    ============================ -->
+    <section class="section">
+        <div class="section-head">
+            <div class="section-icon green">👥</div>
+            <div>
+                <div class="section-title">Employee Portals</div>
+                <div class="section-desc">Self-service entry</div>
+            </div>
+        </div>
+
+        <div class="card-grid">
+
+            <a class="portal-card green" href="Employee_Hourly_Entry.html">
+                <div class="portal-icon">⏱️</div>
+                <div class="portal-name">Hourly Production Tracker</div>
+                <div class="portal-desc">
+                    Employees log their own hourly production, mark attendance, and view their personal achievement vs. target.
+                </div>
+                <div class="portal-meta">
+                    <span class="portal-tag employee">Employee</span>
+                    <span class="portal-arrow">Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                </div>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- ============================
+         ADMIN TOOLS
+    ============================ -->
+    <section class="section">
+        <div class="section-head">
+            <div class="section-icon violet">🛠️</div>
+            <div>
+                <div class="section-title">Admin Tools</div>
+                <div class="section-desc">One-time maintenance scripts — use only as needed</div>
+            </div>
+        </div>
+
+        <div class="card-grid">
+
+            <a class="portal-card violet" href="bulk-logins.html">
+                <div class="portal-icon">➕</div>
+                <div class="portal-name">Bulk Login Creator</div>
+                <div class="portal-desc">
+                    Creates auth accounts for employees without logins. Skips anyone who already has one. Use once after a fresh import.
+                </div>
+                <div class="portal-meta">
+                    <span class="portal-tag tools">Admin Tool</span>
+                    <span class="portal-arrow">Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                </div>
+            </a>
+
+            <a class="portal-card violet" href="bulk-reset.html">
+                <div class="portal-icon">🔄</div>
+                <div class="portal-name">Bulk Password Reset</div>
+                <div class="portal-desc">
+                    Resets all employee passwords to a common value and forces a change on next login. Use for a company-wide reset.
+                </div>
+                <div class="portal-meta">
+                    <span class="portal-tag tools">Admin Tool</span>
+                    <span class="portal-arrow">Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+                </div>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- ============================
+         FOOTER
+    ============================ -->
+    <div class="footer">
+        <strong>AMI Revenue Cycle Management</strong> · Portal Hub · Confidential
+    </div>
+
+</div>
+
+</body>
+</html>
