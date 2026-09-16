@@ -2411,211 +2411,103 @@ sb.auth.onAuthStateChange(async (event) => {
         document.getElementById("loginScreen").classList.remove("hidden");
     }
 });
+</script>
 
-
+<!-- =========================================================
+     LIVE WALLPAPER — Aurora Mesh (isolated script)
+========================================================= -->
+<script>
 /* =========================================================
-   LIVE WALLPAPER v2 — Aurora Mesh
-   • Low-res offscreen render + upscale  → ~4x cheaper
-   • Organic multi-sine drift + breathing radius
-   • Pointer parallax (eased, device-orientation aware)
-   • Animated film grain + cached vignette
-   • Pauses when tab hidden, respects prefers-reduced-motion
-   • Toggle persisted in localStorage
+   LIVE WALLPAPER — Aurora Mesh (direct render)
+   Isolated from dashboard code so it always runs.
 ========================================================= */
 (function(){
-    const canvas = document.getElementById('liveWallpaper');
+    var canvas = document.getElementById('liveWallpaper');
     if(!canvas) return;
-    const ctx = canvas.getContext('2d', { alpha:true });
+    var ctx = canvas.getContext('2d');
     if(!ctx) return;
 
-    /* ---------------- config ---------------- */
-    const RENDER_SCALE = 0.28;        // offscreen resolution (0.20–0.40 is the sweet spot)
-    const TARGET_FPS   = 30;
-    const FRAME_MS     = 1000 / TARGET_FPS;
-    const PARALLAX     = 28;          // px of drift at full pointer deflection
-    const GRAIN_ALPHA  = 0.032;
-    const GRAIN_TILE   = 128;
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    /* blend: 'source-over' tints the paper, 'lighter' glows on top */
-    const BLOBS = [
-        { c:[15,42,74],   a:0.115, x:0.12, y:0.16, r:0.62, ax:0.09, ay:0.07, s:0.00016, p:0.0,  blend:'source-over' },
-        { c:[26,77,122],  a:0.095, x:0.88, y:0.82, r:0.66, ax:0.10, ay:0.08, s:0.00013, p:1.3,  blend:'source-over' },
-        { c:[10,22,40],   a:0.060, x:0.52, y:0.44, r:0.52, ax:0.13, ay:0.11, s:0.00011, p:2.6,  blend:'source-over' },
-        { c:[201,162,39], a:0.075, x:0.78, y:0.12, r:0.40, ax:0.09, ay:0.07, s:0.00019, p:3.9,  blend:'lighter' },
-        { c:[201,162,39], a:0.055, x:0.20, y:0.88, r:0.46, ax:0.11, ay:0.09, s:0.00014, p:5.2,  blend:'lighter' },
-        { c:[13,122,74],  a:0.045, x:0.48, y:0.58, r:0.42, ax:0.14, ay:0.12, s:0.00017, p:6.5,  blend:'lighter' },
-        { c:[59,130,190], a:0.050, x:0.62, y:0.30, r:0.38, ax:0.12, ay:0.10, s:0.00021, p:7.8,  blend:'lighter' }
+    var BLOBS = [
+        { c:[15,42,74],   a:0.10,  bx:0.15, by:0.20, r:0.55, ax:0.08, ay:0.06, sx:0.00022, sy:0.00018, p:0.0 },
+        { c:[26,77,122],  a:0.08,  bx:0.85, by:0.78, r:0.60, ax:0.10, ay:0.08, sx:0.00019, sy:0.00023, p:1.3 },
+        { c:[10,22,40],   a:0.055, bx:0.55, by:0.42, r:0.45, ax:0.12, ay:0.10, sx:0.00017, sy:0.00019, p:2.6 },
+        { c:[201,162,39], a:0.065, bx:0.72, by:0.15, r:0.36, ax:0.09, ay:0.07, sx:0.00025, sy:0.00022, p:3.9 },
+        { c:[201,162,39], a:0.050, bx:0.25, by:0.85, r:0.42, ax:0.11, ay:0.09, sx:0.00018, sy:0.00026, p:5.2 },
+        { c:[13,122,74],  a:0.040, bx:0.50, by:0.55, r:0.38, ax:0.13, ay:0.11, sx:0.00021, sy:0.00024, p:6.5 }
     ];
 
-    /* ---------------- state ---------------- */
-    const off = document.createElement('canvas');
-    let offCtx = null;
-    let W = 0, H = 0, DPR = 1, minDim = 0;
-    let vignette = null;
-    let grainPattern = null;
-    let rafId = null, lastFrame = 0, running = false;
+    var W = 0, H = 0, DPR = 1, minDim = 0;
+    var t = 0, rafId = null, lastFrame = 0;
+    var P = { x:0, y:0, tx:0, ty:0 };
 
-    const pointer = { x:0, y:0, tx:0, ty:0 };
-
-    /* ---------------- grain ---------------- */
-    function buildGrain(){
-        const c = document.createElement('canvas');
-        c.width = c.height = GRAIN_TILE;
-        const g = c.getContext('2d');
-        const img = g.createImageData(GRAIN_TILE, GRAIN_TILE);
-        const d = img.data;
-        for(let i = 0; i < d.length; i += 4){
-            const v = (Math.random() * 255) | 0;
-            d[i] = d[i+1] = d[i+2] = v;
-            d[i+3] = 255;
-        }
-        g.putImageData(img, 0, 0);
-        grainPattern = ctx.createPattern(c, 'repeat');
-    }
-
-    /* ---------------- resize ---------------- */
     function resize(){
         DPR = Math.min(window.devicePixelRatio || 1, 1.5);
         W = window.innerWidth;
         H = window.innerHeight;
         minDim = Math.min(W, H);
-
         canvas.width  = Math.round(W * DPR);
         canvas.height = Math.round(H * DPR);
         canvas.style.width  = W + 'px';
         canvas.style.height = H + 'px';
         ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
-        /* offscreen buffer — blobs are soft, so low-res is invisible */
-        const ow = Math.max(2, Math.round(W * RENDER_SCALE));
-        const oh = Math.max(2, Math.round(H * RENDER_SCALE));
-        off.width = ow; off.height = oh;
-        offCtx = off.getContext('2d');
-        offCtx.setTransform(ow / W, 0, 0, oh / H, 0, 0);   // draw in CSS-px coords
-
-        /* cached vignette */
-        vignette = ctx.createRadialGradient(
-            W/2, H/2, minDim * 0.25,
-            W/2, H/2, Math.max(W, H) * 0.78
-        );
-        vignette.addColorStop(0, 'rgba(10,22,40,0)');
-        vignette.addColorStop(1, 'rgba(10,22,40,0.055)');
-
-        buildGrain();
         draw(performance.now());
     }
 
-    /* ---------------- draw ---------------- */
     function draw(now){
-        const time = now || 0;
+        P.x += (P.tx - P.x) * 0.05;
+        P.y += (P.ty - P.y) * 0.05;
 
-        /* eased pointer */
-        pointer.x += (pointer.tx - pointer.x) * 0.06;
-        pointer.y += (pointer.ty - pointer.y) * 0.06;
-
-        offCtx.clearRect(0, 0, W, H);
-
-        for(const b of BLOBS){
-            const ph = b.p, sp = b.s;
-
-            /* two sines per axis → non-repeating organic drift */
-            const dx = Math.sin(time * sp + ph) * b.ax
-                     + Math.sin(time * sp * 0.41 + ph * 1.7) * b.ax * 0.55;
-            const dy = Math.cos(time * sp * 0.87 + ph) * b.ay
-                     + Math.cos(time * sp * 0.33 + ph * 2.1) * b.ay * 0.50;
-
-            /* parallax — bigger blobs move more */
-            const cx = (b.x + dx) * W + pointer.x * PARALLAX * (0.4 + b.r);
-            const cy = (b.y + dy) * H + pointer.y * PARALLAX * (0.4 + b.r);
-
-            /* breathing radius */
-            const breathe = 1 + Math.sin(time * sp * 0.6 + ph * 1.3) * 0.09;
-            const rad = b.r * minDim * breathe;
-
-            const [cr, cg, cb] = b.c;
-            const g = offCtx.createRadialGradient(cx, cy, 0, cx, cy, rad);
-            g.addColorStop(0,    `rgba(${cr},${cg},${cb},${b.a})`);
-            g.addColorStop(0.45, `rgba(${cr},${cg},${cb},${(b.a * 0.45).toFixed(3)})`);
-            g.addColorStop(1,    `rgba(${cr},${cg},${cb},0)`);
-
-            offCtx.globalCompositeOperation = b.blend;
-            offCtx.fillStyle = g;
-            offCtx.beginPath();
-            offCtx.arc(cx, cy, rad, 0, Math.PI * 2);
-            offCtx.fill();
-        }
-        offCtx.globalCompositeOperation = 'source-over';
-
-        /* blit upscaled */
         ctx.clearRect(0, 0, W, H);
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(off, 0, 0, off.width, off.height, 0, 0, W, H);
 
-        /* vignette */
-        if(vignette){
-            ctx.fillStyle = vignette;
-            ctx.fillRect(0, 0, W, H);
-        }
+        for(var i = 0; i < BLOBS.length; i++){
+            var b = BLOBS[i];
+            var cx = (b.bx + Math.sin(t * b.sx + b.p) * b.ax) * W + P.x * 20 * (0.4 + b.r);
+            var cy = (b.by + Math.cos(t * b.sy + b.p) * b.ay) * H + P.y * 20 * (0.4 + b.r);
+            var r  = b.r * minDim;
 
-        /* animated film grain */
-        if(grainPattern){
-            ctx.save();
-            ctx.globalAlpha = GRAIN_ALPHA;
-            ctx.translate(
-                -((Math.random() * GRAIN_TILE) | 0),
-                -((Math.random() * GRAIN_TILE) | 0)
-            );
-            ctx.fillStyle = grainPattern;
-            ctx.fillRect(0, 0, W + GRAIN_TILE, H + GRAIN_TILE);
-            ctx.restore();
+            var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+            grad.addColorStop(0,    'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',' + b.a + ')');
+            grad.addColorStop(0.55, 'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',' + (b.a * 0.4).toFixed(3) + ')');
+            grad.addColorStop(1,    'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',0)');
+
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.fill();
         }
     }
 
-    /* ---------------- loop ---------------- */
     function loop(now){
         rafId = requestAnimationFrame(loop);
-        if(now - lastFrame < FRAME_MS) return;
+        if(now - lastFrame < 32) return;   /* ~30 FPS cap */
         lastFrame = now;
+        t += 16;
         draw(now);
     }
 
     function start(){
-        if(running) return;
-        running = true;
+        if(rafId) return;
         if(reduceMotion){ draw(performance.now()); return; }
         lastFrame = 0;
         rafId = requestAnimationFrame(loop);
     }
 
     function stop(){
-        running = false;
         if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
     }
 
-    /* ---------------- events ---------------- */
+    window.addEventListener('resize', resize, { passive:true });
+
     window.addEventListener('pointermove', function(e){
-        pointer.tx = (e.clientX / window.innerWidth)  * 2 - 1;
-        pointer.ty = (e.clientY / window.innerHeight) * 2 - 1;
+        P.tx = (e.clientX / W) * 2 - 1;
+        P.ty = (e.clientY / H) * 2 - 1;
     }, { passive:true });
 
     window.addEventListener('pointerleave', function(){
-        pointer.tx = 0; pointer.ty = 0;
+        P.tx = 0; P.ty = 0;
     }, { passive:true });
-
-    window.addEventListener('deviceorientation', function(e){
-        if(e.gamma === null || e.beta === null) return;
-        pointer.tx = Math.max(-1, Math.min(1, e.gamma / 35));
-        pointer.ty = Math.max(-1, Math.min(1, (e.beta - 45) / 45));
-    }, { passive:true });
-
-    let resizeTimer = null;
-    window.addEventListener('resize', function(){
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(resize, 140);
-    });
 
     document.addEventListener('visibilitychange', function(){
         if(document.hidden) stop();
@@ -2636,19 +2528,19 @@ sb.auth.onAuthStateChange(async (event) => {
    WALLPAPER TOGGLE — floating control, persisted
 ========================================================= */
 (function(){
-    const btn = document.getElementById('wallpaperToggle');
+    var btn = document.getElementById('wallpaperToggle');
     if(!btn) return;
-    const KEY = 'ami.wallpaper';
+    var KEY = 'ami.wallpaper';
 
     function apply(on){
         document.body.classList.toggle('wp-off', !on);
         btn.classList.toggle('off', !on);
         btn.textContent = on ? '◐' : '○';
         btn.setAttribute('aria-pressed', String(on));
-        window.dispatchEvent(new CustomEvent('wallpaper:toggle', { detail:{ on } }));
+        window.dispatchEvent(new CustomEvent('wallpaper:toggle', { detail:{ on: on } }));
     }
 
-    let on = localStorage.getItem(KEY) !== 'off';
+    var on = localStorage.getItem(KEY) !== 'off';
     apply(on);
 
     btn.addEventListener('click', function(){
