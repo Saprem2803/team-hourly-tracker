@@ -438,9 +438,9 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
             </div>
             <div class="kpi-card neutral">
                 <div class="kpi-icon">📉</div>
-                <div class="kpi-label">Shrinkage</div>
+                <div class="kpi-label">Current Month Shrinkage</div>
                 <div class="kpi-value" id="kpiShrinkage">0<span class="kpi-unit">%</span></div>
-                <div class="kpi-sub">Avg of daily · Month-to-date</div>
+                <div class="kpi-sub" id="kpiShrinkageSub">0 shrinkage days / 0 scheduled days</div>
             </div>
             <div class="kpi-card neutral">
                 <div class="kpi-icon">🎯</div>
@@ -475,7 +475,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">01</span>
                     <div>
                         <div class="section-title">Project Scorecard</div>
-                        <div class="section-desc">Click any project with sub-projects to expand · Shrinkage = avg of daily % (month-to-date)</div>
+                        <div class="section-desc">Click any project with sub-projects to expand · Shrinkage = shrinkage days ÷ scheduled days (month-to-date)</div>
                     </div>
                 </div>
             </div>
@@ -516,7 +516,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">02</span>
                     <div>
                         <div class="section-title">Sub-Project Scorecard</div>
-                        <div class="section-desc">Cross-project ranking · Shrinkage = avg of daily % (month-to-date)</div>
+                        <div class="section-desc">Cross-project ranking · Shrinkage = shrinkage days ÷ scheduled days (month-to-date)</div>
                     </div>
                 </div>
             </div>
@@ -557,7 +557,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">03</span>
                     <div>
                         <div class="section-title">Team Lead Scorecard</div>
-                        <div class="section-desc">Leadership performance and project coverage · Shrinkage = avg of daily %</div>
+                        <div class="section-desc">Leadership performance and project coverage · Shrinkage = shrinkage days ÷ scheduled days</div>
                     </div>
                 </div>
             </div>
@@ -1066,57 +1066,46 @@ function getActualProduction(productivity){
 /* =========================================================
    MONTHLY SHRINKAGE HELPERS
    ---------------------------------------------------------
-   computeMonthlyShrinkage: AVERAGE of daily shrinkage %
-   For each day D in month: daily_shrinkage = (FTE - present_D)/FTE * 100
-   Average = sum(daily_shrinkage) / days_with_data
+   Formula (matches operational dashboard):
+     scheduled_days = active_employees × days_elapsed_in_month
+     shrinkage_days = Σ (1 − attendance_factor)
+     shrinkage_%    = (shrinkage_days ÷ scheduled_days) × 100
 ========================================================= */
-function getMonthDaysCount(){
-    if(!currentDate) return 1;
-    const parts = currentDate.split("-");
-    const dayOfMonth = Number(parts[2]) || 1;
-    return Math.max(1, dayOfMonth);
-}
-
-function computeMonthlyShrinkage(employeeIds){
-    if(!currentDate) return 0;
-    if(!employeeIds || !employeeIds.length) return 0;
+function computeShrinkageBreakdown(employeeIds){
+    const empty = { pct: 0, shrinkDays: 0, scheduledDays: 0 };
+    if(!currentDate) return empty;
+    if(!employeeIds || !employeeIds.length) return empty;
 
     const parts = currentDate.split("-");
-    const year = Number(parts[0]);
-    const month = Number(parts[1]);
-    const endDay = Number(parts[2]);
+    const endDay = Number(parts[2]) || 1;
+    const daysElapsed = Math.max(1, endDay);
 
     const idSet = new Set(employeeIds.map(id => String(id).trim()));
     const employeeCount = idSet.size;
-    if(employeeCount === 0) return 0;
+    if(employeeCount === 0) return empty;
 
-    // Group present FTE by date for this scope
-    const presentByDate = new Map();
+    const scheduledDays = employeeCount * daysElapsed;
+
+    let shrinkDays = 0;
     monthlyProductivityRows.forEach(row => {
         if(!idSet.has(String(row.employee_id ?? "").trim())) return;
-        const date = row.tracker_date;
         const factor = getAttendanceFactor(row.attendance);
-        presentByDate.set(date, (presentByDate.get(date) || 0) + factor);
+        shrinkDays += (1 - factor);
     });
 
-    // Average of daily shrinkage percentages
-    let sumShrinkage = 0;
-    let dayCount = 0;
+    const pct = scheduledDays > 0
+        ? (shrinkDays / scheduledDays) * 100
+        : 0;
 
-    for(let day = 1; day <= endDay; day++){
-        const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        const presentFTE = presentByDate.get(dateStr);
+    return {
+        pct: Math.max(0, pct),
+        shrinkDays: Math.max(0, shrinkDays),
+        scheduledDays
+    };
+}
 
-        // Skip days with no productivity data
-        if(presentFTE === undefined || presentFTE === null) continue;
-
-        const dayShrinkage = ((employeeCount - presentFTE) / employeeCount) * 100;
-        sumShrinkage += Math.max(0, dayShrinkage);
-        dayCount++;
-    }
-
-    if(dayCount === 0) return 0;
-    return sumShrinkage / dayCount;
+function computeMonthlyShrinkage(employeeIds){
+    return computeShrinkageBreakdown(employeeIds).pct;
 }
 
 function computeDailyShrinkageSeries(employeeIds){
@@ -1385,7 +1374,7 @@ function renderHero(){
 
 
 /* =========================================================
-   KPIs  (avg daily shrinkage)
+   KPIs  (aggregate monthly shrinkage + breakdown sub-text)
 ========================================================= */
 function renderKPIs(){
     const totalEmployees = filteredEmployees.length;
@@ -1394,15 +1383,23 @@ function renderKPIs(){
     const production = filteredEmployees.reduce((t,m) => t + m.production, 0);
     const achievement = target > 0 ? (production / target) * 100 : 0;
     const average = presentFTE > 0 ? production / presentFTE : 0;
-    const shrinkage = computeMonthlyShrinkage(filteredEmployees.map(m => m.employee.id));
+
+    const shrinkageDetails = computeShrinkageBreakdown(filteredEmployees.map(m => m.employee.id));
+    const shrinkage = shrinkageDetails.pct;
 
     document.getElementById("kpiEmployees").textContent = totalEmployees;
     document.getElementById("kpiPresent").textContent = formatNumber(presentFTE, 1);
-    document.getElementById("kpiShrinkage").innerHTML = formatNumber(shrinkage, 1) + '<span class="kpi-unit">%</span>';
+    document.getElementById("kpiShrinkage").innerHTML = formatNumber(shrinkage, 2) + '<span class="kpi-unit">%</span>';
     document.getElementById("kpiTarget").textContent = formatNumber(target, 1);
     document.getElementById("kpiProduction").textContent = formatNumber(production, 0);
     document.getElementById("kpiAchievement").innerHTML = formatNumber(achievement, 1) + '<span class="kpi-unit">%</span>';
     document.getElementById("kpiAverage").textContent = formatNumber(average, 1);
+
+    const shrinkSubEl = document.getElementById("kpiShrinkageSub");
+    if(shrinkSubEl){
+        shrinkSubEl.textContent =
+            `${formatNumber(shrinkageDetails.shrinkDays, 1)} shrinkage days / ${formatNumber(shrinkageDetails.scheduledDays, 0)} scheduled days`;
+    }
 
     const achCard = document.getElementById("kpiAchievement").closest(".kpi-card");
     achCard.classList.remove("good","warn","bad","neutral");
