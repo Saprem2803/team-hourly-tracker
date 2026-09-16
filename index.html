@@ -506,85 +506,6 @@ body.wp-off #liveWallpaper { opacity: 0; }
         </div>
     </div>
 
-    <!-- SETUP -->
-    <div class="section management-only" id="managementSetupSection">
-        <div class="section-title">Setup</div>
-        <div class="setup-grid">
-
-            <div class="setup-card">
-                <h3>Project Setup</h3>
-                <div class="form-field">
-                    <label>Project Name</label>
-                    <input id="projectName" placeholder="Example: BFW">
-                </div>
-                <br>
-                <div class="form-field">
-                    <label>Daily Target</label>
-                    <input type="number" min="0" id="projectTarget" placeholder="Leave blank if target is at sub-project level">
-                </div>
-                <br>
-                <button class="btn-primary" onclick="addProject()">Add Project</button>
-                <div class="setup-note">
-                    For BFW, leave the project target blank and set AR target to 55 under Sub-Project Setup. For WRMC, add AR sub-project with target 40.
-                </div>
-            </div>
-
-            <div class="setup-card">
-                <h3>Sub-Project Setup</h3>
-                <div class="form-field">
-                    <label>Project</label>
-                    <select id="subProjectParent"><option value="">Select Project</option></select>
-                </div>
-                <br>
-                <div class="form-field">
-                    <label>Sub-Project Name</label>
-                    <input id="subProjectName" placeholder="Example: AR">
-                </div>
-                <br>
-                <div class="form-field">
-                    <label>Daily Target</label>
-                    <input type="number" min="0" id="subProjectTarget" placeholder="Example: 55">
-                </div>
-                <br>
-                <label>
-                    <input type="checkbox" id="subProjectTargetBased" checked>
-                    Target Based
-                </label>
-                <br><br>
-                <button class="btn-primary" onclick="addSubProject()">Add Sub-Project</button>
-            </div>
-
-            <div class="setup-card">
-                <h3>Employee Setup</h3>
-                <div class="form-row">
-                    <div class="form-field">
-                        <label>Employee Name</label>
-                        <input id="employeeName" placeholder="Employee Name">
-                    </div>
-                    <div class="form-field">
-                        <label>Employee ID</label>
-                        <input id="employeeCode" placeholder="Employee ID">
-                    </div>
-                </div>
-                <div class="form-field">
-                    <label>Project</label>
-                    <select id="employeeProject" onchange="loadEmployeeSubProjectDropdown()">
-                        <option value="">Select Project</option>
-                    </select>
-                </div>
-                <br>
-                <div class="form-field">
-                    <label>Sub-Project</label>
-                    <select id="employeeSubProject" disabled></select>
-                </div>
-                <br>
-                <button class="btn-primary" onclick="addEmployee()">Add Employee</button>
-                <div class="employee-list" id="employeeList"></div>
-            </div>
-
-        </div>
-    </div>
-
 </div>
 
 <div class="message" id="message"></div>
@@ -1319,48 +1240,9 @@ function loadSubProjectFilter(preserveValue = null) {
 function handleProjectFilterChange() { loadSubProjectFilter(""); buildDailyTracker(); updateDashboard(); }
 function handleSubProjectFilterChange() { buildDailyTracker(); updateDashboard(); }
 
-function loadEmployeeProjectDropdown() {
-    const employeeSelect = document.getElementById("employeeProject");
-    const parentSelect = document.getElementById("subProjectParent");
-    employeeSelect.innerHTML = `<option value="">Select Project</option>`;
-    parentSelect.innerHTML = `<option value="">Select Project</option>`;
-    projects.forEach(project => {
-        const option1 = document.createElement("option");
-        option1.value = project.id; option1.textContent = project.project_name;
-        employeeSelect.appendChild(option1);
-        const option2 = document.createElement("option");
-        option2.value = project.id; option2.textContent = project.project_name;
-        parentSelect.appendChild(option2);
-    });
-}
-
-function loadEmployeeSubProjectDropdown() {
-    const projectId = document.getElementById("employeeProject").value;
-    const select = document.getElementById("employeeSubProject");
-    select.innerHTML = "";
-    if (!projectId) {
-        select.disabled = true;
-        select.innerHTML = `<option value="">Select Project First</option>`;
-        return;
-    }
-    const list = subProjects.filter(sp => Number(sp.project_id) === Number(projectId) && sp.active === true);
-    if (!list.length) {
-        select.disabled = true;
-        select.innerHTML = `<option value="">No Sub-Project Required</option>`;
-        return;
-    }
-    select.disabled = false;
-    select.innerHTML = `<option value="">Select Sub-Project</option>`;
-    list.forEach(sp => {
-        const option = document.createElement("option");
-        option.value = sp.id;
-        option.textContent = sp.target_based ? `${sp.sub_project_name} - Target ${sp.daily_target}` : `${sp.sub_project_name} - N/A`;
-        select.appendChild(option);
-    });
-}
-
 function displayEmployees() {
     const container = document.getElementById("employeeList");
+    if (!container) return;
     container.innerHTML = "";
     employees.forEach(employee => {
         const project = getProjectById(employee.project_id);
@@ -1934,7 +1816,6 @@ async function refreshDashboard() {
     await loadEmployeeProjects();
     loadProjectFilter(selectedProject);
     loadSubProjectFilter(selectedSubProject);
-    loadEmployeeProjectDropdown();
     displayEmployees();
     await loadDailyTracker();
     await updateDashboard();
@@ -2080,92 +1961,6 @@ async function downloadMTDCSV() {
     showMessage("MTD Report downloaded successfully");
 }
 
-/* =========================================================
-   SETUP
-========================================================= */
-async function addProject() {
-    const name = document.getElementById("projectName").value.trim();
-    const target = document.getElementById("projectTarget").value;
-    if (!name) { showMessage("Enter project name", "error"); return; }
-    const duplicate = projects.some(p => String(p.project_name || "").trim().toLowerCase() === name.toLowerCase());
-    if (duplicate) { showMessage("Project already exists", "error"); return; }
-    const { error } = await supabaseClient.from("projects").insert({
-        project_name: name,
-        daily_target: target !== "" ? Number(target) : null
-    });
-    if (error) { showMessage(error.message, "error"); return; }
-    document.getElementById("projectName").value = "";
-    document.getElementById("projectTarget").value = "";
-    await loadProjects();
-    loadProjectFilter();
-    loadEmployeeProjectDropdown();
-    showMessage(`${name} project added successfully`);
-}
-
-async function addSubProject() {
-    const projectId = document.getElementById("subProjectParent").value;
-    const name = document.getElementById("subProjectName").value.trim();
-    const target = document.getElementById("subProjectTarget").value;
-    const targetBased = document.getElementById("subProjectTargetBased").checked;
-    if (!projectId) { showMessage("Select project", "error"); return; }
-    if (!name) { showMessage("Enter sub-project name", "error"); return; }
-    if (targetBased && target === "") { showMessage("Enter daily target", "error"); return; }
-    const { error } = await supabaseClient.from("sub_projects").insert({
-        project_id: Number(projectId),
-        sub_project_name: name,
-        daily_target: targetBased ? Number(target) : null,
-        target_based: targetBased,
-        active: true
-    });
-    if (error) { showMessage(error.message, "error"); return; }
-    document.getElementById("subProjectName").value = "";
-    document.getElementById("subProjectTarget").value = "";
-    await loadSubProjects();
-    loadSubProjectFilter();
-    loadEmployeeSubProjectDropdown();
-    displayEmployees();
-    updateDashboard();
-    showMessage(`${name} sub-project added successfully`);
-}
-
-async function addEmployee() {
-    const name = document.getElementById("employeeName").value.trim();
-    const code = document.getElementById("employeeCode").value.trim();
-    const projectId = document.getElementById("employeeProject").value;
-    const subProjectId = document.getElementById("employeeSubProject").value;
-    if (!name) { showMessage("Enter employee name", "error"); return; }
-    if (!code) { showMessage("Enter employee ID", "error"); return; }
-    if (!projectId) { showMessage("Select project", "error"); return; }
-    const projectSubProjects = subProjects.filter(sp => Number(sp.project_id) === Number(projectId) && sp.active === true);
-    if (projectSubProjects.length && !subProjectId) { showMessage("Select sub-project", "error"); return; }
-    const { data, error } = await supabaseClient.from("employees").insert({
-        employee_name: name,
-        employee_code: code,
-        project_id: Number(projectId),
-        sub_project_id: subProjectId ? Number(subProjectId) : null,
-        active: true
-    }).select().single();
-    if (error) { showMessage(error.message, "error"); return; }
-    if (data) {
-        await supabaseClient.from("employee_projects").insert({
-            employee_id: data.id,
-            project_id: Number(projectId),
-            sub_project_id: subProjectId ? Number(subProjectId) : null
-        });
-    }
-    document.getElementById("employeeName").value = "";
-    document.getElementById("employeeCode").value = "";
-    document.getElementById("employeeProject").value = "";
-    document.getElementById("employeeSubProject").disabled = true;
-    document.getElementById("employeeSubProject").innerHTML = `<option value="">Select Project First</option>`;
-    await loadEmployees();
-    await loadEmployeeProjects();
-    displayEmployees();
-    buildDailyTracker();
-    updateDashboard();
-    showMessage("Employee added successfully");
-}
-
 function escapeHtml(value) {
     return String(value ?? "")
         .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -2200,7 +1995,6 @@ async function bootstrapApplicationData() {
     await loadEmployeeProjects();
     loadProjectFilter();
     loadSubProjectFilter();
-    loadEmployeeProjectDropdown();
     displayEmployees();
     buildDailyTracker();
     await loadDailyTracker();
