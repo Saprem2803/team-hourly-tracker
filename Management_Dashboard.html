@@ -2196,8 +2196,8 @@ sb.auth.onAuthStateChange(async (event) => {
 
 
 <!-- =========================================================
-     LIVE WALLPAPER — Floating Golden Dots (bigger ambers)
-     Only the wallpaper animation is changed.
+     LIVE WALLPAPER — Small Golden Dots with Faint Light Rays
+     Ambers are now smaller and connected by faint golden rays.
 ========================================================= -->
 <script>
 (function(){
@@ -2210,6 +2210,7 @@ sb.auth.onAuthStateChange(async (event) => {
     var W = 0, H = 0, DPR = 1;
     var particles = [];
     var COUNT = 85;
+    var LINK_DISTANCE = 180;   /* Max distance (px) to draw a ray between two dots */
     var rafId = null;
     var lastFrame = 0;
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2238,8 +2239,8 @@ sb.auth.onAuthStateChange(async (event) => {
                 y: Math.random() * H,
                 vx: (Math.random() - 0.5) * 0.28,
                 vy: (Math.random() - 0.5) * 0.28,
-                /* Large amber size */
-                r: Math.random() * 8 + 5,
+                /* === Small amber size === */
+                r: Math.random() * 1.6 + 0.8,
                 phase: Math.random() * Math.PI * 2,
                 speed: Math.random() * 0.018 + 0.008,
                 drift: Math.random() * 0.18 + 0.05
@@ -2250,57 +2251,103 @@ sb.auth.onAuthStateChange(async (event) => {
     function draw(now){
         ctx.clearRect(0, 0, W, H);
 
+        /* ---------- 1. Faint golden rays between nearby dots ---------- */
+        ctx.globalCompositeOperation = 'lighter';
+
         for(var i = 0; i < particles.length; i++){
-            var p = particles[i];
+            var p1 = particles[i];
+            for(var j = i + 1; j < particles.length; j++){
+                var p2 = particles[j];
+
+                var dx = p2.x - p1.x;
+                var dy = p2.y - p1.y;
+                var distSq = dx * dx + dy * dy;
+
+                if(distSq > LINK_DISTANCE * LINK_DISTANCE) continue;
+
+                var dist = Math.sqrt(distSq);
+                /* Proximity factor: 1 when very close, 0 when at max distance */
+                var proximity = 1 - (dist / LINK_DISTANCE);
+
+                /* Combined pulse from both endpoints → ray breathes with them */
+                var pulse1 = 0.58 + Math.sin(p1.phase) * 0.42;
+                var pulse2 = 0.58 + Math.sin(p2.phase) * 0.42;
+                var pulseAvg = (pulse1 + pulse2) * 0.5;
+
+                /* Very faint golden alpha */
+                var lineAlpha = proximity * proximity * 0.22 * pulseAvg;
+
+                ctx.strokeStyle = 'rgba(255, 215, 90, ' + lineAlpha.toFixed(3) + ')';
+                ctx.lineWidth = 0.8;
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+        }
+
+        ctx.globalCompositeOperation = 'source-over';
+
+        /* ---------- 2. Small glowing amber dots ---------- */
+        for(var k = 0; k < particles.length; k++){
+            var p = particles[k];
 
             p.x += p.vx;
             p.y += p.vy;
             p.phase += p.speed;
 
+            /* Gentle floating motion */
             p.x += Math.sin(p.phase * 0.7) * p.drift * 0.08;
             p.y += Math.cos(p.phase * 0.55) * p.drift * 0.08;
 
-            if(p.x < -25) p.x = W + 25;
-            if(p.x > W + 25) p.x = -25;
-            if(p.y < -25) p.y = H + 25;
-            if(p.y > H + 25) p.y = -25;
+            /* Wrap around screen edges */
+            if(p.x < -10) p.x = W + 10;
+            if(p.x > W + 10) p.x = -10;
+            if(p.y < -10) p.y = H + 10;
+            if(p.y > H + 10) p.y = -10;
 
+            /* Soft glow pulse */
             var pulse = 0.58 + Math.sin(p.phase) * 0.32;
             var radius = p.r * (0.9 + pulse * 0.22);
 
+            /* Small soft glow halo */
             var glow = ctx.createRadialGradient(
                 p.x, p.y, 0,
                 p.x, p.y, radius * 5
             );
-
-            glow.addColorStop(0, 'rgba(255,220,95,' + (0.38 * pulse).toFixed(3) + ')');
-            glow.addColorStop(0.3, 'rgba(201,162,39,' + (0.20 * pulse).toFixed(3) + ')');
+            glow.addColorStop(0, 'rgba(255,220,95,' + (0.45 * pulse).toFixed(3) + ')');
+            glow.addColorStop(0.4, 'rgba(201,162,39,' + (0.18 * pulse).toFixed(3) + ')');
             glow.addColorStop(1, 'rgba(201,162,39,0)');
 
+            ctx.globalCompositeOperation = 'lighter';
             ctx.fillStyle = glow;
             ctx.beginPath();
             ctx.arc(p.x, p.y, radius * 5, 0, Math.PI * 2);
             ctx.fill();
 
-            ctx.shadowColor = 'rgba(255,210,70,0.95)';
-            ctx.shadowBlur = 18 + pulse * 10;
-            ctx.fillStyle = 'rgba(242,199,62,' + (0.62 + pulse * 0.32).toFixed(3) + ')';
+            /* Bright core dot with golden shadow */
+            ctx.shadowColor = 'rgba(255,210,70,0.9)';
+            ctx.shadowBlur = 8 + pulse * 5;
+            ctx.fillStyle = 'rgba(255,225,120,' + (0.75 + pulse * 0.25).toFixed(3) + ')';
 
             ctx.beginPath();
             ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
             ctx.fill();
 
+            /* Tiny inner specular highlight for "shiny" feel */
             ctx.shadowBlur = 0;
             var spec = ctx.createRadialGradient(
                 p.x - radius * 0.3, p.y - radius * 0.3, 0,
-                p.x - radius * 0.3, p.y - radius * 0.3, radius * 0.55
+                p.x - radius * 0.3, p.y - radius * 0.3, radius * 0.5
             );
-            spec.addColorStop(0, 'rgba(255,255,240,' + (0.85 * pulse).toFixed(3) + ')');
+            spec.addColorStop(0, 'rgba(255,255,240,' + (0.9 * pulse).toFixed(3) + ')');
             spec.addColorStop(1, 'rgba(255,255,240,0)');
             ctx.fillStyle = spec;
             ctx.beginPath();
-            ctx.arc(p.x - radius * 0.3, p.y - radius * 0.3, radius * 0.55, 0, Math.PI * 2);
+            ctx.arc(p.x - radius * 0.3, p.y - radius * 0.3, radius * 0.5, 0, Math.PI * 2);
             ctx.fill();
+
+            ctx.globalCompositeOperation = 'source-over';
         }
 
         ctx.shadowBlur = 0;
