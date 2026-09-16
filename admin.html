@@ -2322,8 +2322,8 @@ sb.auth.onAuthStateChange((event) => {
 </script>
 
 <!-- ============================================================
-     LIVE DARK PURPLE SMOKE WALLPAPER — ACTIVE BILLOWING SMOKE
-     Large drifting smoke clouds only (no particles/embers).
+     LIVE DARK PURPLE SMOKE WALLPAPER
+     + Golden shiny ambers connected by light ray lines
 ============================================================ -->
 <script>
 (function(){
@@ -2334,11 +2334,7 @@ sb.auth.onAuthStateChange((event) => {
 
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* Large smoke clouds with strong movement.
-       ax/ay  → horizontal/vertical amplitude (how far each puff drifts)
-       sx/sy  → horizontal/vertical speed (how fast it drifts)
-       r      → size multiplier
-       a      → opacity (higher = denser smoke) */
+    /* ---------------- Layer 1: Purple smoke clouds ---------------- */
     var SMOKE = [
         { c:[88,28,135],   a:0.38, r:1.05, bx:0.15, by:0.25, ax:0.32, ay:0.26, sx:0.00042, sy:0.00038, p:0.0 },
         { c:[139,92,246],  a:0.32, r:0.95, bx:0.82, by:0.75, ax:0.30, ay:0.28, sx:0.00038, sy:0.00044, p:1.7 },
@@ -2350,6 +2346,37 @@ sb.auth.onAuthStateChange((event) => {
         { c:[88,28,135],   a:0.30, r:0.80, bx:0.40, by:0.70, ax:0.36, ay:0.30, sx:0.00054, sy:0.00048, p:9.8 },
         { c:[147,51,234],  a:0.26, r:0.85, bx:0.60, by:0.10, ax:0.30, ay:0.26, sx:0.00044, sy:0.00040, p:11.2 }
     ];
+
+    /* ---------------- Layer 2: Golden shiny ambers ---------------- */
+    /* Big golden glowing orbs that drift and pulse, connected by
+       golden light-ray lines when they are close enough. */
+    var AMBER_COUNT = 22;
+    var AMBERS = [];
+    var CONNECT_DISTANCE = 340;   /* px — max distance to draw a ray */
+
+    function initAmbers(){
+        AMBERS = [];
+        for (var i = 0; i < AMBER_COUNT; i++){
+            /* Each amber drifts on two sines so motion feels organic */
+            AMBERS.push({
+                bx: Math.random(),
+                by: Math.random(),
+                /* Amplitude and speed of drift */
+                ax: 0.10 + Math.random() * 0.10,
+                ay: 0.08 + Math.random() * 0.10,
+                sx: 0.00018 + Math.random() * 0.00022,
+                sy: 0.00016 + Math.random() * 0.00022,
+                phase: Math.random() * Math.PI * 2,
+                /* Size in px */
+                size: 5 + Math.random() * 5,
+                /* Base alpha */
+                alpha: 0.85 + Math.random() * 0.15,
+                /* Twinkle speed */
+                twSpeed: 0.0015 + Math.random() * 0.002,
+                twPhase: Math.random() * Math.PI * 2
+            });
+        }
+    }
 
     var W = 0, H = 0, DPR = 1, minDim = 0;
     var t = 0, rafId = null, lastFrame = 0;
@@ -2368,12 +2395,11 @@ sb.auth.onAuthStateChange((event) => {
         draw();
     }
 
+    /* ---------- Smoke render ---------- */
     function drawSmoke(){
         ctx.globalCompositeOperation = 'lighter';
         for (var i = 0; i < SMOKE.length; i++){
             var s = SMOKE[i];
-
-            /* Two sines per axis → smoke drifts in organic, non-looping paths */
             var driftX = Math.sin(t * s.sx + s.p) * s.ax
                        + Math.sin(t * s.sx * 0.43 + s.p * 1.7) * s.ax * 0.45;
             var driftY = Math.cos(t * s.sy + s.p) * s.ay
@@ -2382,7 +2408,6 @@ sb.auth.onAuthStateChange((event) => {
             var cx = (s.bx + driftX) * W + P.x * 30 * (0.4 + s.r);
             var cy = (s.by + driftY) * H + P.y * 30 * (0.4 + s.r);
 
-            /* Breathing radius — billowing effect */
             var breathe = 1 + Math.sin(t * s.sx * 0.85 + s.p * 1.4) * 0.14
                             + Math.sin(t * s.sy * 0.55 + s.p * 0.8) * 0.06;
             var r = s.r * minDim * breathe;
@@ -2401,18 +2426,147 @@ sb.auth.onAuthStateChange((event) => {
         ctx.globalCompositeOperation = 'source-over';
     }
 
+    /* Compute each amber's current screen position */
+    function computeAmberPositions(){
+        for (var i = 0; i < AMBERS.length; i++){
+            var a = AMBERS[i];
+            var dx = Math.sin(t * a.sx + a.phase) * a.ax
+                   + Math.sin(t * a.sx * 0.51 + a.phase * 1.6) * a.ax * 0.35;
+            var dy = Math.cos(t * a.sy + a.phase) * a.ay
+                   + Math.cos(t * a.sy * 0.39 + a.phase * 2.1) * a.ay * 0.35;
+            a.cx = (a.bx + dx) * W + P.x * 26;
+            a.cy = (a.by + dy) * H + P.y * 26;
+        }
+    }
+
+    /* ---------- Golden light rays between nearby ambers ---------- */
+    function drawRays(){
+        ctx.globalCompositeOperation = 'lighter';
+        for (var i = 0; i < AMBERS.length; i++){
+            for (var j = i + 1; j < AMBERS.length; j++){
+                var a1 = AMBERS[i];
+                var a2 = AMBERS[j];
+                var dx = a2.cx - a1.cx;
+                var dy = a2.cy - a1.cy;
+                var dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist > CONNECT_DISTANCE) continue;
+
+                /* Fade ray based on distance — closer = brighter */
+                var proximity = 1 - (dist / CONNECT_DISTANCE);
+                var baseAlpha = proximity * proximity * 0.55;
+
+                /* Both endpoints pulse so the ray breathes too */
+                var twA = 0.65 + Math.sin(t * a1.twSpeed + a1.twPhase) * 0.35;
+                var twB = 0.65 + Math.sin(t * a2.twSpeed + a2.twPhase) * 0.35;
+                var alpha = baseAlpha * (twA * 0.5 + twB * 0.5);
+
+                /* Wide soft glow (outer halo of the ray) */
+                var grad = ctx.createLinearGradient(a1.cx, a1.cy, a2.cx, a2.cy);
+                grad.addColorStop(0,    'rgba(255,215,90,' + (alpha * 0.15).toFixed(3) + ')');
+                grad.addColorStop(0.5,  'rgba(255,200,50,' + (alpha * 0.55).toFixed(3) + ')');
+                grad.addColorStop(1,    'rgba(255,215,90,' + (alpha * 0.15).toFixed(3) + ')');
+
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = 3.5;
+                ctx.beginPath();
+                ctx.moveTo(a1.cx, a1.cy);
+                ctx.lineTo(a2.cx, a2.cy);
+                ctx.stroke();
+
+                /* Bright thin core */
+                var coreGrad = ctx.createLinearGradient(a1.cx, a1.cy, a2.cx, a2.cy);
+                coreGrad.addColorStop(0,    'rgba(255,240,200,' + (alpha * 0.4).toFixed(3) + ')');
+                coreGrad.addColorStop(0.5,  'rgba(255,255,230,' + (alpha * 0.95).toFixed(3) + ')');
+                coreGrad.addColorStop(1,    'rgba(255,240,200,' + (alpha * 0.4).toFixed(3) + ')');
+
+                ctx.strokeStyle = coreGrad;
+                ctx.lineWidth = 1.2;
+                ctx.beginPath();
+                ctx.moveTo(a1.cx, a1.cy);
+                ctx.lineTo(a2.cx, a2.cy);
+                ctx.stroke();
+            }
+        }
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
+    /* ---------- Golden shiny ambers ---------- */
+    function drawAmbers(){
+        ctx.globalCompositeOperation = 'lighter';
+        for (var i = 0; i < AMBERS.length; i++){
+            var a = AMBERS[i];
+            var tw = 0.65 + Math.sin(t * a.twSpeed + a.twPhase) * 0.35;
+            var size = a.size * (0.9 + tw * 0.25);
+            var alpha = a.alpha * tw;
+
+            /* ---- Outer glow halo ---- */
+            var outerR = size * 8;
+            var outerGrad = ctx.createRadialGradient(a.cx, a.cy, 0, a.cx, a.cy, outerR);
+            outerGrad.addColorStop(0,    'rgba(255,215,90,' + (alpha * 0.35).toFixed(3) + ')');
+            outerGrad.addColorStop(0.35, 'rgba(255,180,40,' + (alpha * 0.18).toFixed(3) + ')');
+            outerGrad.addColorStop(1,    'rgba(255,150,20,0)');
+            ctx.fillStyle = outerGrad;
+            ctx.beginPath();
+            ctx.arc(a.cx, a.cy, outerR, 0, Math.PI * 2);
+            ctx.fill();
+
+            /* ---- Mid glow ---- */
+            var midR = size * 3;
+            var midGrad = ctx.createRadialGradient(a.cx, a.cy, 0, a.cx, a.cy, midR);
+            midGrad.addColorStop(0,   'rgba(255,235,150,' + (alpha * 0.85).toFixed(3) + ')');
+            midGrad.addColorStop(0.6, 'rgba(255,200,60,' + (alpha * 0.4).toFixed(3) + ')');
+            midGrad.addColorStop(1,   'rgba(255,180,40,0)');
+            ctx.fillStyle = midGrad;
+            ctx.beginPath();
+            ctx.arc(a.cx, a.cy, midR, 0, Math.PI * 2);
+            ctx.fill();
+
+            /* ---- Shiny bright core ---- */
+            var coreGrad = ctx.createRadialGradient(a.cx, a.cy, 0, a.cx, a.cy, size);
+            coreGrad.addColorStop(0,   'rgba(255,255,245,' + alpha.toFixed(3) + ')');
+            coreGrad.addColorStop(0.5, 'rgba(255,225,130,' + alpha.toFixed(3) + ')');
+            coreGrad.addColorStop(1,   'rgba(255,190,50,' + (alpha * 0.85).toFixed(3) + ')');
+            ctx.fillStyle = coreGrad;
+            ctx.beginPath();
+            ctx.arc(a.cx, a.cy, size, 0, Math.PI * 2);
+            ctx.fill();
+
+            /* ---- Tiny inner specular highlight for the "shiny" feel ---- */
+            var specGrad = ctx.createRadialGradient(
+                a.cx - size * 0.3, a.cy - size * 0.3, 0,
+                a.cx - size * 0.3, a.cy - size * 0.3, size * 0.55
+            );
+            specGrad.addColorStop(0, 'rgba(255,255,255,' + (alpha * 0.9).toFixed(3) + ')');
+            specGrad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = specGrad;
+            ctx.beginPath();
+            ctx.arc(a.cx - size * 0.3, a.cy - size * 0.3, size * 0.55, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
     function draw(){
         P.x += (P.tx - P.x) * 0.06;
         P.y += (P.ty - P.y) * 0.06;
+
         ctx.clearRect(0, 0, W, H);
+
+        /* 1. Smoke behind everything */
         drawSmoke();
+
+        /* 2. Compute amber positions, then draw rays, then ambers on top */
+        computeAmberPositions();
+        drawRays();
+        drawAmbers();
     }
 
     function loop(now){
         rafId = requestAnimationFrame(loop);
-        if (now - lastFrame < 28) return;   /* ~35 FPS for smoother motion */
+        if (now - lastFrame < 28) return;   /* ~35 FPS */
         lastFrame = now;
-        t += 22;                            /* faster time step = more motion */
+        t += 22;
         draw();
     }
 
@@ -2446,6 +2600,7 @@ sb.auth.onAuthStateChange((event) => {
         if (e.detail && e.detail.on) start(); else stop();
     });
 
+    initAmbers();
     resize();
     start();
 })();
