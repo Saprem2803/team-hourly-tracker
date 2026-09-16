@@ -27,8 +27,8 @@ body{
     color:#1e293b; font-size:14px; line-height:1.5;
     background-color:var(--navy-800);
     background-image:
-        radial-gradient(ellipse 1000px 800px at 0% 0%,rgba(201,162,39,.12) 0%,transparent 55%),
-        radial-gradient(ellipse 900px 800px at 100% 100%,rgba(26,77,122,.4) 0%,transparent 60%),
+        radial-gradient(ellipse 1000px 800px at 0% 0%,rgba(201,162,39,.14) 0%,transparent 55%),
+        radial-gradient(ellipse 900px 800px at 100% 100%,rgba(26,77,122,.5) 0%,transparent 60%),
         linear-gradient(135deg,#0a1628 0%,#0f2a4a 55%,#12335c 100%);
     background-attachment:fixed;
     position:relative;
@@ -38,9 +38,7 @@ body{
     padding:20px;
 }
 
-/* ============================
-   AMI LOGO WATERMARK (behind particles)
-============================ */
+/* AMI LOGO WATERMARK */
 .wallpaper{
     position:fixed;
     inset:0;
@@ -58,18 +56,18 @@ body{
     border-radius:24%;
     background:linear-gradient(
         135deg,
-        rgba(255,255,255,.05) 0%,
-        rgba(26,77,122,.09) 55%,
-        rgba(15,42,74,.12) 100%
+        rgba(255,255,255,.09) 0%,
+        rgba(26,77,122,.15) 55%,
+        rgba(15,42,74,.20) 100%
     );
-    border:2px solid rgba(255,255,255,.05);
+    border:2px solid rgba(255,255,255,.1);
     display:flex;
     align-items:center;
     justify-content:center;
     transform:rotate(-8deg);
     box-shadow:
-        inset 0 0 120px rgba(255,255,255,.02),
-        0 0 80px rgba(0,0,0,.15);
+        inset 0 0 120px rgba(255,255,255,.04),
+        0 0 80px rgba(0,0,0,.2);
     animation:wallpaperFloat 20s ease-in-out infinite;
     overflow:hidden;
 }
@@ -81,8 +79,8 @@ body{
     border-radius:50%;
     background:radial-gradient(
         circle,
-        rgba(201,162,39,.13) 0%,
-        rgba(201,162,39,.05) 40%,
+        rgba(201,162,39,.22) 0%,
+        rgba(201,162,39,.08) 40%,
         transparent 70%
     );
     top:-20%;
@@ -97,9 +95,9 @@ body{
     color:transparent;
     background:linear-gradient(
         135deg,
-        rgba(255,255,255,.08) 0%,
-        rgba(255,255,255,.04) 45%,
-        rgba(201,162,39,.07) 100%
+        rgba(255,255,255,.14) 0%,
+        rgba(255,255,255,.08) 45%,
+        rgba(201,162,39,.13) 100%
     );
     -webkit-background-clip:text;
     background-clip:text;
@@ -114,9 +112,7 @@ body{
     50%{transform:rotate(-8deg) scale(1.02);}
 }
 
-/* ============================
-   LIVE WALLPAPER (canvas)
-============================ */
+/* LIVE WALLPAPER CANVAS */
 #liveWallpaper{
     position:fixed;
     inset:0;
@@ -124,12 +120,10 @@ body{
     height:100%;
     pointer-events:none;
     z-index:2;
-    opacity:.9;
+    opacity:1;
 }
 
-/* ============================
-   MAIN CONTAINER
-============================ */
+/* MAIN */
 .hub{
     position:relative;
     z-index:3;
@@ -141,9 +135,6 @@ body{
     gap:12px;
 }
 
-/* ============================
-   BANNER
-============================ */
 .banner{
     position:relative;
     display:flex;
@@ -152,22 +143,22 @@ body{
     gap:20px;
     padding:14px 22px;
     border-radius:16px;
-    background:linear-gradient(135deg,rgba(10,22,40,.88) 0%,rgba(15,42,74,.88) 55%,rgba(26,77,122,.88) 100%);
-    border:1px solid rgba(255,255,255,.15);
+    background:linear-gradient(135deg,rgba(10,22,40,.9) 0%,rgba(15,42,74,.9) 55%,rgba(26,77,122,.9) 100%);
+    border:1px solid rgba(255,255,255,.18);
     box-shadow:
         0 12px 40px rgba(0,0,0,.5),
-        inset 0 1px 0 rgba(255,255,255,.1);
+        inset 0 1px 0 rgba(255,255,255,.12);
     overflow:hidden;
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
 }
 .banner::before{
     content:'';
     position:absolute;
     inset:0;
     background:
-        radial-gradient(circle at 92% 15%,rgba(201,162,39,.22) 0%,transparent 40%),
-        radial-gradient(circle at 8% 85%,rgba(255,255,255,.05) 0%,transparent 45%);
+        radial-gradient(circle at 92% 15%,rgba(201,162,39,.25) 0%,transparent 40%),
+        radial-gradient(circle at 8% 85%,rgba(255,255,255,.06) 0%,transparent 45%);
     pointer-events:none;
 }
 .banner::after{
@@ -175,12 +166,9 @@ body{
     position:absolute;
     left:0;right:0;bottom:0;
     height:3px;
-    background:linear-gradient(90deg,transparent 0%,rgba(201,162,39,.7) 20%,rgba(201,162,39,.95) 50%,rgba(201,162,39,.7) 80%,transparent 100%);
+    background:linear-gradient(90deg,transparent 0%,rgba(201,162,39,.75) 20%,rgba(201,162,39,1) 50%,rgba(201,162,39,.75) 80%,transparent 100%);
 }
-.banner-left{
-    display:flex;align-items:center;gap:16px;
-    position:relative;z-index:2;min-width:0;
-}
+.banner-left{display:flex;align-items:center;gap:16px;position:relative;z-index:2;min-width:0;}
 .brand-mark{
     display:flex;align-items:center;justify-content:center;
     width:56px;height:56px;border-radius:14px;
@@ -208,8 +196,8 @@ body{
     position:relative;z-index:2;
     display:flex;align-items:center;gap:8px;
     padding:8px 14px;border-radius:999px;
-    background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.15);
     backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 }
 .banner-dot{
@@ -219,29 +207,26 @@ body{
 }
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.2);}}
 .banner-status{
-    font-size:10px;font-weight:800;color:rgba(255,255,255,.9);
+    font-size:10px;font-weight:800;color:rgba(255,255,255,.95);
     letter-spacing:.8px;text-transform:uppercase;white-space:nowrap;
 }
 
-/* ============================
-   SECTIONS
-============================ */
 .hub-body{display:flex;flex-direction:column;gap:10px;}
 .section{
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.13);
     border-radius:14px;
     padding:12px 16px;
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
     display:flex;align-items:center;gap:16px;
-    box-shadow:0 4px 20px rgba(0,0,0,.2);
+    box-shadow:0 4px 20px rgba(0,0,0,.25);
 }
 .section-badge{
     width:48px;height:48px;border-radius:12px;
     display:flex;align-items:center;justify-content:center;
     flex-shrink:0;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 4px 16px rgba(0,0,0,.25);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 4px 16px rgba(0,0,0,.3);
 }
 .section-badge svg{width:26px;height:26px;stroke-width:2.4;}
 .section-badge.gold{background:linear-gradient(135deg,#fcd34d,#c9a227);color:#3d2b00;}
@@ -253,11 +238,8 @@ body{
     font-family:'Playfair Display',Georgia,serif;
     font-size:16px;font-weight:700;color:#ffffff;
     letter-spacing:-.1px;white-space:nowrap;min-width:130px;
+    text-shadow:0 1px 4px rgba(0,0,0,.3);
 }
-
-/* ============================
-   TILE GRID
-============================ */
 .tile-grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -265,14 +247,14 @@ body{
 }
 .tile{
     background:linear-gradient(180deg,#ffffff 0%,#fbfcfe 100%);
-    border:1px solid rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.18);
     border-radius:11px;
     padding:12px 14px;
     text-decoration:none;
     color:inherit;
     display:flex;align-items:center;gap:14px;
     position:relative;overflow:hidden;
-    box-shadow:0 4px 16px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.9);
+    box-shadow:0 4px 16px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.9);
     transition:all .2s cubic-bezier(.4,0,.2,1);
     cursor:pointer;
 }
@@ -286,8 +268,8 @@ body{
 .tile.violet::before{background:var(--violet);}
 .tile:hover{
     transform:translateY(-3px);
-    box-shadow:0 12px 32px rgba(0,0,0,.35),0 4px 8px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.9);
-    border-color:rgba(255,255,255,.35);
+    box-shadow:0 12px 32px rgba(0,0,0,.4),0 4px 8px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.9);
+    border-color:rgba(255,255,255,.4);
 }
 .tile:hover::before{width:6px;}
 .tile-icon{
@@ -313,19 +295,12 @@ body{
     font-size:11px;color:#64748b;line-height:1.3;font-weight:500;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-
-/* ============================
-   FOOTER
-============================ */
 .hub-footer{
     text-align:center;
-    font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.6px;
+    font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.6px;
 }
-.hub-footer strong{color:rgba(255,255,255,.75);font-weight:700;}
+.hub-footer strong{color:rgba(255,255,255,.8);font-weight:700;}
 
-/* ============================
-   RESPONSIVE
-============================ */
 @media (max-height:720px){
     body{padding:14px;}
     .hub{gap:8px;}
@@ -370,19 +345,18 @@ body{
 
 <body>
 
-<!-- AMI logo watermark (behind particles) -->
+<!-- AMI logo watermark -->
 <div class="wallpaper">
     <div class="wallpaper-logo">
         <div class="wallpaper-text">AMI</div>
     </div>
 </div>
 
-<!-- Live wallpaper (animated particles) -->
+<!-- Live wallpaper -->
 <canvas id="liveWallpaper"></canvas>
 
 <div class="hub">
 
-    <!-- BANNER -->
     <div class="banner">
         <div class="banner-left">
             <div class="brand-mark">AMI</div>
@@ -397,7 +371,6 @@ body{
         </div>
     </div>
 
-    <!-- SECTIONS -->
     <div class="hub-body">
 
         <!-- MANAGEMENT -->
@@ -495,7 +468,6 @@ body{
 
     </div>
 
-    <!-- FOOTER -->
     <div class="hub-footer">
         <strong>AMI Revenue Cycle Management</strong> · Portal Hub · Confidential
     </div>
@@ -503,7 +475,7 @@ body{
 </div>
 
 <!-- ============================================
-     LIVE WALLPAPER — Animated particle network
+     LIVE WALLPAPER — Boosted visibility
 ============================================ -->
 <script>
 (function(){
@@ -518,19 +490,21 @@ body{
     let animationId = null;
     let mouse = { x: null, y: null };
 
-    // Tuning knobs
+    // ============ TUNING — MUCH MORE VISIBLE ============
     const CONFIG = {
-        density: 26000,          // lower = more particles
-        maxParticles: 90,
-        minRadius: 0.6,
-        maxRadius: 2.0,
-        speed: 0.35,             // px per frame
-        connectionDist: 130,     // px
-        goldRatio: 0.30,         // 30% gold, 70% white
-        whiteDotAlpha: 0.45,
-        goldDotAlpha: 0.60,
-        lineAlpha: 0.16
+        density: 12000,          // ↑ more particles
+        maxParticles: 140,       // ↑ raised cap
+        minRadius: 1.2,          // ↑ bigger dots
+        maxRadius: 2.8,          // ↑ bigger dots
+        speed: 0.5,              // ↑ faster drift
+        connectionDist: 180,     // ↑ more connections
+        goldRatio: 0.35,         // ↑ 35% gold
+        whiteDotAlpha: 0.85,     // ↑ much brighter
+        goldDotAlpha: 1.0,       // ↑ full opacity
+        lineAlpha: 0.35,         // ↑ stronger lines
+        glowBlur: 12             // ↑ glow strength
     };
+    // ===================================================
 
     function resize(){
         dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -567,21 +541,19 @@ body{
             p.x += p.vx;
             p.y += p.vy;
 
-            // Gently bend away from mouse
             if(mouse.x !== null){
                 const dx = p.x - mouse.x;
                 const dy = p.y - mouse.y;
                 const distSq = dx*dx + dy*dy;
-                const radius = 140;
+                const radius = 160;
                 if(distSq < radius*radius && distSq > 1){
                     const dist = Math.sqrt(distSq);
-                    const force = (1 - dist / radius) * 0.6;
+                    const force = (1 - dist / radius) * 0.8;
                     p.x += (dx / dist) * force;
                     p.y += (dy / dist) * force;
                 }
             }
 
-            // Wrap around edges
             if(p.x < -10) p.x = width + 10;
             else if(p.x > width + 10) p.x = -10;
             if(p.y < -10) p.y = height + 10;
@@ -592,7 +564,7 @@ body{
     function draw(){
         ctx.clearRect(0, 0, width, height);
 
-        // Draw connections first (so dots sit on top)
+        // Connections
         for(let i = 0; i < particles.length; i++){
             for(let j = i + 1; j < particles.length; j++){
                 const a = particles[i];
@@ -607,26 +579,33 @@ body{
                     ctx.beginPath();
                     ctx.moveTo(a.x, a.y);
                     ctx.lineTo(b.x, b.y);
-                    ctx.strokeStyle = 'rgba(255, 255, 255, ' + alpha.toFixed(3) + ')';
-                    ctx.lineWidth = 0.7;
+
+                    // Slightly brighter gold-ish lines between two gold dots
+                    if(a.gold && b.gold){
+                        ctx.strokeStyle = 'rgba(230, 195, 70, ' + alpha.toFixed(3) + ')';
+                    } else {
+                        ctx.strokeStyle = 'rgba(255, 255, 255, ' + alpha.toFixed(3) + ')';
+                    }
+
+                    ctx.lineWidth = 1.0;
                     ctx.stroke();
                 }
             }
         }
 
-        // Draw dots
+        // Dots
         for(const p of particles){
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
 
             if(p.gold){
-                ctx.fillStyle = 'rgba(201, 162, 39, ' + CONFIG.goldDotAlpha + ')';
-                ctx.shadowColor = 'rgba(201, 162, 39, 0.7)';
-                ctx.shadowBlur = 8;
+                ctx.fillStyle = 'rgba(220, 180, 55, ' + CONFIG.goldDotAlpha + ')';
+                ctx.shadowColor = 'rgba(201, 162, 39, 0.95)';
+                ctx.shadowBlur = CONFIG.glowBlur;
             } else {
                 ctx.fillStyle = 'rgba(255, 255, 255, ' + CONFIG.whiteDotAlpha + ')';
-                ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
-                ctx.shadowBlur = 5;
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.75)';
+                ctx.shadowBlur = CONFIG.glowBlur - 2;
             }
 
             ctx.fill();
@@ -643,7 +622,6 @@ body{
     function start(){
         if(animationId) return;
         if(prefersReducedMotion){
-            // Just draw once — no motion
             draw();
             return;
         }
@@ -657,7 +635,6 @@ body{
         }
     }
 
-    // Event listeners
     window.addEventListener('resize', () => {
         resize();
         if(prefersReducedMotion) draw();
@@ -681,7 +658,6 @@ body{
         }
     });
 
-    // Go
     resize();
     start();
 })();
