@@ -7,13 +7,13 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
 :root{
     --ink:#0a1628; --ink-3:#475569; --ink-4:#64748b;
     --line:#e2e8f0;
-    --gold:#c9a227; --gold-soft:#f5e6b8;
+    --gold:#c9a227;
     --green:#0d7a4a;
     --blue:#0369a1;
     --violet:#6d28d9;
@@ -27,8 +27,8 @@ body{
     color:#1e293b; font-size:14px; line-height:1.5;
     background-color:var(--navy-800);
     background-image:
-        radial-gradient(ellipse 1000px 800px at 0% 0%,rgba(201,162,39,.10) 0%,transparent 55%),
-        radial-gradient(ellipse 900px 800px at 100% 100%,rgba(26,77,122,.35) 0%,transparent 60%),
+        radial-gradient(ellipse 1000px 800px at 0% 0%,rgba(201,162,39,.12) 0%,transparent 55%),
+        radial-gradient(ellipse 900px 800px at 100% 100%,rgba(26,77,122,.4) 0%,transparent 60%),
         linear-gradient(135deg,#0a1628 0%,#0f2a4a 55%,#12335c 100%);
     background-attachment:fixed;
     position:relative;
@@ -37,15 +37,100 @@ body{
     justify-content:center;
     padding:20px;
 }
-body::before{
-    content:'';
-    position:fixed;inset:0;
-    background-image:
-        linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
-    background-size:48px 48px,48px 48px;
+
+/* ============================
+   WALLPAPER — Faint AMI LOGO
+   Recreates the brand-mark as a huge, faint backdrop.
+============================ */
+.wallpaper{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     pointer-events:none;
     z-index:1;
+    overflow:hidden;
+}
+
+/* Subtle grid texture */
+.wallpaper::before{
+    content:'';
+    position:absolute;inset:0;
+    background-image:
+        linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
+    background-size:48px 48px,48px 48px;
+    pointer-events:none;
+}
+
+/* The giant logo mark */
+.wallpaper-logo{
+    position:relative;
+    width:min(72vw,72vh);
+    height:min(72vw,72vh);
+    border-radius:24%;
+    background:linear-gradient(
+        135deg,
+        rgba(255,255,255,.055) 0%,
+        rgba(26,77,122,.10) 55%,
+        rgba(15,42,74,.13) 100%
+    );
+    border:2px solid rgba(255,255,255,.055);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transform:rotate(-8deg);
+    box-shadow:
+        inset 0 0 120px rgba(255,255,255,.02),
+        0 0 80px rgba(0,0,0,.15);
+    animation:wallpaperFloat 20s ease-in-out infinite;
+    overflow:hidden;
+}
+
+/* Gold accent glow (mimics the ::after on the real brand mark) */
+.wallpaper-logo::after{
+    content:'';
+    position:absolute;
+    width:60%;
+    height:60%;
+    border-radius:50%;
+    background:radial-gradient(
+        circle,
+        rgba(201,162,39,.14) 0%,
+        rgba(201,162,39,.05) 40%,
+        transparent 70%
+    );
+    top:-20%;
+    right:-20%;
+}
+
+/* The AMI text */
+.wallpaper-text{
+    font-family:'Playfair Display',Georgia,serif;
+    font-weight:900;
+    font-size:min(24vw,24vh);
+    line-height:.85;
+    letter-spacing:-.05em;
+    color:transparent;
+    background:linear-gradient(
+        135deg,
+        rgba(255,255,255,.09) 0%,
+        rgba(255,255,255,.05) 45%,
+        rgba(201,162,39,.08) 100%
+    );
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    user-select:none;
+    position:relative;
+    z-index:2;
+    transform:translateY(-2%);
+}
+
+@keyframes wallpaperFloat{
+    0%,100%{transform:rotate(-8deg) scale(1);}
+    50%{transform:rotate(-8deg) scale(1.02);}
 }
 
 /* ============================
@@ -59,7 +144,7 @@ body::before{
     max-height:calc(100vh - 40px);
     display:flex;
     flex-direction:column;
-    gap:14px;
+    gap:12px;
 }
 
 /* ============================
@@ -71,14 +156,16 @@ body::before{
     align-items:center;
     justify-content:space-between;
     gap:20px;
-    padding:16px 24px;
+    padding:14px 22px;
     border-radius:16px;
-    background:linear-gradient(135deg,#0a1628 0%,#0f2a4a 55%,#1a4d7a 100%);
-    border:1px solid rgba(255,255,255,.12);
+    background:linear-gradient(135deg,rgba(10,22,40,.88) 0%,rgba(15,42,74,.88) 55%,rgba(26,77,122,.88) 100%);
+    border:1px solid rgba(255,255,255,.15);
     box-shadow:
-        0 12px 40px rgba(0,0,0,.4),
-        inset 0 1px 0 rgba(255,255,255,.08);
+        0 12px 40px rgba(0,0,0,.5),
+        inset 0 1px 0 rgba(255,255,255,.1);
     overflow:hidden;
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
 }
 .banner::before{
     content:'';
@@ -105,24 +192,19 @@ body::before{
     z-index:2;
     min-width:0;
 }
-
 .brand-mark{
     display:flex;align-items:center;justify-content:center;
     width:56px;height:56px;border-radius:14px;
     background:linear-gradient(135deg,#ffffff,#e8eef5);
     color:var(--navy-800);font-weight:800;font-size:20px;letter-spacing:.5px;
-    box-shadow:
-        0 10px 32px rgba(0,0,0,.35),
-        inset 0 1px 0 rgba(255,255,255,.9);
-    position:relative;overflow:hidden;
-    flex-shrink:0;
+    box-shadow:0 10px 32px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.9);
+    position:relative;overflow:hidden;flex-shrink:0;
 }
 .brand-mark::after{
     content:'';position:absolute;width:70px;height:70px;border-radius:50%;
     background:radial-gradient(circle,rgba(201,162,39,.5),transparent 70%);
     top:-35px;right:-35px;
 }
-
 .brand-text{display:flex;flex-direction:column;gap:3px;min-width:0;}
 .brand-eyebrow{
     font-size:10px;font-weight:800;letter-spacing:2.6px;text-transform:uppercase;
@@ -131,80 +213,63 @@ body::before{
 .brand-title{
     font-family:'Playfair Display',Georgia,serif;
     font-size:26px;font-weight:700;color:#ffffff;
-    letter-spacing:-.5px;line-height:1.05;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    letter-spacing:-.5px;line-height:1.05;white-space:nowrap;
 }
-
-/* Right side of banner — decorative tag */
 .banner-right{
-    position:relative;
-    z-index:2;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    padding:8px 14px;
-    border-radius:999px;
+    position:relative;z-index:2;
+    display:flex;align-items:center;gap:8px;
+    padding:8px 14px;border-radius:999px;
     background:rgba(255,255,255,.08);
     border:1px solid rgba(255,255,255,.12);
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 }
 .banner-dot{
     width:8px;height:8px;border-radius:50%;
-    background:#6ee7b7;
-    box-shadow:0 0 12px #6ee7b7;
+    background:#6ee7b7;box-shadow:0 0 12px #6ee7b7;
     animation:pulse 2s ease-in-out infinite;
 }
-@keyframes pulse{
-    0%,100%{opacity:1;transform:scale(1);}
-    50%{opacity:.5;transform:scale(1.2);}
-}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.2);}}
 .banner-status{
-    font-size:11px;font-weight:700;color:rgba(255,255,255,.9);
-    letter-spacing:.6px;text-transform:uppercase;white-space:nowrap;
+    font-size:10px;font-weight:800;color:rgba(255,255,255,.9);
+    letter-spacing:.8px;text-transform:uppercase;white-space:nowrap;
 }
 
 /* ============================
    SECTIONS
 ============================ */
-.hub-body{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-}
+.hub-body{display:flex;flex-direction:column;gap:10px;}
 
 .section{
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.1);
     border-radius:14px;
     padding:12px 16px;
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    display:flex;align-items:center;gap:16px;
+    box-shadow:0 4px 20px rgba(0,0,0,.2);
 }
-.section-head{
-    display:flex;align-items:center;gap:10px;
-    margin-bottom:10px;
-    padding-bottom:8px;
-    border-bottom:1px solid rgba(255,255,255,.08);
-}
-.section-icon{
-    width:24px;height:24px;border-radius:7px;
-    display:flex;align-items:center;justify-content:center;
-    font-size:13px;flex-shrink:0;
-}
-.section-icon.gold{background:linear-gradient(135deg,rgba(201,162,39,.3),rgba(201,162,39,.18));border:1px solid rgba(201,162,39,.4);}
-.section-icon.green{background:linear-gradient(135deg,rgba(13,122,74,.3),rgba(13,122,74,.18));border:1px solid rgba(110,231,183,.3);}
-.section-icon.blue{background:linear-gradient(135deg,rgba(26,77,122,.45),rgba(26,77,122,.28));border:1px solid rgba(125,211,252,.35);}
-.section-icon.violet{background:linear-gradient(135deg,rgba(109,40,217,.3),rgba(109,40,217,.18));border:1px solid rgba(196,181,253,.35);}
 
-.section-title{
-    font-family:'Playfair Display',Georgia,serif;
-    font-size:14px;font-weight:700;color:#ffffff;
-    letter-spacing:-.1px;line-height:1;
+.section-badge{
+    width:48px;height:48px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    position:relative;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 4px 16px rgba(0,0,0,.25);
 }
-.section-desc{
-    font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;font-weight:600;
-    letter-spacing:.3px;
+.section-badge svg{width:26px;height:26px;stroke-width:2.4;}
+
+.section-badge.gold{background:linear-gradient(135deg,#fcd34d,#c9a227);color:#3d2b00;}
+.section-badge.green{background:linear-gradient(135deg,#34d399,#0d7a4a);color:#ffffff;}
+.section-badge.blue{background:linear-gradient(135deg,#38bdf8,#0369a1);color:#ffffff;}
+.section-badge.violet{background:linear-gradient(135deg,#a78bfa,#6d28d9);color:#ffffff;}
+
+.section-content{flex:1;display:flex;align-items:center;gap:16px;min-width:0;}
+.section-label{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:16px;font-weight:700;color:#ffffff;
+    letter-spacing:-.1px;white-space:nowrap;
+    min-width:130px;
 }
 
 /* ============================
@@ -212,8 +277,10 @@ body::before{
 ============================ */
 .tile-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
     gap:10px;
+    flex:1;
+    min-width:0;
 }
 
 .tile{
@@ -224,14 +291,14 @@ body::before{
     text-decoration:none;
     color:inherit;
     display:flex;align-items:center;
-    gap:12px;
+    gap:14px;
     position:relative;overflow:hidden;
     box-shadow:0 4px 16px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.9);
     transition:all .2s cubic-bezier(.4,0,.2,1);
     cursor:pointer;
 }
 .tile::before{
-    content:'';position:absolute;top:0;left:0;width:3px;height:100%;
+    content:'';position:absolute;top:0;left:0;width:4px;height:100%;
     background:var(--navy-800);transition:width .2s;
 }
 .tile.gold::before{background:var(--gold);}
@@ -244,35 +311,34 @@ body::before{
     box-shadow:0 12px 32px rgba(0,0,0,.35),0 4px 8px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.9);
     border-color:rgba(255,255,255,.35);
 }
-.tile:hover::before{width:5px;}
+.tile:hover::before{width:6px;}
 
 .tile-icon{
-    width:42px;height:42px;border-radius:10px;
+    width:48px;height:48px;border-radius:12px;
     display:flex;align-items:center;justify-content:center;
-    font-size:20px;flex-shrink:0;
-    background:linear-gradient(135deg,#f8fafc,#f1f5f9);
-    border:1px solid var(--line);
+    flex-shrink:0;
     transition:transform .2s;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 2px 8px rgba(0,0,0,.1);
 }
+.tile-icon svg{width:26px;height:26px;stroke-width:2.2;}
 .tile:hover .tile-icon{transform:scale(1.08) rotate(-4deg);}
 
-.tile.gold .tile-icon{background:linear-gradient(135deg,#fef3c7,#fde68a);border-color:#fcd34d;}
-.tile.green .tile-icon{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-color:#6ee7b7;}
-.tile.blue .tile-icon{background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-color:#7dd3fc;}
-.tile.violet .tile-icon{background:linear-gradient(135deg,#ede9fe,#ddd6fe);border-color:#c4b5fd;}
+.tile.gold .tile-icon{background:linear-gradient(135deg,#fef3c7,#fcd34d);color:#78350f;border:1px solid #fbbf24;}
+.tile.green .tile-icon{background:linear-gradient(135deg,#d1fae5,#6ee7b7);color:#065f46;border:1px solid #34d399;}
+.tile.blue .tile-icon{background:linear-gradient(135deg,#e0f2fe,#7dd3fc);color:#075985;border:1px solid #38bdf8;}
+.tile.violet .tile-icon{background:linear-gradient(135deg,#ede9fe,#c4b5fd);color:#4c1d95;border:1px solid #a78bfa;}
 
 .tile-text{
     display:flex;flex-direction:column;gap:2px;
     min-width:0;flex:1;
 }
 .tile-name{
-    font-size:13px;font-weight:800;color:#0a1628;
+    font-size:14px;font-weight:800;color:#0a1628;
     letter-spacing:-.1px;line-height:1.25;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .tile-desc{
-    font-size:10.5px;color:#64748b;line-height:1.3;
+    font-size:11px;color:#64748b;line-height:1.3;font-weight:500;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 
@@ -281,32 +347,39 @@ body::before{
 ============================ */
 .hub-footer{
     text-align:center;
-    font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.6px;
+    font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.6px;
 }
-.hub-footer strong{color:rgba(255,255,255,.7);font-weight:700;}
+.hub-footer strong{color:rgba(255,255,255,.75);font-weight:700;}
 
 /* ============================
    RESPONSIVE
 ============================ */
 @media (max-height:720px){
     body{padding:14px;}
-    .hub{gap:10px;max-height:calc(100vh - 28px);}
-    .banner{padding:12px 18px;border-radius:14px;}
-    .brand-mark{width:46px;height:46px;font-size:17px;border-radius:12px;}
+    .hub{gap:8px;}
+    .banner{padding:11px 18px;}
+    .brand-mark{width:48px;height:48px;font-size:17px;border-radius:12px;}
     .brand-title{font-size:22px;}
-    .hub-body{gap:8px;}
-    .section{padding:9px 13px;border-radius:12px;}
-    .section-head{margin-bottom:8px;padding-bottom:7px;}
-    .tile{padding:10px 12px;gap:10px;}
-    .tile-icon{width:36px;height:36px;font-size:17px;border-radius:9px;}
-    .tile-name{font-size:12px;}
-    .tile-desc{font-size:10px;}
+    .hub-body{gap:7px;}
+    .section{padding:9px 13px;gap:13px;}
+    .section-badge{width:40px;height:40px;border-radius:10px;}
+    .section-badge svg{width:22px;height:22px;}
+    .section-label{font-size:15px;min-width:120px;}
+    .tile{padding:10px 12px;gap:12px;}
+    .tile-icon{width:42px;height:42px;border-radius:10px;}
+    .tile-icon svg{width:23px;height:23px;}
+    .tile-name{font-size:13px;}
+    .tile-desc{font-size:10.5px;}
 }
 
 @media (max-width:900px){
     html,body{overflow:auto;}
-    .tile-grid{grid-template-columns:1fr 1fr;}
+    .section{flex-direction:column;align-items:flex-start;}
+    .section-content{flex-direction:column;align-items:flex-start;width:100%;}
+    .tile-grid{grid-template-columns:1fr 1fr;width:100%;}
     .banner-right{display:none;}
+    .wallpaper-logo{width:min(110vw,110vh);height:min(110vw,110vh);}
+    .wallpaper-text{font-size:min(32vw,32vh);}
 }
 
 @media (max-width:600px){
@@ -322,11 +395,18 @@ body::before{
 
 <body>
 
+<!-- ============================================
+     WALLPAPER — Faint AMI Logo (behind everything)
+============================================ -->
+<div class="wallpaper">
+    <div class="wallpaper-logo">
+        <div class="wallpaper-text">AMI</div>
+    </div>
+</div>
+
 <div class="hub">
 
-    <!-- ============================
-         BANNER
-    ============================ -->
+    <!-- BANNER -->
     <div class="banner">
         <div class="banner-left">
             <div class="brand-mark">AMI</div>
@@ -341,103 +421,105 @@ body::before{
         </div>
     </div>
 
-    <!-- ============================
-         SECTIONS
-    ============================ -->
+    <!-- SECTIONS -->
     <div class="hub-body">
 
         <!-- MANAGEMENT -->
         <section class="section">
-            <div class="section-head">
-                <div class="section-icon gold">👔</div>
-                <div>
-                    <div class="section-title">Management</div>
-                    <div class="section-desc">Executive oversight</div>
-                </div>
+            <div class="section-badge gold">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
-            <div class="tile-grid">
-                <a class="tile gold" href="Management_Dashboard.html">
-                    <div class="tile-icon">📊</div>
-                    <div class="tile-text">
-                        <div class="tile-name">Executive Dashboard</div>
-                        <div class="tile-desc">Consolidated performance &amp; insights</div>
-                    </div>
-                </a>
+            <div class="section-content">
+                <div class="section-label">Management</div>
+                <div class="tile-grid">
+                    <a class="tile gold" href="Management_Dashboard.html">
+                        <div class="tile-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-5"/><circle cx="19" cy="8" r="1.5" fill="currentColor" stroke="none"/></svg>
+                        </div>
+                        <div class="tile-text">
+                            <div class="tile-name">Executive Dashboard</div>
+                            <div class="tile-desc">Performance &amp; insights</div>
+                        </div>
+                    </a>
+                </div>
             </div>
         </section>
 
         <!-- ADMIN TOOLS -->
         <section class="section">
-            <div class="section-head">
-                <div class="section-icon violet">🛠️</div>
-                <div>
-                    <div class="section-title">Admin Tools</div>
-                    <div class="section-desc">Master data &amp; user management</div>
-                </div>
+            <div class="section-badge violet">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
             </div>
-            <div class="tile-grid">
-                <a class="tile violet" href="admin.html">
-                    <div class="tile-icon">⚙️</div>
-                    <div class="tile-text">
-                        <div class="tile-name">Admin Portal</div>
-                        <div class="tile-desc">Projects · Employees · Users</div>
-                    </div>
-                </a>
-                <a class="tile violet" href="admin-reset-password.html">
-                    <div class="tile-icon">🔑</div>
-                    <div class="tile-text">
-                        <div class="tile-name">Password Reset</div>
-                        <div class="tile-desc">Recover or reset user logins</div>
-                    </div>
-                </a>
+            <div class="section-content">
+                <div class="section-label">Admin Tools</div>
+                <div class="tile-grid">
+                    <a class="tile violet" href="admin.html">
+                        <div class="tile-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m6.4 6.4 2.8 2.8"/><path d="M2 12h4"/><path d="m6.4 17.6 2.8-2.8"/><path d="M12 22v-4"/><path d="m17.6 17.6-2.8-2.8"/><path d="M22 12h-4"/><path d="m17.6 6.4-2.8 2.8"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
+                        </div>
+                        <div class="tile-text">
+                            <div class="tile-name">Admin Portal</div>
+                            <div class="tile-desc">Data &amp; user management</div>
+                        </div>
+                    </a>
+                    <a class="tile violet" href="admin-reset-password.html">
+                        <div class="tile-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                        </div>
+                        <div class="tile-text">
+                            <div class="tile-name">Password Reset</div>
+                            <div class="tile-desc">Recover user logins</div>
+                        </div>
+                    </a>
+                </div>
             </div>
         </section>
 
         <!-- OPERATIONS -->
         <section class="section">
-            <div class="section-head">
-                <div class="section-icon blue">⚡</div>
-                <div>
-                    <div class="section-title">Operations</div>
-                    <div class="section-desc">Team leads &amp; hourly tracking</div>
-                </div>
+            <div class="section-badge blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor" stroke="none"/></svg>
             </div>
-            <div class="tile-grid">
-                <a class="tile blue" href="index.html">
-                    <div class="tile-icon">🎯</div>
-                    <div class="tile-text">
-                        <div class="tile-name">Operational Dashboard</div>
-                        <div class="tile-desc">Team lead view · Project scope</div>
-                    </div>
-                </a>
+            <div class="section-content">
+                <div class="section-label">Operations</div>
+                <div class="tile-grid">
+                    <a class="tile blue" href="index.html">
+                        <div class="tile-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
+                        </div>
+                        <div class="tile-text">
+                            <div class="tile-name">Operational Dashboard</div>
+                            <div class="tile-desc">Team lead view</div>
+                        </div>
+                    </a>
+                </div>
             </div>
         </section>
 
         <!-- EMPLOYEE -->
         <section class="section">
-            <div class="section-head">
-                <div class="section-icon green">👥</div>
-                <div>
-                    <div class="section-title">Employee</div>
-                    <div class="section-desc">Self-service entry</div>
-                </div>
+            <div class="section-badge green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
             </div>
-            <div class="tile-grid">
-                <a class="tile green" href="Employee_Hourly_Entry.html">
-                    <div class="tile-icon">⏱️</div>
-                    <div class="tile-text">
-                        <div class="tile-name">Hourly Production Tracker</div>
-                        <div class="tile-desc">Log production &amp; view achievement</div>
-                    </div>
-                </a>
+            <div class="section-content">
+                <div class="section-label">Employee</div>
+                <div class="tile-grid">
+                    <a class="tile green" href="Employee_Hourly_Entry.html">
+                        <div class="tile-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                        </div>
+                        <div class="tile-text">
+                            <div class="tile-name">Hourly Production Tracker</div>
+                            <div class="tile-desc">Log your production</div>
+                        </div>
+                    </a>
+                </div>
             </div>
         </section>
 
     </div>
 
-    <!-- ============================
-         FOOTER
-    ============================ -->
+    <!-- FOOTER -->
     <div class="hub-footer">
         <strong>AMI Revenue Cycle Management</strong> · Portal Hub · Confidential
     </div>
