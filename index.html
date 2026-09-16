@@ -205,9 +205,95 @@ td.left { text-align: left; }
     .report-date-group input { width: 100%; }
 }
 </style>
+
+<!-- ============================================================
+     LIVE DARK WALLPAPER — STYLES
+============================================================ -->
+<style>
+/* Page background: deep navy */
+body {
+    background-color: #0a1628 !important;
+    background-image:
+        linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px),
+        radial-gradient(ellipse 900px 600px at 0% 0%,rgba(201,162,39,.05) 0%,transparent 55%),
+        radial-gradient(ellipse 900px 600px at 100% 100%,rgba(26,77,122,.35) 0%,transparent 60%),
+        radial-gradient(ellipse 1200px 800px at 50% 0%,rgba(15,42,74,.55) 0%,transparent 70%) !important;
+    background-size: 48px 48px, 48px 48px, 100% 100%, 100% 100%, 100% 100% !important;
+    background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat !important;
+    background-attachment: fixed, fixed, fixed, fixed, fixed !important;
+    min-height: 100vh;
+}
+
+/* Wallpaper canvas */
+#liveWallpaper {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 1;
+    transition: opacity .4s ease;
+}
+body.wp-off #liveWallpaper { opacity: 0; }
+
+/* Keep dashboard content above the wallpaper */
+#appHeader, #appContainer, #authScreen { position: relative; z-index: 1; }
+#appHeader { z-index: 10; }
+
+/* Header: dark glass that blends with navy */
+.header {
+    background: linear-gradient(135deg, rgba(15,61,104,.85), rgba(18,97,160,.70)) !important;
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+/* Readable text on navy */
+.section-title   { color: #e2e8f0 !important; }
+.download-title  { color: #e2e8f0 !important; }
+.download-note   { color: rgba(148,163,184,.9) !important; }
+
+/* Wallpaper toggle button */
+.wp-toggle {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 500;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.14);
+    color: #e2e8f0;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    font-family: inherit;
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    box-shadow: 0 6px 20px rgba(0,0,0,.35);
+    transition: all .18s ease;
+}
+.wp-toggle:hover {
+    color: #fff;
+    background: rgba(255,255,255,.14);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(0,0,0,.45);
+}
+.wp-toggle.off { color: rgba(148,163,184,.6); opacity: .6; }
+</style>
 </head>
 
 <body>
+
+<!-- LIVE WALLPAPER -->
+<canvas id="liveWallpaper"></canvas>
+<button id="wallpaperToggle" class="wp-toggle" type="button" title="Toggle live wallpaper" aria-label="Toggle live wallpaper">◐</button>
 
 <!-- LOGIN -->
 <div id="authScreen" class="auth-screen">
@@ -2135,6 +2221,189 @@ async function startApplication() {
 
 startApplication();
 
+</script>
+
+<!-- ============================================================
+     LIVE DARK WALLPAPER — Aurora Mesh + Starfield
+     Fully isolated so it never interferes with dashboard logic.
+============================================================ -->
+<script>
+(function(){
+    var canvas = document.getElementById('liveWallpaper');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* Aurora blobs — cool navy/blue/teal + subtle gold for professional feel */
+    var BLOBS = [
+        { c:[59,130,190],  a:0.16, bx:0.15, by:0.20, r:0.62, ax:0.09, ay:0.07, sx:0.00022, sy:0.00018, p:0.0 },
+        { c:[26,77,122],   a:0.22, bx:0.85, by:0.80, r:0.68, ax:0.11, ay:0.09, sx:0.00019, sy:0.00023, p:1.3 },
+        { c:[40,90,160],   a:0.14, bx:0.55, by:0.45, r:0.55, ax:0.13, ay:0.11, sx:0.00017, sy:0.00019, p:2.6 },
+        { c:[201,162,39],  a:0.08, bx:0.72, by:0.15, r:0.40, ax:0.10, ay:0.08, sx:0.00025, sy:0.00022, p:3.9 },
+        { c:[13,122,120],  a:0.09, bx:0.25, by:0.85, r:0.45, ax:0.12, ay:0.10, sx:0.00018, sy:0.00026, p:5.2 },
+        { c:[40,150,180],  a:0.10, bx:0.50, by:0.58, r:0.42, ax:0.14, ay:0.12, sx:0.00021, sy:0.00024, p:6.5 }
+    ];
+
+    /* Faint starfield */
+    var STAR_COUNT = 70;
+    var stars = [];
+    function initStars(){
+        stars = [];
+        for (var i = 0; i < STAR_COUNT; i++){
+            stars.push({
+                x: Math.random(), y: Math.random(),
+                r: Math.random() * 1.2 + 0.3,
+                a: Math.random() * 0.45 + 0.10,
+                vx: (Math.random() - 0.5) * 0.00006,
+                vy: (Math.random() - 0.5) * 0.00006 - 0.00002,
+                tw: Math.random() * Math.PI * 2,
+                tws: 0.001 + Math.random() * 0.002
+            });
+        }
+    }
+
+    var W = 0, H = 0, DPR = 1, minDim = 0;
+    var t = 0, rafId = null, lastFrame = 0;
+    var P = { x:0, y:0, tx:0, ty:0 };
+
+    function resize(){
+        DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+        W = window.innerWidth;
+        H = window.innerHeight;
+        minDim = Math.min(W, H);
+        canvas.width  = Math.round(W * DPR);
+        canvas.height = Math.round(H * DPR);
+        canvas.style.width  = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        draw();
+    }
+
+    function drawAurora(){
+        for (var i = 0; i < BLOBS.length; i++){
+            var b = BLOBS[i];
+            var cx = (b.bx + Math.sin(t * b.sx + b.p) * b.ax) * W + P.x * 20 * (0.4 + b.r);
+            var cy = (b.by + Math.cos(t * b.sy + b.p) * b.ay) * H + P.y * 20 * (0.4 + b.r);
+            var r  = b.r * minDim;
+            var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+            grad.addColorStop(0,   'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',' + b.a + ')');
+            grad.addColorStop(0.5, 'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',' + (b.a * 0.35).toFixed(3) + ')');
+            grad.addColorStop(1,   'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',0)');
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function drawStars(){
+        ctx.globalCompositeOperation = 'lighter';
+        for (var i = 0; i < stars.length; i++){
+            var s = stars[i];
+            s.x += s.vx; s.y += s.vy;
+            if (s.x < -0.02) s.x = 1.02;
+            if (s.x >  1.02) s.x = -0.02;
+            if (s.y < -0.02) s.y = 1.02;
+            if (s.y >  1.02) s.y = -0.02;
+            s.tw += s.tws;
+            var tw = 0.55 + Math.sin(s.tw) * 0.45;
+            var sx = s.x * W + P.x * 5;
+            var sy = s.y * H + P.y * 5;
+            var halo = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.r * 6);
+            halo.addColorStop(0, 'rgba(255,255,255,' + (s.a * tw).toFixed(3) + ')');
+            halo.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = halo;
+            ctx.beginPath();
+            ctx.arc(sx, sy, s.r * 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,' + (s.a * tw * 1.2).toFixed(3) + ')';
+            ctx.beginPath();
+            ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function draw(){
+        P.x += (P.tx - P.x) * 0.05;
+        P.y += (P.ty - P.y) * 0.05;
+        ctx.clearRect(0, 0, W, H);
+        drawAurora();
+        drawStars();
+    }
+
+    function loop(now){
+        rafId = requestAnimationFrame(loop);
+        if (now - lastFrame < 32) return;   /* ~30 FPS cap */
+        lastFrame = now;
+        t += 16;
+        draw();
+    }
+
+    function start(){
+        if (rafId) return;
+        if (reduceMotion){ draw(); return; }
+        lastFrame = 0;
+        rafId = requestAnimationFrame(loop);
+    }
+
+    function stop(){
+        if (rafId){ cancelAnimationFrame(rafId); rafId = null; }
+    }
+
+    window.addEventListener('resize', resize, { passive:true });
+
+    window.addEventListener('pointermove', function(e){
+        P.tx = (e.clientX / W) * 2 - 1;
+        P.ty = (e.clientY / H) * 2 - 1;
+    }, { passive:true });
+
+    window.addEventListener('pointerleave', function(){
+        P.tx = 0; P.ty = 0;
+    }, { passive:true });
+
+    document.addEventListener('visibilitychange', function(){
+        if (document.hidden) stop(); else start();
+    });
+
+    window.addEventListener('wallpaper:toggle', function(e){
+        if (e.detail && e.detail.on) start(); else stop();
+    });
+
+    initStars();
+    resize();
+    start();
+})();
+
+
+/* Wallpaper toggle — persisted in localStorage */
+(function(){
+    var btn = document.getElementById('wallpaperToggle');
+    if (!btn) return;
+    var KEY = 'wrmc.wallpaper';
+
+    function apply(on){
+        document.body.classList.toggle('wp-off', !on);
+        btn.classList.toggle('off', !on);
+        btn.textContent = on ? '◐' : '○';
+        btn.setAttribute('aria-pressed', String(on));
+        window.dispatchEvent(new CustomEvent('wallpaper:toggle', { detail:{ on: on } }));
+    }
+
+    var on = true;
+    try { on = localStorage.getItem(KEY) !== 'off'; } catch (e) {}
+    apply(on);
+
+    btn.addEventListener('click', function(){
+        on = !on;
+        try { localStorage.setItem(KEY, on ? 'on' : 'off'); } catch (e) {}
+        apply(on);
+    });
+})();
 </script>
 
 </body>
