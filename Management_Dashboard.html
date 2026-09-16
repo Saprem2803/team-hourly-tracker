@@ -56,7 +56,26 @@ body{
     pointer-events:none;
     z-index:0;
     opacity:1;
+    transition:opacity .35s ease;
 }
+body.wp-off #liveWallpaper{ opacity:0; }
+
+.wp-toggle{
+    position:fixed; right:22px; bottom:22px; z-index:500;
+    width:42px; height:42px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.72);
+    border:1px solid var(--line);
+    color:var(--ink-3); font-size:15px; line-height:1;
+    cursor:pointer; font-family:inherit;
+    backdrop-filter:blur(12px) saturate(160%);
+    -webkit-backdrop-filter:blur(12px) saturate(160%);
+    box-shadow:0 6px 20px rgba(10,22,40,.10);
+    transition:all .18s ease;
+}
+.wp-toggle:hover{ color:var(--ink); transform:translateY(-2px); box-shadow:0 10px 26px rgba(10,22,40,.16); }
+.wp-toggle.off{ color:var(--muted); opacity:.55; }
+
 .header{position:sticky;z-index:100;}
 .page{position:relative;z-index:1;}
 .login-page{position:relative;z-index:1;}
@@ -311,6 +330,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
     .hero-metric:not(:last-child)::after{display:none;}
     .section-num{font-size:28px;}
     .section-title{font-size:20px;}
+    .wp-toggle{right:14px; bottom:14px; width:38px; height:38px;}
 }
 </style>
 </head>
@@ -319,6 +339,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 
 <!-- LIVE WALLPAPER -->
 <canvas id="liveWallpaper"></canvas>
+<button id="wallpaperToggle" class="wp-toggle" type="button" title="Toggle live wallpaper" aria-label="Toggle live wallpaper">◐</button>
 
 <!-- LOGIN -->
 <div id="loginScreen" class="login-page">
@@ -2393,100 +2414,248 @@ sb.auth.onAuthStateChange(async (event) => {
 
 
 /* =========================================================
-   LIVE WALLPAPER — Gradient Mesh
-   Soft floating color blobs behind the dashboard
+   LIVE WALLPAPER v2 — Aurora Mesh
+   • Low-res offscreen render + upscale  → ~4x cheaper
+   • Organic multi-sine drift + breathing radius
+   • Pointer parallax (eased, device-orientation aware)
+   • Animated film grain + cached vignette
+   • Pauses when tab hidden, respects prefers-reduced-motion
+   • Toggle persisted in localStorage
 ========================================================= */
 (function(){
     const canvas = document.getElementById('liveWallpaper');
     if(!canvas) return;
+    const ctx = canvas.getContext('2d', { alpha:true });
+    if(!ctx) return;
 
-    const ctx = canvas.getContext('2d');
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    /* ---------------- config ---------------- */
+    const RENDER_SCALE = 0.28;        // offscreen resolution (0.20–0.40 is the sweet spot)
+    const TARGET_FPS   = 30;
+    const FRAME_MS     = 1000 / TARGET_FPS;
+    const PARALLAX     = 28;          // px of drift at full pointer deflection
+    const GRAIN_ALPHA  = 0.032;
+    const GRAIN_TILE   = 128;
 
-    let width, height, dpr;
-    let animationId = null;
-    let t = 0;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // 6 soft floating blobs — navy + gold + teal
+    /* blend: 'source-over' tints the paper, 'lighter' glows on top */
     const BLOBS = [
-        { color: [15, 42, 74],   alpha: 0.10,  baseX: 0.15, baseY: 0.20, radius: 0.55,
-          xAmp: 0.08, yAmp: 0.06, xFreq: 0.00022, yFreq: 0.00018, phase: 0.0 },
-        { color: [26, 77, 122],  alpha: 0.08,  baseX: 0.85, baseY: 0.78, radius: 0.60,
-          xAmp: 0.10, yAmp: 0.08, xFreq: 0.00019, yFreq: 0.00023, phase: 1.3 },
-        { color: [10, 22, 40],   alpha: 0.055, baseX: 0.55, baseY: 0.42, radius: 0.45,
-          xAmp: 0.12, yAmp: 0.10, xFreq: 0.00017, yFreq: 0.00019, phase: 2.6 },
-        { color: [201, 162, 39], alpha: 0.065, baseX: 0.72, baseY: 0.15, radius: 0.36,
-          xAmp: 0.09, yAmp: 0.07, xFreq: 0.00025, yFreq: 0.00022, phase: 3.9 },
-        { color: [201, 162, 39], alpha: 0.050, baseX: 0.25, baseY: 0.85, radius: 0.42,
-          xAmp: 0.11, yAmp: 0.09, xFreq: 0.00018, yFreq: 0.00026, phase: 5.2 },
-        { color: [13, 122, 74],  alpha: 0.040, baseX: 0.50, baseY: 0.55, radius: 0.38,
-          xAmp: 0.13, yAmp: 0.11, xFreq: 0.00021, yFreq: 0.00024, phase: 6.5 }
+        { c:[15,42,74],   a:0.115, x:0.12, y:0.16, r:0.62, ax:0.09, ay:0.07, s:0.00016, p:0.0,  blend:'source-over' },
+        { c:[26,77,122],  a:0.095, x:0.88, y:0.82, r:0.66, ax:0.10, ay:0.08, s:0.00013, p:1.3,  blend:'source-over' },
+        { c:[10,22,40],   a:0.060, x:0.52, y:0.44, r:0.52, ax:0.13, ay:0.11, s:0.00011, p:2.6,  blend:'source-over' },
+        { c:[201,162,39], a:0.075, x:0.78, y:0.12, r:0.40, ax:0.09, ay:0.07, s:0.00019, p:3.9,  blend:'lighter' },
+        { c:[201,162,39], a:0.055, x:0.20, y:0.88, r:0.46, ax:0.11, ay:0.09, s:0.00014, p:5.2,  blend:'lighter' },
+        { c:[13,122,74],  a:0.045, x:0.48, y:0.58, r:0.42, ax:0.14, ay:0.12, s:0.00017, p:6.5,  blend:'lighter' },
+        { c:[59,130,190], a:0.050, x:0.62, y:0.30, r:0.38, ax:0.12, ay:0.10, s:0.00021, p:7.8,  blend:'lighter' }
     ];
 
-    function resize(){
-        dpr = Math.min(window.devicePixelRatio || 1, 2);
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        canvas.style.width = width + 'px';
-        canvas.style.height = height + 'px';
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    /* ---------------- state ---------------- */
+    const off = document.createElement('canvas');
+    let offCtx = null;
+    let W = 0, H = 0, DPR = 1, minDim = 0;
+    let vignette = null;
+    let grainPattern = null;
+    let rafId = null, lastFrame = 0, running = false;
+
+    const pointer = { x:0, y:0, tx:0, ty:0 };
+
+    /* ---------------- grain ---------------- */
+    function buildGrain(){
+        const c = document.createElement('canvas');
+        c.width = c.height = GRAIN_TILE;
+        const g = c.getContext('2d');
+        const img = g.createImageData(GRAIN_TILE, GRAIN_TILE);
+        const d = img.data;
+        for(let i = 0; i < d.length; i += 4){
+            const v = (Math.random() * 255) | 0;
+            d[i] = d[i+1] = d[i+2] = v;
+            d[i+3] = 255;
+        }
+        g.putImageData(img, 0, 0);
+        grainPattern = ctx.createPattern(c, 'repeat');
     }
 
-    function draw(){
-        ctx.clearRect(0, 0, width, height);
-        const minDim = Math.min(width, height);
+    /* ---------------- resize ---------------- */
+    function resize(){
+        DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+        W = window.innerWidth;
+        H = window.innerHeight;
+        minDim = Math.min(W, H);
 
-        for(const blob of BLOBS){
-            const cx = (blob.baseX + Math.sin(t * blob.xFreq + blob.phase) * blob.xAmp) * width;
-            const cy = (blob.baseY + Math.cos(t * blob.yFreq + blob.phase) * blob.yAmp) * height;
-            const r  = blob.radius * minDim;
+        canvas.width  = Math.round(W * DPR);
+        canvas.height = Math.round(H * DPR);
+        canvas.style.width  = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-            const [cr, cg, cb] = blob.color;
-            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-            grad.addColorStop(0,    `rgba(${cr},${cg},${cb},${blob.alpha})`);
-            grad.addColorStop(0.55, `rgba(${cr},${cg},${cb},${(blob.alpha * 0.4).toFixed(3)})`);
-            grad.addColorStop(1,    `rgba(${cr},${cg},${cb},0)`);
+        /* offscreen buffer — blobs are soft, so low-res is invisible */
+        const ow = Math.max(2, Math.round(W * RENDER_SCALE));
+        const oh = Math.max(2, Math.round(H * RENDER_SCALE));
+        off.width = ow; off.height = oh;
+        offCtx = off.getContext('2d');
+        offCtx.setTransform(ow / W, 0, 0, oh / H, 0, 0);   // draw in CSS-px coords
 
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI * 2);
-            ctx.fill();
+        /* cached vignette */
+        vignette = ctx.createRadialGradient(
+            W/2, H/2, minDim * 0.25,
+            W/2, H/2, Math.max(W, H) * 0.78
+        );
+        vignette.addColorStop(0, 'rgba(10,22,40,0)');
+        vignette.addColorStop(1, 'rgba(10,22,40,0.055)');
+
+        buildGrain();
+        draw(performance.now());
+    }
+
+    /* ---------------- draw ---------------- */
+    function draw(now){
+        const time = now || 0;
+
+        /* eased pointer */
+        pointer.x += (pointer.tx - pointer.x) * 0.06;
+        pointer.y += (pointer.ty - pointer.y) * 0.06;
+
+        offCtx.clearRect(0, 0, W, H);
+
+        for(const b of BLOBS){
+            const ph = b.p, sp = b.s;
+
+            /* two sines per axis → non-repeating organic drift */
+            const dx = Math.sin(time * sp + ph) * b.ax
+                     + Math.sin(time * sp * 0.41 + ph * 1.7) * b.ax * 0.55;
+            const dy = Math.cos(time * sp * 0.87 + ph) * b.ay
+                     + Math.cos(time * sp * 0.33 + ph * 2.1) * b.ay * 0.50;
+
+            /* parallax — bigger blobs move more */
+            const cx = (b.x + dx) * W + pointer.x * PARALLAX * (0.4 + b.r);
+            const cy = (b.y + dy) * H + pointer.y * PARALLAX * (0.4 + b.r);
+
+            /* breathing radius */
+            const breathe = 1 + Math.sin(time * sp * 0.6 + ph * 1.3) * 0.09;
+            const rad = b.r * minDim * breathe;
+
+            const [cr, cg, cb] = b.c;
+            const g = offCtx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+            g.addColorStop(0,    `rgba(${cr},${cg},${cb},${b.a})`);
+            g.addColorStop(0.45, `rgba(${cr},${cg},${cb},${(b.a * 0.45).toFixed(3)})`);
+            g.addColorStop(1,    `rgba(${cr},${cg},${cb},0)`);
+
+            offCtx.globalCompositeOperation = b.blend;
+            offCtx.fillStyle = g;
+            offCtx.beginPath();
+            offCtx.arc(cx, cy, rad, 0, Math.PI * 2);
+            offCtx.fill();
+        }
+        offCtx.globalCompositeOperation = 'source-over';
+
+        /* blit upscaled */
+        ctx.clearRect(0, 0, W, H);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(off, 0, 0, off.width, off.height, 0, 0, W, H);
+
+        /* vignette */
+        if(vignette){
+            ctx.fillStyle = vignette;
+            ctx.fillRect(0, 0, W, H);
+        }
+
+        /* animated film grain */
+        if(grainPattern){
+            ctx.save();
+            ctx.globalAlpha = GRAIN_ALPHA;
+            ctx.translate(
+                -((Math.random() * GRAIN_TILE) | 0),
+                -((Math.random() * GRAIN_TILE) | 0)
+            );
+            ctx.fillStyle = grainPattern;
+            ctx.fillRect(0, 0, W + GRAIN_TILE, H + GRAIN_TILE);
+            ctx.restore();
         }
     }
 
-    function loop(){
-        t += 16;
-        draw();
-        animationId = requestAnimationFrame(loop);
+    /* ---------------- loop ---------------- */
+    function loop(now){
+        rafId = requestAnimationFrame(loop);
+        if(now - lastFrame < FRAME_MS) return;
+        lastFrame = now;
+        draw(now);
     }
 
     function start(){
-        if(animationId) return;
-        if(prefersReducedMotion){ draw(); return; }
-        loop();
+        if(running) return;
+        running = true;
+        if(reduceMotion){ draw(performance.now()); return; }
+        lastFrame = 0;
+        rafId = requestAnimationFrame(loop);
     }
 
     function stop(){
-        if(animationId){
-            cancelAnimationFrame(animationId);
-            animationId = null;
-        }
+        running = false;
+        if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
     }
 
-    window.addEventListener('resize', () => {
-        resize();
-        if(prefersReducedMotion) draw();
+    /* ---------------- events ---------------- */
+    window.addEventListener('pointermove', function(e){
+        pointer.tx = (e.clientX / window.innerWidth)  * 2 - 1;
+        pointer.ty = (e.clientY / window.innerHeight) * 2 - 1;
+    }, { passive:true });
+
+    window.addEventListener('pointerleave', function(){
+        pointer.tx = 0; pointer.ty = 0;
+    }, { passive:true });
+
+    window.addEventListener('deviceorientation', function(e){
+        if(e.gamma === null || e.beta === null) return;
+        pointer.tx = Math.max(-1, Math.min(1, e.gamma / 35));
+        pointer.ty = Math.max(-1, Math.min(1, (e.beta - 45) / 45));
+    }, { passive:true });
+
+    let resizeTimer = null;
+    window.addEventListener('resize', function(){
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(resize, 140);
     });
 
-    document.addEventListener('visibilitychange', () => {
+    document.addEventListener('visibilitychange', function(){
         if(document.hidden) stop();
         else start();
     });
 
+    window.addEventListener('wallpaper:toggle', function(e){
+        if(e.detail && e.detail.on) start();
+        else stop();
+    });
+
     resize();
     start();
+})();
+
+
+/* =========================================================
+   WALLPAPER TOGGLE — floating control, persisted
+========================================================= */
+(function(){
+    const btn = document.getElementById('wallpaperToggle');
+    if(!btn) return;
+    const KEY = 'ami.wallpaper';
+
+    function apply(on){
+        document.body.classList.toggle('wp-off', !on);
+        btn.classList.toggle('off', !on);
+        btn.textContent = on ? '◐' : '○';
+        btn.setAttribute('aria-pressed', String(on));
+        window.dispatchEvent(new CustomEvent('wallpaper:toggle', { detail:{ on } }));
+    }
+
+    let on = localStorage.getItem(KEY) !== 'off';
+    apply(on);
+
+    btn.addEventListener('click', function(){
+        on = !on;
+        localStorage.setItem(KEY, on ? 'on' : 'off');
+        apply(on);
+    });
 })();
 </script>
 
