@@ -111,10 +111,8 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .header-title-block{display:flex;flex-direction:column;}
 .header-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;}
 
-/* === Executive Operations Dashboard — white base text + slow golden shine overlay === */
+/* === Executive Operations Dashboard — white text with golden glow pulse every 5s === */
 .header h1{
-    position: relative;
-    display: inline-block;
     font-family:'Playfair Display',Georgia,serif;
     font-size:22px;
     font-weight:700;
@@ -123,36 +121,30 @@ body.wp-off #liveWallpaper{ opacity:0; }
     color: #ffffff;
     margin: 0;
     white-space: nowrap;
+    animation: titleGoldenGlow 5s ease-in-out infinite;
+    will-change: text-shadow, color;
 }
-.header h1::after{
-    content: '';
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        transparent 35%,
-        rgba(201, 162, 39, 0.45) 45%,
-        rgba(255, 220, 95, 0.95) 50%,
-        rgba(201, 162, 39, 0.45) 55%,
-        transparent 65%,
-        transparent 100%
-    );
-    background-size: 260% 100%;
-    background-position: 200% 0;
-    background-repeat: no-repeat;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-    animation: goldenShine 10s ease-in-out infinite;
-    pointer-events: none;
-}
-@keyframes goldenShine {
-    0%   { background-position: 200% 0; }
-    25%  { background-position: 200% 0; }
-    75%  { background-position: -100% 0; }
-    100% { background-position: -100% 0; }
+@keyframes titleGoldenGlow {
+    0%, 40% {
+        color: #ffffff;
+        text-shadow: none;
+    }
+    50% {
+        color: #fff7d6;
+        text-shadow:
+            0 0 8px rgba(255, 220, 95, 0.85),
+            0 0 18px rgba(255, 200, 60, 0.70),
+            0 0 32px rgba(201, 162, 39, 0.55),
+            0 0 55px rgba(201, 162, 39, 0.35);
+    }
+    60% {
+        color: #ffffff;
+        text-shadow: none;
+    }
+    100% {
+        color: #ffffff;
+        text-shadow: none;
+    }
 }
 
 .header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -2246,7 +2238,7 @@ sb.auth.onAuthStateChange(async (event) => {
                 y: Math.random() * H,
                 vx: (Math.random() - 0.5) * 0.28,
                 vy: (Math.random() - 0.5) * 0.28,
-                /* === Even larger ambers (was 3.5–9.5, now 5–13) === */
+                /* Large amber size */
                 r: Math.random() * 8 + 5,
                 phase: Math.random() * Math.PI * 2,
                 speed: Math.random() * 0.018 + 0.008,
@@ -2265,21 +2257,17 @@ sb.auth.onAuthStateChange(async (event) => {
             p.y += p.vy;
             p.phase += p.speed;
 
-            /* Gentle floating motion */
             p.x += Math.sin(p.phase * 0.7) * p.drift * 0.08;
             p.y += Math.cos(p.phase * 0.55) * p.drift * 0.08;
 
-            /* Wrap around screen edges */
             if(p.x < -25) p.x = W + 25;
             if(p.x > W + 25) p.x = -25;
             if(p.y < -25) p.y = H + 25;
             if(p.y > H + 25) p.y = -25;
 
-            /* Soft glowing pulse */
             var pulse = 0.58 + Math.sin(p.phase) * 0.32;
             var radius = p.r * (0.9 + pulse * 0.22);
 
-            /* Outer soft glow — bigger radius for larger dots */
             var glow = ctx.createRadialGradient(
                 p.x, p.y, 0,
                 p.x, p.y, radius * 5
@@ -2294,7 +2282,6 @@ sb.auth.onAuthStateChange(async (event) => {
             ctx.arc(p.x, p.y, radius * 5, 0, Math.PI * 2);
             ctx.fill();
 
-            /* Bright shiny dot with golden halo */
             ctx.shadowColor = 'rgba(255,210,70,0.95)';
             ctx.shadowBlur = 18 + pulse * 10;
             ctx.fillStyle = 'rgba(242,199,62,' + (0.62 + pulse * 0.32).toFixed(3) + ')';
@@ -2303,7 +2290,6 @@ sb.auth.onAuthStateChange(async (event) => {
             ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
             ctx.fill();
 
-            /* Tiny inner specular for "shiny" look */
             ctx.shadowBlur = 0;
             var spec = ctx.createRadialGradient(
                 p.x - radius * 0.3, p.y - radius * 0.3, 0,
