@@ -45,7 +45,6 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 .section { margin-bottom: 28px; }
 .section-title { font-size: 18px; font-weight: bold; margin-bottom: 14px; color: #173b5e; }
 
-/* Weekend / Holiday banner */
 .holiday-banner {
     display: none;
     background: linear-gradient(135deg, #fff4d6, #fff9ea);
@@ -60,6 +59,13 @@ button:disabled { opacity: .6; cursor: not-allowed; }
     box-shadow: 0 4px 12px rgba(202, 145, 20, 0.10);
 }
 .holiday-banner.active { display: block; }
+.holiday-banner.client-holiday {
+    background: linear-gradient(135deg, #ffe8f0, #fff5f8);
+    border-color: #f0a7c4;
+    border-left-color: #be185d;
+    color: #9d174d;
+    box-shadow: 0 4px 12px rgba(190, 24, 93, 0.10);
+}
 .holiday-banner .hb-icon { font-size: 18px; margin-right: 8px; }
 
 .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 22px; }
@@ -80,6 +86,7 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 .manager-kpi.green { border-left-color:#198754; }
 .manager-kpi.orange { border-left-color:#f59e0b; }
 .manager-kpi.red { border-left-color:#dc3545; }
+.manager-kpi.grey { border-left-color:#64748b; }
 .manager-kpi-label { font-size:10px; color:#64748b; font-weight:bold; text-transform:uppercase; }
 .manager-kpi-value { font-size:23px; font-weight:bold; color:#172b4d; margin-top:5px; }
 .manager-kpi-sub { font-size:10px; color:#64748b; margin-top:3px; }
@@ -97,6 +104,7 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 .manager-status.orange { background:#fef3c7; color:#b45309; }
 .manager-status.red { background:#fee2e2; color:#b91c1c; }
 .manager-status.grey { background:#e2e8f0; color:#475569; }
+.manager-status.pink { background:#fce7f3; color:#9d174d; }
 
 .project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
 .project-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,.08); border-left: 6px solid #1261a0; }
@@ -127,9 +135,10 @@ td { border-bottom: 1px solid #e2e8f0; padding: 8px; font-size: 11px; text-align
 tbody tr:hover { background: #f8fafc; }
 td.left { text-align: left; }
 
-/* Weekend row highlight */
 .holiday-row td { background: #fffaf5; }
 .holiday-row td.left, .holiday-row td:first-child { background: #fffaf5; }
+.holiday-row.client-holiday-row td { background: #fff5f8; }
+.holiday-row.client-holiday-row td.left, .holiday-row.client-holiday-row td:first-child { background: #fff5f8; }
 .holiday-tag {
     display: inline-block;
     margin-left: 6px;
@@ -142,6 +151,7 @@ td.left { text-align: left; }
     color: #92400e;
     text-transform: uppercase;
 }
+.holiday-tag.client { background: #fce7f3; color: #9d174d; }
 
 .production-input { width: 58px; height: 30px; text-align: center; padding: 2px; }
 .production-input.hour-locked { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; cursor: not-allowed; font-weight: 700; }
@@ -179,6 +189,7 @@ td.left { text-align: left; }
 .status.attention { background: #fee2e2; color: #b91c1c; }
 .status.na { background: #e5e7eb; color: #4b5563; }
 .status.holiday { background: #fef3c7; color: #92400e; }
+.status.holiday.client { background: #fce7f3; color: #9d174d; }
 .achievement-good { color: #198754; font-weight: bold; }
 .achievement-low { color: #dc3545; font-weight: bold; }
 .achievement-na { color: #64748b; font-weight: bold; }
@@ -240,9 +251,7 @@ td.left { text-align: left; }
 }
 </style>
 
-<!-- ============================================================
-     LIVE DARK WALLPAPER — STYLES
-============================================================ -->
+<!-- LIVE DARK WALLPAPER — STYLES -->
 <style>
 body {
     background-color: #0a1628 !important;
@@ -373,10 +382,10 @@ body.wp-off #liveWallpaper { opacity: 0; }
         </div>
     </div>
 
-    <!-- WEEKEND HOLIDAY BANNER -->
+    <!-- WEEKEND / HOLIDAY BANNER -->
     <div id="holidayBanner" class="holiday-banner">
-        <span class="hb-icon">🎉</span>
-        <span id="holidayBannerText">Weekend Holiday — no production target for this date</span>
+        <span class="hb-icon" id="holidayBannerIcon">🎉</span>
+        <span id="holidayBannerText">Holiday — no production target for this date</span>
     </div>
 
     <!-- REPORTS -->
@@ -385,7 +394,7 @@ body.wp-off #liveWallpaper { opacity: 0; }
             <div>
                 <div class="download-title">Production Reports</div>
                 <div class="download-note">
-                    Daily Report uses the selected Tracker Date. MTD Report uses the From Date and To Date. Reports follow the selected filters. Weekends (Sat / Sun) are treated as fixed holidays.
+                    Daily Report uses the selected Tracker Date. MTD Report uses the From Date and To Date. Reports follow the selected filters. Weekends (Sat / Sun) and Client Holidays are treated as fixed holidays.
                 </div>
             </div>
             <div class="download-buttons">
@@ -586,10 +595,16 @@ const hourLabels = ["6–7 PM","7–8 PM","8–9 PM","9–10 PM","10–11 PM","1
 /* =========================================================
    WEEKEND / HOLIDAY HELPERS
    -----------------------------------------------------
-   Saturday (6) and Sunday (0) are fixed weekly holidays.
-   No production target is assigned on these days, and any
-   MTD / shrinkage calculations ignore them.
+   • Saturday (6) and Sunday (0) are fixed weekly holidays.
+   • CUSTOM_HOLIDAYS holds additional fixed holidays
+     (client holidays, festivals, etc.) in YYYY-MM-DD format.
+   • No production target is assigned on any holiday, and any
+     MTD / shrinkage calculations ignore them.
 ========================================================= */
+const CUSTOM_HOLIDAYS = [
+    "2026-09-07"   // Client Holiday — September 7, 2026
+];
+
 function isWeekendDate(dateStr) {
     if (!dateStr) return false;
     const parts = String(dateStr).split("-");
@@ -597,6 +612,15 @@ function isWeekendDate(dateStr) {
     const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
     const dow = d.getDay();   // 0 = Sun, 6 = Sat
     return dow === 0 || dow === 6;
+}
+
+function isCustomHoliday(dateStr) {
+    if (!dateStr) return false;
+    return CUSTOM_HOLIDAYS.includes(String(dateStr).trim());
+}
+
+function isHolidayDate(dateStr) {
+    return isWeekendDate(dateStr) || isCustomHoliday(dateStr);
 }
 
 function isWeekendDayOfWeek(dow) {
@@ -1024,12 +1048,24 @@ function setTodayDate() {
 function updateHolidayBanner() {
     const banner = document.getElementById("holidayBanner");
     const text   = document.getElementById("holidayBannerText");
+    const icon   = document.getElementById("holidayBannerIcon");
     if (!banner || !text) return;
     const trackerDate = document.getElementById("trackerDate")?.value;
-    if (isWeekendDate(trackerDate)) {
+
+    banner.classList.remove("client-holiday");
+
+    if (isCustomHoliday(trackerDate)) {
         const d = new Date(trackerDate + "T00:00:00");
         const dayName = d.toLocaleDateString("en-IN", { weekday: "long" });
-        text.textContent = `${dayName} — Fixed Holiday · No production target is assigned for this date. Any entries made will not count toward achievement.`;
+        text.textContent = `${dayName}, ${d.toLocaleDateString("en-IN",{day:"2-digit", month:"short", year:"numeric"})} — Client Holiday · No production target is assigned for this date. Any entries made will not count toward achievement.`;
+        if (icon) icon.textContent = "🎊";
+        banner.classList.add("active");
+        banner.classList.add("client-holiday");
+    } else if (isWeekendDate(trackerDate)) {
+        const d = new Date(trackerDate + "T00:00:00");
+        const dayName = d.toLocaleDateString("en-IN", { weekday: "long" });
+        text.textContent = `${dayName} — Fixed Weekly Holiday · No production target is assigned for this date. Any entries made will not count toward achievement.`;
+        if (icon) icon.textContent = "🎉";
         banner.classList.add("active");
     } else {
         banner.classList.remove("active");
@@ -1244,12 +1280,12 @@ function getEmployeeTarget(employee) {
 }
 
 /* ---------------------------------------------------------
-   DAILY TARGET — returns null on weekends (fixed holiday)
-   so no target is assigned and everything downstream shows N/A.
+   DAILY TARGET — returns null on any holiday (weekend or
+   custom) so no target is assigned.
 --------------------------------------------------------- */
 function getDailyTarget(employee, attendance) {
     const trackerDate = document.getElementById("trackerDate")?.value;
-    if (isWeekendDate(trackerDate)) return null;   // Fixed weekly holiday
+    if (isHolidayDate(trackerDate)) return null;
 
     const target = getEmployeeTarget(employee);
     if (target === null || target === undefined) return null;
@@ -1349,7 +1385,10 @@ function buildDailyTracker() {
     const tbody = document.getElementById("trackerBody");
     tbody.innerHTML = "";
     const trackerDate = document.getElementById("trackerDate").value;
-    const weekend = isWeekendDate(trackerDate);
+    const holiday = isHolidayDate(trackerDate);
+    const isClientHol = isCustomHoliday(trackerDate);
+    const tagClass = isClientHol ? "holiday-tag client" : "holiday-tag";
+    const rowHolidayClass = isClientHol ? "holiday-row client-holiday-row" : "holiday-row";
     const visibleEmployees = getFilteredEmployees();
     if (!visibleEmployees.length) {
         tbody.innerHTML = `<tr><td colspan="19" style="padding:30px;color:#64748b">No employees found for the selected filter.</td></tr>`;
@@ -1363,8 +1402,8 @@ function buildDailyTracker() {
         const target = getDailyTarget(employee, attendance);
         const tr = document.createElement("tr");
         tr.dataset.employeeId = employee.id;
-        if (weekend) tr.classList.add("holiday-row");
-        const holidayTag = weekend ? `<span class="holiday-tag">HOLIDAY</span>` : "";
+        if (holiday) tr.className = rowHolidayClass;
+        const holidayTag = holiday ? `<span class="${tagClass}">${isClientHol ? 'CLIENT HOLIDAY' : 'HOLIDAY'}</span>` : "";
         let html = `
             <td class="left"><strong>${escapeHtml(employee.employee_name)}</strong>${holidayTag}</td>
             <td>${escapeHtml(employee.employee_code)}</td>
@@ -1414,7 +1453,8 @@ function recalculateRow(element) {
     if (!employee) return;
     const attendance = row.querySelector('[data-field="attendance"]').value;
     const trackerDate = document.getElementById("trackerDate")?.value;
-    const weekend = isWeekendDate(trackerDate);
+    const holiday = isHolidayDate(trackerDate);
+    const isClientHol = isCustomHoliday(trackerDate);
     const target = getDailyTarget(employee, attendance);
     row.querySelector(".daily-target").textContent = target === null ? "N/A" : target;
     let achieved = 0;
@@ -1423,8 +1463,10 @@ function recalculateRow(element) {
         const value = Math.max(Number(input?.value || 0), 0);
         achieved += value;
         const statusContainer = row.querySelector(`[data-hour-index="${index}"]`);
-        if (weekend) {
-            statusContainer.innerHTML = `<span class="status holiday">HOLIDAY</span>`;
+        if (holiday) {
+            const statusClass = isClientHol ? "status holiday client" : "status holiday";
+            const statusText = isClientHol ? "CLIENT HOLIDAY" : "HOLIDAY";
+            statusContainer.innerHTML = `<span class="${statusClass}">${statusText}</span>`;
             return;
         }
         if (target === null || attendance === "Absent") {
@@ -1437,8 +1479,8 @@ function recalculateRow(element) {
     });
     row.querySelector(".achieved").textContent = achieved;
     if (target === null) {
-        row.querySelector(".remaining").textContent = weekend ? "HOLIDAY" : "N/A";
-        row.querySelector(".achievement").textContent = weekend ? "HOLIDAY" : "N/A";
+        row.querySelector(".remaining").textContent = holiday ? "HOLIDAY" : "N/A";
+        row.querySelector(".achievement").textContent = holiday ? "HOLIDAY" : "N/A";
         row.querySelector(".achievement").className = "achievement achievement-na";
         return;
     }
@@ -1641,7 +1683,8 @@ function renderPerformanceSummary() {
     const tbody = document.getElementById("performanceSummaryBody");
     tbody.innerHTML = "";
     const trackerDate = document.getElementById("trackerDate")?.value;
-    const weekend = isWeekendDate(trackerDate);
+    const holiday = isHolidayDate(trackerDate);
+    const isClientHol = isCustomHoliday(trackerDate);
     const list = getFilteredEmployees();
     list.forEach(employee => {
         const project = getProjectById(employee.project_id);
@@ -1653,8 +1696,10 @@ function renderPerformanceSummary() {
         const remaining = target === null ? null : Math.max(target - achieved, 0);
         const percentage = (target !== null && target > 0) ? (achieved / target * 100) : null;
         let status;
-        if (weekend) {
-            status = `<span class="status holiday">HOLIDAY</span>`;
+        if (holiday) {
+            status = isClientHol
+                ? `<span class="status holiday client">CLIENT HOLIDAY</span>`
+                : `<span class="status holiday">HOLIDAY</span>`;
         } else if (percentage === null) {
             status = `<span class="status na">N/A</span>`;
         } else {
@@ -1663,9 +1708,11 @@ function renderPerformanceSummary() {
                 : `<span class="status attention">NEED ATTENTION</span>`;
         }
         const tr = document.createElement("tr");
-        if (weekend) tr.classList.add("holiday-row");
+        if (holiday) tr.className = isClientHol ? "holiday-row client-holiday-row" : "holiday-row";
+        const tagClass = isClientHol ? "holiday-tag client" : "holiday-tag";
+        const tagText = isClientHol ? "CLIENT HOLIDAY" : "HOLIDAY";
         tr.innerHTML = `
-            <td class="left">${escapeHtml(employee.employee_name)}${weekend ? '<span class="holiday-tag">HOLIDAY</span>' : ''}</td>
+            <td class="left">${escapeHtml(employee.employee_name)}${holiday ? `<span class="${tagClass}">${tagText}</span>` : ''}</td>
             <td>${escapeHtml(employee.employee_code)}</td>
             <td>${project ? escapeHtml(project.project_name) : "N/A"}</td>
             <td>${subProject ? escapeHtml(subProject.sub_project_name || "Unnamed Sub-Project") : "Not Required"}</td>
@@ -1673,7 +1720,7 @@ function renderPerformanceSummary() {
             <td>${achieved}</td>
             <td>${remaining === null ? "N/A" : remaining}</td>
             <td class="${percentage === null ? "achievement-na" : percentage >= 100 ? "achievement-good" : "achievement-low"}">
-                ${percentage === null ? (weekend ? "HOLIDAY" : "N/A") : percentage.toFixed(1) + "%"}
+                ${percentage === null ? (holiday ? "HOLIDAY" : "N/A") : percentage.toFixed(1) + "%"}
             </td>
             <td>${status}</td>
         `;
@@ -1682,7 +1729,7 @@ function renderPerformanceSummary() {
 }
 
 /* =========================================================
-   SHRINKAGE — Sat/Sun excluded
+   SHRINKAGE — Weekends & custom holidays excluded
 ========================================================= */
 async function calculateCurrentMonthShrinkage() {
     const visibleEmployees = getFilteredEmployees();
@@ -1694,9 +1741,10 @@ async function calculateCurrentMonthShrinkage() {
     const firstDay = new Date(year, month, 1);
     const dates = [];
     for (let date = new Date(firstDay); date <= todayDate; date.setDate(date.getDate() + 1)) {
-        const day = date.getDay();
-        if (!isWeekendDayOfWeek(day)) {
-            dates.push(`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`);
+        const dow = date.getDay();
+        const ds = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+        if (!isWeekendDayOfWeek(dow) && !isCustomHoliday(ds)) {
+            dates.push(ds);
         }
     }
     if (!dates.length) return { shrinkageDays: 0, scheduledDays: 0, shrinkagePercentage: 0, absentDays: 0, halfDays: 0, presentDays: 0 };
@@ -1732,7 +1780,9 @@ async function updateKPI() {
     const selectedProject = document.getElementById("projectFilter").value;
     const selectedSubProject = document.getElementById("subProjectFilter").value;
     const trackerDate = document.getElementById("trackerDate")?.value;
-    const weekend = isWeekendDate(trackerDate);
+    const holiday = isHolidayDate(trackerDate);
+    const isClientHol = isCustomHoliday(trackerDate);
+    const holidayName = isClientHol ? "Client Holiday" : "Fixed Holiday";
     const list = getFilteredEmployees();
 
     let totalTarget = 0, totalAchieved = 0, targetAchieved = 0, present = 0, absent = 0;
@@ -1769,11 +1819,13 @@ async function updateKPI() {
         title = project ? project.project_name : "Selected Project";
     }
 
+    const holidaySubText = isClientHol ? `${holidayName} — no target` : `Weekend — ${holidayName.toLowerCase()}`;
+
     container.innerHTML = `
         <div class="kpi-card">
             <div class="kpi-label">Selected View</div>
             <div class="kpi-value" style="font-size:20px">${escapeHtml(title)}</div>
-            <div class="kpi-sub">Current dashboard filter${weekend ? ' · Weekend Holiday' : ''}</div>
+            <div class="kpi-sub">Current dashboard filter${holiday ? ` · ${holidayName}` : ''}</div>
         </div>
         <div class="kpi-card">
             <div class="kpi-label">Employees</div>
@@ -1790,10 +1842,10 @@ async function updateKPI() {
             <div class="kpi-value">${absent}</div>
             <div class="kpi-sub">Today's absence</div>
         </div>
-        <div class="kpi-card ${weekend ? 'grey' : ''}">
+        <div class="kpi-card ${holiday ? 'grey' : ''}">
             <div class="kpi-label">Target</div>
-            <div class="kpi-value">${weekend ? "N/A" : (totalTarget > 0 ? totalTarget : "N/A")}</div>
-            <div class="kpi-sub">${weekend ? 'Fixed holiday — no target' : 'Target-based work only'}</div>
+            <div class="kpi-value">${holiday ? "N/A" : (totalTarget > 0 ? totalTarget : "N/A")}</div>
+            <div class="kpi-sub">${holiday ? holidaySubText : 'Target-based work only'}</div>
         </div>
         <div class="kpi-card green">
             <div class="kpi-label">Achieved</div>
@@ -1802,13 +1854,13 @@ async function updateKPI() {
         </div>
         <div class="kpi-card orange">
             <div class="kpi-label">Remaining</div>
-            <div class="kpi-value">${weekend ? "N/A" : (totalTarget > 0 ? remaining : "N/A")}</div>
+            <div class="kpi-value">${holiday ? "N/A" : (totalTarget > 0 ? remaining : "N/A")}</div>
             <div class="kpi-sub">Target balance</div>
         </div>
-        <div class="kpi-card ${weekend ? 'grey' : (achievement !== null && achievement >= 100 ? "green" : achievement === null ? "grey" : "red")}">
+        <div class="kpi-card ${holiday ? 'grey' : (achievement !== null && achievement >= 100 ? "green" : achievement === null ? "grey" : "red")}">
             <div class="kpi-label">Achievement</div>
-            <div class="kpi-value">${weekend ? "N/A" : (achievement === null ? "N/A" : achievement.toFixed(1) + "%")}</div>
-            <div class="kpi-sub">${weekend ? 'Fixed holiday — no achievement' : 'Target achievement'}</div>
+            <div class="kpi-value">${holiday ? "N/A" : (achievement === null ? "N/A" : achievement.toFixed(1) + "%")}</div>
+            <div class="kpi-sub">${holiday ? `${holidayName} — no achievement` : 'Target achievement'}</div>
         </div>
         <div class="kpi-card ${shrinkageClass}">
             <div class="kpi-label">Current Month Shrinkage</div>
@@ -1828,10 +1880,12 @@ function renderManagerControlCenter() {
     section.style.display = "block";
     const list = getFilteredEmployees();
     const date = document.getElementById("trackerDate")?.value || "";
-    const weekend = isWeekendDate(date);
+    const holiday = isHolidayDate(date);
+    const isClientHol = isCustomHoliday(date);
+    const holidayName = isClientHol ? "Client Holiday" : "Fixed Holiday";
     const label = document.getElementById("managerControlDateLabel");
     if (label) {
-        label.textContent = date ? `Tracker date: ${date} • ${list.length} employees in selected view${weekend ? ' · Fixed Holiday' : ''}` : "Current tracker date";
+        label.textContent = date ? `Tracker date: ${date} • ${list.length} employees in selected view${holiday ? ` · ${holidayName}` : ''}` : "Current tracker date";
     }
     let totalTarget = 0, totalAchieved = 0, present = 0, halfDay = 0, absent = 0, onTrack = 0, attention = 0, totalHours = 0;
     const rows = [];
@@ -1842,55 +1896,58 @@ function renderManagerControlCenter() {
         const target = targetRaw === null ? 0 : Number(targetRaw || 0);
         const achieved = computeAchievedFromRecord(record);
         const remaining = Math.max(target - achieved, 0);
-        const pct = (target > 0 && !weekend) ? achieved / target * 100 : null;
+        const pct = (target > 0 && !holiday) ? achieved / target * 100 : null;
         const project = getProjectById(employee.project_id);
         if (attendance === "Absent") absent++; else if (attendance === "Half Day") halfDay++; else present++;
         totalTarget += target; totalAchieved += achieved;
         if (pct !== null) { if (pct >= 90) onTrack++; else attention++; }
         hourFields.forEach(field => { totalHours += Number(record?.[field] || 0); });
-        rows.push({ employee, project, attendance, target, achieved, remaining, pct, weekend });
+        rows.push({ employee, project, attendance, target, achieved, remaining, pct, holiday, isClientHol });
     });
-    const teamPct = (!weekend && totalTarget > 0) ? totalAchieved / totalTarget * 100 : 0;
+    const teamPct = (!holiday && totalTarget > 0) ? totalAchieved / totalTarget * 100 : 0;
     const deficit = Math.max(totalTarget - totalAchieved, 0);
     const activeEmployees = present + halfDay;
-    const statusClass = weekend ? "grey" : (teamPct >= 90 ? "green" : teamPct >= 70 ? "orange" : "red");
+    const statusClass = holiday ? "grey" : (teamPct >= 90 ? "green" : teamPct >= 70 ? "orange" : "red");
     document.getElementById("managerControlKPIs").innerHTML = `
         <div class="manager-kpi"><div class="manager-kpi-label">Team FTE</div><div class="manager-kpi-value">${list.length}</div><div class="manager-kpi-sub">Employees in selected view</div></div>
         <div class="manager-kpi green"><div class="manager-kpi-label">Present</div><div class="manager-kpi-value">${present}</div><div class="manager-kpi-sub">${halfDay} half day • ${absent} absent</div></div>
-        <div class="manager-kpi ${weekend ? 'grey' : ''}"><div class="manager-kpi-label">Daily Target</div><div class="manager-kpi-value">${weekend ? 'N/A' : totalTarget}</div><div class="manager-kpi-sub">${weekend ? 'Fixed Holiday' : 'Based on attendance'}</div></div>
+        <div class="manager-kpi ${holiday ? 'grey' : ''}"><div class="manager-kpi-label">Daily Target</div><div class="manager-kpi-value">${holiday ? 'N/A' : totalTarget}</div><div class="manager-kpi-sub">${holiday ? holidayName : 'Based on attendance'}</div></div>
         <div class="manager-kpi"><div class="manager-kpi-label">Achieved</div><div class="manager-kpi-value">${totalAchieved}</div><div class="manager-kpi-sub">Current tracker date</div></div>
-        <div class="manager-kpi ${statusClass}"><div class="manager-kpi-label">Team Achievement</div><div class="manager-kpi-value">${weekend ? 'N/A' : teamPct.toFixed(1) + '%'}</div><div class="manager-kpi-sub">${weekend ? 'Fixed Holiday' : 'Target vs achieved'}</div></div>
-        <div class="manager-kpi ${deficit > 0 && !weekend ? "red" : "green"}"><div class="manager-kpi-label">Team Deficit</div><div class="manager-kpi-value">${weekend ? 'N/A' : deficit}</div><div class="manager-kpi-sub">Production remaining</div></div>
+        <div class="manager-kpi ${statusClass}"><div class="manager-kpi-label">Team Achievement</div><div class="manager-kpi-value">${holiday ? 'N/A' : teamPct.toFixed(1) + '%'}</div><div class="manager-kpi-sub">${holiday ? holidayName : 'Target vs achieved'}</div></div>
+        <div class="manager-kpi ${deficit > 0 && !holiday ? "red" : "green"}"><div class="manager-kpi-label">Team Deficit</div><div class="manager-kpi-value">${holiday ? 'N/A' : deficit}</div><div class="manager-kpi-sub">Production remaining</div></div>
         <div class="manager-kpi"><div class="manager-kpi-label">Hourly Production</div><div class="manager-kpi-value">${totalHours}</div><div class="manager-kpi-sub">Total units entered</div></div>
     `;
     const top = rows.filter(r => r.pct !== null).sort((a,b) => b.pct - a.pct)[0];
     const low = rows.filter(r => r.pct !== null).sort((a,b) => a.pct - b.pct)[0];
     document.getElementById("managerControlAlerts").innerHTML = `
-        <div class="manager-alert"><strong>🏆 Top Performer</strong><span>${top ? `${escapeHtml(top.employee.employee_name)} — ${top.pct.toFixed(1)}%` : (weekend ? "Fixed Holiday" : "No production data yet")}</span></div>
-        <div class="manager-alert"><strong>⚠️ Needs Attention</strong><span>${low && low.pct < 90 ? `${escapeHtml(low.employee.employee_name)} — ${low.pct.toFixed(1)}%` : (weekend ? "Fixed Holiday" : "No employee below 90%")}</span></div>
-        <div class="manager-alert"><strong>🎯 On Track</strong><span>${weekend ? "Fixed Holiday" : `${onTrack} employees at or above 90% achievement`}</span></div>
+        <div class="manager-alert"><strong>🏆 Top Performer</strong><span>${top ? `${escapeHtml(top.employee.employee_name)} — ${top.pct.toFixed(1)}%` : (holiday ? holidayName : "No production data yet")}</span></div>
+        <div class="manager-alert"><strong>⚠️ Needs Attention</strong><span>${low && low.pct < 90 ? `${escapeHtml(low.employee.employee_name)} — ${low.pct.toFixed(1)}%` : (holiday ? holidayName : "No employee below 90%")}</span></div>
+        <div class="manager-alert"><strong>🎯 On Track</strong><span>${holiday ? holidayName : `${onTrack} employees at or above 90% achievement`}</span></div>
         <div class="manager-alert"><strong>📌 Active Workforce</strong><span>${activeEmployees} employees available today</span></div>
     `;
     const tbody = document.getElementById("managerControlBody");
     tbody.innerHTML = "";
     rows.sort((a,b) => (b.pct ?? -1) - (a.pct ?? -1)).forEach(r => {
         let cls = "grey", text = "N/A";
-        if (r.weekend) { text = "HOLIDAY"; cls = "grey"; }
+        if (r.holiday) {
+            text = r.isClientHol ? "CLIENT HOLIDAY" : "HOLIDAY";
+            cls = r.isClientHol ? "pink" : "grey";
+        }
         else if (r.pct !== null) {
             cls = r.pct >= 90 ? "green" : r.pct >= 70 ? "orange" : "red";
             text = r.pct >= 90 ? "ON TRACK" : r.pct >= 70 ? "MONITOR" : "ATTENTION";
         }
         const tr = document.createElement("tr");
-        if (r.weekend) tr.classList.add("holiday-row");
+        if (r.holiday) tr.className = r.isClientHol ? "holiday-row client-holiday-row" : "holiday-row";
         tr.innerHTML = `
             <td class="left">${escapeHtml(r.employee.employee_name)}</td>
             <td>${escapeHtml(r.employee.employee_code)}</td>
             <td>${escapeHtml(r.project?.project_name || "")}</td>
             <td>${escapeHtml(r.attendance)}</td>
-            <td>${r.weekend ? "N/A" : r.target}</td>
+            <td>${r.holiday ? "N/A" : r.target}</td>
             <td>${r.achieved}</td>
-            <td>${r.weekend ? "N/A" : r.remaining}</td>
-            <td>${r.pct === null ? (r.weekend ? "HOLIDAY" : "N/A") : r.pct.toFixed(1) + "%"}</td>
+            <td>${r.holiday ? "N/A" : r.remaining}</td>
+            <td>${r.pct === null ? (r.holiday ? "HOLIDAY" : "N/A") : r.pct.toFixed(1) + "%"}</td>
             <td><span class="manager-status ${cls}">${text}</span></td>
         `;
         tbody.appendChild(tr);
@@ -1955,7 +2012,8 @@ async function downloadDailyCSV() {
     const { data, error } = await supabaseClient.from("daily_productivity").select("*").eq("tracker_date", date).limit(10000);
     if (error) { console.error(error); showMessage("Unable to load daily report", "error"); return; }
     const records = data || [];
-    const weekend = isWeekendDate(date);
+    const holiday = isHolidayDate(date);
+    const isClientHol = isCustomHoliday(date);
     const rows = [];
     visibleEmployees.forEach(employee => {
         const project = getProjectById(employee.project_id);
@@ -1966,9 +2024,12 @@ async function downloadDailyCSV() {
         const achieved = computeAchievedFromRecord(record);
         const remaining = target === null ? null : Math.max(target - achieved, 0);
         const percentage = (target !== null && target > 0) ? (achieved / target * 100) : null;
+        let dayType = "Working Day";
+        if (isClientHol) dayType = "Client Holiday";
+        else if (holiday) dayType = "Fixed Holiday (Weekend)";
         const row = {
             "Tracker Date": date,
-            "Day Type": weekend ? "Fixed Holiday (Weekend)" : "Working Day",
+            "Day Type": dayType,
             "Employee": employee.employee_name,
             "EMP ID": employee.employee_code,
             "Project": project ? project.project_name : "",
@@ -1980,7 +2041,7 @@ async function downloadDailyCSV() {
         row["Achieved"] = achieved;
         row["Remaining"] = remaining === null ? "N/A" : remaining;
         row["Achievement %"] = percentage === null ? "N/A" : percentage.toFixed(1) + "%";
-        row["Status"] = weekend ? "HOLIDAY" : (percentage === null ? "N/A" : percentage >= 100 ? "ON TRACK" : "NEED ATTENTION");
+        row["Status"] = isClientHol ? "CLIENT HOLIDAY" : (holiday ? "HOLIDAY" : (percentage === null ? "N/A" : percentage >= 100 ? "ON TRACK" : "NEED ATTENTION"));
         rows.push(row);
     });
     downloadCSV(rows, `Hourly_Production_Daily_${date}.csv`);
@@ -1999,11 +2060,7 @@ function getDateRange(fromDate, toDate) {
 }
 
 /* =========================================================
-   MTD REPORT — WEEKENDS EXCLUDED
-   -----------------------------------------------------
-   • Saturdays & Sundays are skipped entirely.
-   • Only weekday dates appear as rows in the daily breakdown.
-   • The MTD summary totals only count working days.
+   MTD REPORT — Weekends & custom holidays excluded
 ========================================================= */
 async function downloadMTDCSV() {
     const fromDate = document.getElementById("mtdFromDate").value;
@@ -2026,10 +2083,10 @@ async function downloadMTDCSV() {
 
     const records = data || [];
     const allDates = getDateRange(fromDate, toDate);
-    const workingDates = allDates.filter(d => !isWeekendDate(d));
+    const workingDates = allDates.filter(d => !isHolidayDate(d));
     const rows = [];
 
-    /* ── BLOCK 1 — DAILY BREAKDOWN (weekdays only) ── */
+    /* ── BLOCK 1 — DAILY BREAKDOWN (working days only) ── */
     workingDates.forEach(date => {
         visibleEmployees.forEach(employee => {
             const project = getProjectById(employee.project_id);
@@ -2075,7 +2132,7 @@ async function downloadMTDCSV() {
         });
     });
 
-    /* ── BLOCK 2 — MTD SUMMARY (per employee, weekdays only) ── */
+    /* ── BLOCK 2 — MTD SUMMARY (per employee, working days only) ── */
     visibleEmployees.forEach(employee => {
         const project = getProjectById(employee.project_id);
         const subProject = getEmployeeSubProject(employee);
@@ -2123,7 +2180,7 @@ async function downloadMTDCSV() {
     });
 
     downloadCSV(rows, `Hourly_Production_MTD_${fromDate}_to_${toDate}.csv`);
-    showMessage("MTD Report downloaded successfully (weekends excluded)");
+    showMessage("MTD Report downloaded successfully (weekends & client holidays excluded)");
 }
 
 function escapeHtml(value) {
