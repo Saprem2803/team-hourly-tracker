@@ -231,8 +231,26 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .table-shell{background:#fff;border:1px solid rgba(255,255,255,.9);border-radius:var(--radius);overflow:hidden;box-shadow:0 6px 24px -6px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.9);}
 .table-scroll{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;min-width:1200px;font-size:13px;}
-thead th{background:var(--bg-soft);color:var(--ink-3);padding:14px 14px;text-align:left;font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;border-bottom:1px solid var(--line);white-space:nowrap;}
-tbody td{padding:14px;border-bottom:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap;font-weight:500;}
+
+/* ─────────────── ALIGNMENT: headers centered by default ─────────────── */
+thead th{background:var(--bg-soft);color:var(--ink-3);padding:14px 14px;text-align:center;font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;border-bottom:1px solid var(--line);white-space:nowrap;}
+
+/* Name-related header columns stay left-aligned */
+#projectTable thead th:nth-child(2),
+#projectTable thead th:nth-child(3),
+#subProjectTable thead th:nth-child(2),
+#subProjectTable thead th:nth-child(3),
+#subProjectTable thead th:nth-child(4),
+#teamLeadTable thead th:nth-child(2){text-align:left;}
+
+/* ─────────────── ALIGNMENT: body cells centered by default ─────────────── */
+tbody td{padding:14px;border-bottom:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap;font-weight:500;text-align:center;}
+
+/* Name-related body columns stay left-aligned */
+td.project-cell,
+td.lead-cell,
+.sub-row td:nth-child(2){text-align:left;}
+
 tbody tr:last-child td{border-bottom:none;}
 tbody tr{transition:background .12s ease;}
 tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
@@ -1224,8 +1242,6 @@ function getActualProduction(productivity){
 
 /* =========================================================
    WORKING DAYS HELPER
-   Returns YYYY-MM-DD strings for every Mon-Fri between
-   startDate and endDate inclusive. Sat/Sun excluded.
 ========================================================= */
 function getWorkingDaysBetween(startDate, endDate){
     const dates = [];
@@ -1233,7 +1249,7 @@ function getWorkingDaysBetween(startDate, endDate){
     let current = new Date(startDate + "T00:00:00");
     const end = new Date(endDate + "T00:00:00");
     while(current <= end){
-        const dow = current.getDay();   // 0 = Sunday, 6 = Saturday
+        const dow = current.getDay();
         if(dow !== 0 && dow !== 6){
             dates.push(
                 `${current.getFullYear()}-${String(current.getMonth()+1).padStart(2,"0")}-${String(current.getDate()).padStart(2,"0")}`
@@ -1246,9 +1262,6 @@ function getWorkingDaysBetween(startDate, endDate){
 
 /* =========================================================
    SHRINKAGE
-   • Daily → shrinkage for the selected date only
-   • MTD   → average daily shrinkage 1st of month → selected
-   Weekends excluded from denominator in both modes.
 ========================================================= */
 function computeShrinkageBreakdown(employeeIds){
     const empty = { pct: 0, shrinkDays: 0, scheduledDays: 0, workingDays: 0 };
@@ -2355,14 +2368,13 @@ sb.auth.onAuthStateChange(async (event) => {
     var W = 0, H = 0, DPR = 1;
     var particles = [];
     var COUNT = 90;
-    var LINK_DISTANCE = 200;   // px — how far a ray can reach
+    var LINK_DISTANCE = 200;
     var rafId = null;
     var lastFrame = 0;
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* ---------- Colour palettes ---------- */
-    var GOLD   = { r: 255, g: 215, b: 90  };   // warm golden amber
-    var SILVER = { r: 215, g: 230, b: 255 };   // cool silver-white
+    var GOLD   = { r: 255, g: 215, b: 90  };
+    var SILVER = { r: 215, g: 230, b: 255 };
 
     function resize(){
         DPR = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -2383,7 +2395,6 @@ sb.auth.onAuthStateChange(async (event) => {
         particles = [];
 
         for(var i = 0; i < COUNT; i++){
-            /* ~55% golden, ~45% silver */
             var isGolden = Math.random() < 0.55;
             particles.push({
                 x: Math.random() * W,
@@ -2406,7 +2417,6 @@ sb.auth.onAuthStateChange(async (event) => {
     function draw(now){
         ctx.clearRect(0, 0, W, H);
 
-        /* ---------- 1. Bright rays between nearby dots ---------- */
         ctx.globalCompositeOperation = 'lighter';
 
         for(var i = 0; i < particles.length; i++){
@@ -2427,12 +2437,10 @@ sb.auth.onAuthStateChange(async (event) => {
                 var pulse2 = 0.58 + Math.sin(p2.phase) * 0.42;
                 var pulseAvg = (pulse1 + pulse2) * 0.5;
 
-                /* Blend the two endpoint colours */
                 var rc = Math.round((p1.color.r + p2.color.r) * 0.5);
                 var gc = Math.round((p1.color.g + p2.color.g) * 0.5);
                 var bc = Math.round((p1.color.b + p2.color.b) * 0.5);
 
-                /* Much more visible rays */
                 var lineAlpha = proximity * proximity * 0.55 * pulseAvg;
 
                 ctx.strokeStyle = 'rgba(' + rc + ',' + gc + ',' + bc + ',' + lineAlpha.toFixed(3) + ')';
@@ -2446,7 +2454,6 @@ sb.auth.onAuthStateChange(async (event) => {
 
         ctx.globalCompositeOperation = 'source-over';
 
-        /* ---------- 2. Glowing golden + silver dots ---------- */
         for(var k = 0; k < particles.length; k++){
             var p = particles[k];
             var c = p.color;
@@ -2455,11 +2462,9 @@ sb.auth.onAuthStateChange(async (event) => {
             p.y += p.vy;
             p.phase += p.speed;
 
-            /* Gentle floating motion */
             p.x += Math.sin(p.phase * 0.7) * p.drift * 0.08;
             p.y += Math.cos(p.phase * 0.55) * p.drift * 0.08;
 
-            /* Wrap around edges */
             if(p.x < -10) p.x = W + 10;
             if(p.x > W + 10) p.x = -10;
             if(p.y < -10) p.y = H + 10;
@@ -2468,7 +2473,6 @@ sb.auth.onAuthStateChange(async (event) => {
             var pulse = 0.58 + Math.sin(p.phase) * 0.32;
             var radius = p.r * (0.9 + pulse * 0.22);
 
-            /* Soft halo */
             var glow = ctx.createRadialGradient(
                 p.x, p.y, 0,
                 p.x, p.y, radius * 5
@@ -2483,7 +2487,6 @@ sb.auth.onAuthStateChange(async (event) => {
             ctx.arc(p.x, p.y, radius * 5, 0, Math.PI * 2);
             ctx.fill();
 
-            /* Bright core dot */
             ctx.shadowColor = colorStr(c, 0.95);
             ctx.shadowBlur  = 10 + pulse * 6;
             ctx.fillStyle   = colorStr(c, 0.85 + pulse * 0.15);
@@ -2492,7 +2495,6 @@ sb.auth.onAuthStateChange(async (event) => {
             ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
             ctx.fill();
 
-            /* Specular white highlight on top */
             ctx.shadowBlur = 0;
             var spec = ctx.createRadialGradient(
                 p.x - radius * 0.3, p.y - radius * 0.3, 0,
