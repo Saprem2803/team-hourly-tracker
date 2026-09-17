@@ -111,13 +111,11 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .header-title-block{display:flex;flex-direction:column;}
 .header-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;}
 
-/* === Executive Operations Dashboard — moving golden gradient sweep ===
-   A diagonal band of golden light slowly travels across the text
-   from the top-right corner to the bottom-left, then reverses.    */
+/* === Executive Operations Dashboard — PURE GOLD with intense layered glow === */
 .header h1{
     font-family:'Playfair Display',Georgia,serif;
     font-size:22px;
-    font-weight:700;
+    font-weight:800;
     letter-spacing:-.3px;
     line-height:1.15;
     margin:0;
@@ -125,15 +123,19 @@ body.wp-off #liveWallpaper{ opacity:0; }
 
     background-image: linear-gradient(
         120deg,
-        #ffffff 0%,
-        #ffffff 32%,
-        #fff7d6 42%,
-        #ffd95f 50%,
-        #fff7d6 58%,
-        #ffffff 68%,
-        #ffffff 100%
+        #8a6410 0%,
+        #b8860b 14%,
+        #d4af37 28%,
+        #f5cf4a 40%,
+        #fff3b0 48%,
+        #ffe066 52%,
+        #fff3b0 58%,
+        #f5cf4a 68%,
+        #d4af37 82%,
+        #b8860b 92%,
+        #8a6410 100%
     );
-    background-size: 240% 240%;
+    background-size: 260% 260%;
     background-position: 100% 0%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -141,9 +143,17 @@ body.wp-off #liveWallpaper{ opacity:0; }
     color: transparent;
 
     animation: titleGoldenSweep 14s ease-in-out infinite;
-    filter: drop-shadow(0 0 5px rgba(255,220,95,0.35));
-    will-change: background-position;
+
+    filter:
+        drop-shadow(0 0 3px rgba(255, 225, 90, 0.95))
+        drop-shadow(0 0 8px rgba(255, 200, 40, 0.85))
+        drop-shadow(0 0 16px rgba(212, 175, 55, 0.70))
+        drop-shadow(0 0 28px rgba(201, 162, 39, 0.55))
+        drop-shadow(0 0 46px rgba(180, 130, 20, 0.35));
+
+    will-change: background-position, filter;
 }
+
 @keyframes titleGoldenSweep {
     0%   { background-position: 100% 0%; }
     50%  { background-position: 0% 100%; }
@@ -700,7 +710,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                 <div class="chart-card">
                     <div class="chart-card-head">
                         <div class="chart-card-title">Sub-Project Achievement Ranking</div>
-                        <div class="chart-card-desc">Top 10 sub-projects by achievement %</div>
+                        <div class="chart-card-desc">Top 10 sub-projects by achievement % (with parent project)</div>
                     </div>
                     <div class="chart-box"><canvas id="subProjectAchievementChart"></canvas></div>
                 </div>
@@ -714,7 +724,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                 <div class="chart-card">
                     <div class="chart-card-head">
                         <div class="chart-card-title">Daily Shrinkage Trend</div>
-                        <div class="chart-card-desc">Shrinkage % per day across current month</div>
+                        <div class="chart-card-desc" id="shrinkageTrendDesc">Shrinkage % per day across current month</div>
                     </div>
                     <div class="chart-box"><canvas id="shrinkageTrendChart"></canvas></div>
                 </div>
@@ -830,14 +840,81 @@ const OPERATIONAL_DASHBOARD_FILE = "index.html";
 function openOperationalDashboard(){ window.location.href = OPERATIONAL_DASHBOARD_FILE; }
 
 /* =========================================================
-   CHART.JS — DATA CALLOUT PLUGIN
+   PROJECT SHORT LABELS
    -----------------------------------------------------
-   Draws a small label (value) on top of every bar and
-   above every line point. Supports two formats:
-       'percent'  →  87.4%
-       'number'   →  1,234
-   Toggle per chart with:
-       options.plugins.dataLabels = { enabled: true, format: 'percent' }
+   Maps each project's full name to its short code. The
+   lookup is case-insensitive, so minor capitalisation
+   differences in the database won't break it.
+
+   Examples:
+     "Hopebridge"                  → "HB"
+     "New Season"                  → "NS"
+     "White Rock Medical Center"   → "WRMC"
+     "Behavioural Frame Work"      → "BFW"
+
+   These short codes get prefixed onto sub-project labels
+   in the Sub-Project Achievement Ranking chart, e.g.
+     "PAR" under Hopebridge  →  "HB - PAR"
+     "AR"  under New Season  →  "NS - AR"
+========================================================= */
+const PROJECT_SHORT_LABELS = {
+    "Hopebridge": "HB",
+    "Hope Bridge": "HB",
+    "New Season": "NS",
+    "White Rock Medical Center": "WRMC",
+    "White rock Medical Center": "WRMC",
+    "Behavioural Frame Work": "BFW",
+    "Behavioral Frame Work": "BFW"
+};
+
+/* Case-insensitive lookup: returns the short code for a
+   project name (or null if not mapped). */
+function getProjectShortLabel(projectName){
+    if(!projectName) return null;
+    const target = String(projectName).trim().toLowerCase();
+    for(const key of Object.keys(PROJECT_SHORT_LABELS)){
+        if(key.trim().toLowerCase() === target){
+            return PROJECT_SHORT_LABELS[key];
+        }
+    }
+    return null;
+}
+
+/* =========================================================
+   SUB-PROJECT LABEL HELPER
+   -----------------------------------------------------
+   Combines the parent project's short code (or full name)
+   with the sub-project name so duplicates like "AR" become
+   uniquely identifiable on charts.
+     • If the sub-project name already contains its project
+       name (or short code), we keep it as-is to avoid
+       double-prefixing like "WRMC - WRMC AR".
+     • Otherwise we prefix with the short code (if defined)
+       or the raw project name, joined by " - ".
+========================================================= */
+function getSubProjectLabel(subProject, project){
+    const nm = spName(subProject);
+    const projNm = project?.project_name || "";
+    if(!projNm) return nm;
+
+    const nmLower = String(nm).toLowerCase();
+    const projLower = String(projNm).toLowerCase();
+
+    /* If the sub-project name already mentions its project, skip. */
+    if(nmLower.includes(projLower)) return nm;
+
+    /* Also skip if the short code is already present in the name. */
+    const shortLabel = getProjectShortLabel(projNm);
+    if(shortLabel && nmLower.includes(String(shortLabel).toLowerCase())){
+        return nm;
+    }
+
+    const prefix = shortLabel || projNm;
+    return `${prefix} - ${nm}`;
+}
+
+/* =========================================================
+   CHART.JS — DATA CALLOUT PLUGIN
 ========================================================= */
 const chartDataLabelsPlugin = {
     id: 'chartDataLabels',
@@ -855,7 +932,6 @@ const chartDataLabelsPlugin = {
         ctx.font = `700 ${fontSize}px ${fontFamily}`;
         ctx.fillStyle = opts.color || '#0f2a4a';
 
-        // subtle white halo for readability
         ctx.shadowColor = 'rgba(255,255,255,0.95)';
         ctx.shadowBlur = 3;
 
@@ -880,17 +956,14 @@ const chartDataLabelsPlugin = {
                 const y = element.y;
 
                 if (chart.options.indexAxis === 'y') {
-                    // Horizontal bars — label to the right of the bar end
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(text, x + 6, y);
                 } else if (chart.config.type === 'line') {
-                    // Line charts — label above each point
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.fillText(text, x, y - 9);
                 } else {
-                    // Vertical bars — label above the bar
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.fillText(text, x, y - 5);
@@ -902,8 +975,77 @@ const chartDataLabelsPlugin = {
     }
 };
 
-// Register the plugin so every chart can use it
+/* =========================================================
+   CHART.JS — AVERAGE LINE PLUGIN
+========================================================= */
+const averageLinePlugin = {
+    id: 'averageLine',
+    afterDatasetsDraw(chart) {
+        const opts = (chart.options.plugins && chart.options.plugins.averageLine) || {};
+        if (!opts.enabled) return;
+        if (opts.value === null || opts.value === undefined || !Number.isFinite(opts.value)) return;
+
+        const yScale = chart.scales.y;
+        if (!yScale) return;
+
+        const yPixel = yScale.getPixelForValue(opts.value);
+        const { left, right } = chart.chartArea;
+        const ctx = chart.ctx;
+
+        const color = opts.color || '#c9a227';
+        const textColor = opts.textColor || '#7a5a10';
+
+        ctx.save();
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([7, 5]);
+        ctx.beginPath();
+        ctx.moveTo(left, yPixel);
+        ctx.lineTo(right, yPixel);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const label = opts.label || `Avg: ${Number(opts.value).toFixed(1)}%`;
+        const fontFamily = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        ctx.font = `800 11px ${fontFamily}`;
+        const textWidth = ctx.measureText(label).width;
+        const padX = 8;
+        const boxW = textWidth + padX * 2;
+        const boxH = 20;
+        const boxX = right - boxW - 4;
+        const boxY = yPixel - boxH - 4;
+
+        const radius = 6;
+        ctx.beginPath();
+        ctx.moveTo(boxX + radius, boxY);
+        ctx.lineTo(boxX + boxW - radius, boxY);
+        ctx.quadraticCurveTo(boxX + boxW, boxY, boxX + boxW, boxY + radius);
+        ctx.lineTo(boxX + boxW, boxY + boxH - radius);
+        ctx.quadraticCurveTo(boxX + boxW, boxY + boxH, boxX + boxW - radius, boxY + boxH);
+        ctx.lineTo(boxX + radius, boxY + boxH);
+        ctx.quadraticCurveTo(boxX, boxY + boxH, boxX, boxY + boxH - radius);
+        ctx.lineTo(boxX, boxY + radius);
+        ctx.quadraticCurveTo(boxX, boxY, boxX + radius, boxY);
+        ctx.closePath();
+
+        ctx.fillStyle = opts.bgColor || 'rgba(255, 253, 240, 0.98)';
+        ctx.fill();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, boxX + boxW / 2, boxY + boxH / 2 + 0.5);
+
+        ctx.restore();
+    }
+};
+
 Chart.register(chartDataLabelsPlugin);
+Chart.register(averageLinePlugin);
 
 /* =========================================================
    STATE
@@ -1813,6 +1955,7 @@ function renderCharts(){
     renderHourlyProductionChart();
     renderShrinkageTrendChart();
 }
+
 function renderProjectAchievementChart(){
     const canvas = document.getElementById("projectAchievementChart");
     const data = buildProjectMetrics();
@@ -1859,6 +2002,7 @@ function renderProjectAchievementChart(){
         }
     });
 }
+
 function renderSubProjectAchievementChart(){
     const canvas = document.getElementById("subProjectAchievementChart");
     if(!canvas) return;
@@ -1881,10 +2025,12 @@ function renderSubProjectAchievementChart(){
         if(item.achievement > 0) return "#b91c1c";
         return "#94a3b8";
     });
+    const labels = data.map(item => getSubProjectLabel(item.subProject, item.project));
+
     subProjectChart = new Chart(canvas, {
         type: "bar",
         data: {
-            labels: data.map(item => spName(item.subProject)),
+            labels: labels,
             datasets: [{
                 label: "Achievement %",
                 data: data.map(item => Number(item.achievement.toFixed(1))),
@@ -1904,10 +2050,17 @@ function renderSubProjectAchievementChart(){
                     titleFont: { family: "Inter", size: 12, weight: "700" },
                     bodyFont: { family: "Inter", size: 12, weight: "500" },
                     callbacks: {
-                        label: ctx => ctx.parsed.x.toFixed(1) + "%",
+                        title: items => {
+                            const item = data[items[0].dataIndex];
+                            return `${spName(item.subProject)}`;
+                        },
+                        label: ctx => "Achievement: " + ctx.parsed.x.toFixed(1) + "%",
                         afterLabel: ctx => {
                             const item = data[ctx.dataIndex];
-                            return `Target: ${formatNumber(item.target, 0)} · Achieved: ${formatNumber(item.production, 0)}`;
+                            return [
+                                `Parent Project: ${item.project?.project_name || "—"}`,
+                                `Target: ${formatNumber(item.target, 0)} · Achieved: ${formatNumber(item.production, 0)}`
+                            ];
                         }
                     }
                 }
@@ -1922,6 +2075,7 @@ function renderSubProjectAchievementChart(){
         }
     });
 }
+
 function renderHourlyProductionChart(){
     const canvas = document.getElementById("hourlyProductionChart");
     const totals = HOUR_FIELDS.map(() => 0);
@@ -1960,11 +2114,27 @@ function renderHourlyProductionChart(){
         }
     });
 }
+
 function renderShrinkageTrendChart(){
     const canvas = document.getElementById("shrinkageTrendChart");
     if(!canvas) return;
     const employeeIds = filteredEmployees.map(m => m.employee.id);
     const series = computeDailyShrinkageSeries(employeeIds);
+
+    let averageValue = null;
+    if(series.values.length){
+        const sum = series.values.reduce((t,v) => t + v, 0);
+        averageValue = sum / series.values.length;
+        averageValue = Math.round(averageValue * 10) / 10;
+    }
+
+    const descEl = document.getElementById("shrinkageTrendDesc");
+    if(descEl){
+        descEl.textContent = averageValue !== null
+            ? `Shrinkage % per day across current month · Monthly average: ${averageValue.toFixed(1)}%`
+            : "Shrinkage % per day across current month";
+    }
+
     if(shrinkageTrendChart) shrinkageTrendChart.destroy();
     if(!series.labels.length){
         shrinkageTrendChart = new Chart(canvas, {
@@ -1977,7 +2147,6 @@ function renderShrinkageTrendChart(){
         });
         return;
     }
-    // Smaller label font when there are many days, to avoid crowding
     const labelFontSize = series.labels.length > 15 ? 9 : 10;
     shrinkageTrendChart = new Chart(canvas, {
         type: "bar",
@@ -1993,17 +2162,25 @@ function renderShrinkageTrendChart(){
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            layout: { padding: { top: 24 } },
+            layout: { padding: { top: 24, right: 4 } },
             plugins: {
                 legend: { display: false },
                 dataLabels: { enabled: true, format: 'percent', fontSize: labelFontSize, color: '#0f2a4a' },
+                averageLine: {
+                    enabled: averageValue !== null,
+                    value: averageValue,
+                    label: averageValue !== null ? `Avg: ${averageValue.toFixed(1)}%` : "",
+                    color: '#c9a227',
+                    textColor: '#7a5a10'
+                },
                 tooltip: {
                     backgroundColor: "#0a1628", padding: 12, cornerRadius: 8,
                     titleFont: { family: "Inter", size: 12, weight: "700" },
                     bodyFont: { family: "Inter", size: 12, weight: "500" },
                     callbacks: {
                         title: items => `Day ${items[0].label}`,
-                        label: ctx => `Shrinkage: ${ctx.parsed.y.toFixed(1)}%`
+                        label: ctx => `Shrinkage: ${ctx.parsed.y.toFixed(1)}%`,
+                        afterLabel: () => averageValue !== null ? `Monthly avg: ${averageValue.toFixed(1)}%` : ""
                     }
                 }
             },
@@ -2055,12 +2232,11 @@ function renderInsights(){
     if(spData.length){
         const top = spData[0];
         topSubEl.innerHTML =
-            `<span class="insight-accent">${escapeHTML(spName(top.subProject))}</span> under ` +
-            `<span class="insight-accent">${escapeHTML(top.project?.project_name || "—")}</span> at ` +
+            `<span class="insight-accent">${escapeHTML(getSubProjectLabel(top.subProject, top.project))}</span> at ` +
             `<span class="insight-accent">${formatPercent(top.achievement)}</span>`;
         const bottom = spData[spData.length - 1];
         bottomSubEl.innerHTML =
-            `<span class="insight-accent">${escapeHTML(spName(bottom.subProject))}</span> at ` +
+            `<span class="insight-accent">${escapeHTML(getSubProjectLabel(bottom.subProject, bottom.project))}</span> at ` +
             `<span class="insight-accent">${formatPercent(bottom.achievement)}</span> — requires attention`;
         countEl.innerHTML =
             `<span class="insight-accent">${spData.length}</span> target-based sub-projects in current view`;
@@ -2286,7 +2462,6 @@ sb.auth.onAuthStateChange(async (event) => {
 
 <!-- =========================================================
      LIVE WALLPAPER — Small Golden Dots with Faint Light Rays
-     Ambers are now smaller and connected by faint golden rays.
 ========================================================= -->
 <script>
 (function(){
@@ -2299,7 +2474,7 @@ sb.auth.onAuthStateChange(async (event) => {
     var W = 0, H = 0, DPR = 1;
     var particles = [];
     var COUNT = 85;
-    var LINK_DISTANCE = 180;   /* Max distance (px) to draw a ray between two dots */
+    var LINK_DISTANCE = 180;
     var rafId = null;
     var lastFrame = 0;
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2328,7 +2503,6 @@ sb.auth.onAuthStateChange(async (event) => {
                 y: Math.random() * H,
                 vx: (Math.random() - 0.5) * 0.28,
                 vy: (Math.random() - 0.5) * 0.28,
-                /* === Small amber size === */
                 r: Math.random() * 1.6 + 0.8,
                 phase: Math.random() * Math.PI * 2,
                 speed: Math.random() * 0.018 + 0.008,
@@ -2340,7 +2514,6 @@ sb.auth.onAuthStateChange(async (event) => {
     function draw(now){
         ctx.clearRect(0, 0, W, H);
 
-        /* ---------- 1. Faint golden rays between nearby dots ---------- */
         ctx.globalCompositeOperation = 'lighter';
 
         for(var i = 0; i < particles.length; i++){
@@ -2355,15 +2528,12 @@ sb.auth.onAuthStateChange(async (event) => {
                 if(distSq > LINK_DISTANCE * LINK_DISTANCE) continue;
 
                 var dist = Math.sqrt(distSq);
-                /* Proximity factor: 1 when very close, 0 when at max distance */
                 var proximity = 1 - (dist / LINK_DISTANCE);
 
-                /* Combined pulse from both endpoints → ray breathes with them */
                 var pulse1 = 0.58 + Math.sin(p1.phase) * 0.42;
                 var pulse2 = 0.58 + Math.sin(p2.phase) * 0.42;
                 var pulseAvg = (pulse1 + pulse2) * 0.5;
 
-                /* Very faint golden alpha */
                 var lineAlpha = proximity * proximity * 0.22 * pulseAvg;
 
                 ctx.strokeStyle = 'rgba(255, 215, 90, ' + lineAlpha.toFixed(3) + ')';
@@ -2377,7 +2547,6 @@ sb.auth.onAuthStateChange(async (event) => {
 
         ctx.globalCompositeOperation = 'source-over';
 
-        /* ---------- 2. Small glowing amber dots ---------- */
         for(var k = 0; k < particles.length; k++){
             var p = particles[k];
 
@@ -2385,21 +2554,17 @@ sb.auth.onAuthStateChange(async (event) => {
             p.y += p.vy;
             p.phase += p.speed;
 
-            /* Gentle floating motion */
             p.x += Math.sin(p.phase * 0.7) * p.drift * 0.08;
             p.y += Math.cos(p.phase * 0.55) * p.drift * 0.08;
 
-            /* Wrap around screen edges */
             if(p.x < -10) p.x = W + 10;
             if(p.x > W + 10) p.x = -10;
             if(p.y < -10) p.y = H + 10;
             if(p.y > H + 10) p.y = -10;
 
-            /* Soft glow pulse */
             var pulse = 0.58 + Math.sin(p.phase) * 0.32;
             var radius = p.r * (0.9 + pulse * 0.22);
 
-            /* Small soft glow halo */
             var glow = ctx.createRadialGradient(
                 p.x, p.y, 0,
                 p.x, p.y, radius * 5
@@ -2414,7 +2579,6 @@ sb.auth.onAuthStateChange(async (event) => {
             ctx.arc(p.x, p.y, radius * 5, 0, Math.PI * 2);
             ctx.fill();
 
-            /* Bright core dot with golden shadow */
             ctx.shadowColor = 'rgba(255,210,70,0.9)';
             ctx.shadowBlur = 8 + pulse * 5;
             ctx.fillStyle = 'rgba(255,225,120,' + (0.75 + pulse * 0.25).toFixed(3) + ')';
@@ -2423,7 +2587,6 @@ sb.auth.onAuthStateChange(async (event) => {
             ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
             ctx.fill();
 
-            /* Tiny inner specular highlight for "shiny" feel */
             ctx.shadowBlur = 0;
             var spec = ctx.createRadialGradient(
                 p.x - radius * 0.3, p.y - radius * 0.3, 0,
@@ -2491,7 +2654,7 @@ sb.auth.onAuthStateChange(async (event) => {
 
 
 /* =========================================================
-   WALLPAPER TOGGLE — existing control retained
+   WALLPAPER TOGGLE
 ========================================================= */
 (function(){
     var btn = document.getElementById('wallpaperToggle');
