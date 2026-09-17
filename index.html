@@ -210,7 +210,6 @@ td.left { text-align: left; }
      LIVE DARK WALLPAPER — STYLES
 ============================================================ -->
 <style>
-/* Page background: deep navy */
 body {
     background-color: #0a1628 !important;
     background-image:
@@ -225,7 +224,6 @@ body {
     min-height: 100vh;
 }
 
-/* Wallpaper canvas */
 #liveWallpaper {
     position: fixed;
     inset: 0;
@@ -238,11 +236,9 @@ body {
 }
 body.wp-off #liveWallpaper { opacity: 0; }
 
-/* Keep dashboard content above the wallpaper */
 #appHeader, #appContainer, #authScreen { position: relative; z-index: 1; }
 #appHeader { z-index: 10; }
 
-/* Header: dark glass that blends with navy */
 .header {
     background: linear-gradient(135deg, rgba(15,61,104,.85), rgba(18,97,160,.70)) !important;
     backdrop-filter: blur(14px) saturate(160%);
@@ -250,12 +246,10 @@ body.wp-off #liveWallpaper { opacity: 0; }
     border-bottom: 1px solid rgba(255,255,255,.08);
 }
 
-/* Readable text on navy */
 .section-title   { color: #e2e8f0 !important; }
 .download-title  { color: #e2e8f0 !important; }
 .download-note   { color: rgba(148,163,184,.9) !important; }
 
-/* Wallpaper toggle button */
 .wp-toggle {
     position: fixed;
     right: 22px;
@@ -959,9 +953,10 @@ function setTodayDate() {
     document.getElementById("trackerDate").max = calendarToday;
     document.getElementById("mtdFromDate").max = calendarToday;
     document.getElementById("mtdToDate").max = calendarToday;
-    const firstDay = calendarToday.substring(0,8) + "01";
+    // MTD To Date follows the tracker (shift) date by default
+    const firstDay = trackerDate.substring(0,8) + "01";
     document.getElementById("mtdFromDate").value = firstDay;
-    document.getElementById("mtdToDate").value = calendarToday;
+    document.getElementById("mtdToDate").value = trackerDate;
 }
 
 /* =========================================================
@@ -1894,69 +1889,124 @@ function getDateRange(fromDate, toDate) {
     return dates;
 }
 
+/* =========================================================
+   MTD REPORT — DAILY BREAKDOWN + PER-EMPLOYEE SUMMARY
+   -----------------------------------------------------
+   • Every date in the range appears as its own row per employee.
+   • Hourly columns are preserved (6–7 PM through 2–3 AM).
+   • A summary block at the bottom gives the MTD total per employee,
+     labelled with "— MTD TOTAL —" in the Date column.
+========================================================= */
 async function downloadMTDCSV() {
     const fromDate = document.getElementById("mtdFromDate").value;
     const toDate = document.getElementById("mtdToDate").value;
+
     if (!fromDate || !toDate) { showMessage("Select both From Date and To Date", "error"); return; }
     if (fromDate > toDate) { showMessage("From Date cannot be later than To Date", "error"); return; }
+
     const visibleEmployees = getFilteredEmployees();
     if (!visibleEmployees.length) { showMessage("No employees found", "error"); return; }
+
     showMessage("Preparing MTD Report...");
-    const { data, error } = await supabaseClient.from("daily_productivity").select("*").gte("tracker_date", fromDate).lte("tracker_date", toDate).limit(20000);
+
+    const { data, error } = await supabaseClient
+        .from("daily_productivity").select("*")
+        .gte("tracker_date", fromDate).lte("tracker_date", toDate)
+        .limit(50000);
+
     if (error) { console.error(error); showMessage("Unable to load MTD data", "error"); return; }
+
     const records = data || [];
     const dates = getDateRange(fromDate, toDate);
     const rows = [];
+
+    /* ── BLOCK 1 — DAILY BREAKDOWN (one row per employee per date) ── */
+    dates.forEach(date => {
+        visibleEmployees.forEach(employee => {
+            const project = getProjectById(employee.project_id);
+            const subProject = getEmployeeSubProject(employee);
+            const record = records.find(r =>
+                Number(r.employee_id) === Number(employee.id) && r.tracker_date === date
+            );
+
+            const attendance = record?.attendance || "Present";
+            const employeeTarget = getEmployeeTarget(employee);
+            const targetBased = employeeTarget !== null;
+
+            let dailyTarget = null;
+            if (targetBased) {
+                dailyTarget = getDailyTarget(employee, attendance);
+                if (record && record.daily_target !== null && record.daily_target !== undefined && record.daily_target !== "") {
+                    dailyTarget = Number(record.daily_target);
+                }
+            }
+
+            const achieved = computeAchievedFromRecord(record);
+            const remaining = dailyTarget === null ? null : Math.max(Number(dailyTarget) - achieved, 0);
+            const pct = (dailyTarget !== null && Number(dailyTarget) > 0)
+                ? (achieved / Number(dailyTarget) * 100) : null;
+
+            const row = {
+                "Date": date,
+                "Employee": employee.employee_name,
+                "EMP ID": employee.employee_code,
+                "Project": project ? project.project_name : "",
+                "Sub-Project": subProject ? (subProject.sub_project_name || "Unnamed Sub-Project") : "Not Required",
+                "Attendance": attendance,
+                "Daily Target": dailyTarget === null ? "N/A" : dailyTarget
+            };
+            hourFields.forEach((field, idx) => { row[hourLabels[idx]] = Number(record?.[field] || 0); });
+            row["Achieved"] = achieved;
+            row["Remaining"] = remaining === null ? "N/A" : remaining;
+            row["Achievement %"] = pct === null ? "N/A" : pct.toFixed(1) + "%";
+            row["Status"] = pct === null ? "N/A" : pct >= 100 ? "ON TRACK" : "NEED ATTENTION";
+            rows.push(row);
+        });
+    });
+
+    /* ── BLOCK 2 — MTD SUMMARY (one totals row per employee) ── */
     visibleEmployees.forEach(employee => {
         const project = getProjectById(employee.project_id);
         const subProject = getEmployeeSubProject(employee);
         const employeeTarget = getEmployeeTarget(employee);
         const targetBased = employeeTarget !== null;
-        let mtdTarget = 0, mtdAchieved = 0, daysPresent = 0, halfDays = 0, absentDays = 0, daysWithProduction = 0;
+
+        let mtdTarget = 0, mtdAchieved = 0, daysPresent = 0, halfDays = 0, absentDays = 0;
+
         dates.forEach(date => {
-            const record = records.find(r => Number(r.employee_id) === Number(employee.id) && r.tracker_date === date);
+            const record = records.find(r =>
+                Number(r.employee_id) === Number(employee.id) && r.tracker_date === date
+            );
             const attendance = record?.attendance || "Present";
             if (attendance === "Absent") absentDays++;
             else if (attendance === "Half Day") halfDays++;
             else daysPresent++;
-            let dailyTarget = getDailyTarget(employee, attendance);
-            if (record && record.daily_target !== null && record.daily_target !== undefined && record.daily_target !== "" && targetBased) {
-                dailyTarget = Number(record.daily_target);
+
+            if (targetBased) {
+                const dt = getDailyTarget(employee, attendance);
+                if (dt !== null) mtdTarget += Number(dt);
             }
-            if (targetBased && dailyTarget !== null) mtdTarget += Number(dailyTarget || 0);
-            const achieved = computeAchievedFromRecord(record);
-            mtdAchieved += achieved;
-            if (achieved > 0) daysWithProduction++;
+            mtdAchieved += computeAchievedFromRecord(record);
         });
-        if (!targetBased) {
-            rows.push({
-                "From Date": fromDate, "To Date": toDate,
-                "Employee": employee.employee_name, "EMP ID": employee.employee_code,
-                "Project": project ? project.project_name : "",
-                "Sub-Project": subProject ? (subProject.sub_project_name || "Unnamed Sub-Project") : "Not Required",
-                "Days Present": daysPresent, "Half Days": halfDays, "Absent Days": absentDays,
-                "Days With Production": daysWithProduction,
-                "MTD Target": "N/A", "MTD Achieved": mtdAchieved, "MTD Remaining": "N/A",
-                "MTD Achievement %": "N/A", "Status": "N/A"
-            });
-            return;
-        }
-        const targetAchieved = Math.min(mtdAchieved, mtdTarget);
-        const remaining = Math.max(mtdTarget - targetAchieved, 0);
-        const achievement = mtdTarget > 0 ? Number(computeAchievementPercent(mtdAchieved, mtdTarget).toFixed(1)) : null;
-        const status = achievement === null ? "N/A" : achievement >= 100 ? "ON TRACK" : "NEED ATTENTION";
-        rows.push({
-            "From Date": fromDate, "To Date": toDate,
-            "Employee": employee.employee_name, "EMP ID": employee.employee_code,
+
+        const pct = mtdTarget > 0 ? (mtdAchieved / mtdTarget * 100) : null;
+        const row = {
+            "Date": "— MTD TOTAL —",
+            "Employee": employee.employee_name,
+            "EMP ID": employee.employee_code,
             "Project": project ? project.project_name : "",
             "Sub-Project": subProject ? (subProject.sub_project_name || "Unnamed Sub-Project") : "Not Required",
-            "Days Present": daysPresent, "Half Days": halfDays, "Absent Days": absentDays,
-            "Days With Production": daysWithProduction,
-            "MTD Target": mtdTarget, "MTD Achieved": mtdAchieved, "MTD Remaining": remaining,
-            "MTD Achievement %": achievement === null ? "N/A" : achievement + "%",
-            "Status": status
-        });
+            "Attendance": `${daysPresent}P / ${halfDays}H / ${absentDays}A`,
+            "Daily Target": targetBased ? mtdTarget : "N/A"
+        };
+        hourFields.forEach((_, idx) => { row[hourLabels[idx]] = ""; });
+        row["Achieved"] = mtdAchieved;
+        row["Remaining"] = targetBased ? Math.max(mtdTarget - mtdAchieved, 0) : "N/A";
+        row["Achievement %"] = pct === null ? "N/A" : pct.toFixed(1) + "%";
+        row["Status"] = pct === null ? "N/A" : pct >= 100 ? "ON TRACK" : "NEED ATTENTION";
+        rows.push(row);
     });
+
     downloadCSV(rows, `Hourly_Production_MTD_${fromDate}_to_${toDate}.csv`);
     showMessage("MTD Report downloaded successfully");
 }
@@ -1972,6 +2022,16 @@ function escapeHtml(value) {
 ========================================================= */
 document.getElementById("trackerDate").addEventListener("change", async function() {
     await flushAllAutosaves();
+    const newDate = this.value;
+    // Auto-sync the MTD To Date and (if needed) the MTD From Date
+    if (newDate) {
+        document.getElementById("mtdToDate").value = newDate;
+        const firstOfMonth = newDate.substring(0, 8) + "01";
+        const fromField = document.getElementById("mtdFromDate");
+        if (!fromField.value || fromField.value > newDate) {
+            fromField.value = firstOfMonth;
+        }
+    }
     await loadDailyTracker();
 });
 
@@ -2019,7 +2079,6 @@ startApplication();
 
 <!-- ============================================================
      LIVE DARK WALLPAPER — Aurora Mesh + Starfield
-     Fully isolated so it never interferes with dashboard logic.
 ============================================================ -->
 <script>
 (function(){
@@ -2030,7 +2089,6 @@ startApplication();
 
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* Aurora blobs — cool navy/blue/teal + subtle gold for professional feel */
     var BLOBS = [
         { c:[59,130,190],  a:0.16, bx:0.15, by:0.20, r:0.62, ax:0.09, ay:0.07, sx:0.00022, sy:0.00018, p:0.0 },
         { c:[26,77,122],   a:0.22, bx:0.85, by:0.80, r:0.68, ax:0.11, ay:0.09, sx:0.00019, sy:0.00023, p:1.3 },
@@ -2040,7 +2098,6 @@ startApplication();
         { c:[40,150,180],  a:0.10, bx:0.50, by:0.58, r:0.42, ax:0.14, ay:0.12, sx:0.00021, sy:0.00024, p:6.5 }
     ];
 
-    /* Faint starfield */
     var STAR_COUNT = 70;
     var stars = [];
     function initStars(){
@@ -2132,7 +2189,7 @@ startApplication();
 
     function loop(now){
         rafId = requestAnimationFrame(loop);
-        if (now - lastFrame < 32) return;   /* ~30 FPS cap */
+        if (now - lastFrame < 32) return;
         lastFrame = now;
         t += 16;
         draw();
