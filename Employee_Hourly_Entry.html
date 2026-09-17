@@ -35,15 +35,115 @@
                 Helvetica,
                 sans-serif;
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #eef4ff 0%,
-                    #f8fbff 45%,
-                    #eef5ff 100%
-                );
+            /* Fallback colour — the canvas wallpaper paints over this */
+            background: #0b1029;
 
             color: #172033;
+        }
+
+        /* =====================================================
+           LIVE SKY WALLPAPER
+        ===================================================== */
+
+        #skyCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: block;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* =====================================================
+           FLOATING CLOCK WIDGET
+        ===================================================== */
+
+        #clockWidget {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 200;
+            padding: 12px 18px 13px;
+            border-radius: 16px;
+            background: rgba(10, 20, 45, 0.42);
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            text-align: right;
+            pointer-events: none;
+            min-width: 168px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .clock-time {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .clock-time .clock-seconds {
+            font-size: 13px;
+            font-weight: 700;
+            opacity: 0.72;
+            margin-left: 3px;
+            letter-spacing: 0.3px;
+        }
+
+        .clock-time .clock-ampm {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            opacity: 0.78;
+            margin-left: 5px;
+            vertical-align: top;
+            line-height: 1.6;
+        }
+
+        .clock-date {
+            margin-top: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.88);
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+        }
+
+        .clock-greeting {
+            margin-top: 5px;
+            font-size: 11px;
+            font-weight: 850;
+            letter-spacing: 0.2px;
+            text-transform: none;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+            margin-left: auto;
+            line-height: 1.3;
+        }
+
+        @media (max-width: 600px) {
+            #clockWidget {
+                top: 10px;
+                right: 10px;
+                padding: 9px 13px 10px;
+                min-width: 140px;
+                border-radius: 13px;
+            }
+            .clock-time { font-size: 19px; }
+            .clock-time .clock-seconds { font-size: 11px; }
+            .clock-date { font-size: 10px; }
+            .clock-greeting { font-size: 9.5px; max-width: 160px; }
         }
 
         button,
@@ -75,8 +175,8 @@
             background:
                 linear-gradient(
                     135deg,
-                    #0b1f44,
-                    #173f78
+                    rgba(11, 31, 68, 0.94),
+                    rgba(23, 63, 120, 0.94)
                 );
 
             color: white;
@@ -86,13 +186,16 @@
             padding: 25px 30px;
 
             box-shadow:
-                0 12px 35px rgba(15, 39, 80, 0.18);
+                0 12px 35px rgba(15, 39, 80, 0.28);
 
             margin-bottom: 22px;
 
             position: relative;
 
             overflow: hidden;
+
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         .header::after {
@@ -296,13 +399,15 @@
 
         .notify-permission {
             display: none;
-            background: #f1f7ff;
+            background: rgba(241, 247, 255, 0.94);
             border: 1px solid #d0e2f7;
             border-radius: 14px;
             padding: 14px 18px;
             margin-bottom: 18px;
             align-items: center;
             gap: 14px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         .notify-permission.active {
@@ -357,12 +462,14 @@
         ===================================================== */
 
         .card {
-            background: white;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(14px) saturate(150%);
+            -webkit-backdrop-filter: blur(14px) saturate(150%);
             border-radius: 18px;
             padding: 22px;
             margin-bottom: 18px;
-            box-shadow: 0 8px 28px rgba(24, 55, 99, 0.08);
-            border: 1px solid #e6edf7;
+            box-shadow: 0 8px 28px rgba(24, 55, 99, 0.12);
+            border: 1px solid rgba(230, 237, 247, 0.9);
         }
 
         .card-title {
@@ -402,16 +509,20 @@
             align-items: center;
             justify-content: center;
             padding: 25px;
+            position: relative;
+            z-index: 1;
         }
 
         .login-card {
             width: 100%;
             max-width: 440px;
-            background: white;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
             border-radius: 22px;
             padding: 34px;
-            box-shadow: 0 18px 55px rgba(18, 46, 88, 0.15);
-            border: 1px solid #e4ebf5;
+            box-shadow: 0 18px 55px rgba(18, 46, 88, 0.22);
+            border: 1px solid rgba(228, 235, 245, 0.9);
         }
 
         .login-logo {
@@ -546,16 +657,20 @@
             align-items: center;
             justify-content: center;
             padding: 25px;
+            position: relative;
+            z-index: 1;
         }
 
         .password-card {
             width: 100%;
             max-width: 470px;
-            background: white;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
             border-radius: 22px;
             padding: 34px;
-            box-shadow: 0 18px 55px rgba(18, 46, 88, 0.15);
-            border: 1px solid #e4ebf5;
+            box-shadow: 0 18px 55px rgba(18, 46, 88, 0.22);
+            border: 1px solid rgba(228, 235, 245, 0.9);
         }
 
         .password-icon {
@@ -635,11 +750,13 @@
         }
 
         .identity-item {
-            background: white;
-            border: 1px solid #e3eaf4;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px) saturate(150%);
+            -webkit-backdrop-filter: blur(12px) saturate(150%);
+            border: 1px solid rgba(227, 234, 244, 0.9);
             border-radius: 15px;
             padding: 15px;
-            box-shadow: 0 5px 18px rgba(30, 62, 106, 0.06);
+            box-shadow: 0 5px 18px rgba(30, 62, 106, 0.10);
         }
 
         .identity-label {
@@ -1378,9 +1495,10 @@
 
         .footer {
             text-align: center;
-            color: #8b98aa;
+            color: rgba(255, 255, 255, 0.85);
             font-size: 11px;
             padding: 10px 0 25px;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
         }
 
         /* =====================================================
@@ -1421,6 +1539,33 @@
 
 
 <body>
+
+<!-- =========================================================
+     LIVE SKY WALLPAPER
+========================================================= -->
+
+<canvas id="skyCanvas"></canvas>
+
+
+<!-- =========================================================
+     FLOATING CLOCK WIDGET
+========================================================= -->
+
+<div id="clockWidget">
+
+    <div class="clock-time">
+        <span id="clockHHMM">--:--</span><span id="clockSeconds" class="clock-seconds">:--</span><span id="clockAmPm" class="clock-ampm">--</span>
+    </div>
+
+    <div class="clock-date" id="clockDate">
+        Loading...
+    </div>
+
+    <div class="clock-greeting" id="clockGreeting">
+        Welcome
+    </div>
+
+</div>
 
 
 <!-- =========================================================
@@ -1720,7 +1865,8 @@
 ========================================================= -->
 
 <div id="appScreen"
-     class="hidden">
+     class="hidden"
+     style="position: relative; z-index: 1;">
 
     <div class="page">
 
@@ -2189,6 +2335,618 @@
 
 <script>
 
+/* =========================================================
+   GLOBAL STATE
+   -----------------------------------------------------
+   Declared FIRST so the live clock / wallpaper can safely
+   reference the logged-in employee's name (via `me`) even
+   during the very first render.
+========================================================= */
+
+let currentAuthUser = null;
+
+let me = null;
+
+let currentProject = null;
+
+let currentSubProject = null;
+
+let currentRecord = null;
+
+let currentShiftDate = null;
+
+let currentDateLocked = false;
+
+let saveTimer = null;
+
+let savePending = false;
+
+let saveInFlight = false;
+
+let lastPerformanceState = "";
+
+let celebrationTimer = null;
+
+let passwordChangeRequired = false;
+
+let passwordRecoveryMode = false;
+
+let lockTickerStarted = false;
+
+let hourTickerStarted = false;
+
+let reminderFiredFor = {};
+
+
+/* =========================================================
+   LIVE SKY WALLPAPER + CLOCK
+   -----------------------------------------------------
+   Draws a real-time sky on a fixed canvas behind everything:
+     • Sky gradient changes hour by hour (dawn → day → dusk → night)
+     • Sun rises in the east (left), peaks at noon, sets in the west (right)
+     • Big moon rises at 6 PM, peaks at midnight, sets at 6 AM
+     • Stars fade in at night, twinkle gently
+     • Shooting stars streak down at night — white and golden
+       streaks like falling light rays
+     • Floating glass clock widget updates every second and
+       greets the logged-in employee by first name.
+   Nothing here touches the production tracker logic.
+========================================================= */
+
+const skyCanvas = document.getElementById("skyCanvas");
+const skyCtx = skyCanvas.getContext("2d");
+
+let skyStars = [];
+let skyClouds = [];
+let skyShootingStars = [];
+
+/* Next scheduled shooting star spawn time (ms since epoch). */
+let nextShootingStarAt = 0;
+
+function resizeSkyCanvas() {
+    skyCanvas.width = window.innerWidth;
+    skyCanvas.height = window.innerHeight;
+    generateStars();
+    generateClouds();
+}
+
+window.addEventListener("resize", resizeSkyCanvas);
+
+function generateStars() {
+    skyStars = [];
+    const count = Math.max(60, Math.floor((skyCanvas.width * skyCanvas.height) / 9000));
+    for (let i = 0; i < count; i++) {
+        skyStars.push({
+            x: Math.random() * skyCanvas.width,
+            y: Math.random() * skyCanvas.height * 0.82,
+            r: 0.35 + Math.random() * 1.55,
+            phase: Math.random() * Math.PI * 2,
+            speed: 0.4 + Math.random() * 1.4,
+            base: 0.4 + Math.random() * 0.6
+        });
+    }
+}
+
+function generateClouds() {
+    skyClouds = [];
+    const count = Math.max(2, Math.floor(skyCanvas.width / 420));
+    for (let i = 0; i < count; i++) {
+        skyClouds.push({
+            x: Math.random() * skyCanvas.width,
+            y: skyCanvas.height * (0.08 + Math.random() * 0.28),
+            scale: 0.6 + Math.random() * 1.1,
+            speed: 0.06 + Math.random() * 0.12,
+            alpha: 0.18 + Math.random() * 0.22
+        });
+    }
+}
+
+/* ---------- Sky colour keyframes (hour → [r,g,b]) ---------- */
+
+const SKY_KEYFRAMES = [
+    { h: 0.0,  top: [8,   12,  36],  bot: [24,  30,  70]  }, // deep night
+    { h: 4.0,  top: [8,   12,  36],  bot: [24,  30,  70]  }, // deep night
+    { h: 5.0,  top: [26,  30,  66],  bot: [78,  58, 108]  }, // pre-dawn
+    { h: 5.7,  top: [118, 78, 118],  bot: [255, 152, 108] }, // dawn break
+    { h: 6.3,  top: [156, 178, 214], bot: [255, 208, 156] }, // sunrise
+    { h: 8.0,  top: [110, 172, 226], bot: [190, 222, 244] }, // morning
+    { h: 12.0, top: [70,  148, 224], bot: [148, 204, 244] }, // noon
+    { h: 15.0, top: [82,  158, 220], bot: [176, 214, 244] }, // afternoon
+    { h: 17.0, top: [110, 160, 210], bot: [255, 196, 148] }, // late afternoon
+    { h: 18.0, top: [222, 120, 120], bot: [255, 176, 118] }, // evening
+    { h: 19.0, top: [140, 72, 112],  bot: [255, 132, 92]  }, // dusk
+    { h: 20.0, top: [52,  42,  92],  bot: [140, 80, 112]  }, // twilight
+    { h: 21.0, top: [16,  22,  58],  bot: [42,  42,  92]  }, // night falling
+    { h: 24.0, top: [8,   12,  36],  bot: [24,  30,  70]  }  // deep night
+];
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function lerpColor(a, b, t) {
+    return [
+        Math.round(lerp(a[0], b[0], t)),
+        Math.round(lerp(a[1], b[1], t)),
+        Math.round(lerp(a[2], b[2], t))
+    ];
+}
+
+function getSkyColors(hours) {
+    for (let i = 0; i < SKY_KEYFRAMES.length - 1; i++) {
+        const a = SKY_KEYFRAMES[i];
+        const b = SKY_KEYFRAMES[i + 1];
+        if (hours >= a.h && hours <= b.h) {
+            const t = (hours - a.h) / (b.h - a.h);
+            return {
+                top: lerpColor(a.top, b.top, t),
+                bot: lerpColor(a.bot, b.bot, t)
+            };
+        }
+    }
+    return { top: SKY_KEYFRAMES[0].top, bot: SKY_KEYFRAMES[0].bot };
+}
+
+/* ---------- Celestial bodies ---------- */
+
+function drawSun(progress) {
+    const w = skyCanvas.width;
+    const h = skyCanvas.height;
+
+    const x = w * (0.08 + progress * 0.84);
+    const horizonY = h * 0.80;
+    const peak = h * 0.68;
+    const y = horizonY - Math.sin(progress * Math.PI) * peak;
+
+    const radius = Math.min(w, h) * 0.055;
+
+    /* soft outer glow */
+    const glow = skyCtx.createRadialGradient(x, y, 0, x, y, radius * 6);
+    glow.addColorStop(0,    "rgba(255, 240, 175, 0.85)");
+    glow.addColorStop(0.30, "rgba(255, 200, 110, 0.32)");
+    glow.addColorStop(1,    "rgba(255, 170, 70, 0)");
+    skyCtx.fillStyle = glow;
+    skyCtx.beginPath();
+    skyCtx.arc(x, y, radius * 6, 0, Math.PI * 2);
+    skyCtx.fill();
+
+    /* sun disc */
+    const disc = skyCtx.createRadialGradient(
+        x - radius * 0.30, y - radius * 0.30, radius * 0.10,
+        x, y, radius
+    );
+    disc.addColorStop(0,   "#fffbe0");
+    disc.addColorStop(0.55,"#ffe066");
+    disc.addColorStop(1,   "#ffb347");
+    skyCtx.fillStyle = disc;
+    skyCtx.beginPath();
+    skyCtx.arc(x, y, radius, 0, Math.PI * 2);
+    skyCtx.fill();
+}
+
+function drawMoon(progress, ambientDarkness) {
+    const w = skyCanvas.width;
+    const h = skyCanvas.height;
+
+    const x = w * (0.10 + progress * 0.80);
+    const horizonY = h * 0.80;
+    const peak = h * 0.72;
+    const y = horizonY - Math.sin(progress * Math.PI) * peak;
+
+    const radius = Math.min(w, h) * 0.072; /* noticeably big */
+
+    /* moon glow – stronger when darker */
+    const glowAlpha = 0.55 + ambientDarkness * 0.35;
+    const glow = skyCtx.createRadialGradient(x, y, 0, x, y, radius * 7);
+    glow.addColorStop(0,   `rgba(232, 240, 255, ${glowAlpha})`);
+    glow.addColorStop(0.35,`rgba(200, 218, 255, ${glowAlpha * 0.35})`);
+    glow.addColorStop(1,   "rgba(180, 200, 255, 0)");
+    skyCtx.fillStyle = glow;
+    skyCtx.beginPath();
+    skyCtx.arc(x, y, radius * 7, 0, Math.PI * 2);
+    skyCtx.fill();
+
+    /* moon disc */
+    const disc = skyCtx.createRadialGradient(
+        x - radius * 0.35, y - radius * 0.35, radius * 0.15,
+        x, y, radius
+    );
+    disc.addColorStop(0,   "#ffffff");
+    disc.addColorStop(0.65,"#eef3ff");
+    disc.addColorStop(1,   "#c6d2ee");
+    skyCtx.fillStyle = disc;
+    skyCtx.beginPath();
+    skyCtx.arc(x, y, radius, 0, Math.PI * 2);
+    skyCtx.fill();
+
+    /* craters – subtle grey blobs inside the moon disc */
+    const craters = [
+        [-0.32, -0.18, 0.19],
+        [ 0.22, -0.38, 0.12],
+        [-0.14,  0.34, 0.16],
+        [ 0.36,  0.14, 0.10],
+        [ 0.04, -0.06, 0.08],
+        [-0.42,  0.18, 0.07],
+        [ 0.14,  0.42, 0.09]
+    ];
+    skyCtx.save();
+    skyCtx.beginPath();
+    skyCtx.arc(x, y, radius, 0, Math.PI * 2);
+    skyCtx.clip();
+    skyCtx.fillStyle = "rgba(180, 195, 220, 0.42)";
+    craters.forEach(([cx, cy, cr]) => {
+        skyCtx.beginPath();
+        skyCtx.arc(x + cx * radius, y + cy * radius, cr * radius, 0, Math.PI * 2);
+        skyCtx.fill();
+    });
+    skyCtx.restore();
+}
+
+/* ---------- Stars ---------- */
+
+function drawStars(hours, darkness) {
+    if (darkness <= 0.01) return;
+
+    const t = performance.now() / 1000;
+
+    skyStars.forEach(star => {
+        const twinkle = 0.55 + 0.45 * Math.sin(t * star.speed + star.phase);
+        const alpha = star.base * twinkle * darkness;
+
+        skyCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        skyCtx.beginPath();
+        skyCtx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        skyCtx.fill();
+    });
+}
+
+/* ---------- Clouds (only visible while there is light) ---------- */
+
+function drawClouds(darkness, deltaSec) {
+    const light = 1 - darkness;
+    if (light <= 0.05) return;
+
+    skyClouds.forEach(c => {
+        c.x += c.speed * deltaSec * 8;
+        if (c.x - 200 * c.scale > skyCanvas.width) {
+            c.x = -200 * c.scale;
+            c.y = skyCanvas.height * (0.08 + Math.random() * 0.28);
+        }
+
+        const alpha = c.alpha * light;
+
+        skyCtx.save();
+        skyCtx.translate(c.x, c.y);
+        skyCtx.scale(c.scale, c.scale);
+        skyCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+
+        const puffs = [
+            [ 0,   0,   42],
+            [ 38,  6,   34],
+            [-40,  8,   32],
+            [ 20, -12,  30],
+            [-20, -8,   26],
+            [ 8,   14,  26]
+        ];
+        puffs.forEach(([px, py, pr]) => {
+            skyCtx.beginPath();
+            skyCtx.arc(px, py, pr, 0, Math.PI * 2);
+            skyCtx.fill();
+        });
+        skyCtx.restore();
+    });
+}
+
+/* =========================================================
+   SHOOTING STARS
+   -----------------------------------------------------
+   Active only at night (darkness > threshold). Each star
+   is a fast-moving streak that leaves a long glowing tail
+   in white and/or golden hues — like a falling light ray.
+========================================================= */
+
+function spawnShootingStar() {
+    const w = skyCanvas.width;
+    const h = skyCanvas.height;
+
+    /* Start anywhere in the upper 60% of the sky, biased
+       toward the right / upper-right so streaks cross the
+       visible area nicely. */
+    const startX = w * (0.15 + Math.random() * 0.85);
+    const startY = h * (0.02 + Math.random() * 0.45);
+
+    /* Direction: mostly down-left; variations make the
+       streaks feel organic rather than uniform. */
+    const angleDeg = 200 + Math.random() * 30;      /* 200° – 230° */
+    const angleRad = angleDeg * Math.PI / 180;
+    const speed = 620 + Math.random() * 320;        /* px / second */
+
+    /* Two palettes: pure white, and golden/amber. */
+    const isGolden = Math.random() < 0.45;
+
+    const color = isGolden
+        ? { r: 255, g: 214, b: 120 }   /* golden  */
+        : { r: 235, g: 244, b: 255 };  /* whitish */
+
+    skyShootingStars.push({
+        x: startX,
+        y: startY,
+        vx: Math.cos(angleRad) * speed,
+        vy: -Math.sin(angleRad) * speed * -1,   /* converted below */
+        angleRad: angleRad,
+        speed: speed,
+        length: 140 + Math.random() * 140,      /* tail length in px */
+        life: 0,
+        maxLife: 1.1 + Math.random() * 0.7,     /* seconds */
+        color: color,
+        width: 1.4 + Math.random() * 1.2
+    });
+
+    /* Fix sign of vy so it always moves downward on screen. */
+    const s = skyShootingStars[skyShootingStars.length - 1];
+    s.vy = Math.abs(s.speed * Math.sin(s.angleRad));
+
+    /* vx should be negative (moving left) for the classic
+       falling-star diagonal. Force it. */
+    s.vx = -Math.abs(s.speed * Math.cos(s.angleRad) * 0.6);
+}
+
+function updateShootingStars(deltaSec, darkness) {
+    if (darkness < 0.35) {
+        /* Not dark enough yet — clear any leftovers so they
+           don't linger into daytime. */
+        if (skyShootingStars.length) skyShootingStars.length = 0;
+        nextShootingStarAt = 0;
+        return;
+    }
+
+    /* Schedule new stars. Rate scales with darkness so the
+       sky gets busier the deeper the night goes. */
+    const now = performance.now();
+
+    if (nextShootingStarAt === 0) {
+        nextShootingStarAt = now + 900 + Math.random() * 1500;
+    }
+
+    if (now >= nextShootingStarAt) {
+        spawnShootingStar();
+
+        /* Occasionally fire a quick pair so some moments feel
+           like a mini shower. */
+        if (Math.random() < 0.22) {
+            setTimeout(spawnShootingStar, 180 + Math.random() * 260);
+        }
+
+        const baseGap = 2600 - darkness * 1400;   /* 1200 – 2600 ms */
+        nextShootingStarAt = now + baseGap + Math.random() * 2200;
+    }
+
+    /* Advance and cull. */
+    for (let i = skyShootingStars.length - 1; i >= 0; i--) {
+        const s = skyShootingStars[i];
+
+        s.x += s.vx * deltaSec;
+        s.y += s.vy * deltaSec;
+        s.life += deltaSec;
+
+        const offscreen =
+            s.x < -220 ||
+            s.x > skyCanvas.width + 220 ||
+            s.y > skyCanvas.height + 220;
+
+        if (offscreen || s.life >= s.maxLife) {
+            skyShootingStars.splice(i, 1);
+        }
+    }
+}
+
+function drawShootingStars(darkness) {
+    if (darkness < 0.35) return;
+
+    skyShootingStars.forEach(s => {
+        /* Life-based fade in/out so streaks appear and
+           disappear smoothly. */
+        const t = s.life / s.maxLife;
+        let alpha;
+        if (t < 0.15) alpha = t / 0.15;
+        else if (t > 0.75) alpha = Math.max(0, (1 - t) / 0.25);
+        else alpha = 1;
+
+        alpha *= Math.min(1, darkness * 1.15);
+        if (alpha <= 0.01) return;
+
+        const { r, g, b } = s.color;
+
+        /* Direction unit vector for the tail. */
+        const mag = Math.hypot(s.vx, s.vy) || 1;
+        const ux = s.vx / mag;
+        const uy = s.vy / mag;
+
+        const tailX = s.x - ux * s.length;
+        const tailY = s.y - uy * s.length;
+
+        /* 1. Wide soft glow behind the trail. */
+        const glowGrad = skyCtx.createLinearGradient(
+            tailX, tailY, s.x, s.y
+        );
+        glowGrad.addColorStop(0,    `rgba(${r},${g},${b},0)`);
+        glowGrad.addColorStop(0.55, `rgba(${r},${g},${b},${alpha * 0.18})`);
+        glowGrad.addColorStop(1,    `rgba(${r},${g},${b},${alpha * 0.55})`);
+
+        skyCtx.save();
+        skyCtx.strokeStyle = glowGrad;
+        skyCtx.lineCap = "round";
+        skyCtx.lineWidth = s.width * 3.4;
+        skyCtx.beginPath();
+        skyCtx.moveTo(tailX, tailY);
+        skyCtx.lineTo(s.x, s.y);
+        skyCtx.stroke();
+        skyCtx.restore();
+
+        /* 2. Sharp bright core streak. */
+        const coreGrad = skyCtx.createLinearGradient(
+            tailX, tailY, s.x, s.y
+        );
+        coreGrad.addColorStop(0,    `rgba(255,255,255,0)`);
+        coreGrad.addColorStop(0.45, `rgba(255,255,255,${alpha * 0.35})`);
+        coreGrad.addColorStop(1,    `rgba(255,255,255,${alpha * 0.95})`);
+
+        skyCtx.save();
+        skyCtx.strokeStyle = coreGrad;
+        skyCtx.lineCap = "round";
+        skyCtx.lineWidth = s.width;
+        skyCtx.beginPath();
+        skyCtx.moveTo(tailX, tailY);
+        skyCtx.lineTo(s.x, s.y);
+        skyCtx.stroke();
+        skyCtx.restore();
+
+        /* 3. Bright head of the streak — small glowing dot. */
+        const headR = 2.2 + s.width * 0.6;
+        const headGrad = skyCtx.createRadialGradient(
+            s.x, s.y, 0, s.x, s.y, headR * 3.5
+        );
+        headGrad.addColorStop(0,   `rgba(255,255,255,${alpha})`);
+        headGrad.addColorStop(0.4, `rgba(${r},${g},${b},${alpha * 0.55})`);
+        headGrad.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+
+        skyCtx.fillStyle = headGrad;
+        skyCtx.beginPath();
+        skyCtx.arc(s.x, s.y, headR * 3.5, 0, Math.PI * 2);
+        skyCtx.fill();
+
+        skyCtx.fillStyle = `rgba(255,255,255,${alpha})`;
+        skyCtx.beginPath();
+        skyCtx.arc(s.x, s.y, headR * 0.85, 0, Math.PI * 2);
+        skyCtx.fill();
+    });
+}
+
+/* ---------- Darkness helper (0 = bright day, 1 = deep night) ---------- */
+
+function getDarkness(hours) {
+    if (hours >= 21 || hours < 4.5) return 1;
+    if (hours >= 19 && hours < 21) return (hours - 19) / 2;
+    if (hours >= 4.5 && hours < 6.5) return 1 - (hours - 4.5) / 2;
+    return 0;
+}
+
+/* ---------- Animation loop ---------- */
+
+let lastSkyFrame = performance.now();
+
+function drawSkyFrame(nowMs) {
+    const deltaSec = Math.min((nowMs - lastSkyFrame) / 1000, 0.1);
+    lastSkyFrame = nowMs;
+
+    const now = new Date();
+    const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+
+    const w = skyCanvas.width;
+    const h = skyCanvas.height;
+
+    /* 1. Gradient */
+    const colors = getSkyColors(hours);
+    const grad = skyCtx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, `rgb(${colors.top[0]},${colors.top[1]},${colors.top[2]})`);
+    grad.addColorStop(1, `rgb(${colors.bot[0]},${colors.bot[1]},${colors.bot[2]})`);
+    skyCtx.fillStyle = grad;
+    skyCtx.fillRect(0, 0, w, h);
+
+    const darkness = getDarkness(hours);
+
+    /* 2. Stars (twinkling background) */
+    drawStars(hours, darkness);
+
+    /* 3. Clouds */
+    drawClouds(darkness, deltaSec);
+
+    /* 4. Sun (6 AM → 6 PM) */
+    if (hours >= 6 && hours <= 18) {
+        const progress = (hours - 6) / 12;
+        drawSun(progress);
+    }
+
+    /* 5. Moon (6 PM → 6 AM next day) */
+    let moonHours = hours;
+    if (moonHours < 6) moonHours += 24;
+    if (moonHours >= 18 && moonHours <= 30) {
+        const progress = (moonHours - 18) / 12;
+        drawMoon(progress, darkness);
+    }
+
+    /* 6. Shooting stars (night only) */
+    updateShootingStars(deltaSec, darkness);
+    drawShootingStars(darkness);
+
+    requestAnimationFrame(drawSkyFrame);
+}
+
+/* ---------- Clock widget (with personalised greeting) ---------- */
+
+const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MONTHS   = ["January","February","March","April","May","June",
+                  "July","August","September","October","November","December"];
+
+function pad2(n) { return String(n).padStart(2, "0"); }
+
+/* Returns the display name for the clock greeting.
+   Prefers the employee's first name once they are logged in. */
+function getClockDisplayName() {
+    if (!me) return "";
+    const fullName = me.employee_name || me.name || "";
+    const parts = String(fullName).trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return "";
+    return parts[0];
+}
+
+function updateClock() {
+    const now = new Date();
+
+    let hh = now.getHours();
+    const mm = pad2(now.getMinutes());
+    const ss = pad2(now.getSeconds());
+
+    const ampm = hh >= 12 ? "PM" : "AM";
+    let hh12 = hh % 12;
+    if (hh12 === 0) hh12 = 12;
+
+    document.getElementById("clockHHMM").textContent   = pad2(hh12) + ":" + mm;
+    document.getElementById("clockSeconds").textContent = ":" + ss;
+    document.getElementById("clockAmPm").textContent    = ampm;
+
+    document.getElementById("clockDate").textContent =
+        WEEKDAYS[now.getDay()] + ", " +
+        now.getDate() + " " +
+        MONTHS[now.getMonth()] + " " +
+        now.getFullYear();
+
+    let greeting;
+    const h = now.getHours();
+    if (h < 5)       greeting = "Good night";
+    else if (h < 12) greeting = "Good morning";
+    else if (h < 17) greeting = "Good afternoon";
+    else if (h < 21) greeting = "Good evening";
+    else             greeting = "Good night";
+
+    const firstName = getClockDisplayName();
+
+    const greetingEl = document.getElementById("clockGreeting");
+
+    if (firstName) {
+        greetingEl.textContent = greeting + " " + firstName + " !!";
+    }
+    else {
+        /* Before login (or if name is missing) — generic greeting. */
+        greetingEl.textContent = greeting + " !!";
+    }
+}
+
+/* ---------- Boot the wallpaper ---------- */
+
+resizeSkyCanvas();
+updateClock();
+setInterval(updateClock, 1000);
+requestAnimationFrame(drawSkyFrame);
+
 
 /* =========================================================
    SUPABASE CONFIGURATION
@@ -2260,41 +3018,6 @@ const AUTO_SAVE_DELAY = 700;
 
 const PASSWORD_RECOVERY_REDIRECT =
     "https://saprem2803.github.io/team-hourly-tracker/Employee_Hourly_Entry.html";
-
-
-let currentAuthUser = null;
-
-let me = null;
-
-let currentProject = null;
-
-let currentSubProject = null;
-
-let currentRecord = null;
-
-let currentShiftDate = null;
-
-let currentDateLocked = false;
-
-let saveTimer = null;
-
-let savePending = false;
-
-let saveInFlight = false;
-
-let lastPerformanceState = "";
-
-let celebrationTimer = null;
-
-let passwordChangeRequired = false;
-
-let passwordRecoveryMode = false;
-
-let lockTickerStarted = false;
-
-let hourTickerStarted = false;
-
-let reminderFiredFor = {};
 
 
 /* =========================================================
@@ -3037,6 +3760,10 @@ async function openAuthenticatedPortal() {
         applyLocks();
         recalcTotal();
         updatePerformanceCard();
+
+        /* Refresh the personalised greeting immediately after
+           the employee's name is known. */
+        updateClock();
 
         hide("loadingCard");
         show("entryScreen");
@@ -4256,24 +4983,6 @@ async function flushSave() {
 
 /* =========================================================
    SMART SYNC WITH TEAM LEAD EDITS
-
-   The Team Lead dashboard can edit the same daily_productivity
-   row the employee is working on. When that happens, the
-   employee's cached `currentRecord` is stale: the hour inputs
-   still show the old values, and if the employee hits Save,
-   the stale values would overwrite the Team Lead's correction.
-
-   This function:
-
-     1. Re-fetches the daily record from Supabase.
-     2. Compares it to what is currently in the DOM inputs.
-     3. Only updates an hour input if:
-          - the input is NOT currently focused (user isn't typing)
-          - there are no pending autosaves for that row
-          - the DB value actually differs from the DOM value
-     4. Silently skips if the employee has unsaved work.
-
-   It also refreshes the attendance radio if it changed.
 ========================================================= */
 
 async function syncFromDatabase() {
@@ -4395,11 +5104,6 @@ async function syncFromDatabase() {
         recalcTotal();
         updatePerformanceCard();
 
-        showMessage(
-            "Updated from Team Lead corrections.",
-            "success"
-        );
-
     }
     else {
 
@@ -4501,10 +5205,6 @@ function startLockTicker() {
 
 /* =========================================================
    PERIODIC SYNC TICKER
-
-   Re-fetches the daily record from Supabase every 60
-   seconds so Team Lead corrections show up on the
-   employee page without a manual reload.
 ========================================================= */
 
 let syncTickerStarted = false;
@@ -5386,6 +6086,9 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
         hide("notifyPermission");
 
         show("loginScreen");
+
+        /* Reset greeting to generic form after sign-out. */
+        updateClock();
 
     }
 
