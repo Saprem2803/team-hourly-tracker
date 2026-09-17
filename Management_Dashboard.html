@@ -182,7 +182,7 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .lock-chip.locked{background:rgba(185,28,28,.22);color:#fca5a5;border:1px solid rgba(252,165,165,.25);}
 .lock-chip.unlocked{background:rgba(13,122,74,.22);color:#6ee7b7;border:1px solid rgba(110,231,183,.25);}
 
-/* Weekend Holiday banner */
+/* Weekend / Holiday banner */
 .holiday-banner {
     display: none;
     background: linear-gradient(135deg, rgba(255,244,214,.96), rgba(255,249,234,.96));
@@ -199,8 +199,16 @@ body.wp-off #liveWallpaper{ opacity:0; }
     -webkit-backdrop-filter: blur(10px);
 }
 .holiday-banner.active { display: block; }
+.holiday-banner.client-holiday {
+    background: linear-gradient(135deg, rgba(255,232,240,.96), rgba(255,245,248,.96));
+    border-color: #f0a7c4;
+    border-left-color: #be185d;
+    color: #9d174d;
+    box-shadow: 0 6px 18px rgba(190, 24, 93, 0.14);
+}
 .holiday-banner .hb-icon { font-size: 18px; margin-right: 8px; }
 .holiday-banner .hb-sub { display: block; font-size: 11.5px; font-weight: 500; color: #a16207; margin-top: 3px; }
+.holiday-banner.client-holiday .hb-sub { color: #be185d; }
 
 .hero{background:linear-gradient(135deg,rgba(10,22,40,.85) 0%,rgba(15,42,74,.85) 55%,rgba(26,77,122,.85) 100%);color:#fff;border-radius:20px;padding:36px 40px;margin-bottom:28px;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 90% 10%,rgba(201,162,39,.20) 0%,transparent 45%),radial-gradient(circle at 15% 90%,rgba(255,255,255,.06) 0%,transparent 40%);pointer-events:none;}
@@ -228,6 +236,8 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .health-badge.critical .hb-dot{background:#fca5a5;box-shadow:0 0 12px #fca5a5;}
 .health-badge.holiday{background:rgba(217,119,6,.22);color:#fcd34d;border:1px solid rgba(252,211,77,.35);}
 .health-badge.holiday .hb-dot{background:#fcd34d;box-shadow:0 0 12px #fcd34d;}
+.health-badge.client-holiday{background:rgba(190,24,93,.22);color:#f9a8d4;border:1px solid rgba(249,168,212,.35);}
+.health-badge.client-holiday .hb-dot{background:#f9a8d4;box-shadow:0 0 12px #f9a8d4;}
 
 .kpi-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:16px;margin-bottom:32px;}
 .kpi-card{background:linear-gradient(180deg,#fff 0%,#fefefc 100%);border:1px solid rgba(255,255,255,.9);border-radius:var(--radius);padding:22px 20px;position:relative;overflow:hidden;transition:all .2s ease;box-shadow:0 6px 24px -6px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.9);}
@@ -237,6 +247,7 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .kpi-card.bad::before{background:var(--red);}
 .kpi-card.neutral::before{background:var(--muted);}
 .kpi-card.holiday::before{background:#d97706;}
+.kpi-card.client-holiday::before{background:#be185d;}
 .kpi-card:hover{transform:translateY(-2px);box-shadow:0 12px 36px -6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.9);}
 .kpi-icon{position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:9px;background:var(--bg-soft);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--ink-3);}
 .kpi-label{font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--ink-4);margin-bottom:10px;padding-right:44px;}
@@ -313,6 +324,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 .badge-low{background:var(--red-soft);color:var(--red);border:1px solid #fecaca;}
 .badge-neutral{background:var(--bg-soft);color:var(--muted);border:1px solid var(--line);}
 .badge-holiday{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;}
+.badge-client-holiday{background:#fce7f3;color:#9d174d;border:1px solid #f9a8d4;}
 
 .status-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;}
 .status-chip .dot{width:6px;height:6px;border-radius:50%;}
@@ -326,6 +338,8 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 .status-chip.neutral .dot{background:var(--muted);}
 .status-chip.holiday{background:#fef3c7;color:#92400e;}
 .status-chip.holiday .dot{background:#d97706;}
+.status-chip.client-holiday{background:#fce7f3;color:#9d174d;}
+.status-chip.client-holiday .dot{background:#be185d;}
 
 .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:36px;}
 .chart-card{background:#fff;border:1px solid rgba(255,255,255,.9);border-radius:var(--radius);padding:24px;box-shadow:0 6px 24px -6px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.9);}
@@ -519,11 +533,11 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
 
         <div id="pageError" class="error-banner hidden"></div>
 
-        <!-- WEEKEND HOLIDAY BANNER -->
+        <!-- HOLIDAY BANNER -->
         <div id="holidayBanner" class="holiday-banner">
-            <span class="hb-icon">🎉</span>
-            <span id="holidayBannerText">Weekend Holiday</span>
-            <span class="hb-sub" id="holidayBannerSub">Saturday and Sunday are fixed weekly holidays — no targets, shrinkage, or achievement are computed for these days.</span>
+            <span class="hb-icon" id="holidayBannerIcon">🎉</span>
+            <span id="holidayBannerText">Holiday</span>
+            <span class="hb-sub" id="holidayBannerSub">No targets, shrinkage, or achievement are computed for this day.</span>
         </div>
 
         <div class="hero">
@@ -608,7 +622,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">01</span>
                     <div>
                         <div class="section-title">Project Scorecard</div>
-                        <div class="section-desc">Click any project with sub-projects to expand · Working days exclude Saturday &amp; Sunday</div>
+                        <div class="section-desc">Click any project with sub-projects to expand · Working days exclude weekends &amp; client holidays</div>
                     </div>
                 </div>
             </div>
@@ -647,7 +661,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">02</span>
                     <div>
                         <div class="section-title">Sub-Project Scorecard</div>
-                        <div class="section-desc">Cross-project ranking · Working days exclude Saturday &amp; Sunday</div>
+                        <div class="section-desc">Cross-project ranking · Working days exclude weekends &amp; client holidays</div>
                     </div>
                 </div>
             </div>
@@ -687,7 +701,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">03</span>
                     <div>
                         <div class="section-title">Team Lead Scorecard</div>
-                        <div class="section-desc">Leadership performance and project coverage · Working days exclude Saturday &amp; Sunday</div>
+                        <div class="section-desc">Leadership performance and project coverage · Working days exclude weekends &amp; client holidays</div>
                     </div>
                 </div>
             </div>
@@ -751,7 +765,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                 <div class="chart-card">
                     <div class="chart-card-head">
                         <div class="chart-card-title">Shrinkage by Team Lead</div>
-                        <div class="chart-card-desc">Month-to-date shrinkage % per Team Lead (weekends excluded)</div>
+                        <div class="chart-card-desc">Month-to-date shrinkage % per Team Lead (weekends &amp; client holidays excluded)</div>
                     </div>
                     <div class="chart-box"><canvas id="teamLeadShrinkageChart"></canvas></div>
                 </div>
@@ -1005,21 +1019,53 @@ const HOUR_LABELS = ["6–7 PM","7–8 PM","8–9 PM","9–10 PM","10–11 PM","
 /* =========================================================
    WEEKEND / HOLIDAY HELPERS
    -----------------------------------------------------
-   Saturday (6) and Sunday (0) are fixed weekly holidays.
-   No production target is assigned on these days, and all
-   MTD / shrinkage aggregations ignore them.
+   • Saturday (6) and Sunday (0) are fixed weekly holidays.
+   • CUSTOM_HOLIDAYS holds additional fixed holidays
+     (client holidays, festivals, etc.) in YYYY-MM-DD format.
+   • No production target is assigned on any holiday, and
+     all MTD / shrinkage aggregations ignore them.
 ========================================================= */
-function isWeekendDate(dateStr) {
-    if (!dateStr) return false;
+const CUSTOM_HOLIDAYS = [
+    "2026-09-07"   // Client Holiday — September 7, 2026
+];
+
+function isWeekendDate(dateStr){
+    if(!dateStr) return false;
     const parts = String(dateStr).split("-");
-    if (parts.length !== 3) return false;
+    if(parts.length !== 3) return false;
     const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
     const dow = d.getDay();
     return dow === 0 || dow === 6;
 }
 
-function isWeekendDayOfWeek(dow) {
+function isCustomHoliday(dateStr){
+    if(!dateStr) return false;
+    return CUSTOM_HOLIDAYS.includes(String(dateStr).trim());
+}
+
+function isHolidayDate(dateStr){
+    return isWeekendDate(dateStr) || isCustomHoliday(dateStr);
+}
+
+function isWeekendDayOfWeek(dow){
     return dow === 0 || dow === 6;
+}
+
+/* Human-readable label, used in banner and KPIs */
+function getHolidayLabel(dateStr){
+    if(!dateStr) return "";
+    if(isCustomHoliday(dateStr)){
+        const d = new Date(dateStr + "T00:00:00");
+        const dayName = d.toLocaleDateString("en-IN", { weekday: "long" });
+        const niceDate = d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+        return `${dayName}, ${niceDate} — Client Holiday`;
+    }
+    if(isWeekendDate(dateStr)){
+        const d = new Date(dateStr + "T00:00:00");
+        const dayName = d.toLocaleDateString("en-IN", { weekday: "long" });
+        return `${dayName} — Fixed Weekly Holiday`;
+    }
+    return "";
 }
 
 /* =========================================================
@@ -1148,24 +1194,34 @@ async function loadDashboard(){
 /* =========================================================
    HOLIDAY BANNER
 ========================================================= */
-function updateHolidayBanner() {
+function updateHolidayBanner(){
     const banner = document.getElementById("holidayBanner");
     const text   = document.getElementById("holidayBannerText");
     const sub    = document.getElementById("holidayBannerSub");
-    if (!banner || !text) return;
+    const icon   = document.getElementById("holidayBannerIcon");
+    if(!banner || !text) return;
 
-    const weekend = isWeekendDate(currentDate);
-    const mtdIncludesWeekends = currentPeriod === "mtd";
+    banner.classList.remove("client-holiday");
 
-    if (weekend && currentPeriod === "day") {
-        const d = new Date(currentDate + "T00:00:00");
-        const dayName = d.toLocaleDateString("en-IN", { weekday: "long" });
-        text.textContent = `${dayName} — Fixed Weekly Holiday`;
+    const isClient = isCustomHoliday(currentDate);
+    const isWeeknd = isWeekendDate(currentDate);
+    const mtdMode  = currentPeriod === "mtd";
+
+    if(isClient && currentPeriod === "day"){
+        if(icon) icon.textContent = "🎊";
+        text.textContent = getHolidayLabel(currentDate);
+        sub.textContent = "This is a Client Holiday — no targets, shrinkage, or achievement are computed for this date.";
+        banner.classList.add("active");
+        banner.classList.add("client-holiday");
+    } else if(isWeeknd && currentPeriod === "day"){
+        if(icon) icon.textContent = "🎉";
+        text.textContent = getHolidayLabel(currentDate);
         sub.textContent = "Saturday and Sunday are fixed weekly holidays — no targets, shrinkage, or achievement are computed for this date.";
         banner.classList.add("active");
-    } else if (mtdIncludesWeekends) {
-        text.textContent = "Month-to-Date view — weekends excluded";
-        sub.textContent = "All MTD metrics below aggregate only weekdays (Mon–Fri). Saturdays and Sundays are treated as fixed weekly holidays.";
+    } else if(mtdMode){
+        if(icon) icon.textContent = "📅";
+        text.textContent = "Month-to-Date view — weekends & client holidays excluded";
+        sub.textContent = "All MTD metrics below aggregate only working days (weekdays minus client holidays). Saturdays, Sundays, and any configured client holidays are ignored.";
         banner.classList.add("active");
     } else {
         banner.classList.remove("active");
@@ -1317,8 +1373,9 @@ function getActualProduction(productivity){
 
 /* =========================================================
    WORKING DAYS HELPER
-   Returns YYYY-MM-DD strings for every Mon-Fri between
-   startDate and endDate inclusive. Sat/Sun excluded.
+   Returns YYYY-MM-DD strings for every working day between
+   startDate and endDate inclusive. Weekends AND custom
+   holidays are excluded.
 ========================================================= */
 function getWorkingDaysBetween(startDate, endDate){
     const dates = [];
@@ -1327,10 +1384,9 @@ function getWorkingDaysBetween(startDate, endDate){
     const end = new Date(endDate + "T00:00:00");
     while(current <= end){
         const dow = current.getDay();
-        if(!isWeekendDayOfWeek(dow)){
-            dates.push(
-                `${current.getFullYear()}-${String(current.getMonth()+1).padStart(2,"0")}-${String(current.getDate()).padStart(2,"0")}`
-            );
+        const ds = `${current.getFullYear()}-${String(current.getMonth()+1).padStart(2,"0")}-${String(current.getDate()).padStart(2,"0")}`;
+        if(!isWeekendDayOfWeek(dow) && !isCustomHoliday(ds)){
+            dates.push(ds);
         }
         current.setDate(current.getDate() + 1);
     }
@@ -1341,7 +1397,7 @@ function getWorkingDaysBetween(startDate, endDate){
    SHRINKAGE
    • Daily → shrinkage for the selected date only
    • MTD   → average daily shrinkage 1st of month → selected
-   Weekends excluded from denominator in both modes.
+   Weekends & custom holidays excluded from denominator.
 ========================================================= */
 function computeShrinkageBreakdown(employeeIds){
     const empty = { pct: 0, shrinkDays: 0, scheduledDays: 0, workingDays: 0 };
@@ -1354,7 +1410,7 @@ function computeShrinkageBreakdown(employeeIds){
 
     let workingDayList;
     if(currentPeriod === "day"){
-        workingDayList = isWeekendDate(currentDate) ? [] : [currentDate];
+        workingDayList = isHolidayDate(currentDate) ? [] : [currentDate];
     } else {
         const parts = currentDate.split("-");
         const fromDate = `${parts[0]}-${parts[1]}-01`;
@@ -1386,9 +1442,10 @@ function computeMonthlyShrinkage(employeeIds){ return computeShrinkageBreakdown(
 /* =========================================================
    EMPLOYEE METRIC
    -----------------------------------------------------
-   Weekend-aware:
-     • Daily mode on a weekend → target is 0, hasTarget = false.
-     • MTD mode → only weekday records contribute to targets.
+   Holiday-aware:
+     • Daily mode on a holiday → target is 0, hasTarget = false.
+     • MTD mode → only weekday records (excluding custom holidays)
+       contribute to targets.
 ========================================================= */
 function buildEmployeeMetric(employee){
     const project = getProjectById(employee.project_id);
@@ -1420,31 +1477,27 @@ function buildEmployeeMetric(employee){
         attendance = rows.length > 0 ? "Period" : "No Data";
     }
 
-    /* ── Weekend-aware target calculation ── */
     let adjustedTarget = 0;
     const hasConfiguredTarget = employeeTarget !== null && employeeTarget !== undefined && employeeTarget > 0;
     let hasTarget = hasConfiguredTarget;
 
     if(hasConfiguredTarget){
         if(currentPeriod === "day"){
-            /* On a weekend, target is 0 and hasTarget = false */
-            if(isWeekendDate(currentDate)){
+            if(isHolidayDate(currentDate)){
                 adjustedTarget = 0;
                 hasTarget = false;
             } else {
                 adjustedTarget = employeeTarget * fte;
             }
         }else{
-            /* MTD: only weekday records add to the target sum */
             const rows = productivityRows.filter(item =>
                 String(item.employee_id ?? "").trim() === String(employee.id).trim()
-                && !isWeekendDate(item.tracker_date));
+                && !isHolidayDate(item.tracker_date));
             if(rows.length > 0){
                 rows.forEach(row => { adjustedTarget += employeeTarget * getAttendanceFactor(row.attendance); });
             }else{
                 adjustedTarget = 0;
             }
-            /* MTD always has target if there were weekday records */
             hasTarget = rows.length > 0;
         }
     }
@@ -1570,38 +1623,42 @@ function renderAll(){
     renderInsights();
 }
 function renderHero(){
-    const weekend = currentPeriod === "day" && isWeekendDate(currentDate);
+    const holiday = currentPeriod === "day" && isHolidayDate(currentDate);
+    const isClient = isCustomHoliday(currentDate);
     const totalProduction = filteredEmployees.reduce((t,m) => t + m.production, 0);
     const totalTarget = filteredEmployees.reduce((t,m) => t + m.adjustedTarget, 0);
     const achievement = totalTarget > 0 ? (totalProduction / totalTarget) * 100 : 0;
 
     document.getElementById("heroProduction").textContent = formatNumber(totalProduction, 0);
-    document.getElementById("heroTarget").textContent = weekend ? "—" : formatNumber(totalTarget, 0);
-    document.getElementById("heroAchievement").innerHTML = weekend
+    document.getElementById("heroTarget").textContent = holiday ? "—" : formatNumber(totalTarget, 0);
+    document.getElementById("heroAchievement").innerHTML = holiday
         ? "—"
         : formatNumber(achievement, 1) + '<span class="unit">%</span>';
 
     document.getElementById("heroEyebrow").textContent =
-        weekend ? "Weekend — Fixed Holiday"
+        holiday ? (isClient ? "Client Holiday" : "Weekend — Fixed Holiday")
                 : currentPeriod === "mtd" ? "Month to Date Operations"
                 : "Daily Operations";
 
     const projectCount = buildProjectMetrics().length;
-    document.getElementById("heroSub").textContent = weekend
-        ? `As of ${currentDate} · Weekend holiday — no targets or achievement`
+    document.getElementById("heroSub").textContent = holiday
+        ? `As of ${currentDate} · ${isClient ? "Client holiday" : "Weekend holiday"} — no targets or achievement`
         : `As of ${currentDate} · ${filteredEmployees.length} employees · ${projectCount} projects`;
 
     const badge = document.getElementById("healthBadge");
     const label = document.getElementById("healthLabel");
-    badge.classList.remove("healthy","monitor","critical","holiday");
-    if(weekend){
+    badge.classList.remove("healthy","monitor","critical","holiday","client-holiday");
+    if(holiday && isClient){
+        badge.classList.add("client-holiday"); label.textContent = "Client Holiday";
+    } else if(holiday){
         badge.classList.add("holiday"); label.textContent = "Holiday";
     } else if(achievement >= 95){ badge.classList.add("healthy"); label.textContent = "Healthy"; }
     else if(achievement >= 75){ badge.classList.add("monitor"); label.textContent = "Monitor"; }
     else{ badge.classList.add("critical"); label.textContent = "Critical"; }
 }
 function renderKPIs(){
-    const weekend = currentPeriod === "day" && isWeekendDate(currentDate);
+    const holiday = currentPeriod === "day" && isHolidayDate(currentDate);
+    const isClient = isCustomHoliday(currentDate);
     const totalEmployees = filteredEmployees.length;
     const presentFTE = filteredEmployees.reduce((t,m) => t + m.fte, 0);
     const target = filteredEmployees.reduce((t,m) => t + m.adjustedTarget, 0);
@@ -1614,15 +1671,17 @@ function renderKPIs(){
     document.getElementById("kpiEmployees").textContent = totalEmployees;
     document.getElementById("kpiPresent").textContent = formatNumber(presentFTE, 1);
     document.getElementById("kpiShrinkage").innerHTML = formatNumber(shrinkage, 2) + '<span class="kpi-unit">%</span>';
-    document.getElementById("kpiTarget").textContent = weekend ? "—" : formatNumber(target, 1);
+    document.getElementById("kpiTarget").textContent = holiday ? "—" : formatNumber(target, 1);
     document.getElementById("kpiProduction").textContent = formatNumber(production, 0);
-    document.getElementById("kpiAchievement").innerHTML = weekend ? "—" : formatNumber(achievement, 1) + '<span class="kpi-unit">%</span>';
+    document.getElementById("kpiAchievement").innerHTML = holiday ? "—" : formatNumber(achievement, 1) + '<span class="kpi-unit">%</span>';
     document.getElementById("kpiAverage").textContent = formatNumber(average, 1);
 
     const shrinkSubEl = document.getElementById("kpiShrinkageSub");
     if(shrinkSubEl){
-        if(weekend){
-            shrinkSubEl.textContent = "Weekend — shrinkage not computed for holiday";
+        if(holiday){
+            shrinkSubEl.textContent = isClient
+                ? "Client Holiday — shrinkage not computed for this date"
+                : "Weekend — shrinkage not computed for holiday";
         } else {
             shrinkSubEl.textContent =
                 `${formatNumber(shrinkageDetails.shrinkDays, 1)} shrinkage days / ${formatNumber(shrinkageDetails.scheduledDays, 0)} scheduled days (${shrinkageDetails.workingDays} working)`;
@@ -1631,33 +1690,39 @@ function renderKPIs(){
 
     const targetSubEl = document.getElementById("kpiTargetSub");
     if(targetSubEl){
-        targetSubEl.textContent = weekend ? "Weekend — fixed holiday" : "As per Present FTE";
+        targetSubEl.textContent = holiday
+            ? (isClient ? "Client Holiday — no target" : "Weekend — fixed holiday")
+            : "As per Present FTE";
     }
 
     const achCard = document.getElementById("kpiAchievement").closest(".kpi-card");
-    achCard.classList.remove("good","warn","bad","neutral","holiday");
-    if(weekend) achCard.classList.add("holiday");
+    achCard.classList.remove("good","warn","bad","neutral","holiday","client-holiday");
+    if(holiday && isClient) achCard.classList.add("client-holiday");
+    else if(holiday) achCard.classList.add("holiday");
     else if(achievement >= 95) achCard.classList.add("good");
     else if(achievement >= 75) achCard.classList.add("warn");
     else if(achievement > 0) achCard.classList.add("bad");
     else achCard.classList.add("neutral");
 
     const prodCard = document.getElementById("kpiProduction").closest(".kpi-card");
-    prodCard.classList.remove("good","warn","bad","neutral","holiday");
-    if(weekend) prodCard.classList.add("holiday");
+    prodCard.classList.remove("good","warn","bad","neutral","holiday","client-holiday");
+    if(holiday && isClient) prodCard.classList.add("client-holiday");
+    else if(holiday) prodCard.classList.add("holiday");
     else if(production > 0) prodCard.classList.add("good");
     else prodCard.classList.add("neutral");
 
     const shrinkCard = document.getElementById("kpiShrinkage").closest(".kpi-card");
-    shrinkCard.classList.remove("good","warn","bad","neutral","holiday");
-    if(weekend) shrinkCard.classList.add("holiday");
+    shrinkCard.classList.remove("good","warn","bad","neutral","holiday","client-holiday");
+    if(holiday && isClient) shrinkCard.classList.add("client-holiday");
+    else if(holiday) shrinkCard.classList.add("holiday");
     else if(shrinkage <= 5)       shrinkCard.classList.add("good");
     else if(shrinkage <= 15)      shrinkCard.classList.add("warn");
     else                          shrinkCard.classList.add("bad");
 
     const targetCard = document.getElementById("kpiTarget").closest(".kpi-card");
-    targetCard.classList.remove("good","warn","bad","neutral","holiday");
-    if(weekend) targetCard.classList.add("holiday");
+    targetCard.classList.remove("good","warn","bad","neutral","holiday","client-holiday");
+    if(holiday && isClient) targetCard.classList.add("client-holiday");
+    else if(holiday) targetCard.classList.add("holiday");
     else targetCard.classList.add("neutral");
 }
 
@@ -2222,12 +2287,14 @@ function renderTeamLeadShrinkageChart(){
    INSIGHTS
 ========================================================= */
 function renderInsights(){
-    const weekend = currentPeriod === "day" && isWeekendDate(currentDate);
+    const holiday = currentPeriod === "day" && isHolidayDate(currentDate);
+    const isClient = isCustomHoliday(currentDate);
+    const holidayLabel = isClient ? "Client Holiday" : "Weekend Holiday";
     const projectData = buildProjectMetrics();
     const ranked = projectData.filter(p => p.hasTarget);
-    if(weekend){
-        document.getElementById("insightTopProject").textContent = "Weekend holiday — no project targets";
-        document.getElementById("insightBottomProject").textContent = "Weekend holiday — no project targets";
+    if(holiday){
+        document.getElementById("insightTopProject").textContent = `${holidayLabel} — no project targets`;
+        document.getElementById("insightBottomProject").textContent = `${holidayLabel} — no project targets`;
     } else if(ranked.length){
         const top = ranked[0];
         document.getElementById("insightTopProject").innerHTML =
@@ -2250,15 +2317,15 @@ function renderInsights(){
     const peakIndex = totals.indexOf(peakValue);
     document.getElementById("insightPeakHour").innerHTML = peakValue > 0
         ? `<span class="insight-accent">${HOUR_LABELS[peakIndex]}</span> with <span class="insight-accent">${formatNumber(peakValue, 0)}</span> units`
-        : (weekend ? "Weekend holiday — no hourly production" : "No hourly data yet");
+        : (holiday ? `${holidayLabel} — no hourly production` : "No hourly data yet");
 
     const spData = buildSubProjectMetrics().filter(s => s.hasTarget);
     const topSubEl    = document.getElementById("insightTopSubProject");
     const bottomSubEl = document.getElementById("insightBottomSubProject");
     const countEl     = document.getElementById("insightSubProjectCount");
-    if(weekend){
-        topSubEl.textContent = "Weekend holiday — no sub-project targets";
-        bottomSubEl.textContent = "Weekend holiday — no sub-project targets";
+    if(holiday){
+        topSubEl.textContent = `${holidayLabel} — no sub-project targets`;
+        bottomSubEl.textContent = `${holidayLabel} — no sub-project targets`;
         countEl.textContent = "—";
     } else if(spData.length){
         const top = spData[0];
@@ -2334,7 +2401,7 @@ function updateExportInfo(){
     if(from > to){ info.innerHTML = `<strong style="color:#b91c1c;">From Date cannot be later than To Date.</strong>`; return; }
     const days = Math.round((new Date(to+"T00:00:00") - new Date(from+"T00:00:00")) / 86400000) + 1;
     info.innerHTML = `Report will include <strong>${days} day${days===1?"":"s"}</strong> from <strong>${from}</strong> to <strong>${to}</strong>. ` +
-        `Weekends are excluded from target calculations. ` +
+        `Weekends &amp; client holidays are excluded from target calculations. ` +
         `Scope: <strong>${document.getElementById("exportScope").value === "all" ? "All Projects" : "Current filter"}</strong>.`;
 }
 async function confirmExport(){
@@ -2376,7 +2443,7 @@ async function exportReportRange(fromDate, toDate, scope){
         csvRows.push(["AMI Executive Report", `${fromDate} to ${toDate}`]);
         csvRows.push(["Scope", scope === "all" ? "All Projects" : "Current filter"]);
         csvRows.push(["Generated at", new Date().toLocaleString("en-IN")]);
-        csvRows.push(["Weekend Policy", "Saturday & Sunday are fixed weekly holidays — targets excluded"]);
+        csvRows.push(["Holiday Policy", "Weekends & client holidays are excluded from target calculations"]);
         csvRows.push([]);
         csvRows.push(["Date","Day Type","Employee","EMP ID","Project","Sub-Project","Sub-Project Target/FTE","Team Lead","Attendance","FTE","Adjusted Target","Achieved","Remaining","Achievement %"]);
         const dates = [];
@@ -2392,12 +2459,14 @@ async function exportReportRange(fromDate, toDate, scope){
             const teamLead = getTeamLeadForProject(emp.project_id);
             const employeeTarget = resolveEmployeeTarget(emp, project);
             dates.forEach(date => {
-                const weekend = isWeekendDate(date);
+                const isClient = isCustomHoliday(date);
+                const isWeeknd = isWeekendDate(date);
+                const isHoli = isClient || isWeeknd;
                 const record = rows.find(r => Number(r.employee_id) === Number(emp.id) && r.tracker_date === date);
                 const attendance = getAttendanceLabel(record?.attendance);
                 const fte = getAttendanceFactor(record?.attendance);
                 let target = 0;
-                if(!weekend && employeeTarget !== null && employeeTarget > 0){
+                if(!isHoli && employeeTarget !== null && employeeTarget > 0){
                     target = employeeTarget * fte;
                 }
                 let production = 0;
@@ -2405,10 +2474,13 @@ async function exportReportRange(fromDate, toDate, scope){
                 const remaining = Math.max(target - production, 0);
                 const achievement = target > 0 ? (production / target) * 100 : 0;
                 const hasAnyData = record && (attendance !== "Present" || production > 0);
-                if(!hasAnyData && !weekend) return;
+                if(!hasAnyData && !isHoli) return;
+                let dayType = "Working Day";
+                if(isClient) dayType = "Client Holiday";
+                else if(isWeeknd) dayType = "Fixed Holiday (Weekend)";
                 csvRows.push([
                     date,
-                    weekend ? "Fixed Holiday (Weekend)" : "Working Day",
+                    dayType,
                     emp.employee_name || "",
                     emp.employee_code || "",
                     project?.project_name || "",
@@ -2421,13 +2493,13 @@ async function exportReportRange(fromDate, toDate, scope){
             });
         });
         csvRows.push([]);
-        csvRows.push(["Summary (weekdays only)"]);
+        csvRows.push(["Summary (working days only)"]);
         let totalTarget = 0, totalProduction = 0;
         scopedEmployees.forEach(emp => {
             const project = getProjectById(emp.project_id);
             const employeeTarget = resolveEmployeeTarget(emp, project);
             dates.forEach(date => {
-                if(isWeekendDate(date)) return;
+                if(isHolidayDate(date)) return;
                 const record = rows.find(r => Number(r.employee_id) === Number(emp.id) && r.tracker_date === date);
                 const fte = getAttendanceFactor(record?.attendance);
                 if(employeeTarget !== null && employeeTarget > 0) totalTarget += employeeTarget * fte;
