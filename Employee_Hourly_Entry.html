@@ -999,6 +999,17 @@
             color: #6f7c92;
         }
 
+        .hour-row.grace {
+            border-color: #9fd4b5;
+            background: linear-gradient(135deg, #f2fff8, #fbfdff);
+            box-shadow: 0 4px 14px rgba(39, 145, 84, 0.08);
+        }
+
+        .hour-row.grace .hour-status {
+            background: #d6f2e2;
+            color: #1f7a4d;
+        }
+
         .hour-row.urgent {
             border-color: #e08a8a;
             background: linear-gradient(135deg, #fff2f2, #fffafa);
@@ -1958,9 +1969,9 @@
                             <div class="entry-banner-text">
 
                                 Future hours stay locked until they begin.
-                                Each hour opens at the top of the hour, gives
-                                you a 10-minute grace period after it ends,
-                                and then locks automatically.
+                                Each hour opens at the top of the hour, stays
+                                editable for a 1-hour grace period after it
+                                ends, and then locks automatically.
 
                             </div>
 
@@ -2204,7 +2215,9 @@ const supabaseClient =
 
 const MANAGER_NAME = "Andy";
 
-const LOCK_GRACE_MINUTES = 10;
+/* A passed hour stays editable for this many minutes after it
+   ends. 60 = 1 hour. Example: 12–1 AM locks at 2 AM. */
+const LOCK_GRACE_MINUTES = 60;
 
 const REMINDER_MINUTES_BEFORE_END = 10;
 
@@ -3368,34 +3381,51 @@ function getCurrentHourIndex() {
    HOUR LOCK STATE
 ========================================================= */
 
+/* Returns the Date object for the START of hour slot `index`
+   on the current shift date. Shift always starts at 6 PM. */
+function getHourStartTime(index) {
+
+    const shiftDate = currentShiftDate || getShiftDate();
+
+    const parts = String(shiftDate).split("-");
+
+    const base = new Date(
+        Number(parts[0]),
+        Number(parts[1]) - 1,
+        Number(parts[2]),
+        18, 0, 0, 0
+    );
+
+    return new Date(base.getTime() + index * 60 * 60 * 1000);
+
+}
+
+
 function getHourLockState(index) {
 
     if (currentDateLocked) return "date-locked";
 
-    const currentIndex = getCurrentHourIndex();
+    const now = new Date();
 
-    if (currentIndex === -1) return "locked";
+    const start = getHourStartTime(index);
 
-    if (index < currentIndex) {
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
 
-        if (index === currentIndex - 1) {
+    const graceEnd = new Date(
+        end.getTime() + LOCK_GRACE_MINUTES * 60 * 1000
+    );
 
-            const now = new Date();
-            const minutesIntoHour = now.getMinutes();
+    /* Future hours are locked until they begin. */
+    if (now < start) return "future";
 
-            if (minutesIntoHour < LOCK_GRACE_MINUTES) return "grace";
+    /* The hour that is running right now. */
+    if (now < end) return "current";
 
-            return "locked";
+    /* The hour that just ended — still editable during grace. */
+    if (now < graceEnd) return "grace";
 
-        }
-
-        return "locked";
-
-    }
-
-    if (index === currentIndex) return "current";
-
-    return "future";
+    /* Past the grace window → permanently locked. */
+    return "locked";
 
 }
 
@@ -3656,9 +3686,13 @@ function isStateReadOnly(state) {
 
 function applyRowStateClass(row, state) {
 
-    row.classList.remove("current", "locked", "future", "urgent");
+    row.classList.remove(
+        "current", "locked", "future", "urgent", "grace"
+    );
 
     if (state === "current") row.classList.add("current");
+
+    if (state === "grace") row.classList.add("grace");
 
     if (state === "locked" || state === "date-locked")
         row.classList.add("locked");
@@ -3673,7 +3707,7 @@ function getHourStatusText(state) {
     if (state === "date-locked") return "DATE LOCKED";
     if (state === "locked") return "LOCKED";
     if (state === "current") return "CURRENT";
-    if (state === "grace") return "GRACE PERIOD";
+    if (state === "grace") return "STILL OPEN";
     if (state === "future") return "NOT STARTED";
 
     return "OPEN";
