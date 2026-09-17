@@ -111,7 +111,7 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .header-title-block{display:flex;flex-direction:column;}
 .header-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;}
 
-/* === Executive Operations Dashboard — PURE GOLD with intense layered glow === */
+/* === Executive Operations Dashboard — pure gold, softened glow === */
 .header h1{
     font-family:'Playfair Display',Georgia,serif;
     font-size:22px;
@@ -144,12 +144,11 @@ body.wp-off #liveWallpaper{ opacity:0; }
 
     animation: titleGoldenSweep 14s ease-in-out infinite;
 
+    /* Softened golden halo — gentle, no bloom */
     filter:
-        drop-shadow(0 0 3px rgba(255, 225, 90, 0.95))
-        drop-shadow(0 0 8px rgba(255, 200, 40, 0.85))
-        drop-shadow(0 0 16px rgba(212, 175, 55, 0.70))
-        drop-shadow(0 0 28px rgba(201, 162, 39, 0.55))
-        drop-shadow(0 0 46px rgba(180, 130, 20, 0.35));
+        drop-shadow(0 0 1.5px rgba(255, 220, 100, 0.45))
+        drop-shadow(0 0 5px   rgba(255, 200, 50,  0.26))
+        drop-shadow(0 0 12px  rgba(201, 162, 39, 0.14));
 
     will-change: background-position, filter;
 }
@@ -695,7 +694,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">04</span>
                     <div>
                         <div class="section-title">Performance Analytics</div>
-                        <div class="section-desc">Visual comparison across projects, sub-projects, hours, and shrinkage</div>
+                        <div class="section-desc">Visual comparison across projects, sub-projects, hours, and team-lead shrinkage</div>
                     </div>
                 </div>
             </div>
@@ -723,10 +722,10 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                 </div>
                 <div class="chart-card">
                     <div class="chart-card-head">
-                        <div class="chart-card-title">Daily Shrinkage Trend</div>
-                        <div class="chart-card-desc" id="shrinkageTrendDesc">Shrinkage % per day across current month</div>
+                        <div class="chart-card-title">Shrinkage by Team Lead</div>
+                        <div class="chart-card-desc">Month-to-date shrinkage % per Team Lead (mirrors the Team Lead Scorecard column)</div>
                     </div>
-                    <div class="chart-box"><canvas id="shrinkageTrendChart"></canvas></div>
+                    <div class="chart-box"><canvas id="teamLeadShrinkageChart"></canvas></div>
                 </div>
             </div>
         </section>
@@ -841,21 +840,6 @@ function openOperationalDashboard(){ window.location.href = OPERATIONAL_DASHBOAR
 
 /* =========================================================
    PROJECT SHORT LABELS
-   -----------------------------------------------------
-   Maps each project's full name to its short code. The
-   lookup is case-insensitive, so minor capitalisation
-   differences in the database won't break it.
-
-   Examples:
-     "Hopebridge"                  → "HB"
-     "New Season"                  → "NS"
-     "White Rock Medical Center"   → "WRMC"
-     "Behavioural Frame Work"      → "BFW"
-
-   These short codes get prefixed onto sub-project labels
-   in the Sub-Project Achievement Ranking chart, e.g.
-     "PAR" under Hopebridge  →  "HB - PAR"
-     "AR"  under New Season  →  "NS - AR"
 ========================================================= */
 const PROJECT_SHORT_LABELS = {
     "Hopebridge": "HB",
@@ -867,8 +851,6 @@ const PROJECT_SHORT_LABELS = {
     "Behavioral Frame Work": "BFW"
 };
 
-/* Case-insensitive lookup: returns the short code for a
-   project name (or null if not mapped). */
 function getProjectShortLabel(projectName){
     if(!projectName) return null;
     const target = String(projectName).trim().toLowerCase();
@@ -880,18 +862,6 @@ function getProjectShortLabel(projectName){
     return null;
 }
 
-/* =========================================================
-   SUB-PROJECT LABEL HELPER
-   -----------------------------------------------------
-   Combines the parent project's short code (or full name)
-   with the sub-project name so duplicates like "AR" become
-   uniquely identifiable on charts.
-     • If the sub-project name already contains its project
-       name (or short code), we keep it as-is to avoid
-       double-prefixing like "WRMC - WRMC AR".
-     • Otherwise we prefix with the short code (if defined)
-       or the raw project name, joined by " - ".
-========================================================= */
 function getSubProjectLabel(subProject, project){
     const nm = spName(subProject);
     const projNm = project?.project_name || "";
@@ -900,10 +870,8 @@ function getSubProjectLabel(subProject, project){
     const nmLower = String(nm).toLowerCase();
     const projLower = String(projNm).toLowerCase();
 
-    /* If the sub-project name already mentions its project, skip. */
     if(nmLower.includes(projLower)) return nm;
 
-    /* Also skip if the short code is already present in the name. */
     const shortLabel = getProjectShortLabel(projNm);
     if(shortLabel && nmLower.includes(String(shortLabel).toLowerCase())){
         return nm;
@@ -975,77 +943,7 @@ const chartDataLabelsPlugin = {
     }
 };
 
-/* =========================================================
-   CHART.JS — AVERAGE LINE PLUGIN
-========================================================= */
-const averageLinePlugin = {
-    id: 'averageLine',
-    afterDatasetsDraw(chart) {
-        const opts = (chart.options.plugins && chart.options.plugins.averageLine) || {};
-        if (!opts.enabled) return;
-        if (opts.value === null || opts.value === undefined || !Number.isFinite(opts.value)) return;
-
-        const yScale = chart.scales.y;
-        if (!yScale) return;
-
-        const yPixel = yScale.getPixelForValue(opts.value);
-        const { left, right } = chart.chartArea;
-        const ctx = chart.ctx;
-
-        const color = opts.color || '#c9a227';
-        const textColor = opts.textColor || '#7a5a10';
-
-        ctx.save();
-
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        ctx.setLineDash([7, 5]);
-        ctx.beginPath();
-        ctx.moveTo(left, yPixel);
-        ctx.lineTo(right, yPixel);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        const label = opts.label || `Avg: ${Number(opts.value).toFixed(1)}%`;
-        const fontFamily = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-        ctx.font = `800 11px ${fontFamily}`;
-        const textWidth = ctx.measureText(label).width;
-        const padX = 8;
-        const boxW = textWidth + padX * 2;
-        const boxH = 20;
-        const boxX = right - boxW - 4;
-        const boxY = yPixel - boxH - 4;
-
-        const radius = 6;
-        ctx.beginPath();
-        ctx.moveTo(boxX + radius, boxY);
-        ctx.lineTo(boxX + boxW - radius, boxY);
-        ctx.quadraticCurveTo(boxX + boxW, boxY, boxX + boxW, boxY + radius);
-        ctx.lineTo(boxX + boxW, boxY + boxH - radius);
-        ctx.quadraticCurveTo(boxX + boxW, boxY + boxH, boxX + boxW - radius, boxY + boxH);
-        ctx.lineTo(boxX + radius, boxY + boxH);
-        ctx.quadraticCurveTo(boxX, boxY + boxH, boxX, boxY + boxH - radius);
-        ctx.lineTo(boxX, boxY + radius);
-        ctx.quadraticCurveTo(boxX, boxY, boxX + radius, boxY);
-        ctx.closePath();
-
-        ctx.fillStyle = opts.bgColor || 'rgba(255, 253, 240, 0.98)';
-        ctx.fill();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.4;
-        ctx.stroke();
-
-        ctx.fillStyle = textColor;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(label, boxX + boxW / 2, boxY + boxH / 2 + 0.5);
-
-        ctx.restore();
-    }
-};
-
 Chart.register(chartDataLabelsPlugin);
-Chart.register(averageLinePlugin);
 
 /* =========================================================
    STATE
@@ -1060,7 +958,7 @@ let filteredEmployees = [];
 let projectChart = null;
 let subProjectChart = null;
 let hourlyChart = null;
-let shrinkageTrendChart = null;
+let teamLeadShrinkageChart = null;
 let currentUser = null;
 let currentDate = null;
 let currentPeriod = "day";
@@ -1369,43 +1267,6 @@ function computeShrinkageBreakdown(employeeIds){
     return { pct: Math.max(0, pct), shrinkDays: Math.max(0, shrinkDays), scheduledDays };
 }
 function computeMonthlyShrinkage(employeeIds){ return computeShrinkageBreakdown(employeeIds).pct; }
-
-function computeDailyShrinkageSeries(employeeIds){
-    if(!currentDate) return { labels: [], values: [], colors: [] };
-    if(!employeeIds || !employeeIds.length) return { labels: [], values: [], colors: [] };
-
-    const parts = currentDate.split("-");
-    const year = Number(parts[0]);
-    const month = Number(parts[1]);
-    const endDay = Number(parts[2]);
-
-    const idSet = new Set(employeeIds.map(id => String(id).trim()));
-    const employeeCount = idSet.size;
-    if(employeeCount === 0) return { labels: [], values: [], colors: [] };
-
-    const byDate = new Map();
-    monthlyProductivityRows.forEach(row => {
-        if(!idSet.has(String(row.employee_id ?? "").trim())) return;
-        const date = row.tracker_date;
-        if(!byDate.has(date)) byDate.set(date, 0);
-        byDate.set(date, byDate.get(date) + getAttendanceFactor(row.attendance));
-    });
-
-    const labels = [], values = [], colors = [];
-    for(let day = 1; day <= endDay; day++){
-        const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        const presentFTE = byDate.get(dateStr);
-        if(presentFTE === undefined || presentFTE === null) continue;
-        const shrinkage = ((employeeCount - presentFTE) / employeeCount) * 100;
-        const rounded = Math.max(0, Math.round(shrinkage * 10) / 10);
-        labels.push(String(day));
-        values.push(rounded);
-        if(rounded <= 5)       colors.push("#0d7a4a");
-        else if(rounded <= 15) colors.push("#b45309");
-        else                   colors.push("#b91c1c");
-    }
-    return { labels, values, colors };
-}
 
 /* =========================================================
    EMPLOYEE METRIC
@@ -1953,7 +1814,7 @@ function renderCharts(){
     renderProjectAchievementChart();
     renderSubProjectAchievementChart();
     renderHourlyProductionChart();
-    renderShrinkageTrendChart();
+    renderTeamLeadShrinkageChart();
 }
 
 function renderProjectAchievementChart(){
@@ -2115,81 +1976,85 @@ function renderHourlyProductionChart(){
     });
 }
 
-function renderShrinkageTrendChart(){
-    const canvas = document.getElementById("shrinkageTrendChart");
+/* =========================================================
+   SHRINKAGE BY TEAM LEAD CHART
+   -----------------------------------------------------
+   Mirrors the Shrinkage % column in the Team Lead Scorecard
+   as a bar chart. Bars are colour-coded by threshold:
+     ≤ 5%  → green
+     ≤ 15% → amber
+     > 15% → red
+   Team Leads are sorted by shrinkage (highest first) so the
+   worst performer appears on the left.
+========================================================= */
+function renderTeamLeadShrinkageChart(){
+    const canvas = document.getElementById("teamLeadShrinkageChart");
     if(!canvas) return;
-    const employeeIds = filteredEmployees.map(m => m.employee.id);
-    const series = computeDailyShrinkageSeries(employeeIds);
 
-    let averageValue = null;
-    if(series.values.length){
-        const sum = series.values.reduce((t,v) => t + v, 0);
-        averageValue = sum / series.values.length;
-        averageValue = Math.round(averageValue * 10) / 10;
-    }
+    const data = buildTeamLeadMetrics()
+        .filter(item => item.employeeIds.length > 0)
+        .sort((a,b) => b.shrinkage - a.shrinkage);
 
-    const descEl = document.getElementById("shrinkageTrendDesc");
-    if(descEl){
-        descEl.textContent = averageValue !== null
-            ? `Shrinkage % per day across current month · Monthly average: ${averageValue.toFixed(1)}%`
-            : "Shrinkage % per day across current month";
-    }
+    if(teamLeadShrinkageChart) teamLeadShrinkageChart.destroy();
 
-    if(shrinkageTrendChart) shrinkageTrendChart.destroy();
-    if(!series.labels.length){
-        shrinkageTrendChart = new Chart(canvas, {
+    if(!data.length){
+        teamLeadShrinkageChart = new Chart(canvas, {
             type: "bar", data: { labels: [], datasets: [] },
             options: { responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false },
-                    title: { display: true, text: "No productivity data for current month",
+                    title: { display: true, text: "No Team Lead data for the current filter",
                         color: "#94a3b8", font: { family: "Inter", size: 12, weight: "600" } } },
                 scales: { x: { display: false }, y: { display: false } } }
         });
         return;
     }
-    const labelFontSize = series.labels.length > 15 ? 9 : 10;
-    shrinkageTrendChart = new Chart(canvas, {
+
+    const colors = data.map(item => {
+        if(item.shrinkage <= 5)  return "#0d7a4a";
+        if(item.shrinkage <= 15) return "#b45309";
+        return "#b91c1c";
+    });
+
+    teamLeadShrinkageChart = new Chart(canvas, {
         type: "bar",
         data: {
-            labels: series.labels,
+            labels: data.map(item => item.teamLead),
             datasets: [{
                 label: "Shrinkage %",
-                data: series.values,
-                backgroundColor: series.colors,
-                borderRadius: 5,
-                maxBarThickness: 40
+                data: data.map(item => Number(item.shrinkage.toFixed(1))),
+                backgroundColor: colors,
+                borderRadius: 8,
+                maxBarThickness: 56
             }]
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            layout: { padding: { top: 24, right: 4 } },
+            layout: { padding: { top: 24 } },
             plugins: {
                 legend: { display: false },
-                dataLabels: { enabled: true, format: 'percent', fontSize: labelFontSize, color: '#0f2a4a' },
-                averageLine: {
-                    enabled: averageValue !== null,
-                    value: averageValue,
-                    label: averageValue !== null ? `Avg: ${averageValue.toFixed(1)}%` : "",
-                    color: '#c9a227',
-                    textColor: '#7a5a10'
-                },
+                dataLabels: { enabled: true, format: 'percent', fontSize: 11, color: '#0f2a4a' },
                 tooltip: {
                     backgroundColor: "#0a1628", padding: 12, cornerRadius: 8,
                     titleFont: { family: "Inter", size: 12, weight: "700" },
                     bodyFont: { family: "Inter", size: 12, weight: "500" },
                     callbacks: {
-                        title: items => `Day ${items[0].label}`,
-                        label: ctx => `Shrinkage: ${ctx.parsed.y.toFixed(1)}%`,
-                        afterLabel: () => averageValue !== null ? `Monthly avg: ${averageValue.toFixed(1)}%` : ""
+                        label: ctx => "Shrinkage: " + ctx.parsed.y.toFixed(1) + "%",
+                        afterLabel: ctx => {
+                            const item = data[ctx.dataIndex];
+                            return [
+                                `Projects: ${item.projectCount}`,
+                                `Total FTE: ${item.employees} · Present FTE: ${formatNumber(item.fte, 1)}`
+                            ];
+                        }
                     }
                 }
             },
             scales: {
-                y: { beginAtZero: true, grid: { color: "#f1f5f9", drawBorder: false },
+                y: { beginAtZero: true,
+                    grid: { color: "#f1f5f9", drawBorder: false },
                     ticks: { color: "#94a3b8", font: { family: "Inter", size: 11, weight: "600" }, callback: v => v + "%" } },
                 x: { grid: { display: false },
-                    ticks: { color: "#475569", font: { family: "Inter", size: 11, weight: "600" },
-                        callback: function(val, idx){ return "Day " + this.getLabelForValue(val); } } }
+                    ticks: { color: "#475569", font: { family: "Inter", size: 11, weight: "600" } } }
             }
         }
     });
