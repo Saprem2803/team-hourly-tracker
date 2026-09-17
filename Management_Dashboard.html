@@ -111,36 +111,29 @@ body.wp-off #liveWallpaper{ opacity:0; }
 .header-title-block{display:flex;flex-direction:column;}
 .header-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;}
 
-/* === Executive Operations Dashboard — PURE GOLD with intense layered glow ===
-   A diagonal band of molten gold slowly travels across the text from
-   the top-right corner to the bottom-left, then reverses.
-   The text itself is deep gold (never white) so it reads as "pure gold"
-   even at the resting state of the animation.                          */
+/* === Executive Operations Dashboard — moving golden gradient sweep ===
+   A diagonal band of golden light slowly travels across the text
+   from the top-right corner to the bottom-left, then reverses.    */
 .header h1{
     font-family:'Playfair Display',Georgia,serif;
     font-size:22px;
-    font-weight:800;
+    font-weight:700;
     letter-spacing:-.3px;
     line-height:1.15;
     margin:0;
     white-space:nowrap;
 
-    /* Rich pure-gold palette — deep bronze → gold → bright shine → gold → bronze */
     background-image: linear-gradient(
         120deg,
-        #8a6410 0%,
-        #b8860b 14%,
-        #d4af37 28%,
-        #f5cf4a 40%,
-        #fff3b0 48%,
-        #ffe066 52%,
-        #fff3b0 58%,
-        #f5cf4a 68%,
-        #d4af37 82%,
-        #b8860b 92%,
-        #8a6410 100%
+        #ffffff 0%,
+        #ffffff 32%,
+        #fff7d6 42%,
+        #ffd95f 50%,
+        #fff7d6 58%,
+        #ffffff 68%,
+        #ffffff 100%
     );
-    background-size: 260% 260%;
+    background-size: 240% 240%;
     background-position: 100% 0%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -148,18 +141,9 @@ body.wp-off #liveWallpaper{ opacity:0; }
     color: transparent;
 
     animation: titleGoldenSweep 14s ease-in-out infinite;
-
-    /* Layered golden halo — tight core, wide bloom, ambient wash */
-    filter:
-        drop-shadow(0 0 3px rgba(255, 225, 90, 0.95))
-        drop-shadow(0 0 8px rgba(255, 200, 40, 0.85))
-        drop-shadow(0 0 16px rgba(212, 175, 55, 0.70))
-        drop-shadow(0 0 28px rgba(201, 162, 39, 0.55))
-        drop-shadow(0 0 46px rgba(180, 130, 20, 0.35));
-
-    will-change: background-position, filter;
+    filter: drop-shadow(0 0 5px rgba(255,220,95,0.35));
+    will-change: background-position;
 }
-
 @keyframes titleGoldenSweep {
     0%   { background-position: 100% 0%; }
     50%  { background-position: 0% 100%; }
@@ -847,6 +831,13 @@ function openOperationalDashboard(){ window.location.href = OPERATIONAL_DASHBOAR
 
 /* =========================================================
    CHART.JS — DATA CALLOUT PLUGIN
+   -----------------------------------------------------
+   Draws a small label (value) on top of every bar and
+   above every line point. Supports two formats:
+       'percent'  →  87.4%
+       'number'   →  1,234
+   Toggle per chart with:
+       options.plugins.dataLabels = { enabled: true, format: 'percent' }
 ========================================================= */
 const chartDataLabelsPlugin = {
     id: 'chartDataLabels',
@@ -864,6 +855,7 @@ const chartDataLabelsPlugin = {
         ctx.font = `700 ${fontSize}px ${fontFamily}`;
         ctx.fillStyle = opts.color || '#0f2a4a';
 
+        // subtle white halo for readability
         ctx.shadowColor = 'rgba(255,255,255,0.95)';
         ctx.shadowBlur = 3;
 
@@ -888,14 +880,17 @@ const chartDataLabelsPlugin = {
                 const y = element.y;
 
                 if (chart.options.indexAxis === 'y') {
+                    // Horizontal bars — label to the right of the bar end
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(text, x + 6, y);
                 } else if (chart.config.type === 'line') {
+                    // Line charts — label above each point
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.fillText(text, x, y - 9);
                 } else {
+                    // Vertical bars — label above the bar
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.fillText(text, x, y - 5);
@@ -907,6 +902,7 @@ const chartDataLabelsPlugin = {
     }
 };
 
+// Register the plugin so every chart can use it
 Chart.register(chartDataLabelsPlugin);
 
 /* =========================================================
@@ -1981,6 +1977,7 @@ function renderShrinkageTrendChart(){
         });
         return;
     }
+    // Smaller label font when there are many days, to avoid crowding
     const labelFontSize = series.labels.length > 15 ? 9 : 10;
     shrinkageTrendChart = new Chart(canvas, {
         type: "bar",
@@ -2289,6 +2286,7 @@ sb.auth.onAuthStateChange(async (event) => {
 
 <!-- =========================================================
      LIVE WALLPAPER — Small Golden Dots with Faint Light Rays
+     Ambers are now smaller and connected by faint golden rays.
 ========================================================= -->
 <script>
 (function(){
@@ -2301,7 +2299,7 @@ sb.auth.onAuthStateChange(async (event) => {
     var W = 0, H = 0, DPR = 1;
     var particles = [];
     var COUNT = 85;
-    var LINK_DISTANCE = 180;
+    var LINK_DISTANCE = 180;   /* Max distance (px) to draw a ray between two dots */
     var rafId = null;
     var lastFrame = 0;
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2330,6 +2328,7 @@ sb.auth.onAuthStateChange(async (event) => {
                 y: Math.random() * H,
                 vx: (Math.random() - 0.5) * 0.28,
                 vy: (Math.random() - 0.5) * 0.28,
+                /* === Small amber size === */
                 r: Math.random() * 1.6 + 0.8,
                 phase: Math.random() * Math.PI * 2,
                 speed: Math.random() * 0.018 + 0.008,
@@ -2341,6 +2340,7 @@ sb.auth.onAuthStateChange(async (event) => {
     function draw(now){
         ctx.clearRect(0, 0, W, H);
 
+        /* ---------- 1. Faint golden rays between nearby dots ---------- */
         ctx.globalCompositeOperation = 'lighter';
 
         for(var i = 0; i < particles.length; i++){
@@ -2355,12 +2355,15 @@ sb.auth.onAuthStateChange(async (event) => {
                 if(distSq > LINK_DISTANCE * LINK_DISTANCE) continue;
 
                 var dist = Math.sqrt(distSq);
+                /* Proximity factor: 1 when very close, 0 when at max distance */
                 var proximity = 1 - (dist / LINK_DISTANCE);
 
+                /* Combined pulse from both endpoints → ray breathes with them */
                 var pulse1 = 0.58 + Math.sin(p1.phase) * 0.42;
                 var pulse2 = 0.58 + Math.sin(p2.phase) * 0.42;
                 var pulseAvg = (pulse1 + pulse2) * 0.5;
 
+                /* Very faint golden alpha */
                 var lineAlpha = proximity * proximity * 0.22 * pulseAvg;
 
                 ctx.strokeStyle = 'rgba(255, 215, 90, ' + lineAlpha.toFixed(3) + ')';
@@ -2374,6 +2377,7 @@ sb.auth.onAuthStateChange(async (event) => {
 
         ctx.globalCompositeOperation = 'source-over';
 
+        /* ---------- 2. Small glowing amber dots ---------- */
         for(var k = 0; k < particles.length; k++){
             var p = particles[k];
 
@@ -2381,17 +2385,21 @@ sb.auth.onAuthStateChange(async (event) => {
             p.y += p.vy;
             p.phase += p.speed;
 
+            /* Gentle floating motion */
             p.x += Math.sin(p.phase * 0.7) * p.drift * 0.08;
             p.y += Math.cos(p.phase * 0.55) * p.drift * 0.08;
 
+            /* Wrap around screen edges */
             if(p.x < -10) p.x = W + 10;
             if(p.x > W + 10) p.x = -10;
             if(p.y < -10) p.y = H + 10;
             if(p.y > H + 10) p.y = -10;
 
+            /* Soft glow pulse */
             var pulse = 0.58 + Math.sin(p.phase) * 0.32;
             var radius = p.r * (0.9 + pulse * 0.22);
 
+            /* Small soft glow halo */
             var glow = ctx.createRadialGradient(
                 p.x, p.y, 0,
                 p.x, p.y, radius * 5
@@ -2406,6 +2414,7 @@ sb.auth.onAuthStateChange(async (event) => {
             ctx.arc(p.x, p.y, radius * 5, 0, Math.PI * 2);
             ctx.fill();
 
+            /* Bright core dot with golden shadow */
             ctx.shadowColor = 'rgba(255,210,70,0.9)';
             ctx.shadowBlur = 8 + pulse * 5;
             ctx.fillStyle = 'rgba(255,225,120,' + (0.75 + pulse * 0.25).toFixed(3) + ')';
@@ -2414,6 +2423,7 @@ sb.auth.onAuthStateChange(async (event) => {
             ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
             ctx.fill();
 
+            /* Tiny inner specular highlight for "shiny" feel */
             ctx.shadowBlur = 0;
             var spec = ctx.createRadialGradient(
                 p.x - radius * 0.3, p.y - radius * 0.3, 0,
@@ -2481,7 +2491,7 @@ sb.auth.onAuthStateChange(async (event) => {
 
 
 /* =========================================================
-   WALLPAPER TOGGLE
+   WALLPAPER TOGGLE — existing control retained
 ========================================================= */
 (function(){
     var btn = document.getElementById('wallpaperToggle');
