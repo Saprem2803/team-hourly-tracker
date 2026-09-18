@@ -157,15 +157,12 @@ td.left { text-align: left; }
 .production-input.hour-locked { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; cursor: not-allowed; font-weight: 700; }
 .hour-lock-label { display: inline-block; margin-top: 3px; font-size: 8px; font-weight: 700; color: #64748b; }
 
-/* Editable daily target */
 .daily-target-input { width: 68px; height: 30px; text-align: center; padding: 2px; }
 .daily-target-input.hour-locked { background:#f1f5f9; color:#64748b; cursor:not-allowed; }
 
-/* Ramp-up gear */
 .rampup-btn { background:#e0e7ff; color:#3730a3; }
 .rampup-btn:hover { background:#c7d2fe; }
 
-/* Production / Ramp-up modal */
 .modal-overlay { position:fixed; inset:0; background:rgba(5,12,24,.62);
     backdrop-filter:blur(10px) saturate(120%); -webkit-backdrop-filter:blur(10px) saturate(120%);
     display:flex; align-items:center; justify-content:center; padding:24px; z-index:1000;
@@ -399,6 +396,7 @@ body.wp-off #liveWallpaper { opacity: 0; }
                 <option value="">All Sub-Projects</option>
             </select>
         </div>
+        <button class="btn-secondary" onclick="openHolidayModal()">📅 Client Holidays</button>
         <button class="btn-primary" onclick="refreshDashboard()">Refresh</button>
         <div class="autosave-indicator" id="autosaveIndicator" data-state="idle">
             <span class="autosave-dot"></span>
@@ -620,6 +618,41 @@ body.wp-off #liveWallpaper { opacity: 0; }
   </div>
 </div>
 
+<!-- CLIENT HOLIDAYS MODAL -->
+<div id="holidayModal" class="modal-overlay app-hidden">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Client Holidays</div>
+        <div style="font-size:11px;color:#64748b;margin-top:3px;max-width:380px;">
+          A client holiday is treated exactly like a weekend — no targets, no shrinkage, no achievement are computed for that date.
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeHolidayModal()">✕</button>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px;">
+      <div class="form-field" style="flex:1;min-width:140px;">
+        <label style="font-size:11px;font-weight:bold;color:#64748b;">Date</label>
+        <input id="holidayDate" type="date"
+               style="height:36px;border:1px solid #cbd5e1;border-radius:7px;padding:0 10px;">
+      </div>
+      <div class="form-field" style="flex:2;min-width:180px;">
+        <label style="font-size:11px;font-weight:bold;color:#64748b;">Name (optional)</label>
+        <input id="holidayName" type="text" placeholder="e.g. Diwali"
+               style="height:36px;border:1px solid #cbd5e1;border-radius:7px;padding:0 10px;">
+      </div>
+      <button class="btn-primary" id="holidayAddBtn" onclick="addClientHoliday()">Add Holiday</button>
+    </div>
+
+    <div id="holidayList"
+         style="font-size:12px;color:#475569;background:#f8fafc;border-radius:8px;
+                padding:8px 12px;max-height:300px;overflow-y:auto;">
+      Loading…
+    </div>
+  </div>
+</div>
+
 <div class="message" id="message"></div>
 
 <script>
@@ -664,22 +697,35 @@ const hourLabels = ["6–7 PM","7–8 PM","8–9 PM","9–10 PM","10–11 PM","1
 /* =========================================================
    WEEKEND / HOLIDAY HELPERS
 ========================================================= */
-const CUSTOM_HOLIDAYS = [
-    "2026-09-07"   // Client Holiday — September 7, 2026
-];
+let CUSTOM_HOLIDAYS = new Set();
+
+async function loadClientHolidays() {
+    try {
+        const { data, error } = await supabaseClient
+            .from("client_holidays")
+            .select("holiday_date,holiday_name");
+        if (error) {
+            console.warn("Client holidays:", error.message);
+            return;
+        }
+        CUSTOM_HOLIDAYS = new Set((data || []).map(r => String(r.holiday_date).trim()));
+    } catch (err) {
+        console.warn("Client holidays query failed:", err);
+    }
+}
 
 function isWeekendDate(dateStr) {
     if (!dateStr) return false;
     const parts = String(dateStr).split("-");
     if (parts.length !== 3) return false;
     const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-    const dow = d.getDay();   // 0 = Sun, 6 = Sat
+    const dow = d.getDay();
     return dow === 0 || dow === 6;
 }
 
 function isCustomHoliday(dateStr) {
     if (!dateStr) return false;
-    return CUSTOM_HOLIDAYS.includes(String(dateStr).trim());
+    return CUSTOM_HOLIDAYS.has(String(dateStr).trim());
 }
 
 function isHolidayDate(dateStr) {
@@ -709,7 +755,6 @@ function parseRampupTargets(raw) {
     return [];
 }
 
-/* Effective dates — production wins for targets; tracker wins for visibility */
 function getEffectiveProductionStart(employee) {
     if (!employee) return null;
     return employee.production_start_date || employee.tracker_start_date || null;
@@ -729,7 +774,7 @@ function getRampupTarget(employee, dateStr) {
     const startD = new Date(start + "T00:00:00");
     const d      = new Date(dateStr + "T00:00:00");
     if (Number.isNaN(startD) || Number.isNaN(d)) return null;
-    if (d < startD) return 0;   // before production starts → no target
+    if (d < startD) return 0;
 
     const daysSince = Math.floor((d - startD) / 86400000);
     const weekIdx   = Math.max(0, Math.floor(daysSince / 7));
@@ -737,7 +782,9 @@ function getRampupTarget(employee, dateStr) {
     return ramp[idx];
 }
 
-/* Modal state */
+/* =========================================================
+   RAMP-UP MODAL
+========================================================= */
 let rampupEmployeeId = null;
 
 function openRampupModal(employeeId) {
@@ -860,7 +907,6 @@ async function saveRampup() {
         return;
     }
 
-    // Refresh local cache
     const idx = employees.findIndex(e => Number(e.id) === Number(rampupEmployeeId));
     if (idx >= 0) {
         employees[idx].production_start_date = productionStart;
@@ -868,7 +914,6 @@ async function saveRampup() {
         employees[idx].rampup_targets        = weeks;
     }
 
-    // Sync today's stored target if a row already exists
     const trackerDate = document.getElementById("trackerDate")?.value;
     if (idx >= 0 && trackerDate && trackerDate >= productionStart) {
         const existing = getProductionRecord(rampupEmployeeId);
@@ -886,6 +931,118 @@ async function saveRampup() {
     closeRampupModal();
     buildDailyTracker();
     await updateDashboard();
+}
+
+/* =========================================================
+   CLIENT HOLIDAYS MODAL
+========================================================= */
+function openHolidayModal() {
+    document.getElementById("holidayDate").value = "";
+    document.getElementById("holidayName").value = "";
+    renderHolidayList();
+    document.getElementById("holidayModal").classList.remove("app-hidden");
+}
+
+function closeHolidayModal() {
+    document.getElementById("holidayModal").classList.add("app-hidden");
+}
+
+async function renderHolidayList() {
+    const box = document.getElementById("holidayList");
+    if (!box) return;
+    box.textContent = "Loading…";
+
+    const { data, error } = await supabaseClient
+        .from("client_holidays")
+        .select("holiday_date,holiday_name")
+        .order("holiday_date", { ascending: true });
+
+    if (error) {
+        box.textContent = "Unable to load holidays: " + error.message;
+        return;
+    }
+
+    if (!data || !data.length) {
+        box.innerHTML = `<div style="color:#94a3b8;text-align:center;padding:12px;">No client holidays configured yet.</div>`;
+        return;
+    }
+
+    box.innerHTML = data.map(r => {
+        const date = String(r.holiday_date);
+        const name = r.holiday_name ? escapeHtml(r.holiday_name) : "Client Holiday";
+        return `
+            <div style="display:flex;justify-content:space-between;align-items:center;
+                        padding:8px 4px;border-bottom:1px solid #e2e8f0;">
+                <div>
+                    <strong style="color:#173b5e;">${date}</strong>
+                    <span style="color:#64748b;margin-left:8px;">${name}</span>
+                </div>
+                <button class="btn-secondary" style="padding:4px 8px;font-size:10px;"
+                        onclick="deleteClientHoliday('${date}')">Remove</button>
+            </div>
+        `;
+    }).join("");
+}
+
+async function addClientHoliday() {
+    const date = document.getElementById("holidayDate").value;
+    const name = document.getElementById("holidayName").value.trim() || null;
+
+    if (!date) { showMessage("Please select a date.", "error"); return; }
+
+    const btn = document.getElementById("holidayAddBtn");
+    btn.disabled = true; btn.textContent = "Adding…";
+
+    const { error } = await supabaseClient
+        .from("client_holidays")
+        .upsert(
+            { holiday_date: date, holiday_name: name, created_by: currentUser?.email || null },
+            { onConflict: "holiday_date" }
+        );
+
+    btn.disabled = false; btn.textContent = "Add Holiday";
+
+    if (error) {
+        console.error("Add holiday:", error);
+        showMessage(error.message || "Unable to add holiday.", "error");
+        return;
+    }
+
+    showMessage("Client holiday added.");
+    await loadClientHolidays();
+    await renderHolidayList();
+
+    const trackerDate = document.getElementById("trackerDate")?.value;
+    if (trackerDate === date) {
+        updateHolidayBanner();
+        buildDailyTracker();
+        applyHourlyLocks();
+        await updateDashboard();
+    }
+}
+
+async function deleteClientHoliday(date) {
+    const { error } = await supabaseClient
+        .from("client_holidays")
+        .delete()
+        .eq("holiday_date", date);
+
+    if (error) {
+        showMessage(error.message || "Unable to remove holiday.", "error");
+        return;
+    }
+
+    showMessage("Client holiday removed.");
+    await loadClientHolidays();
+    await renderHolidayList();
+
+    const trackerDate = document.getElementById("trackerDate")?.value;
+    if (trackerDate === date) {
+        updateHolidayBanner();
+        buildDailyTracker();
+        applyHourlyLocks();
+        await updateDashboard();
+    }
 }
 
 /* =========================================================
@@ -1540,21 +1697,13 @@ function getEmployeeTarget(employee) {
     return Number(project.daily_target);
 }
 
-/* ---------------------------------------------------------
-   DAILY TARGET — prioritises ramp-up, respects production
-   start date, returns null on any holiday (weekend or
-   custom). Optional dateStr so MTD loops can resolve the
-   target for a specific date.
---------------------------------------------------------- */
 function getDailyTarget(employee, attendance, dateStr) {
     const trackerDate = dateStr || document.getElementById("trackerDate")?.value;
     if (isHolidayDate(trackerDate)) return null;
 
-    // Before the employee's production start → no target
     const prodStart = getEffectiveProductionStart(employee);
     if (prodStart && trackerDate && trackerDate < prodStart) return null;
 
-    // Ramp-up schedule (team-lead owned) takes priority over config
     let target = getRampupTarget(employee, trackerDate);
     if (target === null) target = getEmployeeTarget(employee);
 
@@ -1580,7 +1729,6 @@ function getFilteredEmployees() {
     const subProjectValue = document.getElementById("subProjectFilter").value;
     const trackerDate = document.getElementById("trackerDate")?.value;
     return employees.filter(employee => {
-        // Hide until they first appear on the tracker
         const visibleFrom = getEffectiveTrackerStart(employee);
         if (visibleFrom && trackerDate && trackerDate < visibleFrom) return false;
 
@@ -1745,7 +1893,6 @@ function recalculateRow(element) {
     const holiday = isHolidayDate(trackerDate);
     const isClientHol = isCustomHoliday(trackerDate);
 
-    // Resolve target: holiday → N/A; Absent → 0; manual override; else computed
     const targetInput = row.querySelector('[data-field="daily_target"]');
     let target;
     if (holiday) {
@@ -2046,8 +2193,7 @@ function renderPerformanceSummary() {
 }
 
 /* =========================================================
-   SHRINKAGE — Weekends, custom holidays, and pre-production
-   days excluded from the scheduled denominator.
+   SHRINKAGE
 ========================================================= */
 async function calculateCurrentMonthShrinkage() {
     const visibleEmployees = getFilteredEmployees();
@@ -2079,7 +2225,7 @@ async function calculateCurrentMonthShrinkage() {
     visibleEmployees.forEach(employee => {
         const employeeStart = getEffectiveProductionStart(employee) || dates[0];
         dates.forEach(date => {
-            if (date < employeeStart) return;   // skip pre-production days
+            if (date < employeeStart) return;
             scheduledDays++;
             const record = records.find(r => Number(r.employee_id) === Number(employee.id) && r.tracker_date === date);
             const attendance = record?.attendance || "Present";
@@ -2289,6 +2435,7 @@ async function refreshDashboard() {
     try { await flushAllAutosaves(); } catch (error) { console.error("Flush before refresh:", error); }
     const selectedProject = document.getElementById("projectFilter").value;
     const selectedSubProject = document.getElementById("subProjectFilter").value;
+    await loadClientHolidays();
     await loadProjects();
     await loadSubProjects();
     await loadEmployees();
@@ -2340,7 +2487,6 @@ async function downloadDailyCSV() {
         const subProject = getEmployeeSubProject(employee);
         const record = records.find(r => Number(r.employee_id) === Number(employee.id));
         const attendance = record?.attendance || "Present";
-        // Prefer stored override; fall back to resolved target for that date
         let target = getDailyTarget(employee, attendance, date);
         if (record && record.daily_target !== null && record.daily_target !== undefined && record.daily_target !== "") {
             target = Number(record.daily_target);
@@ -2383,11 +2529,6 @@ function getDateRange(fromDate, toDate) {
     return dates;
 }
 
-/* =========================================================
-   MTD REPORT — Weekends, custom holidays, and pre-production
-   days excluded. Uses stored daily_target when available so
-   team-lead overrides and ramp-up weeks are respected.
-========================================================= */
 async function downloadMTDCSV() {
     const fromDate = document.getElementById("mtdFromDate").value;
     const toDate = document.getElementById("mtdToDate").value;
@@ -2412,7 +2553,6 @@ async function downloadMTDCSV() {
     const workingDates = allDates.filter(d => !isHolidayDate(d));
     const rows = [];
 
-    /* ── BLOCK 1 — DAILY BREAKDOWN ── */
     workingDates.forEach(date => {
         visibleEmployees.forEach(employee => {
             const prodStart = getEffectiveProductionStart(employee);
@@ -2461,7 +2601,6 @@ async function downloadMTDCSV() {
         });
     });
 
-    /* ── BLOCK 2 — MTD SUMMARY ── */
     visibleEmployees.forEach(employee => {
         const project = getProjectById(employee.project_id);
         const subProject = getEmployeeSubProject(employee);
@@ -2543,8 +2682,10 @@ document.addEventListener("keydown", function(event) {
         loginUser();
     }
     if (event.key === "Escape") {
-        const m = document.getElementById("rampupModal");
-        if (m && !m.classList.contains("app-hidden")) closeRampupModal();
+        const rm = document.getElementById("rampupModal");
+        if (rm && !rm.classList.contains("app-hidden")) closeRampupModal();
+        const hm = document.getElementById("holidayModal");
+        if (hm && !hm.classList.contains("app-hidden")) closeHolidayModal();
     }
 });
 
@@ -2558,6 +2699,7 @@ setTimeout(() => { updateHourlyReminder(); }, 1000);
 ========================================================= */
 async function bootstrapApplicationData() {
     setTodayDate();
+    await loadClientHolidays();
     await loadProjects();
     await loadSubProjects();
     await loadEmployees();
