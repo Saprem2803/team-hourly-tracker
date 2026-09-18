@@ -157,21 +157,22 @@ td.left { text-align: left; }
 .production-input.hour-locked { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; cursor: not-allowed; font-weight: 700; }
 .hour-lock-label { display: inline-block; margin-top: 3px; font-size: 8px; font-weight: 700; color: #64748b; }
 
-/* NEW: editable daily target */
+/* Editable daily target */
 .daily-target-input { width: 68px; height: 30px; text-align: center; padding: 2px; }
 .daily-target-input.hour-locked { background:#f1f5f9; color:#64748b; cursor:not-allowed; }
 
-/* NEW: ramp-up gear button */
+/* Ramp-up gear */
 .rampup-btn { background:#e0e7ff; color:#3730a3; }
 .rampup-btn:hover { background:#c7d2fe; }
 
-/* NEW: ramp-up modal */
+/* Production / Ramp-up modal */
 .modal-overlay { position:fixed; inset:0; background:rgba(5,12,24,.62);
     backdrop-filter:blur(10px) saturate(120%); -webkit-backdrop-filter:blur(10px) saturate(120%);
-    display:flex; align-items:center; justify-content:center; padding:24px; z-index:1000; }
+    display:flex; align-items:center; justify-content:center; padding:24px; z-index:1000;
+    overflow-y:auto; }
 .modal-overlay.app-hidden { display:none !important; }
 .modal-card { background:#fff; border-radius:14px; box-shadow:0 24px 80px rgba(0,0,0,.5);
-    width:100%; max-width:540px; padding:26px 28px; }
+    width:100%; max-width:560px; padding:26px 28px; margin:auto; }
 .modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
 .modal-title { font-size:17px; font-weight:800; color:#173b5e; }
 .modal-close { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; width:30px; height:30px;
@@ -417,7 +418,7 @@ body.wp-off #liveWallpaper { opacity: 0; }
             <div>
                 <div class="download-title">Production Reports</div>
                 <div class="download-note">
-                    Daily Report uses the selected Tracker Date. MTD Report uses the From Date and To Date. Reports follow the selected filters. Weekends (Sat / Sun) and Client Holidays are treated as fixed holidays.
+                    Daily Report uses the selected Tracker Date. MTD Report uses the From Date and To Date. Reports follow the selected filters. Weekends (Sat / Sun) and Client Holidays are treated as fixed holidays. Employees are counted from their Production Start Date.
                 </div>
             </div>
             <div class="download-buttons">
@@ -574,24 +575,37 @@ body.wp-off #liveWallpaper { opacity: 0; }
 
 </div>
 
-<!-- RAMP-UP MODAL -->
+<!-- PRODUCTION & RAMP-UP MODAL -->
 <div id="rampupModal" class="modal-overlay app-hidden">
   <div class="modal-card">
     <div class="modal-head">
       <div>
-        <div class="modal-title">Ramp-up Schedule</div>
+        <div class="modal-title">Production &amp; Ramp-up Settings</div>
         <div id="rampupEmployeeLabel" style="font-size:11px;color:#64748b;margin-top:3px;"></div>
       </div>
       <button class="modal-close" onclick="closeRampupModal()">✕</button>
     </div>
 
     <div class="form-field" style="margin-bottom:14px;">
-      <label style="font-size:11px;font-weight:bold;color:#64748b;">Tracker Start Date</label>
-      <input id="rampupStartDate" type="date" style="height:36px;border:1px solid #cbd5e1;border-radius:7px;padding:0 10px;">
+      <label style="font-size:11px;font-weight:bold;color:#64748b;">Production Start Date</label>
+      <input id="rampupProductionStartDate" type="date"
+             style="height:36px;border:1px solid #cbd5e1;border-radius:7px;padding:0 10px;">
+      <div style="font-size:10px;color:#94a3b8;margin-top:4px;">
+        Targets begin from this date. Ramp-up Week 1 starts here. Shrinkage and MTD only count from this day.
+      </div>
+    </div>
+
+    <div class="form-field" style="margin-bottom:14px;">
+      <label style="font-size:11px;font-weight:bold;color:#64748b;">Tracker Start Date <span style="color:#94a3b8;font-weight:400;">(optional)</span></label>
+      <input id="rampupStartDate" type="date"
+             style="height:36px;border:1px solid #cbd5e1;border-radius:7px;padding:0 10px;">
+      <div style="font-size:10px;color:#94a3b8;margin-top:4px;">
+        When the employee first appears on the tracker. Leave blank to use the Production Start Date.
+      </div>
     </div>
 
     <div class="form-field" style="margin-bottom:8px;">
-      <label style="font-size:11px;font-weight:bold;color:#64748b;">Weekly Targets</label>
+      <label style="font-size:11px;font-weight:bold;color:#64748b;">Ramp-up Weekly Targets <span style="color:#94a3b8;font-weight:400;">(optional)</span></label>
       <div id="rampupWeeks"></div>
     </div>
     <button class="btn-secondary" type="button" style="font-size:11px;padding:6px 10px;" onclick="addRampupWeek()">+ Add week</button>
@@ -601,7 +615,7 @@ body.wp-off #liveWallpaper { opacity: 0; }
 
     <div style="display:flex;justify-content:flex-end;gap:8px;">
       <button class="btn-secondary" onclick="closeRampupModal()">Cancel</button>
-      <button class="btn-primary" id="rampupSaveBtn" onclick="saveRampup()">Save Ramp-up</button>
+      <button class="btn-primary" id="rampupSaveBtn" onclick="saveRampup()">Save Settings</button>
     </div>
   </div>
 </div>
@@ -677,7 +691,7 @@ function isWeekendDayOfWeek(dow) {
 }
 
 /* =========================================================
-   RAMP-UP SCHEDULE — team-lead owned
+   PRODUCTION / TRACKER START + RAMP-UP
 ========================================================= */
 function parseRampupTargets(raw) {
     if (!raw) return [];
@@ -695,16 +709,27 @@ function parseRampupTargets(raw) {
     return [];
 }
 
+/* Effective dates — production wins for targets; tracker wins for visibility */
+function getEffectiveProductionStart(employee) {
+    if (!employee) return null;
+    return employee.production_start_date || employee.tracker_start_date || null;
+}
+
+function getEffectiveTrackerStart(employee) {
+    if (!employee) return null;
+    return employee.tracker_start_date || employee.production_start_date || null;
+}
+
 function getRampupTarget(employee, dateStr) {
     if (!employee || !dateStr) return null;
-    const start = employee.tracker_start_date;
+    const start = getEffectiveProductionStart(employee);
     const ramp  = parseRampupTargets(employee.rampup_targets);
     if (!start || !ramp.length) return null;
 
     const startD = new Date(start + "T00:00:00");
     const d      = new Date(dateStr + "T00:00:00");
     if (Number.isNaN(startD) || Number.isNaN(d)) return null;
-    if (d < startD) return 0;
+    if (d < startD) return 0;   // before production starts → no target
 
     const daysSince = Math.floor((d - startD) / 86400000);
     const weekIdx   = Math.max(0, Math.floor(daysSince / 7));
@@ -727,7 +752,12 @@ function openRampupModal(employeeId) {
 
     document.getElementById("rampupEmployeeLabel").textContent =
         `${emp.employee_name} · ${emp.employee_code}`;
-    document.getElementById("rampupStartDate").value = emp.tracker_start_date || getTodayString();
+
+    document.getElementById("rampupProductionStartDate").value =
+        emp.production_start_date || emp.tracker_start_date || getTodayString();
+
+    document.getElementById("rampupStartDate").value =
+        emp.tracker_start_date || "";
 
     const ramp = parseRampupTargets(emp.rampup_targets);
     const wrap = document.getElementById("rampupWeeks");
@@ -760,7 +790,7 @@ function addRampupWeek(value = "") {
 }
 
 function renderRampupPreview() {
-    const start = document.getElementById("rampupStartDate").value;
+    const start = document.getElementById("rampupProductionStartDate").value;
     const weeks = [...document.querySelectorAll(".rampup-week-input")]
         .map(i => i.value.trim())
         .filter(v => v !== "" && !Number.isNaN(Number(v)))
@@ -768,7 +798,7 @@ function renderRampupPreview() {
 
     const preview = document.getElementById("rampupPreview");
     if (!start || !weeks.length) {
-        preview.textContent = "Add a start date and at least one weekly target to see the preview.";
+        preview.textContent = "Add a production start date and at least one weekly target to see the preview.";
         return;
     }
     const startD = new Date(start + "T00:00:00");
@@ -786,14 +816,23 @@ function renderRampupPreview() {
 
 async function saveRampup() {
     if (currentRole !== "team_lead" || !rampupEmployeeId) return;
-    const start = document.getElementById("rampupStartDate").value;
+
+    const productionStart = document.getElementById("rampupProductionStartDate").value;
+    const trackerStart    = document.getElementById("rampupStartDate").value || null;
+
     const weeks = [...document.querySelectorAll(".rampup-week-input")]
         .map(i => i.value.trim())
         .filter(v => v !== "" && !Number.isNaN(Number(v)))
         .map(Number);
 
-    if (!start) { showMessage("Please enter a tracker start date.", "error"); return; }
-    if (!weeks.length) { showMessage("Add at least one weekly target.", "error"); return; }
+    if (!productionStart) {
+        showMessage("Please enter a production start date.", "error");
+        return;
+    }
+    if (trackerStart && trackerStart > productionStart) {
+        showMessage("Tracker Start Date cannot be later than Production Start Date.", "error");
+        return;
+    }
 
     const emp = getEmployeeById(rampupEmployeeId);
     if (!emp || !canAccessProject(emp.project_id)) {
@@ -806,27 +845,32 @@ async function saveRampup() {
 
     const { error } = await supabaseClient
         .from("employees")
-        .update({ tracker_start_date: start, rampup_targets: weeks })
+        .update({
+            production_start_date: productionStart,
+            tracker_start_date: trackerStart || productionStart,
+            rampup_targets: weeks
+        })
         .eq("id", rampupEmployeeId);
 
-    btn.disabled = false; btn.textContent = "Save Ramp-up";
+    btn.disabled = false; btn.textContent = "Save Settings";
 
     if (error) {
         console.error("Ramp-up save:", error);
-        showMessage(error.message || "Unable to save ramp-up.", "error");
+        showMessage(error.message || "Unable to save settings.", "error");
         return;
     }
 
     // Refresh local cache
     const idx = employees.findIndex(e => Number(e.id) === Number(rampupEmployeeId));
     if (idx >= 0) {
-        employees[idx].tracker_start_date = start;
-        employees[idx].rampup_targets = weeks;
+        employees[idx].production_start_date = productionStart;
+        employees[idx].tracker_start_date    = trackerStart || productionStart;
+        employees[idx].rampup_targets        = weeks;
     }
 
     // Sync today's stored target if a row already exists
     const trackerDate = document.getElementById("trackerDate")?.value;
-    if (idx >= 0 && trackerDate && trackerDate >= start) {
+    if (idx >= 0 && trackerDate && trackerDate >= productionStart) {
         const existing = getProductionRecord(rampupEmployeeId);
         const newTarget = getDailyTarget(employees[idx], existing?.attendance || "Present");
         if (existing && newTarget !== null && Number(existing.daily_target) !== newTarget) {
@@ -838,7 +882,7 @@ async function saveRampup() {
         }
     }
 
-    showMessage("Ramp-up schedule saved.");
+    showMessage("Production settings saved.");
     closeRampupModal();
     buildDailyTracker();
     await updateDashboard();
@@ -1497,19 +1541,18 @@ function getEmployeeTarget(employee) {
 }
 
 /* ---------------------------------------------------------
-   DAILY TARGET — prioritises ramp-up, respects start date,
-   returns null on any holiday (weekend or custom).
-   Optional dateStr param so MTD loops can resolve the
-   target for a specific date rather than the tracker date.
+   DAILY TARGET — prioritises ramp-up, respects production
+   start date, returns null on any holiday (weekend or
+   custom). Optional dateStr so MTD loops can resolve the
+   target for a specific date.
 --------------------------------------------------------- */
 function getDailyTarget(employee, attendance, dateStr) {
     const trackerDate = dateStr || document.getElementById("trackerDate")?.value;
     if (isHolidayDate(trackerDate)) return null;
 
-    // Before the employee's tracker start date → no target
-    if (employee?.tracker_start_date && trackerDate && trackerDate < employee.tracker_start_date) {
-        return null;
-    }
+    // Before the employee's production start → no target
+    const prodStart = getEffectiveProductionStart(employee);
+    if (prodStart && trackerDate && trackerDate < prodStart) return null;
 
     // Ramp-up schedule (team-lead owned) takes priority over config
     let target = getRampupTarget(employee, trackerDate);
@@ -1537,10 +1580,10 @@ function getFilteredEmployees() {
     const subProjectValue = document.getElementById("subProjectFilter").value;
     const trackerDate = document.getElementById("trackerDate")?.value;
     return employees.filter(employee => {
-        // Hide until tracker_start_date
-        if (employee.tracker_start_date && trackerDate && trackerDate < employee.tracker_start_date) {
-            return false;
-        }
+        // Hide until they first appear on the tracker
+        const visibleFrom = getEffectiveTrackerStart(employee);
+        if (visibleFrom && trackerDate && trackerDate < visibleFrom) return false;
+
         if (projectValue && Number(employee.project_id) !== Number(projectValue)) return false;
         if (subProjectValue) {
             const sp = getEmployeeSubProject(employee);
@@ -1639,7 +1682,7 @@ function buildDailyTracker() {
         const gearBtn = (currentRole === "team_lead")
             ? `<button type="button" class="btn-secondary rampup-btn"
                         style="margin-left:6px;padding:3px 7px;font-size:10px;"
-                        title="Edit ramp-up schedule"
+                        title="Production start &amp; ramp-up settings"
                         onclick="event.stopPropagation();openRampupModal(${employee.id})">⚙</button>`
             : "";
         let html = `
@@ -1702,7 +1745,7 @@ function recalculateRow(element) {
     const holiday = isHolidayDate(trackerDate);
     const isClientHol = isCustomHoliday(trackerDate);
 
-    // Resolve target: Absent → 0; else manual override; else computed
+    // Resolve target: holiday → N/A; Absent → 0; manual override; else computed
     const targetInput = row.querySelector('[data-field="daily_target"]');
     let target;
     if (holiday) {
@@ -1822,9 +1865,10 @@ async function flushAllAutosaves() {
    PROJECT METRICS
 ========================================================= */
 function getProjectMetrics(projectId = null) {
+    const base = getFilteredEmployees();
     const list = projectId === null
-        ? getFilteredEmployees()
-        : getFilteredEmployees().filter(e => Number(e.project_id) === Number(projectId));
+        ? base
+        : base.filter(e => Number(e.project_id) === Number(projectId));
 
     let totalEmployees = list.length;
     let target = 0;
@@ -2002,8 +2046,8 @@ function renderPerformanceSummary() {
 }
 
 /* =========================================================
-   SHRINKAGE — Weekends, custom holidays, and pre-start
-   days are excluded from the scheduled denominator.
+   SHRINKAGE — Weekends, custom holidays, and pre-production
+   days excluded from the scheduled denominator.
 ========================================================= */
 async function calculateCurrentMonthShrinkage() {
     const visibleEmployees = getFilteredEmployees();
@@ -2033,9 +2077,9 @@ async function calculateCurrentMonthShrinkage() {
     const records = data || [];
     let shrinkageDays = 0, scheduledDays = 0, absentDays = 0, halfDays = 0, presentDays = 0;
     visibleEmployees.forEach(employee => {
-        const employeeStart = employee.tracker_start_date || dates[0];
+        const employeeStart = getEffectiveProductionStart(employee) || dates[0];
         dates.forEach(date => {
-            if (date < employeeStart) return;   // <-- skip pre-start days
+            if (date < employeeStart) return;   // skip pre-production days
             scheduledDays++;
             const record = records.find(r => Number(r.employee_id) === Number(employee.id) && r.tracker_date === date);
             const attendance = record?.attendance || "Present";
@@ -2296,7 +2340,7 @@ async function downloadDailyCSV() {
         const subProject = getEmployeeSubProject(employee);
         const record = records.find(r => Number(r.employee_id) === Number(employee.id));
         const attendance = record?.attendance || "Present";
-        // Prefer stored override
+        // Prefer stored override; fall back to resolved target for that date
         let target = getDailyTarget(employee, attendance, date);
         if (record && record.daily_target !== null && record.daily_target !== undefined && record.daily_target !== "") {
             target = Number(record.daily_target);
@@ -2340,9 +2384,9 @@ function getDateRange(fromDate, toDate) {
 }
 
 /* =========================================================
-   MTD REPORT — Weekends, custom holidays, and pre-start
-   days excluded. Uses stored daily_target when available
-   so team-lead overrides and ramp-up weeks are respected.
+   MTD REPORT — Weekends, custom holidays, and pre-production
+   days excluded. Uses stored daily_target when available so
+   team-lead overrides and ramp-up weeks are respected.
 ========================================================= */
 async function downloadMTDCSV() {
     const fromDate = document.getElementById("mtdFromDate").value;
@@ -2368,10 +2412,11 @@ async function downloadMTDCSV() {
     const workingDates = allDates.filter(d => !isHolidayDate(d));
     const rows = [];
 
-    /* ── BLOCK 1 — DAILY BREAKDOWN (working days only, from tracker_start_date) ── */
+    /* ── BLOCK 1 — DAILY BREAKDOWN ── */
     workingDates.forEach(date => {
         visibleEmployees.forEach(employee => {
-            if (employee.tracker_start_date && date < employee.tracker_start_date) return;
+            const prodStart = getEffectiveProductionStart(employee);
+            if (prodStart && date < prodStart) return;
 
             const project = getProjectById(employee.project_id);
             const subProject = getEmployeeSubProject(employee);
@@ -2416,13 +2461,13 @@ async function downloadMTDCSV() {
         });
     });
 
-    /* ── BLOCK 2 — MTD SUMMARY (per employee, from tracker_start_date) ── */
+    /* ── BLOCK 2 — MTD SUMMARY ── */
     visibleEmployees.forEach(employee => {
         const project = getProjectById(employee.project_id);
         const subProject = getEmployeeSubProject(employee);
         const employeeTarget = getEmployeeTarget(employee);
 
-        const employeeStart = employee.tracker_start_date || workingDates[0];
+        const employeeStart = getEffectiveProductionStart(employee) || workingDates[0];
         const effectiveDates = workingDates.filter(d => d >= employeeStart);
         const targetBased = employeeTarget !== null || parseRampupTargets(employee.rampup_targets).length > 0;
 
@@ -2502,6 +2547,8 @@ document.addEventListener("keydown", function(event) {
         if (m && !m.classList.contains("app-hidden")) closeRampupModal();
     }
 });
+
+document.getElementById("rampupProductionStartDate")?.addEventListener("input", renderRampupPreview);
 
 setInterval(() => { applyHourlyLocks(); updateHourlyReminder(); }, 30 * 1000);
 setTimeout(() => { updateHourlyReminder(); }, 1000);
