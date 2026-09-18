@@ -622,7 +622,7 @@ tbody tr:hover{background:linear-gradient(90deg,#fdfcf7 0%,#fbfaf5 100%);}
                     <span class="section-num">01</span>
                     <div>
                         <div class="section-title">Project Scorecard</div>
-                        <div class="section-desc">Click any project with sub-projects to expand · Working days exclude weekends &amp; client holidays · Counted from each employee's production start date</div>
+                        <div class="section-desc">Click any project with sub-projects to expand · Working days exclude weekends &amp; client holidays · Counted from each employee's production start date up to their production end date</div>
                     </div>
                 </div>
             </div>
@@ -1083,9 +1083,11 @@ function getHolidayLabel(dateStr){
 }
 
 /* =========================================================
-   PRODUCTION / TRACKER START + RAMP-UP HELPERS
+   PRODUCTION / TRACKER START + END + RAMP-UP HELPERS
    -----------------------------------------------------
    • production_start_date = when targets begin for a new hire
+   • production_end_date   = when the employee separated —
+                             targets/shrinkage stop after this
    • tracker_start_date    = when the row first appears
    • rampup_targets        = per-week target overrides, indexed
                              from the effective production start
@@ -1114,6 +1116,11 @@ function getEffectiveProductionStart(employee){
 function getEffectiveTrackerStart(employee){
     if(!employee) return null;
     return employee.tracker_start_date || employee.production_start_date || null;
+}
+
+function getEffectiveProductionEnd(employee){
+    if(!employee) return null;
+    return employee.production_end_date || null;
 }
 
 /* =========================================================
@@ -1377,12 +1384,16 @@ function spName(sp){ return sp?.sub_project_name || sp?.name || sp?.sub_project 
         Last value repeats for every later week.
      2. Sub-project configured target.
      3. Project configured target.
-   Returns null if no target is configured or if the date
-   is before the employee's production_start_date.
+   Returns null if no target is configured, if the date is
+   before production_start_date, or after production_end_date.
 ========================================================= */
 function resolveEmployeeTarget(employee, project, forDate){
     const date = forDate || currentDate;
     if(!employee) return null;
+
+    // After separation → no target
+    const end = getEffectiveProductionEnd(employee);
+    if(end && date && date > end) return null;
 
     // 1. Ramp-up schedule takes priority for new hires
     const start = getEffectiveProductionStart(employee);
@@ -1472,14 +1483,16 @@ function getWorkingDaysBetween(startDate, endDate){
    SHRINKAGE
    -----------------------------------------------------
    Scheduled days denominator per employee now respects
-   each employee's production_start_date. Days before that
-   date are not counted against them.
+   each employee's production_start_date AND
+   production_end_date. Days outside that window are not
+   counted against them.
 ========================================================= */
-function computeShrinkageBreakdown(employeeIds, startDates){
+function computeShrinkageBreakdown(employeeIds, startDates, endDates){
     const empty = { pct: 0, shrinkDays: 0, scheduledDays: 0, workingDays: 0 };
     if(!currentDate) return empty;
     if(!employeeIds || !employeeIds.length) return empty;
     if(!Array.isArray(startDates)) startDates = [];
+    if(!Array.isArray(endDates)) endDates = [];
 
     const idSet = new Set(employeeIds.map(id => String(id).trim()));
     const employeeCount = idSet.size;
@@ -1489,6 +1502,12 @@ function computeShrinkageBreakdown(employeeIds, startDates){
     employeeIds.forEach((id, i) => {
         const s = startDates[i];
         if(s) startById.set(String(id).trim(), s);
+    });
+
+    const endById = new Map();
+    employeeIds.forEach((id, i) => {
+        const e = endDates[i];
+        if(e) endById.set(String(id).trim(), e);
     });
 
     let workingDayList;
@@ -1504,12 +1523,14 @@ function computeShrinkageBreakdown(employeeIds, startDates){
     const workingSet = new Set(workingDayList);
 
     // Scheduled days = for each employee, only count working days
-    // on or after their production_start_date
+    // within [production_start_date, production_end_date]
     let scheduledDays = 0;
     idSet.forEach(id => {
         const start = startById.get(id);
+        const end   = endById.get(id);
         workingDayList.forEach(d => {
             if(start && d < start) return;
+            if(end   && d > end)   return;
             scheduledDays++;
         });
     });
@@ -1518,8 +1539,11 @@ function computeShrinkageBreakdown(employeeIds, startDates){
     monthlyProductivityRows.forEach(row => {
         if(!idSet.has(String(row.employee_id ?? "").trim())) return;
         if(!workingSet.has(row.tracker_date)) return;
-        const start = startById.get(String(row.employee_id ?? "").trim());
+        const empId = String(row.employee_id ?? "").trim();
+        const start = startById.get(empId);
+        const end   = endById.get(empId);
         if(start && row.tracker_date < start) return;      // skip pre-production days
+        if(end   && row.tracker_date > end)   return;      // skip post-separation days
         const factor = getAttendanceFactor(row.attendance);
         shrinkDays += (1 - factor);
     });
@@ -1532,18 +1556,20 @@ function computeShrinkageBreakdown(employeeIds, startDates){
         workingDays
     };
 }
-function computeMonthlyShrinkage(employeeIds, startDates){ return computeShrinkageBreakdown(employeeIds, startDates).pct; }
+function computeMonthlyShrinkage(employeeIds, startDates, endDates){
+    return computeShrinkageBreakdown(employeeIds, startDates, endDates).pct;
+}
 
 /* =========================================================
    EMPLOYEE METRIC
    -----------------------------------------------------
-   Holiday-aware + production-start-aware:
+   Holiday-aware + production-window-aware:
      • Daily mode
-         - holiday or before production start → target = 0, hasTarget = false
+         - holiday, before start, or after end → target = 0, hasTarget = false
          - otherwise prefer stored daily_target (team-lead override)
            fallback to employeeTarget * fte
      • MTD mode
-         - only rows within [production_start_date, currentDate],
+         - only rows within [production_start_date, production_end_date],
            excluding weekends & client holidays, contribute
          - for each row, prefer stored daily_target; else resolve the
            target for that specific date (ramp-up weeks are honoured)
@@ -1551,6 +1577,7 @@ function computeMonthlyShrinkage(employeeIds, startDates){ return computeShrinka
 function buildEmployeeMetric(employee){
     const project = getProjectById(employee.project_id);
     const prodStart = getEffectiveProductionStart(employee);
+    const prodEnd   = getEffectiveProductionEnd(employee);
 
     let productivityRow = null;
     let attendance = "Present";
@@ -1568,6 +1595,7 @@ function buildEmployeeMetric(employee){
         const rows = productivityRows.filter(item =>
             String(item.employee_id ?? "").trim() === String(employee.id).trim()
             && (!prodStart || item.tracker_date >= prodStart)
+            && (!prodEnd   || item.tracker_date <= prodEnd)
         );
         let fteSum = 0;
         rows.forEach(row => {
@@ -1586,8 +1614,9 @@ function buildEmployeeMetric(employee){
     if(currentPeriod === "day"){
         const holiday = isHolidayDate(currentDate);
         const beforeStart = prodStart && currentDate < prodStart;
+        const afterEnd = prodEnd && currentDate > prodEnd;
 
-        if(holiday || beforeStart){
+        if(holiday || beforeStart || afterEnd){
             adjustedTarget = 0;
             hasTarget = false;
         } else {
@@ -1611,6 +1640,7 @@ function buildEmployeeMetric(employee){
             String(item.employee_id ?? "").trim() === String(employee.id).trim()
             && !isHolidayDate(item.tracker_date)
             && (!prodStart || item.tracker_date >= prodStart)
+            && (!prodEnd   || item.tracker_date <= prodEnd)
         );
         rows.forEach(row => {
             const stored = row.daily_target;
@@ -1720,6 +1750,13 @@ function applyFilters(){
             // Drop employees whose production hasn't started by currentDate
             const start = getEffectiveProductionStart(emp);
             if(start && currentDate < start) return false;
+
+            // In daily mode, also drop employees who have already separated.
+            // MTD still needs them so their partial-month data is counted.
+            if(currentPeriod === "day"){
+                const end = getEffectiveProductionEnd(emp);
+                if(end && currentDate > end) return false;
+            }
             return true;
         })
         .map(buildEmployeeMetric)
@@ -1804,7 +1841,8 @@ function renderKPIs(){
 
     const shrinkageDetails = computeShrinkageBreakdown(
         filteredEmployees.map(m => m.employee.id),
-        filteredEmployees.map(m => getEffectiveProductionStart(m.employee))
+        filteredEmployees.map(m => getEffectiveProductionStart(m.employee)),
+        filteredEmployees.map(m => getEffectiveProductionEnd(m.employee))
     );
     const shrinkage = shrinkageDetails.pct;
 
@@ -1881,7 +1919,7 @@ function buildProjectMetrics(){
                 teamLead: getTeamLeadForProject(project.id),
                 employees: 0, fte: 0, target: 0, production: 0,
                 hasTarget: false, targetBasedEmployees: 0, targetBasedFTE: 0,
-                employeeIds: [], employeeStartDates: []
+                employeeIds: [], employeeStartDates: [], employeeEndDates: []
             });
         }
         const item = map.get(key);
@@ -1891,6 +1929,7 @@ function buildProjectMetrics(){
         item.production += metric.production;
         item.employeeIds.push(metric.employee.id);
         item.employeeStartDates.push(getEffectiveProductionStart(metric.employee));
+        item.employeeEndDates.push(getEffectiveProductionEnd(metric.employee));
         if(metric.hasTarget){
             item.hasTarget = true;
             item.targetBasedEmployees += 1;
@@ -1901,7 +1940,7 @@ function buildProjectMetrics(){
         .map(item => {
             item.achievement = item.hasTarget && item.target > 0 ? (item.production / item.target) * 100 : 0;
             item.average = item.fte > 0 ? item.production / item.fte : 0;
-            const shr = computeShrinkageBreakdown(item.employeeIds, item.employeeStartDates);
+            const shr = computeShrinkageBreakdown(item.employeeIds, item.employeeStartDates, item.employeeEndDates);
             item.shrinkage = shr.pct;
             item.shrinkDays = shr.shrinkDays;
             item.workingDays = shr.workingDays;
@@ -1928,7 +1967,7 @@ function buildSubProjectMetrics(){
                 teamLead: getTeamLeadForProject(sp.project_id),
                 employees: 0, fte: 0, target: 0, production: 0,
                 hasTarget: false, targetBasedFTE: 0,
-                employeeIds: [], employeeStartDates: []
+                employeeIds: [], employeeStartDates: [], employeeEndDates: []
             });
         }
         const item = map.get(key);
@@ -1938,6 +1977,7 @@ function buildSubProjectMetrics(){
         item.production += metric.production;
         item.employeeIds.push(metric.employee.id);
         item.employeeStartDates.push(getEffectiveProductionStart(metric.employee));
+        item.employeeEndDates.push(getEffectiveProductionEnd(metric.employee));
         if(metric.hasTarget){
             item.hasTarget = true;
             item.targetBasedFTE += metric.fte;
@@ -1947,7 +1987,7 @@ function buildSubProjectMetrics(){
         .map(item => {
             item.achievement = item.hasTarget && item.target > 0 ? (item.production / item.target) * 100 : 0;
             item.average = item.fte > 0 ? item.production / item.fte : 0;
-            const shr = computeShrinkageBreakdown(item.employeeIds, item.employeeStartDates);
+            const shr = computeShrinkageBreakdown(item.employeeIds, item.employeeStartDates, item.employeeEndDates);
             item.shrinkage = shr.pct;
             item.shrinkDays = shr.shrinkDays;
             item.workingDays = shr.workingDays;
@@ -2100,7 +2140,7 @@ function buildTeamLeadMetrics(){
                 map.set(name, {
                     teamLead: name, projects: new Set(),
                     employees: 0, fte: 0, target: 0, production: 0,
-                    hasTarget: false, employeeIds: [], employeeStartDates: []
+                    hasTarget: false, employeeIds: [], employeeStartDates: [], employeeEndDates: []
                 });
             }
             const item = map.get(name);
@@ -2111,13 +2151,14 @@ function buildTeamLeadMetrics(){
             item.production += metric.production;
             item.employeeIds.push(metric.employee.id);
             item.employeeStartDates.push(getEffectiveProductionStart(metric.employee));
+            item.employeeEndDates.push(getEffectiveProductionEnd(metric.employee));
             if(metric.hasTarget) item.hasTarget = true;
         });
     });
     return [...map.values()].map(item => {
         item.achievement = item.hasTarget && item.target > 0 ? (item.production / item.target) * 100 : 0;
         item.projectCount = item.projects.size;
-        const shr = computeShrinkageBreakdown(item.employeeIds, item.employeeStartDates);
+        const shr = computeShrinkageBreakdown(item.employeeIds, item.employeeStartDates, item.employeeEndDates);
         item.shrinkage = shr.pct;
         item.shrinkDays = shr.shrinkDays;
         item.workingDays = shr.workingDays;
@@ -2544,7 +2585,7 @@ function updateExportInfo(){
     if(from > to){ info.innerHTML = `<strong style="color:#b91c1c;">From Date cannot be later than To Date.</strong>`; return; }
     const days = Math.round((new Date(to+"T00:00:00") - new Date(from+"T00:00:00")) / 86400000) + 1;
     info.innerHTML = `Report will include <strong>${days} day${days===1?"":"s"}</strong> from <strong>${from}</strong> to <strong>${to}</strong>. ` +
-        `Weekends, client holidays, and days before each employee's production start are excluded. ` +
+        `Weekends, client holidays, and days outside each employee's production window are excluded. ` +
         `Scope: <strong>${document.getElementById("exportScope").value === "all" ? "All Projects" : "Current filter"}</strong>.`;
 }
 async function confirmExport(){
@@ -2587,7 +2628,7 @@ async function exportReportRange(fromDate, toDate, scope){
         csvRows.push(["Scope", scope === "all" ? "All Projects" : "Current filter"]);
         csvRows.push(["Generated at", new Date().toLocaleString("en-IN")]);
         csvRows.push(["Holiday Policy", "Weekends & client holidays are excluded from target calculations"]);
-        csvRows.push(["Ramp-up Policy", "Targets use team-lead-owned weekly ramp-up where configured, anchored on the employee's production start date"]);
+        csvRows.push(["Production Window Policy", "Targets and shrinkage only count days between each employee's production start and production end date"]);
         csvRows.push([]);
         csvRows.push(["Date","Day Type","Employee","EMP ID","Project","Sub-Project","Sub-Project Target/FTE","Team Lead","Attendance","FTE","Adjusted Target","Achieved","Remaining","Achievement %"]);
         const dates = [];
@@ -2602,12 +2643,14 @@ async function exportReportRange(fromDate, toDate, scope){
             const sp = emp.sub_project_id ? getSubProjectById(emp.sub_project_id) : null;
             const teamLead = getTeamLeadForProject(emp.project_id);
             const prodStart = getEffectiveProductionStart(emp);
+            const prodEnd   = getEffectiveProductionEnd(emp);
 
             dates.forEach(date => {
                 const isClient = isCustomHoliday(date);
                 const isWeeknd = isWeekendDate(date);
                 const isHoli = isClient || isWeeknd;
                 const beforeStart = prodStart && date < prodStart;
+                const afterEnd = prodEnd && date > prodEnd;
 
                 const record = rows.find(r => Number(r.employee_id) === Number(emp.id) && r.tracker_date === date);
                 const attendance = getAttendanceLabel(record?.attendance);
@@ -2615,7 +2658,7 @@ async function exportReportRange(fromDate, toDate, scope){
 
                 let target = 0;
                 let targetBased = false;
-                if(!isHoli && !beforeStart){
+                if(!isHoli && !beforeStart && !afterEnd){
                     const stored = record?.daily_target;
                     if(stored !== null && stored !== undefined && stored !== ""){
                         target = num(stored);
@@ -2639,6 +2682,7 @@ async function exportReportRange(fromDate, toDate, scope){
 
                 let dayType = "Working Day";
                 if(beforeStart) dayType = "Before Production Start";
+                else if(afterEnd) dayType = "After Production End";
                 else if(isClient) dayType = "Client Holiday";
                 else if(isWeeknd) dayType = "Fixed Holiday (Weekend)";
 
@@ -2657,14 +2701,16 @@ async function exportReportRange(fromDate, toDate, scope){
             });
         });
         csvRows.push([]);
-        csvRows.push(["Summary (working days only, from each employee's production start date)"]);
+        csvRows.push(["Summary (working days only, within each employee's production window)"]);
         let totalTarget = 0, totalProduction = 0;
         scopedEmployees.forEach(emp => {
             const project = getProjectById(emp.project_id);
             const prodStart = getEffectiveProductionStart(emp);
+            const prodEnd   = getEffectiveProductionEnd(emp);
             dates.forEach(date => {
                 if(isHolidayDate(date)) return;
                 if(prodStart && date < prodStart) return;
+                if(prodEnd   && date > prodEnd)   return;
                 const record = rows.find(r => Number(r.employee_id) === Number(emp.id) && r.tracker_date === date);
                 const fte = getAttendanceFactor(record?.attendance);
 
