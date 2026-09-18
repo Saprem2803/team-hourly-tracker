@@ -157,6 +157,29 @@ td.left { text-align: left; }
 .production-input.hour-locked { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; cursor: not-allowed; font-weight: 700; }
 .hour-lock-label { display: inline-block; margin-top: 3px; font-size: 8px; font-weight: 700; color: #64748b; }
 
+/* NEW: editable daily target */
+.daily-target-input { width: 68px; height: 30px; text-align: center; padding: 2px; }
+.daily-target-input.hour-locked { background:#f1f5f9; color:#64748b; cursor:not-allowed; }
+
+/* NEW: ramp-up gear button */
+.rampup-btn { background:#e0e7ff; color:#3730a3; }
+.rampup-btn:hover { background:#c7d2fe; }
+
+/* NEW: ramp-up modal */
+.modal-overlay { position:fixed; inset:0; background:rgba(5,12,24,.62);
+    backdrop-filter:blur(10px) saturate(120%); -webkit-backdrop-filter:blur(10px) saturate(120%);
+    display:flex; align-items:center; justify-content:center; padding:24px; z-index:1000; }
+.modal-overlay.app-hidden { display:none !important; }
+.modal-card { background:#fff; border-radius:14px; box-shadow:0 24px 80px rgba(0,0,0,.5);
+    width:100%; max-width:540px; padding:26px 28px; }
+.modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.modal-title { font-size:17px; font-weight:800; color:#173b5e; }
+.modal-close { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; width:30px; height:30px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px; color:#64748b; font-family:inherit; padding:0; }
+.modal-close:hover { background:#e2e8f0; color:#1f2937; }
+.rampup-week-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.rampup-week-row .rampup-week-input { flex:1; text-align:left; padding:0 10px; height:34px; }
+
 .autosave-indicator { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.02em; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; white-space: nowrap; }
 .autosave-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; flex: 0 0 auto; }
 .autosave-indicator[data-state="saving"] { border-color: #fcd34d; background: #fffbeb; color: #92400e; }
@@ -551,6 +574,38 @@ body.wp-off #liveWallpaper { opacity: 0; }
 
 </div>
 
+<!-- RAMP-UP MODAL -->
+<div id="rampupModal" class="modal-overlay app-hidden">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Ramp-up Schedule</div>
+        <div id="rampupEmployeeLabel" style="font-size:11px;color:#64748b;margin-top:3px;"></div>
+      </div>
+      <button class="modal-close" onclick="closeRampupModal()">✕</button>
+    </div>
+
+    <div class="form-field" style="margin-bottom:14px;">
+      <label style="font-size:11px;font-weight:bold;color:#64748b;">Tracker Start Date</label>
+      <input id="rampupStartDate" type="date" style="height:36px;border:1px solid #cbd5e1;border-radius:7px;padding:0 10px;">
+    </div>
+
+    <div class="form-field" style="margin-bottom:8px;">
+      <label style="font-size:11px;font-weight:bold;color:#64748b;">Weekly Targets</label>
+      <div id="rampupWeeks"></div>
+    </div>
+    <button class="btn-secondary" type="button" style="font-size:11px;padding:6px 10px;" onclick="addRampupWeek()">+ Add week</button>
+
+    <div id="rampupPreview"
+         style="font-size:11px;color:#475569;background:#f8fafc;border-radius:8px;padding:10px 12px;margin:14px 0;line-height:1.8;"></div>
+
+    <div style="display:flex;justify-content:flex-end;gap:8px;">
+      <button class="btn-secondary" onclick="closeRampupModal()">Cancel</button>
+      <button class="btn-primary" id="rampupSaveBtn" onclick="saveRampup()">Save Ramp-up</button>
+    </div>
+  </div>
+</div>
+
 <div class="message" id="message"></div>
 
 <script>
@@ -594,12 +649,6 @@ const hourLabels = ["6–7 PM","7–8 PM","8–9 PM","9–10 PM","10–11 PM","1
 
 /* =========================================================
    WEEKEND / HOLIDAY HELPERS
-   -----------------------------------------------------
-   • Saturday (6) and Sunday (0) are fixed weekly holidays.
-   • CUSTOM_HOLIDAYS holds additional fixed holidays
-     (client holidays, festivals, etc.) in YYYY-MM-DD format.
-   • No production target is assigned on any holiday, and any
-     MTD / shrinkage calculations ignore them.
 ========================================================= */
 const CUSTOM_HOLIDAYS = [
     "2026-09-07"   // Client Holiday — September 7, 2026
@@ -625,6 +674,174 @@ function isHolidayDate(dateStr) {
 
 function isWeekendDayOfWeek(dow) {
     return dow === 0 || dow === 6;
+}
+
+/* =========================================================
+   RAMP-UP SCHEDULE — team-lead owned
+========================================================= */
+function parseRampupTargets(raw) {
+    if (!raw) return [];
+    if (Array.isArray(raw)) {
+        return raw.map(Number).filter(n => Number.isFinite(n) && n >= 0);
+    }
+    if (typeof raw === "string") {
+        try {
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed)
+                ? parsed.map(Number).filter(n => Number.isFinite(n) && n >= 0)
+                : [];
+        } catch { return []; }
+    }
+    return [];
+}
+
+function getRampupTarget(employee, dateStr) {
+    if (!employee || !dateStr) return null;
+    const start = employee.tracker_start_date;
+    const ramp  = parseRampupTargets(employee.rampup_targets);
+    if (!start || !ramp.length) return null;
+
+    const startD = new Date(start + "T00:00:00");
+    const d      = new Date(dateStr + "T00:00:00");
+    if (Number.isNaN(startD) || Number.isNaN(d)) return null;
+    if (d < startD) return 0;
+
+    const daysSince = Math.floor((d - startD) / 86400000);
+    const weekIdx   = Math.max(0, Math.floor(daysSince / 7));
+    const idx       = Math.min(weekIdx, ramp.length - 1);
+    return ramp[idx];
+}
+
+/* Modal state */
+let rampupEmployeeId = null;
+
+function openRampupModal(employeeId) {
+    if (currentRole !== "team_lead") return;
+    const emp = getEmployeeById(employeeId);
+    if (!emp) return;
+    if (!canAccessProject(emp.project_id)) {
+        showMessage("You do not have access to this employee.", "error");
+        return;
+    }
+    rampupEmployeeId = employeeId;
+
+    document.getElementById("rampupEmployeeLabel").textContent =
+        `${emp.employee_name} · ${emp.employee_code}`;
+    document.getElementById("rampupStartDate").value = emp.tracker_start_date || getTodayString();
+
+    const ramp = parseRampupTargets(emp.rampup_targets);
+    const wrap = document.getElementById("rampupWeeks");
+    wrap.innerHTML = "";
+    (ramp.length ? ramp : [""]).forEach(v => addRampupWeek(v));
+
+    renderRampupPreview();
+    document.getElementById("rampupModal").classList.remove("app-hidden");
+}
+
+function closeRampupModal() {
+    document.getElementById("rampupModal").classList.add("app-hidden");
+    rampupEmployeeId = null;
+}
+
+function addRampupWeek(value = "") {
+    const wrap = document.getElementById("rampupWeeks");
+    const idx  = wrap.children.length + 1;
+    const row  = document.createElement("div");
+    row.className = "rampup-week-row";
+    row.innerHTML = `
+        <span style="font-size:11px;color:#64748b;width:60px;">Week ${idx}</span>
+        <input type="number" min="0" class="production-input rampup-week-input" value="${value}">
+        <button class="btn-secondary" type="button" style="padding:4px 8px;font-size:10px;"
+                onclick="this.parentElement.remove();renderRampupPreview();">✕</button>
+    `;
+    row.querySelector("input").addEventListener("input", renderRampupPreview);
+    wrap.appendChild(row);
+    renderRampupPreview();
+}
+
+function renderRampupPreview() {
+    const start = document.getElementById("rampupStartDate").value;
+    const weeks = [...document.querySelectorAll(".rampup-week-input")]
+        .map(i => i.value.trim())
+        .filter(v => v !== "" && !Number.isNaN(Number(v)))
+        .map(Number);
+
+    const preview = document.getElementById("rampupPreview");
+    if (!start || !weeks.length) {
+        preview.textContent = "Add a start date and at least one weekly target to see the preview.";
+        return;
+    }
+    const startD = new Date(start + "T00:00:00");
+    const fmt = d => d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
+    const lines = [];
+    weeks.slice(0, 6).forEach((v, i) => {
+        const s = new Date(startD); s.setDate(s.getDate() + i * 7);
+        const e = new Date(s);      e.setDate(e.getDate() + 6);
+        const note = (i === weeks.length - 1 && weeks.length > 1) ? " (repeats after)" : "";
+        lines.push(`${fmt(s)} – ${fmt(e)}  →  <strong>${v}</strong>${note}`);
+    });
+    if (weeks.length > 6) lines.push(`… and ${weeks.length - 6} more week(s)`);
+    preview.innerHTML = lines.join("<br>");
+}
+
+async function saveRampup() {
+    if (currentRole !== "team_lead" || !rampupEmployeeId) return;
+    const start = document.getElementById("rampupStartDate").value;
+    const weeks = [...document.querySelectorAll(".rampup-week-input")]
+        .map(i => i.value.trim())
+        .filter(v => v !== "" && !Number.isNaN(Number(v)))
+        .map(Number);
+
+    if (!start) { showMessage("Please enter a tracker start date.", "error"); return; }
+    if (!weeks.length) { showMessage("Add at least one weekly target.", "error"); return; }
+
+    const emp = getEmployeeById(rampupEmployeeId);
+    if (!emp || !canAccessProject(emp.project_id)) {
+        showMessage("You do not have access to this employee.", "error");
+        return;
+    }
+
+    const btn = document.getElementById("rampupSaveBtn");
+    btn.disabled = true; btn.textContent = "Saving…";
+
+    const { error } = await supabaseClient
+        .from("employees")
+        .update({ tracker_start_date: start, rampup_targets: weeks })
+        .eq("id", rampupEmployeeId);
+
+    btn.disabled = false; btn.textContent = "Save Ramp-up";
+
+    if (error) {
+        console.error("Ramp-up save:", error);
+        showMessage(error.message || "Unable to save ramp-up.", "error");
+        return;
+    }
+
+    // Refresh local cache
+    const idx = employees.findIndex(e => Number(e.id) === Number(rampupEmployeeId));
+    if (idx >= 0) {
+        employees[idx].tracker_start_date = start;
+        employees[idx].rampup_targets = weeks;
+    }
+
+    // Sync today's stored target if a row already exists
+    const trackerDate = document.getElementById("trackerDate")?.value;
+    if (idx >= 0 && trackerDate && trackerDate >= start) {
+        const existing = getProductionRecord(rampupEmployeeId);
+        const newTarget = getDailyTarget(employees[idx], existing?.attendance || "Present");
+        if (existing && newTarget !== null && Number(existing.daily_target) !== newTarget) {
+            await supabaseClient.from("daily_productivity")
+                .update({ daily_target: newTarget })
+                .eq("tracker_date", trackerDate)
+                .eq("employee_id", rampupEmployeeId);
+            existing.daily_target = newTarget;
+        }
+    }
+
+    showMessage("Ramp-up schedule saved.");
+    closeRampupModal();
+    buildDailyTracker();
+    await updateDashboard();
 }
 
 /* =========================================================
@@ -1280,14 +1497,24 @@ function getEmployeeTarget(employee) {
 }
 
 /* ---------------------------------------------------------
-   DAILY TARGET — returns null on any holiday (weekend or
-   custom) so no target is assigned.
+   DAILY TARGET — prioritises ramp-up, respects start date,
+   returns null on any holiday (weekend or custom).
+   Optional dateStr param so MTD loops can resolve the
+   target for a specific date rather than the tracker date.
 --------------------------------------------------------- */
-function getDailyTarget(employee, attendance) {
-    const trackerDate = document.getElementById("trackerDate")?.value;
+function getDailyTarget(employee, attendance, dateStr) {
+    const trackerDate = dateStr || document.getElementById("trackerDate")?.value;
     if (isHolidayDate(trackerDate)) return null;
 
-    const target = getEmployeeTarget(employee);
+    // Before the employee's tracker start date → no target
+    if (employee?.tracker_start_date && trackerDate && trackerDate < employee.tracker_start_date) {
+        return null;
+    }
+
+    // Ramp-up schedule (team-lead owned) takes priority over config
+    let target = getRampupTarget(employee, trackerDate);
+    if (target === null) target = getEmployeeTarget(employee);
+
     if (target === null || target === undefined) return null;
     if (attendance === "Absent") return 0;
     if (attendance === "Half Day") return Math.ceil(target / 2);
@@ -1308,7 +1535,12 @@ function computeAchievedFromRecord(record) {
 function getFilteredEmployees() {
     const projectValue = document.getElementById("projectFilter").value;
     const subProjectValue = document.getElementById("subProjectFilter").value;
+    const trackerDate = document.getElementById("trackerDate")?.value;
     return employees.filter(employee => {
+        // Hide until tracker_start_date
+        if (employee.tracker_start_date && trackerDate && trackerDate < employee.tracker_start_date) {
+            return false;
+        }
         if (projectValue && Number(employee.project_id) !== Number(projectValue)) return false;
         if (subProjectValue) {
             const sp = getEmployeeSubProject(employee);
@@ -1404,8 +1636,14 @@ function buildDailyTracker() {
         tr.dataset.employeeId = employee.id;
         if (holiday) tr.className = rowHolidayClass;
         const holidayTag = holiday ? `<span class="${tagClass}">${isClientHol ? 'CLIENT HOLIDAY' : 'HOLIDAY'}</span>` : "";
+        const gearBtn = (currentRole === "team_lead")
+            ? `<button type="button" class="btn-secondary rampup-btn"
+                        style="margin-left:6px;padding:3px 7px;font-size:10px;"
+                        title="Edit ramp-up schedule"
+                        onclick="event.stopPropagation();openRampupModal(${employee.id})">⚙</button>`
+            : "";
         let html = `
-            <td class="left"><strong>${escapeHtml(employee.employee_name)}</strong>${holidayTag}</td>
+            <td class="left"><strong>${escapeHtml(employee.employee_name)}</strong>${holidayTag}${gearBtn}</td>
             <td>${escapeHtml(employee.employee_code)}</td>
             <td>${project ? escapeHtml(project.project_name) : "N/A"}</td>
             <td>${subProject ? escapeHtml(subProject.sub_project_name || "Unnamed Sub-Project") : "Not Required"}</td>
@@ -1416,7 +1654,14 @@ function buildDailyTracker() {
                     <option value="Absent" ${attendance === "Absent" ? "selected" : ""}>Absent</option>
                 </select>
             </td>
-            <td class="daily-target">${target === null ? "N/A" : target}</td>
+            <td class="daily-target">
+                <input type="number" min="0" class="production-input daily-target-input"
+                       data-field="daily_target"
+                       value="${target === null ? "" : target}"
+                       placeholder="${target === null ? "N/A" : ""}"
+                       ${holiday ? "disabled" : ""}
+                       oninput="recalculateRow(this); queueAutosave(this);">
+            </td>
         `;
         hourFields.forEach((field, index) => {
             const value = Number(record?.[field] || 0);
@@ -1451,12 +1696,30 @@ function recalculateRow(element) {
     const employeeId = Number(row.dataset.employeeId);
     const employee = getEmployeeById(employeeId);
     if (!employee) return;
+
     const attendance = row.querySelector('[data-field="attendance"]').value;
     const trackerDate = document.getElementById("trackerDate")?.value;
     const holiday = isHolidayDate(trackerDate);
     const isClientHol = isCustomHoliday(trackerDate);
-    const target = getDailyTarget(employee, attendance);
-    row.querySelector(".daily-target").textContent = target === null ? "N/A" : target;
+
+    // Resolve target: Absent → 0; else manual override; else computed
+    const targetInput = row.querySelector('[data-field="daily_target"]');
+    let target;
+    if (holiday) {
+        target = null;
+        if (targetInput) targetInput.value = "";
+    } else if (attendance === "Absent") {
+        target = 0;
+        if (targetInput) targetInput.value = 0;
+    } else if (targetInput && targetInput.value !== "" && !Number.isNaN(Number(targetInput.value))) {
+        target = Math.max(Number(targetInput.value), 0);
+    } else {
+        target = getDailyTarget(employee, attendance);
+        if (targetInput && target !== null) targetInput.value = target;
+    }
+
+    row.querySelector(".daily-target").dataset.targetValue = target === null ? "" : target;
+
     let achieved = 0;
     hourFields.forEach((field, index) => {
         const input = row.querySelector(`[data-field="${field}"]`);
@@ -1499,8 +1762,18 @@ function getRowData(row) {
     const employee = getEmployeeById(employeeId);
     if (!employee) return null;
     const attendance = row.querySelector('[data-field="attendance"]').value;
-    const calculatedTarget = getDailyTarget(employee, attendance);
-    const target = (calculatedTarget === null || calculatedTarget === undefined || calculatedTarget === "") ? 0 : Number(calculatedTarget);
+    const targetInput = row.querySelector('[data-field="daily_target"]');
+
+    let target;
+    if (attendance === "Absent") {
+        target = 0;
+    } else if (targetInput && targetInput.value !== "" && !Number.isNaN(Number(targetInput.value))) {
+        target = Math.max(Number(targetInput.value), 0);
+    } else {
+        const calculatedTarget = getDailyTarget(employee, attendance);
+        target = (calculatedTarget === null || calculatedTarget === undefined || calculatedTarget === "") ? 0 : Number(calculatedTarget);
+    }
+
     const record = {
         tracker_date: document.getElementById("trackerDate").value,
         employee_id: employeeId,
@@ -1550,8 +1823,8 @@ async function flushAllAutosaves() {
 ========================================================= */
 function getProjectMetrics(projectId = null) {
     const list = projectId === null
-        ? employees
-        : employees.filter(e => Number(e.project_id) === Number(projectId));
+        ? getFilteredEmployees()
+        : getFilteredEmployees().filter(e => Number(e.project_id) === Number(projectId));
 
     let totalEmployees = list.length;
     let target = 0;
@@ -1583,7 +1856,7 @@ function getProjectMetrics(projectId = null) {
 }
 
 function getSubProjectMetrics(subProjectId) {
-    const list = employees.filter(employee => {
+    const list = getFilteredEmployees().filter(employee => {
         const sp = getEmployeeSubProject(employee);
         return sp && Number(sp.id) === Number(subProjectId);
     });
@@ -1729,7 +2002,8 @@ function renderPerformanceSummary() {
 }
 
 /* =========================================================
-   SHRINKAGE — Weekends & custom holidays excluded
+   SHRINKAGE — Weekends, custom holidays, and pre-start
+   days are excluded from the scheduled denominator.
 ========================================================= */
 async function calculateCurrentMonthShrinkage() {
     const visibleEmployees = getFilteredEmployees();
@@ -1759,7 +2033,9 @@ async function calculateCurrentMonthShrinkage() {
     const records = data || [];
     let shrinkageDays = 0, scheduledDays = 0, absentDays = 0, halfDays = 0, presentDays = 0;
     visibleEmployees.forEach(employee => {
+        const employeeStart = employee.tracker_start_date || dates[0];
         dates.forEach(date => {
+            if (date < employeeStart) return;   // <-- skip pre-start days
             scheduledDays++;
             const record = records.find(r => Number(r.employee_id) === Number(employee.id) && r.tracker_date === date);
             const attendance = record?.attendance || "Present";
@@ -2020,7 +2296,11 @@ async function downloadDailyCSV() {
         const subProject = getEmployeeSubProject(employee);
         const record = records.find(r => Number(r.employee_id) === Number(employee.id));
         const attendance = record?.attendance || "Present";
-        const target = getDailyTarget(employee, attendance);
+        // Prefer stored override
+        let target = getDailyTarget(employee, attendance, date);
+        if (record && record.daily_target !== null && record.daily_target !== undefined && record.daily_target !== "") {
+            target = Number(record.daily_target);
+        }
         const achieved = computeAchievedFromRecord(record);
         const remaining = target === null ? null : Math.max(target - achieved, 0);
         const percentage = (target !== null && target > 0) ? (achieved / target * 100) : null;
@@ -2060,7 +2340,9 @@ function getDateRange(fromDate, toDate) {
 }
 
 /* =========================================================
-   MTD REPORT — Weekends & custom holidays excluded
+   MTD REPORT — Weekends, custom holidays, and pre-start
+   days excluded. Uses stored daily_target when available
+   so team-lead overrides and ramp-up weeks are respected.
 ========================================================= */
 async function downloadMTDCSV() {
     const fromDate = document.getElementById("mtdFromDate").value;
@@ -2086,9 +2368,11 @@ async function downloadMTDCSV() {
     const workingDates = allDates.filter(d => !isHolidayDate(d));
     const rows = [];
 
-    /* ── BLOCK 1 — DAILY BREAKDOWN (working days only) ── */
+    /* ── BLOCK 1 — DAILY BREAKDOWN (working days only, from tracker_start_date) ── */
     workingDates.forEach(date => {
         visibleEmployees.forEach(employee => {
+            if (employee.tracker_start_date && date < employee.tracker_start_date) return;
+
             const project = getProjectById(employee.project_id);
             const subProject = getEmployeeSubProject(employee);
             const record = records.find(r =>
@@ -2097,14 +2381,14 @@ async function downloadMTDCSV() {
 
             const attendance = record?.attendance || "Present";
             const employeeTarget = getEmployeeTarget(employee);
-            const targetBased = employeeTarget !== null;
+            const targetBased = employeeTarget !== null || getRampupTarget(employee, date) !== null;
 
             let dailyTarget = null;
             if (targetBased) {
                 if (record && record.daily_target !== null && record.daily_target !== undefined && record.daily_target !== "") {
                     dailyTarget = Number(record.daily_target);
                 } else {
-                    dailyTarget = getDailyTarget(employee, attendance);
+                    dailyTarget = getDailyTarget(employee, attendance, date);
                 }
             }
 
@@ -2132,16 +2416,19 @@ async function downloadMTDCSV() {
         });
     });
 
-    /* ── BLOCK 2 — MTD SUMMARY (per employee, working days only) ── */
+    /* ── BLOCK 2 — MTD SUMMARY (per employee, from tracker_start_date) ── */
     visibleEmployees.forEach(employee => {
         const project = getProjectById(employee.project_id);
         const subProject = getEmployeeSubProject(employee);
         const employeeTarget = getEmployeeTarget(employee);
-        const targetBased = employeeTarget !== null;
+
+        const employeeStart = employee.tracker_start_date || workingDates[0];
+        const effectiveDates = workingDates.filter(d => d >= employeeStart);
+        const targetBased = employeeTarget !== null || parseRampupTargets(employee.rampup_targets).length > 0;
 
         let mtdTarget = 0, mtdAchieved = 0, daysPresent = 0, halfDays = 0, absentDays = 0;
 
-        workingDates.forEach(date => {
+        effectiveDates.forEach(date => {
             const record = records.find(r =>
                 Number(r.employee_id) === Number(employee.id) && r.tracker_date === date
             );
@@ -2151,7 +2438,7 @@ async function downloadMTDCSV() {
             else daysPresent++;
 
             if (targetBased) {
-                let dt = getDailyTarget(employee, attendance);
+                let dt = getDailyTarget(employee, attendance, date);
                 if (record && record.daily_target !== null && record.daily_target !== undefined && record.daily_target !== "") {
                     dt = Number(record.daily_target);
                 }
@@ -2163,7 +2450,7 @@ async function downloadMTDCSV() {
         const pct = mtdTarget > 0 ? (mtdAchieved / mtdTarget * 100) : null;
         const row = {
             "Date": "— MTD TOTAL —",
-            "Day Type": `${workingDates.length} working days`,
+            "Day Type": `${effectiveDates.length} working days`,
             "Employee": employee.employee_name,
             "EMP ID": employee.employee_code,
             "Project": project ? project.project_name : "",
@@ -2209,6 +2496,10 @@ document.getElementById("trackerDate").addEventListener("change", async function
 document.addEventListener("keydown", function(event) {
     if (event.key === "Enter" && !document.getElementById("authScreen").classList.contains("app-hidden")) {
         loginUser();
+    }
+    if (event.key === "Escape") {
+        const m = document.getElementById("rampupModal");
+        if (m && !m.classList.contains("app-hidden")) closeRampupModal();
     }
 });
 
