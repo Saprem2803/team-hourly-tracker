@@ -1018,10 +1018,30 @@ const HOUR_LABELS = ["6–7 PM","7–8 PM","8–9 PM","9–10 PM","10–11 PM","
 
 /* =========================================================
    WEEKEND / HOLIDAY HELPERS
+   -----------------------------------------------------
+   Client holidays are loaded from the `client_holidays`
+   table so team leads can add/remove them without a code
+   change. If the load fails, we fall back to an empty set
+   so the page still works.
 ========================================================= */
-const CUSTOM_HOLIDAYS = [
-    "2026-09-07"   // Client Holiday — September 7, 2026
-];
+let CUSTOM_HOLIDAYS = new Set();
+
+async function loadClientHolidays(){
+    try{
+        const { data, error } = await sb
+            .from("client_holidays")
+            .select("holiday_date,holiday_name");
+        if(error){
+            console.warn("Client holidays:", error.message);
+            return;
+        }
+        CUSTOM_HOLIDAYS = new Set(
+            (data || []).map(r => String(r.holiday_date).trim())
+        );
+    }catch(err){
+        console.warn("Client holidays query failed:", err);
+    }
+}
 
 function isWeekendDate(dateStr){
     if(!dateStr) return false;
@@ -1034,7 +1054,7 @@ function isWeekendDate(dateStr){
 
 function isCustomHoliday(dateStr){
     if(!dateStr) return false;
-    return CUSTOM_HOLIDAYS.includes(String(dateStr).trim());
+    return CUSTOM_HOLIDAYS.has(String(dateStr).trim());
 }
 
 function isHolidayDate(dateStr){
@@ -1201,6 +1221,7 @@ async function loadDashboard(){
 
     try{
         await loadAccessRows();
+        await loadClientHolidays();
         await loadProjects();
         await loadSubProjects();
         await loadEmployees();
