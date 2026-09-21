@@ -2381,15 +2381,31 @@ let reminderFiredFor = {};
 /* =========================================================
    LIVE SKY WALLPAPER + CLOCK
    -----------------------------------------------------
-   Draws a real-time sky on a fixed canvas behind everything:
-     • Sky gradient changes hour by hour (dawn → day → dusk → night)
-     • Sun rises in the east (left), peaks at noon, sets in the west (right)
-     • Big moon rises at 6 PM, peaks at midnight, sets at 6 AM
-     • Stars fade in at night, twinkle gently
-     • Shooting stars streak down at night — white and golden
-       streaks like falling light rays
-     • Floating glass clock widget updates every second and
-       greets the logged-in employee by first name.
+   A real day → night → day wallpaper painted on a fixed
+   canvas behind the whole page:
+
+     • Sky gradient glides smoothly through the whole 24 hour
+       cycle (deep night → first light → sunrise → noon →
+       golden hour → sunset → twilight → night)
+
+     • The sun rises in the east (left), peaks at noon and
+       sets in the west (right)
+
+     • The moon rises at 6 PM, peaks at midnight and sets at
+       6 AM, and shows its REAL current phase
+       (new → quarter → full → quarter → new)
+
+     • Stars slowly rotate around the celestial pole exactly
+       like the real night sky — one full turn every 24 hours
+
+     • A faint Milky Way haze rotates together with the stars
+
+     • Shooting stars streak down at night (white & golden)
+
+     • Clouds drift across the daytime sky
+
+     • A floating glass clock greets the logged-in employee
+
    Nothing here touches the production tracker logic.
 ========================================================= */
 
@@ -2398,39 +2414,163 @@ const skyCtx = skyCanvas.getContext("2d");
 
 let skyStars = [];
 let skyClouds = [];
+let skyMilkyWay = [];
 let skyShootingStars = [];
 
 /* Next scheduled shooting star spawn time (ms since epoch). */
 let nextShootingStarAt = 0;
 
+/* The celestial pole the whole star field rotates around. */
+let skyPole = { x: 0, y: 0 };
+let skyMaxRadius = 900;
+
+let lastSkyFrame = performance.now();
+
+
+/* ---------------------------------------------------------
+   CANVAS SIZING
+--------------------------------------------------------- */
+
 function resizeSkyCanvas() {
+
     skyCanvas.width = window.innerWidth;
     skyCanvas.height = window.innerHeight;
+
+    /* Pole sits high in the sky, slightly left of centre —
+       exactly how the northern sky looks from most places. */
+    skyPole.x = skyCanvas.width * 0.50;
+    skyPole.y = skyCanvas.height * 0.08;
+
+    skyMaxRadius =
+        Math.hypot(
+            Math.max(skyPole.x, skyCanvas.width - skyPole.x),
+            Math.max(skyPole.y, skyCanvas.height - skyPole.y)
+        ) * 1.10;
+
     generateStars();
+    generateMilkyWay();
     generateClouds();
+
 }
 
 window.addEventListener("resize", resizeSkyCanvas);
 
-function generateStars() {
-    skyStars = [];
-    const count = Math.max(60, Math.floor((skyCanvas.width * skyCanvas.height) / 9000));
-    for (let i = 0; i < count; i++) {
-        skyStars.push({
-            x: Math.random() * skyCanvas.width,
-            y: Math.random() * skyCanvas.height * 0.82,
-            r: 0.35 + Math.random() * 1.55,
-            phase: Math.random() * Math.PI * 2,
-            speed: 0.4 + Math.random() * 1.4,
-            base: 0.4 + Math.random() * 0.6
-        });
-    }
+
+/* ---------------------------------------------------------
+   STAR FIELD
+--------------------------------------------------------- */
+
+function pickStarTint() {
+
+    const roll = Math.random();
+
+    if (roll < 0.10) return "170, 200, 255";   /* blue-white */
+    if (roll < 0.22) return "255, 226, 190";   /* warm       */
+    if (roll < 0.30) return "255, 246, 222";   /* pale gold  */
+
+    return "255, 255, 255";
+
 }
 
-function generateClouds() {
-    skyClouds = [];
-    const count = Math.max(2, Math.floor(skyCanvas.width / 420));
+
+function generateStars() {
+
+    skyStars = [];
+
+    const area = skyCanvas.width * skyCanvas.height;
+    const count = Math.max(140, Math.floor(area / 5200));
+
     for (let i = 0; i < count; i++) {
+
+        const bright = Math.random() < 0.055;
+
+        skyStars.push({
+
+            /* Polar coordinates around the celestial pole. */
+            radius: skyMaxRadius * Math.sqrt(Math.random()),
+            angle0: Math.random() * Math.PI * 2,
+
+            size: bright
+                ? 1.35 + Math.random() * 1.25
+                : 0.35 + Math.random() * 1.00,
+
+            base: bright
+                ? 0.80 + Math.random() * 0.20
+                : 0.28 + Math.random() * 0.62,
+
+            phase: Math.random() * Math.PI * 2,
+            speed: 0.45 + Math.random() * 1.90,
+
+            bright,
+            tint: pickStarTint()
+
+        });
+
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   MILKY WAY HAZE
+--------------------------------------------------------- */
+
+function generateMilkyWay() {
+
+    skyMilkyWay = [];
+
+    const count = Math.max(
+        160,
+        Math.floor((skyCanvas.width * skyCanvas.height) / 9000)
+    );
+
+    /* A slightly tilted strip of dust crossing the sky.
+       Stored relative to the pole so it rotates with the stars. */
+    const bandAngle = -0.42;
+    const bandOffset = skyMaxRadius * 0.18;
+    const spread = skyMaxRadius * 0.16;
+
+    for (let i = 0; i < count; i++) {
+
+        const along = (Math.random() * 2 - 1) * skyMaxRadius * 1.05;
+
+        /* Gaussian-ish offset across the band. */
+        const across =
+            (Math.random() + Math.random() + Math.random() - 1.5) * spread;
+
+        const u =
+            along * Math.cos(bandAngle) -
+            across * Math.sin(bandAngle);
+
+        const v =
+            along * Math.sin(bandAngle) +
+            across * Math.cos(bandAngle) +
+            bandOffset;
+
+        skyMilkyWay.push({
+            radius: Math.hypot(u, v),
+            angle0: Math.atan2(v, u),
+            size: 0.40 + Math.random() * 0.90,
+            base: 0.05 + Math.random() * 0.16
+        });
+
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   CLOUDS
+--------------------------------------------------------- */
+
+function generateClouds() {
+
+    skyClouds = [];
+
+    const count = Math.max(2, Math.floor(skyCanvas.width / 420));
+
+    for (let i = 0; i < count; i++) {
+
         skyClouds.push({
             x: Math.random() * skyCanvas.width,
             y: skyCanvas.height * (0.08 + Math.random() * 0.28),
@@ -2438,177 +2578,467 @@ function generateClouds() {
             speed: 0.06 + Math.random() * 0.12,
             alpha: 0.18 + Math.random() * 0.22
         });
+
     }
+
 }
 
-/* ---------- Sky colour keyframes (hour → [r,g,b]) ---------- */
+
+/* ---------------------------------------------------------
+   SKY COLOUR KEYFRAMES  (hour → [r, g, b])
+--------------------------------------------------------- */
 
 const SKY_KEYFRAMES = [
-    { h: 0.0,  top: [8,   12,  36],  bot: [24,  30,  70]  }, // deep night
-    { h: 4.0,  top: [8,   12,  36],  bot: [24,  30,  70]  }, // deep night
-    { h: 5.0,  top: [26,  30,  66],  bot: [78,  58, 108]  }, // pre-dawn
-    { h: 5.7,  top: [118, 78, 118],  bot: [255, 152, 108] }, // dawn break
-    { h: 6.3,  top: [156, 178, 214], bot: [255, 208, 156] }, // sunrise
-    { h: 8.0,  top: [110, 172, 226], bot: [190, 222, 244] }, // morning
-    { h: 12.0, top: [70,  148, 224], bot: [148, 204, 244] }, // noon
-    { h: 15.0, top: [82,  158, 220], bot: [176, 214, 244] }, // afternoon
-    { h: 17.0, top: [110, 160, 210], bot: [255, 196, 148] }, // late afternoon
-    { h: 18.0, top: [222, 120, 120], bot: [255, 176, 118] }, // evening
-    { h: 19.0, top: [140, 72, 112],  bot: [255, 132, 92]  }, // dusk
-    { h: 20.0, top: [52,  42,  92],  bot: [140, 80, 112]  }, // twilight
-    { h: 21.0, top: [16,  22,  58],  bot: [42,  42,  92]  }, // night falling
-    { h: 24.0, top: [8,   12,  36],  bot: [24,  30,  70]  }  // deep night
+
+    { h: 0.0,  top: [6,   10,  30],  bot: [18,  26,  58]  }, /* deep night  */
+    { h: 4.0,  top: [6,   10,  30],  bot: [18,  26,  58]  }, /* deep night  */
+    { h: 4.8,  top: [18,  24,  58],  bot: [58,  52,  96]  }, /* first light */
+    { h: 5.5,  top: [72,  72, 128],  bot: [214, 128, 122] }, /* dawn        */
+    { h: 6.2,  top: [132, 166, 214], bot: [255, 190, 140] }, /* sunrise     */
+    { h: 7.5,  top: [96,  162, 224], bot: [186, 220, 246] }, /* morning     */
+    { h: 12.0, top: [56,  138, 224], bot: [150, 206, 246] }, /* noon        */
+    { h: 16.0, top: [72,  152, 220], bot: [176, 214, 244] }, /* afternoon   */
+    { h: 17.6, top: [110, 150, 208], bot: [255, 188, 138] }, /* golden hour */
+    { h: 18.6, top: [190, 108, 116], bot: [255, 158, 104] }, /* sunset      */
+    { h: 19.6, top: [104, 62,  108], bot: [214, 106, 92]  }, /* dusk        */
+    { h: 20.6, top: [38,  36,  84],  bot: [96,  62,  104] }, /* twilight    */
+    { h: 21.6, top: [10,  16,  44],  bot: [30,  34,  74]  }, /* night falls */
+    { h: 24.0, top: [6,   10,  30],  bot: [18,  26,  58]  }  /* deep night  */
+
 ];
+
 
 function lerp(a, b, t) { return a + (b - a) * t; }
 
+
 function lerpColor(a, b, t) {
+
     return [
         Math.round(lerp(a[0], b[0], t)),
         Math.round(lerp(a[1], b[1], t)),
         Math.round(lerp(a[2], b[2], t))
     ];
+
 }
 
+
 function getSkyColors(hours) {
+
     for (let i = 0; i < SKY_KEYFRAMES.length - 1; i++) {
+
         const a = SKY_KEYFRAMES[i];
         const b = SKY_KEYFRAMES[i + 1];
+
         if (hours >= a.h && hours <= b.h) {
+
             const t = (hours - a.h) / (b.h - a.h);
+
             return {
                 top: lerpColor(a.top, b.top, t),
                 bot: lerpColor(a.bot, b.bot, t)
             };
+
         }
+
     }
-    return { top: SKY_KEYFRAMES[0].top, bot: SKY_KEYFRAMES[0].bot };
+
+    return {
+        top: SKY_KEYFRAMES[0].top,
+        bot: SKY_KEYFRAMES[0].bot
+    };
+
 }
 
-/* ---------- Celestial bodies ---------- */
 
-function drawSun(progress) {
+/* ---------------------------------------------------------
+   DARKNESS HELPER  (0 = bright day, 1 = deep night)
+--------------------------------------------------------- */
+
+function getDarkness(hours) {
+
+    if (hours >= 21.5 || hours < 4.2) return 1;
+
+    if (hours >= 19 && hours < 21.5)
+        return (hours - 19) / 2.5;
+
+    if (hours >= 4.2 && hours < 6.2)
+        return 1 - (hours - 4.2) / 2;
+
+    return 0;
+
+}
+
+
+/* ---------------------------------------------------------
+   STAR ROTATION
+   -----------------------------------------------------
+   The whole sky turns once every 24 hours, so a star that
+   sits on the horizon now will be overhead in a few hours —
+   just like the real sky.
+--------------------------------------------------------- */
+
+function getStarRotation(hours) {
+
+    return (hours / 24) * Math.PI * 2;
+
+}
+
+
+function drawStars(hours, darkness) {
+
+    if (darkness <= 0.02 || !skyStars.length) return;
+
+    const rot = getStarRotation(hours);
+    const t = performance.now() / 1000;
+
+    const horizonY = skyCanvas.height * 0.95;
+    const fadeBand = skyCanvas.height * 0.18;
+
+    skyCtx.save();
+    skyCtx.translate(skyPole.x, skyPole.y);
+
+    for (let i = 0; i < skyStars.length; i++) {
+
+        const star = skyStars[i];
+
+        const a = star.angle0 + rot;
+
+        const x = Math.cos(a) * star.radius;
+        const y = Math.sin(a) * star.radius;
+
+        const screenY = skyPole.y + y;
+
+        /* Stars that have rotated below the horizon vanish. */
+        if (screenY > horizonY) continue;
+
+        let horizonFade = 1;
+
+        if (screenY > horizonY - fadeBand) {
+            horizonFade = (horizonY - screenY) / fadeBand;
+        }
+
+        const twinkle = 0.55 + 0.45 * Math.sin(t * star.speed + star.phase);
+
+        const alpha = star.base * twinkle * darkness * horizonFade;
+
+        if (alpha <= 0.02) continue;
+
+        skyCtx.fillStyle = `rgba(${star.tint}, ${alpha})`;
+        skyCtx.beginPath();
+        skyCtx.arc(x, y, star.size, 0, Math.PI * 2);
+        skyCtx.fill();
+
+        /* Bright stars get a soft halo around them. */
+        if (star.bright) {
+
+            skyCtx.fillStyle = `rgba(${star.tint}, ${alpha * 0.20})`;
+            skyCtx.beginPath();
+            skyCtx.arc(x, y, star.size * 4.5, 0, Math.PI * 2);
+            skyCtx.fill();
+
+        }
+
+    }
+
+    skyCtx.restore();
+
+}
+
+
+function drawMilkyWay(hours, darkness) {
+
+    if (darkness <= 0.15 || !skyMilkyWay.length) return;
+
+    const rot = getStarRotation(hours);
+    const horizonY = skyCanvas.height * 0.95;
+
+    skyCtx.save();
+    skyCtx.translate(skyPole.x, skyPole.y);
+
+    skyCtx.beginPath();
+
+    for (let i = 0; i < skyMilkyWay.length; i++) {
+
+        const p = skyMilkyWay[i];
+
+        const a = p.angle0 + rot;
+
+        const x = Math.cos(a) * p.radius;
+        const y = Math.sin(a) * p.radius;
+
+        if (skyPole.y + y > horizonY) continue;
+
+        skyCtx.moveTo(x + p.size, y);
+        skyCtx.arc(x, y, p.size, 0, Math.PI * 2);
+
+    }
+
+    skyCtx.fillStyle = `rgba(198, 214, 255, ${0.55 * darkness})`;
+    skyCtx.fill();
+
+    skyCtx.restore();
+
+}
+
+
+/* ---------------------------------------------------------
+   SUN
+--------------------------------------------------------- */
+
+function drawSun(hours) {
+
     const w = skyCanvas.width;
     const h = skyCanvas.height;
 
-    const x = w * (0.08 + progress * 0.84);
-    const horizonY = h * 0.80;
-    const peak = h * 0.68;
-    const y = horizonY - Math.sin(progress * Math.PI) * peak;
+    /* The sun is above the horizon from 6 AM until 6 PM. */
+    const progress = (hours - 6) / 12;      /* 0 → 1 */
 
-    const radius = Math.min(w, h) * 0.055;
+    const x = w * (0.06 + progress * 0.88);
 
-    /* soft outer glow */
+    const horizonY = h * 0.86;
+    const y = horizonY - Math.sin(progress * Math.PI) * (h * 0.72);
+
+    const radius = Math.min(w, h) * 0.052;
+
+    /* Warm haze low on the horizon at sunrise / sunset. */
+    const lowSun = 1 - Math.sin(progress * Math.PI);
+
+    if (lowSun > 0.35) {
+
+        const haze = skyCtx.createRadialGradient(
+            x, horizonY, 0, x, horizonY, w * 0.45
+        );
+
+        haze.addColorStop(0,   `rgba(255, 176, 96, ${0.30 * lowSun})`);
+        haze.addColorStop(0.5, `rgba(255, 150, 80, ${0.12 * lowSun})`);
+        haze.addColorStop(1,   "rgba(255, 140, 70, 0)");
+
+        skyCtx.fillStyle = haze;
+        skyCtx.beginPath();
+        skyCtx.arc(x, horizonY, w * 0.45, 0, Math.PI * 2);
+        skyCtx.fill();
+
+    }
+
+    /* Soft outer glow. */
     const glow = skyCtx.createRadialGradient(x, y, 0, x, y, radius * 6);
+
     glow.addColorStop(0,    "rgba(255, 240, 175, 0.85)");
     glow.addColorStop(0.30, "rgba(255, 200, 110, 0.32)");
     glow.addColorStop(1,    "rgba(255, 170, 70, 0)");
+
     skyCtx.fillStyle = glow;
     skyCtx.beginPath();
     skyCtx.arc(x, y, radius * 6, 0, Math.PI * 2);
     skyCtx.fill();
 
-    /* sun disc */
+    /* Sun disc. */
     const disc = skyCtx.createRadialGradient(
         x - radius * 0.30, y - radius * 0.30, radius * 0.10,
         x, y, radius
     );
-    disc.addColorStop(0,   "#fffbe0");
-    disc.addColorStop(0.55,"#ffe066");
-    disc.addColorStop(1,   "#ffb347");
+
+    disc.addColorStop(0,    "#fffbe0");
+    disc.addColorStop(0.55, "#ffe066");
+    disc.addColorStop(1,    "#ffb347");
+
     skyCtx.fillStyle = disc;
     skyCtx.beginPath();
     skyCtx.arc(x, y, radius, 0, Math.PI * 2);
     skyCtx.fill();
+
 }
 
-function drawMoon(progress, ambientDarkness) {
+
+/* ---------------------------------------------------------
+   MOON — real phase, real path
+--------------------------------------------------------- */
+
+const MOON_CRATERS = [
+    [-0.32, -0.18, 0.19],
+    [ 0.22, -0.38, 0.12],
+    [-0.14,  0.34, 0.16],
+    [ 0.36,  0.14, 0.10],
+    [ 0.04, -0.06, 0.08],
+    [-0.42,  0.18, 0.07],
+    [ 0.14,  0.42, 0.09]
+];
+
+
+/* Returns the current lunar phase as 0 → 1:
+   0.00 = new moon, 0.25 = first quarter,
+   0.50 = full moon, 0.75 = last quarter. */
+function getMoonPhase(date) {
+
+    const SYNODIC_MONTH = 29.530588853;
+
+    /* A known new moon: 6 January 2000, 18:14 UTC. */
+    const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14, 0);
+
+    const days = (date.getTime() - knownNewMoon) / 86400000;
+
+    let phase = (days % SYNODIC_MONTH) / SYNODIC_MONTH;
+
+    if (phase < 0) phase += 1;
+
+    return phase;
+
+}
+
+
+/* Builds the outline of the sunlit part of the moon. */
+function traceMoonLitPath(x, y, r, phase) {
+
+    const phi = phase * Math.PI * 2;
+    const cosPhi = Math.cos(phi);
+
+    skyCtx.beginPath();
+
+    if (phase <= 0.5) {
+
+        /* Waxing — the lit limb is on the right. */
+        skyCtx.arc(x, y, r, -Math.PI / 2, Math.PI / 2, false);
+
+        if (cosPhi >= 0) {
+
+            /* Crescent — terminator bulges right. */
+            skyCtx.ellipse(
+                x, y, r * cosPhi, r, 0,
+                Math.PI / 2, -Math.PI / 2, true
+            );
+
+        }
+        else {
+
+            /* Gibbous — terminator bulges left. */
+            skyCtx.ellipse(
+                x, y, -r * cosPhi, r, 0,
+                Math.PI / 2, (3 * Math.PI) / 2, false
+            );
+
+        }
+
+    }
+    else {
+
+        /* Waning — the lit limb is on the left. */
+        skyCtx.arc(x, y, r, Math.PI / 2, (3 * Math.PI) / 2, false);
+
+        skyCtx.ellipse(
+            x, y, r * Math.abs(cosPhi), r, 0,
+            (3 * Math.PI) / 2, (5 * Math.PI) / 2, false
+        );
+
+    }
+
+    skyCtx.closePath();
+
+}
+
+
+function drawMoon(hours, darkness) {
+
+    /* The moon is above the horizon from 6 PM until 6 AM. */
+    let moonHours = hours;
+
+    if (moonHours < 6) moonHours += 24;
+
+    if (moonHours < 18 || moonHours > 30) return;
+
     const w = skyCanvas.width;
     const h = skyCanvas.height;
 
+    const progress = (moonHours - 18) / 12;      /* 0 → 1 */
+
     const x = w * (0.10 + progress * 0.80);
-    const horizonY = h * 0.80;
-    const peak = h * 0.72;
-    const y = horizonY - Math.sin(progress * Math.PI) * peak;
 
-    const radius = Math.min(w, h) * 0.072; /* noticeably big */
+    const horizonY = h * 0.86;
+    const y = horizonY - Math.sin(progress * Math.PI) * (h * 0.76);
 
-    /* moon glow – stronger when darker */
-    const glowAlpha = 0.55 + ambientDarkness * 0.35;
+    const radius = Math.min(w, h) * 0.068;
+
+    const phase = getMoonPhase(new Date());
+
+    /* How much of the disc is lit right now (0 → 1). */
+    const illumination = (1 - Math.cos(phase * Math.PI * 2)) / 2;
+
+    /* ---- soft halo, brighter on dark nights ---- */
+    const glowAlpha =
+        (0.14 + 0.86 * illumination) * (0.45 + darkness * 0.40);
+
     const glow = skyCtx.createRadialGradient(x, y, 0, x, y, radius * 7);
-    glow.addColorStop(0,   `rgba(232, 240, 255, ${glowAlpha})`);
-    glow.addColorStop(0.35,`rgba(200, 218, 255, ${glowAlpha * 0.35})`);
-    glow.addColorStop(1,   "rgba(180, 200, 255, 0)");
+
+    glow.addColorStop(0,    `rgba(226, 236, 255, ${glowAlpha})`);
+    glow.addColorStop(0.30, `rgba(196, 214, 255, ${glowAlpha * 0.32})`);
+    glow.addColorStop(1,    "rgba(170, 195, 255, 0)");
+
     skyCtx.fillStyle = glow;
     skyCtx.beginPath();
     skyCtx.arc(x, y, radius * 7, 0, Math.PI * 2);
     skyCtx.fill();
 
-    /* moon disc */
+    /* ---- the lit part of the moon ---- */
+    if (illumination < 0.01) return;
+
+    skyCtx.save();
+
+    traceMoonLitPath(x, y, radius, phase);
+    skyCtx.clip();
+
     const disc = skyCtx.createRadialGradient(
-        x - radius * 0.35, y - radius * 0.35, radius * 0.15,
+        x - radius * 0.35, y - radius * 0.35, radius * 0.12,
         x, y, radius
     );
-    disc.addColorStop(0,   "#ffffff");
-    disc.addColorStop(0.65,"#eef3ff");
-    disc.addColorStop(1,   "#c6d2ee");
+
+    disc.addColorStop(0,    "#ffffff");
+    disc.addColorStop(0.62, "#f2f6ff");
+    disc.addColorStop(1,    "#c9d5ef");
+
     skyCtx.fillStyle = disc;
-    skyCtx.beginPath();
-    skyCtx.arc(x, y, radius, 0, Math.PI * 2);
-    skyCtx.fill();
+    skyCtx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 
-    /* craters – subtle grey blobs inside the moon disc */
-    const craters = [
-        [-0.32, -0.18, 0.19],
-        [ 0.22, -0.38, 0.12],
-        [-0.14,  0.34, 0.16],
-        [ 0.36,  0.14, 0.10],
-        [ 0.04, -0.06, 0.08],
-        [-0.42,  0.18, 0.07],
-        [ 0.14,  0.42, 0.09]
-    ];
-    skyCtx.save();
-    skyCtx.beginPath();
-    skyCtx.arc(x, y, radius, 0, Math.PI * 2);
-    skyCtx.clip();
-    skyCtx.fillStyle = "rgba(180, 195, 220, 0.42)";
-    craters.forEach(([cx, cy, cr]) => {
+    /* Craters — only inside the lit area. */
+    skyCtx.fillStyle = "rgba(176, 192, 220, 0.42)";
+
+    for (let i = 0; i < MOON_CRATERS.length; i++) {
+
+        const c = MOON_CRATERS[i];
+
         skyCtx.beginPath();
-        skyCtx.arc(x + cx * radius, y + cy * radius, cr * radius, 0, Math.PI * 2);
+        skyCtx.arc(
+            x + c[0] * radius,
+            y + c[1] * radius,
+            c[2] * radius,
+            0, Math.PI * 2
+        );
         skyCtx.fill();
-    });
+
+    }
+
     skyCtx.restore();
+
 }
 
-/* ---------- Stars ---------- */
 
-function drawStars(hours, darkness) {
-    if (darkness <= 0.01) return;
-
-    const t = performance.now() / 1000;
-
-    skyStars.forEach(star => {
-        const twinkle = 0.55 + 0.45 * Math.sin(t * star.speed + star.phase);
-        const alpha = star.base * twinkle * darkness;
-
-        skyCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-        skyCtx.beginPath();
-        skyCtx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-        skyCtx.fill();
-    });
-}
-
-/* ---------- Clouds (only visible while there is light) ---------- */
+/* ---------------------------------------------------------
+   CLOUDS (drawn during daylight only)
+--------------------------------------------------------- */
 
 function drawClouds(darkness, deltaSec) {
+
     const light = 1 - darkness;
+
     if (light <= 0.05) return;
 
     skyClouds.forEach(c => {
+
         c.x += c.speed * deltaSec * 8;
+
         if (c.x - 200 * c.scale > skyCanvas.width) {
+
             c.x = -200 * c.scale;
             c.y = skyCanvas.height * (0.08 + Math.random() * 0.28);
+
         }
 
         const alpha = c.alpha * light;
@@ -2616,6 +3046,7 @@ function drawClouds(darkness, deltaSec) {
         skyCtx.save();
         skyCtx.translate(c.x, c.y);
         skyCtx.scale(c.scale, c.scale);
+
         skyCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
 
         const puffs = [
@@ -2626,80 +3057,78 @@ function drawClouds(darkness, deltaSec) {
             [-20, -8,   26],
             [ 8,   14,  26]
         ];
-        puffs.forEach(([px, py, pr]) => {
+
+        puffs.forEach(p => {
+
             skyCtx.beginPath();
-            skyCtx.arc(px, py, pr, 0, Math.PI * 2);
+            skyCtx.arc(p[0], p[1], p[2], 0, Math.PI * 2);
             skyCtx.fill();
+
         });
+
         skyCtx.restore();
+
     });
+
 }
+
 
 /* =========================================================
    SHOOTING STARS
    -----------------------------------------------------
-   Active only at night (darkness > threshold). Each star
-   is a fast-moving streak that leaves a long glowing tail
-   in white and/or golden hues — like a falling light ray.
+   Active only at night. Each star is a fast streak that
+   leaves a long glowing tail in white and/or golden hues —
+   like a falling light ray.
 ========================================================= */
 
 function spawnShootingStar() {
+
     const w = skyCanvas.width;
     const h = skyCanvas.height;
 
-    /* Start anywhere in the upper 60% of the sky, biased
-       toward the right / upper-right so streaks cross the
-       visible area nicely. */
-    const startX = w * (0.15 + Math.random() * 0.85);
-    const startY = h * (0.02 + Math.random() * 0.45);
-
-    /* Direction: mostly down-left; variations make the
-       streaks feel organic rather than uniform. */
+    /* Travelling down and to the left. */
     const angleDeg = 200 + Math.random() * 30;      /* 200° – 230° */
     const angleRad = angleDeg * Math.PI / 180;
-    const speed = 620 + Math.random() * 320;        /* px / second */
 
-    /* Two palettes: pure white, and golden/amber. */
+    const speed = 620 + Math.random() * 340;        /* px / second */
+
     const isGolden = Math.random() < 0.45;
 
-    const color = isGolden
-        ? { r: 255, g: 214, b: 120 }   /* golden  */
-        : { r: 235, g: 244, b: 255 };  /* whitish */
-
     skyShootingStars.push({
-        x: startX,
-        y: startY,
+
+        x: w * (0.20 + Math.random() * 0.80),
+        y: h * (0.02 + Math.random() * 0.42),
+
         vx: Math.cos(angleRad) * speed,
-        vy: -Math.sin(angleRad) * speed * -1,   /* converted below */
-        angleRad: angleRad,
-        speed: speed,
-        length: 140 + Math.random() * 140,      /* tail length in px */
+        vy: -Math.sin(angleRad) * speed,
+
+        length: 140 + Math.random() * 150,
+
         life: 0,
-        maxLife: 1.1 + Math.random() * 0.7,     /* seconds */
-        color: color,
+        maxLife: 1.1 + Math.random() * 0.7,
+
+        color: isGolden
+            ? { r: 255, g: 214, b: 120 }
+            : { r: 235, g: 244, b: 255 },
+
         width: 1.4 + Math.random() * 1.2
+
     });
 
-    /* Fix sign of vy so it always moves downward on screen. */
-    const s = skyShootingStars[skyShootingStars.length - 1];
-    s.vy = Math.abs(s.speed * Math.sin(s.angleRad));
-
-    /* vx should be negative (moving left) for the classic
-       falling-star diagonal. Force it. */
-    s.vx = -Math.abs(s.speed * Math.cos(s.angleRad) * 0.6);
 }
 
+
 function updateShootingStars(deltaSec, darkness) {
+
     if (darkness < 0.35) {
-        /* Not dark enough yet — clear any leftovers so they
-           don't linger into daytime. */
+
         if (skyShootingStars.length) skyShootingStars.length = 0;
+
         nextShootingStarAt = 0;
         return;
+
     }
 
-    /* Schedule new stars. Rate scales with darkness so the
-       sky gets busier the deeper the night goes. */
     const now = performance.now();
 
     if (nextShootingStarAt === 0) {
@@ -2707,20 +3136,22 @@ function updateShootingStars(deltaSec, darkness) {
     }
 
     if (now >= nextShootingStarAt) {
+
         spawnShootingStar();
 
-        /* Occasionally fire a quick pair so some moments feel
-           like a mini shower. */
+        /* Occasionally fire a quick pair for a mini shower. */
         if (Math.random() < 0.22) {
             setTimeout(spawnShootingStar, 180 + Math.random() * 260);
         }
 
-        const baseGap = 2600 - darkness * 1400;   /* 1200 – 2600 ms */
+        const baseGap = 2600 - darkness * 1400;
+
         nextShootingStarAt = now + baseGap + Math.random() * 2200;
+
     }
 
-    /* Advance and cull. */
     for (let i = skyShootingStars.length - 1; i >= 0; i--) {
+
         const s = skyShootingStars[i];
 
         s.x += s.vx * deltaSec;
@@ -2735,28 +3166,36 @@ function updateShootingStars(deltaSec, darkness) {
         if (offscreen || s.life >= s.maxLife) {
             skyShootingStars.splice(i, 1);
         }
+
     }
+
 }
 
+
 function drawShootingStars(darkness) {
+
     if (darkness < 0.35) return;
 
     skyShootingStars.forEach(s => {
-        /* Life-based fade in/out so streaks appear and
-           disappear smoothly. */
+
         const t = s.life / s.maxLife;
+
         let alpha;
+
         if (t < 0.15) alpha = t / 0.15;
         else if (t > 0.75) alpha = Math.max(0, (1 - t) / 0.25);
         else alpha = 1;
 
         alpha *= Math.min(1, darkness * 1.15);
+
         if (alpha <= 0.01) return;
 
-        const { r, g, b } = s.color;
+        const r = s.color.r;
+        const g = s.color.g;
+        const b = s.color.b;
 
-        /* Direction unit vector for the tail. */
         const mag = Math.hypot(s.vx, s.vy) || 1;
+
         const ux = s.vx / mag;
         const uy = s.vy / mag;
 
@@ -2764,9 +3203,8 @@ function drawShootingStars(darkness) {
         const tailY = s.y - uy * s.length;
 
         /* 1. Wide soft glow behind the trail. */
-        const glowGrad = skyCtx.createLinearGradient(
-            tailX, tailY, s.x, s.y
-        );
+        const glowGrad = skyCtx.createLinearGradient(tailX, tailY, s.x, s.y);
+
         glowGrad.addColorStop(0,    `rgba(${r},${g},${b},0)`);
         glowGrad.addColorStop(0.55, `rgba(${r},${g},${b},${alpha * 0.18})`);
         glowGrad.addColorStop(1,    `rgba(${r},${g},${b},${alpha * 0.55})`);
@@ -2782,10 +3220,9 @@ function drawShootingStars(darkness) {
         skyCtx.restore();
 
         /* 2. Sharp bright core streak. */
-        const coreGrad = skyCtx.createLinearGradient(
-            tailX, tailY, s.x, s.y
-        );
-        coreGrad.addColorStop(0,    `rgba(255,255,255,0)`);
+        const coreGrad = skyCtx.createLinearGradient(tailX, tailY, s.x, s.y);
+
+        coreGrad.addColorStop(0,    "rgba(255,255,255,0)");
         coreGrad.addColorStop(0.45, `rgba(255,255,255,${alpha * 0.35})`);
         coreGrad.addColorStop(1,    `rgba(255,255,255,${alpha * 0.95})`);
 
@@ -2799,11 +3236,13 @@ function drawShootingStars(darkness) {
         skyCtx.stroke();
         skyCtx.restore();
 
-        /* 3. Bright head of the streak — small glowing dot. */
+        /* 3. Glowing head of the streak. */
         const headR = 2.2 + s.width * 0.6;
+
         const headGrad = skyCtx.createRadialGradient(
             s.x, s.y, 0, s.x, s.y, headR * 3.5
         );
+
         headGrad.addColorStop(0,   `rgba(255,255,255,${alpha})`);
         headGrad.addColorStop(0.4, `rgba(${r},${g},${b},${alpha * 0.55})`);
         headGrad.addColorStop(1,   `rgba(${r},${g},${b},0)`);
@@ -2817,101 +3256,119 @@ function drawShootingStars(darkness) {
         skyCtx.beginPath();
         skyCtx.arc(s.x, s.y, headR * 0.85, 0, Math.PI * 2);
         skyCtx.fill();
+
     });
+
 }
 
-/* ---------- Darkness helper (0 = bright day, 1 = deep night) ---------- */
 
-function getDarkness(hours) {
-    if (hours >= 21 || hours < 4.5) return 1;
-    if (hours >= 19 && hours < 21) return (hours - 19) / 2;
-    if (hours >= 4.5 && hours < 6.5) return 1 - (hours - 4.5) / 2;
-    return 0;
-}
-
-/* ---------- Animation loop ---------- */
-
-let lastSkyFrame = performance.now();
+/* ---------------------------------------------------------
+   MAIN ANIMATION LOOP
+--------------------------------------------------------- */
 
 function drawSkyFrame(nowMs) {
+
     const deltaSec = Math.min((nowMs - lastSkyFrame) / 1000, 0.1);
     lastSkyFrame = nowMs;
 
     const now = new Date();
-    const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+
+    const hours =
+        now.getHours() +
+        now.getMinutes() / 60 +
+        now.getSeconds() / 3600;
 
     const w = skyCanvas.width;
     const h = skyCanvas.height;
 
-    /* 1. Gradient */
+    /* 1. Sky gradient */
     const colors = getSkyColors(hours);
+
     const grad = skyCtx.createLinearGradient(0, 0, 0, h);
+
     grad.addColorStop(0, `rgb(${colors.top[0]},${colors.top[1]},${colors.top[2]})`);
     grad.addColorStop(1, `rgb(${colors.bot[0]},${colors.bot[1]},${colors.bot[2]})`);
+
     skyCtx.fillStyle = grad;
     skyCtx.fillRect(0, 0, w, h);
 
     const darkness = getDarkness(hours);
 
-    /* 2. Stars (twinkling background) */
+    /* 2. Milky Way haze (behind the stars) */
+    drawMilkyWay(hours, darkness);
+
+    /* 3. Rotating star field */
     drawStars(hours, darkness);
 
-    /* 3. Clouds */
+    /* 4. Drifting clouds */
     drawClouds(darkness, deltaSec);
 
-    /* 4. Sun (6 AM → 6 PM) */
+    /* 5. Sun (6 AM → 6 PM) */
     if (hours >= 6 && hours <= 18) {
-        const progress = (hours - 6) / 12;
-        drawSun(progress);
+        drawSun(hours);
     }
 
-    /* 5. Moon (6 PM → 6 AM next day) */
-    let moonHours = hours;
-    if (moonHours < 6) moonHours += 24;
-    if (moonHours >= 18 && moonHours <= 30) {
-        const progress = (moonHours - 18) / 12;
-        drawMoon(progress, darkness);
-    }
+    /* 6. Moon (6 PM → 6 AM) with its real phase */
+    drawMoon(hours, darkness);
 
-    /* 6. Shooting stars (night only) */
+    /* 7. Shooting stars (night only) */
     updateShootingStars(deltaSec, darkness);
     drawShootingStars(darkness);
 
     requestAnimationFrame(drawSkyFrame);
+
 }
 
-/* ---------- Clock widget (with personalised greeting) ---------- */
+
+/* ---------------------------------------------------------
+   CLOCK WIDGET (with personalised greeting)
+--------------------------------------------------------- */
 
 const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const MONTHS   = ["January","February","March","April","May","June",
-                  "July","August","September","October","November","December"];
+
+const MONTHS = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+];
+
 
 function pad2(n) { return String(n).padStart(2, "0"); }
+
 
 /* Returns the display name for the clock greeting.
    Prefers the employee's first name once they are logged in. */
 function getClockDisplayName() {
+
     if (!me) return "";
+
     const fullName = me.employee_name || me.name || "";
+
     const parts = String(fullName).trim().split(/\s+/).filter(Boolean);
+
     if (!parts.length) return "";
+
     return parts[0];
+
 }
 
+
 function updateClock() {
+
     const now = new Date();
 
     let hh = now.getHours();
+
     const mm = pad2(now.getMinutes());
     const ss = pad2(now.getSeconds());
 
     const ampm = hh >= 12 ? "PM" : "AM";
+
     let hh12 = hh % 12;
     if (hh12 === 0) hh12 = 12;
 
-    document.getElementById("clockHHMM").textContent   = pad2(hh12) + ":" + mm;
+    document.getElementById("clockHHMM").textContent = pad2(hh12) + ":" + mm;
     document.getElementById("clockSeconds").textContent = ":" + ss;
-    document.getElementById("clockAmPm").textContent    = ampm;
+    document.getElementById("clockAmPm").textContent = ampm;
 
     document.getElementById("clockDate").textContent =
         WEEKDAYS[now.getDay()] + ", " +
@@ -2921,6 +3378,7 @@ function updateClock() {
 
     let greeting;
     const h = now.getHours();
+
     if (h < 5)       greeting = "Good night";
     else if (h < 12) greeting = "Good morning";
     else if (h < 17) greeting = "Good afternoon";
@@ -2928,19 +3386,21 @@ function updateClock() {
     else             greeting = "Good night";
 
     const firstName = getClockDisplayName();
-
     const greetingEl = document.getElementById("clockGreeting");
 
     if (firstName) {
         greetingEl.textContent = greeting + " " + firstName + " !!";
     }
     else {
-        /* Before login (or if name is missing) — generic greeting. */
         greetingEl.textContent = greeting + " !!";
     }
+
 }
 
-/* ---------- Boot the wallpaper ---------- */
+
+/* ---------------------------------------------------------
+   BOOT THE WALLPAPER
+--------------------------------------------------------- */
 
 resizeSkyCanvas();
 updateClock();
