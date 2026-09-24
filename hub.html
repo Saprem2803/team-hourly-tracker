@@ -11,13 +11,13 @@
 
 <style>
 :root{
-    --ink:#0a1628; --ink-3:#475569; --ink-4:#64748b;
+    --ink:#1a0508; --ink-3:#475569; --ink-4:#64748b;
     --line:#e2e8f0;
     --gold:#c9a227;
     --green:#0d7a4a;
-    --blue:#0369a1;
+    --blue:#c21825; /* Changed to cherry red */
     --violet:#6d28d9;
-    --navy-800:#0a1628;
+    --navy-800:#1a0508; /* Changed to dark cherry */
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;overflow:hidden;}
@@ -28,8 +28,8 @@ body{
     background-color:var(--navy-800);
     background-image:
         radial-gradient(ellipse 1000px 800px at 0% 0%,rgba(201,162,39,.14) 0%,transparent 55%),
-        radial-gradient(ellipse 900px 800px at 100% 100%,rgba(26,77,122,.5) 0%,transparent 60%),
-        linear-gradient(135deg,#0a1628 0%,#0f2a4a 55%,#12335c 100%);
+        radial-gradient(ellipse 900px 800px at 100% 100%,rgba(122,18,37,.5) 0%,transparent 60%), /* Changed to cherry red */
+        linear-gradient(135deg,#1a0508 0%,#3a0a13 55%,#57101e 100%); /* Changed to cherry red */
     background-attachment:fixed;
     position:relative;
     display:flex;
@@ -57,8 +57,8 @@ body{
     background:linear-gradient(
         135deg,
         rgba(255,255,255,.09) 0%,
-        rgba(26,77,122,.15) 55%,
-        rgba(15,42,74,.20) 100%
+        rgba(122,18,37,.15) 55%, /* Changed to cherry red */
+        rgba(58,10,19,.20) 100% /* Changed to cherry red */
     );
     border:2px solid rgba(255,255,255,.1);
     display:flex;
@@ -143,7 +143,7 @@ body{
     gap:20px;
     padding:14px 22px;
     border-radius:16px;
-    background:linear-gradient(135deg,rgba(10,22,40,.9) 0%,rgba(15,42,74,.9) 55%,rgba(26,77,122,.9) 100%);
+    background:linear-gradient(135deg,rgba(26,5,8,.9) 0%,rgba(58,10,19,.9) 55%,rgba(122,18,37,.9) 100%); /* Changed to cherry red */
     border:1px solid rgba(255,255,255,.18);
     box-shadow:
         0 12px 40px rgba(0,0,0,.5),
@@ -231,7 +231,7 @@ body{
 .section-badge svg{width:26px;height:26px;stroke-width:2.4;}
 .section-badge.gold{background:linear-gradient(135deg,#fcd34d,#c9a227);color:#3d2b00;}
 .section-badge.green{background:linear-gradient(135deg,#34d399,#0d7a4a);color:#ffffff;}
-.section-badge.blue{background:linear-gradient(135deg,#38bdf8,#0369a1);color:#ffffff;}
+.section-badge.blue{background:linear-gradient(135deg,#ef4444,#991b1b);color:#ffffff;} /* Changed to cherry red */
 .section-badge.violet{background:linear-gradient(135deg,#a78bfa,#6d28d9);color:#ffffff;}
 .section-content{flex:1;display:flex;align-items:center;gap:16px;min-width:0;}
 .section-label{
@@ -283,11 +283,11 @@ body{
 .tile:hover .tile-icon{transform:scale(1.08) rotate(-4deg);}
 .tile.gold .tile-icon{background:linear-gradient(135deg,#fef3c7,#fcd34d);color:#78350f;border:1px solid #fbbf24;}
 .tile.green .tile-icon{background:linear-gradient(135deg,#d1fae5,#6ee7b7);color:#065f46;border:1px solid #34d399;}
-.tile.blue .tile-icon{background:linear-gradient(135deg,#e0f2fe,#7dd3fc);color:#075985;border:1px solid #38bdf8;}
+.tile.blue .tile-icon{background:linear-gradient(135deg,#fee2e2,#fca5a5);color:#7f1d1d;border:1px solid #ef4444;} /* Changed to cherry red */
 .tile.violet .tile-icon{background:linear-gradient(135deg,#ede9fe,#c4b5fd);color:#4c1d95;border:1px solid #a78bfa;}
 .tile-text{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
 .tile-name{
-    font-size:14px;font-weight:800;color:#0a1628;
+    font-size:14px;font-weight:800;color:#1a0508; /* Changed to dark cherry */
     letter-spacing:-.1px;line-height:1.25;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
