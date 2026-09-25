@@ -1933,6 +1933,147 @@
         }
 
         /* =====================================================
+           EOD REMARKS — LIQUID GLASS
+        ===================================================== */
+
+        .remarks-card {
+            border: 1.5px solid rgba(236, 128, 128, 0.72);
+            background: linear-gradient(
+                135deg,
+                rgba(255, 240, 240, 0.58),
+                rgba(255, 250, 250, 0.28)
+            );
+            box-shadow:
+                0 10px 36px rgba(190, 60, 60, 0.16),
+                inset 0 1px 0 rgba(255, 255, 255, 0.75);
+        }
+
+        .remarks-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 13px;
+        }
+
+        .remarks-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 21px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #ffe1e1, #ffc9c9);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+        }
+
+        .remarks-title {
+            font-size: 16.5px;
+            font-weight: 850;
+            color: #8c1c1c;
+            letter-spacing: -0.3px;
+        }
+
+        .remarks-sub {
+            font-size: 12.5px;
+            color: rgba(120, 30, 30, 0.80);
+            margin-top: 3px;
+            line-height: 1.45;
+        }
+
+        .remarks-shortfall {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 13px;
+        }
+
+        .remarks-chip {
+            background: rgba(255, 255, 255, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.68);
+            border-radius: 10px;
+            padding: 6px 11px;
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #7a1a1a;
+            letter-spacing: -0.1px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        }
+
+        .remarks-input {
+            width: 100%;
+            min-height: 108px;
+            resize: vertical;
+            padding: 13px 15px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.62);
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.74),
+                rgba(255, 255, 255, 0.44)
+            );
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            font-size: 14px;
+            line-height: 1.5;
+            color: #0a1f3d;
+            outline: none;
+            font-family: inherit;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.78),
+                0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: 0.2s;
+        }
+
+        .remarks-input::placeholder {
+            color: rgba(120, 40, 40, 0.45);
+        }
+
+        .remarks-input:focus {
+            border-color: rgba(200, 90, 90, 0.82);
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.90),
+                rgba(255, 255, 255, 0.62)
+            );
+            box-shadow:
+                0 0 0 4px rgba(200, 90, 90, 0.14),
+                inset 0 1px 0 rgba(255, 255, 255, 0.88);
+        }
+
+        .remarks-input:disabled {
+            background: rgba(240, 240, 245, 0.62);
+            color: rgba(120, 120, 140, 0.80);
+            cursor: not-allowed;
+        }
+
+        .remarks-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 9px;
+            flex-wrap: wrap;
+        }
+
+        .remarks-counter {
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(120, 40, 40, 0.62);
+        }
+
+        .remarks-status {
+            font-size: 11.5px;
+            font-weight: 800;
+            letter-spacing: -0.1px;
+        }
+
+        .remarks-status.missing { color: #a02020; }
+        .remarks-status.ok      { color: #1f7a4d; }
+        .remarks-status.locked  { color: rgba(30, 55, 90, 0.62); }
+
+        /* =====================================================
            RESPONSIVE
         ===================================================== */
 
@@ -2603,6 +2744,54 @@
                 </div>
 
 
+                <div id="remarksCard"
+                     class="card remarks-card hidden">
+
+                    <div class="remarks-header">
+
+                        <div class="remarks-icon">
+                            📝
+                        </div>
+
+                        <div>
+                            <div class="remarks-title">
+                                EOD Remarks — Target Shortfall
+                            </div>
+                            <div class="remarks-sub" id="remarksSub">
+                                You are below today's target. Please explain
+                                why so your Team Lead can review it.
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="remarks-shortfall" id="remarksChips"></div>
+
+
+                    <textarea
+                        id="remarksInput"
+                        class="remarks-input"
+                        rows="4"
+                        maxlength="500"
+                        placeholder="Example: Machine breakdown from 9–10 PM, raw material shortage, quality rework on batch #12..."></textarea>
+
+
+                    <div class="remarks-footer">
+
+                        <span class="remarks-counter" id="remarksCounter">
+                            0 / 500
+                        </span>
+
+                        <span class="remarks-status missing" id="remarksStatus">
+                            ⚠️ Remarks required
+                        </span>
+
+                    </div>
+
+                </div>
+
+
                 <div class="card">
 
                     <div class="card-title">
@@ -2733,6 +2922,9 @@ let passwordRecoveryMode = false;
 let lockTickerStarted = false;
 let hourTickerStarted = false;
 let reminderFiredFor = {};
+
+let remarksColumnAvailable = true;
+const MAX_REMARKS_LENGTH = 500;
 
 
 /* =========================================================
@@ -4400,6 +4592,7 @@ async function openAuthenticatedPortal() {
 
         await loadEmployee();
         await loadReferenceData();
+        await probeRemarksColumn();
 
         currentShiftDate = getShiftDate();
 
@@ -4848,6 +5041,150 @@ async function loadDateLock() {
 
 
 /* =========================================================
+   EOD REMARKS
+========================================================= */
+
+async function probeRemarksColumn() {
+
+    try {
+
+        const { error } = await supabaseClient
+            .from("daily_productivity")
+            .select("remarks")
+            .limit(1);
+
+        remarksColumnAvailable = !error;
+
+        if (error) {
+
+            console.warn(
+                "Remarks column not available — run the ALTER TABLE migration:",
+                error.message
+            );
+
+        }
+
+    }
+    catch (error) {
+
+        remarksColumnAvailable = false;
+        console.warn("Remarks probe failed:", error);
+
+    }
+
+}
+
+
+function isShiftAtOrPastFinalHour() {
+
+    const index = getCurrentHourIndex();
+
+    if (index === HOUR_FIELDS.length - 1) return true;
+
+    if (index !== -1) return false;
+
+    const shiftEnd = getHourStartTime(HOUR_FIELDS.length);
+
+    return new Date() >= shiftEnd;
+
+}
+
+
+function isRemarksRequired() {
+
+    if (!remarksColumnAvailable) return false;
+
+    if (getEmployeeBaseTarget() === null) return false;
+
+    if (getAttendance() === "Absent") return false;
+
+    const target = getDailyTarget();
+
+    if (!target || target <= 0) return false;
+
+    if (getEnteredTotal() >= target) return false;
+
+    return isShiftAtOrPastFinalHour();
+
+}
+
+
+function updateRemarksStatus() {
+
+    const input = $("remarksInput");
+    const status = $("remarksStatus");
+    const counter = $("remarksCounter");
+
+    if (!input || !status || !counter) return;
+
+    counter.textContent = input.value.length + " / " + MAX_REMARKS_LENGTH;
+
+    if (currentDateLocked) {
+
+        status.className = "remarks-status locked";
+        status.textContent = "🔒 This date is locked by management.";
+        return;
+
+    }
+
+    if (!input.value.trim()) {
+
+        status.className = "remarks-status missing";
+        status.textContent = "⚠️ Remarks required before you finish";
+        return;
+
+    }
+
+    status.className = "remarks-status ok";
+    status.textContent = "✓ This remark will appear on your Team Lead's dashboard";
+
+}
+
+
+function updateRemarksCard() {
+
+    const card = $("remarksCard");
+
+    if (!card) return;
+
+    if (!isRemarksRequired()) {
+
+        card.classList.add("hidden");
+        return;
+
+    }
+
+    card.classList.remove("hidden");
+
+    const target = getDailyTarget() || 0;
+    const achieved = getEnteredTotal();
+    const shortfall = Math.max(target - achieved, 0);
+    const percentage = target > 0
+        ? Math.round((achieved / target) * 1000) / 10
+        : 0;
+
+    const chips = $("remarksChips");
+
+    if (chips) {
+
+        chips.innerHTML =
+            `<span class="remarks-chip">Target: ${target}</span>` +
+            `<span class="remarks-chip">Achieved: ${achieved}</span>` +
+            `<span class="remarks-chip">Shortfall: ${shortfall}</span>` +
+            `<span class="remarks-chip">Achievement: ${percentage}%</span>`;
+
+    }
+
+    const input = $("remarksInput");
+
+    if (input) input.disabled = currentDateLocked;
+
+    updateRemarksStatus();
+
+}
+
+
+/* =========================================================
    LOAD DAILY RECORD
 ========================================================= */
 
@@ -4883,6 +5220,19 @@ async function loadDailyRecord() {
         setAttendance("Present");
 
     }
+
+    const remarksInput = $("remarksInput");
+
+    if (remarksInput) {
+
+        remarksInput.value =
+            (currentRecord && currentRecord.remarks)
+                ? String(currentRecord.remarks)
+                : "";
+
+    }
+
+    updateRemarksStatus();
 
 }
 
@@ -5230,6 +5580,8 @@ function onAttendanceChange() {
 
 function updatePerformanceCard() {
 
+    updateRemarksCard();
+
     const card = $("performanceCard");
     const title = $("performanceTitle");
     const message = $("performanceMessage");
@@ -5491,6 +5843,20 @@ function buildRecord() {
 
     };
 
+    if (remarksColumnAvailable) {
+
+        const remarksInput = $("remarksInput");
+
+        const remarksValue = remarksInput
+            ? remarksInput.value.trim()
+            : "";
+
+        record.remarks = remarksValue
+            ? remarksValue.slice(0, MAX_REMARKS_LENGTH)
+            : null;
+
+    }
+
     return record;
 
 }
@@ -5647,6 +6013,8 @@ async function syncFromDatabase() {
         return;
     }
 
+    if (active && active.id === "remarksInput") return;
+
     let fresh = null;
 
     try {
@@ -5723,6 +6091,28 @@ async function syncFromDatabase() {
         }
 
     });
+
+    if (remarksColumnAvailable) {
+
+        const remarksInput = $("remarksInput");
+
+        if (remarksInput) {
+
+            const dbRemarks = fresh.remarks
+                ? String(fresh.remarks)
+                : "";
+
+            if (dbRemarks !== remarksInput.value) {
+
+                remarksInput.value = dbRemarks;
+                updateRemarksStatus();
+                anyChange = true;
+
+            }
+
+        }
+
+    }
 
     if (anyChange) {
 
@@ -5868,6 +6258,7 @@ function startHourTicker() {
 
         checkHourReminder();
         applyLocks();
+        updateRemarksCard();
 
     }, 20000);
 
@@ -6656,6 +7047,27 @@ $("resetConfirmPassword")
         if (event.key === "Enter") resetPassword();
 
     });
+
+
+const remarksInputEl = $("remarksInput");
+
+if (remarksInputEl) {
+
+    remarksInputEl.addEventListener("input", () => {
+
+        updateRemarksStatus();
+        queueSave();
+
+    });
+
+    remarksInputEl.addEventListener("blur", () => {
+
+        updateRemarksStatus();
+        queueSave();
+
+    });
+
+}
 
 
 /* =========================================================
