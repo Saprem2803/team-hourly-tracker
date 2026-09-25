@@ -261,6 +261,30 @@ td.left { text-align: left; }
 .reminder-enable-btn { border:0; border-radius:10px; padding:9px 13px; cursor:pointer; font-weight:700; font-size:12px; background:#4a0a18; color:white; transition: all 0.2s; }
 .reminder-enable-btn:hover { opacity:.9; }
 
+/* EOD REMARKS */
+.remarks-col { white-space: normal !important; text-align: left; vertical-align: top; }
+.remarks-text {
+    display: block;
+    max-width: 220px;
+    font-size: 10px;
+    line-height: 1.5;
+    color: #334155;
+    white-space: normal;
+    word-break: break-word;
+}
+.remarks-badge {
+    display: inline-block;
+    padding: 4px 7px;
+    border-radius: 5px;
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: .3px;
+}
+.remarks-badge.missing { background: #fee2e2; color: #b91c1c; }
+.remarks-badge.added   { background: #dbeafe; color: #1d4ed8; }
+.remarks-na { color: #94a3b8; font-size: 11px; }
+.tracker-table th:last-child { width: 200px; }
+
 @media(max-width: 700px) {
     .container { padding: 12px; }
     .header { padding: 18px; }
@@ -540,6 +564,7 @@ body.wp-off #liveWallpaper { opacity: 0; }
                         <th>Remaining</th>
                         <th>Achievement %</th>
                         <th>Status</th>
+                        <th>EOD Remarks</th>
                     </tr>
                 </thead>
                 <tbody id="trackerBody"></tbody>
@@ -563,6 +588,7 @@ body.wp-off #liveWallpaper { opacity: 0; }
                         <th>Remaining</th>
                         <th>Achievement %</th>
                         <th>Status</th>
+                        <th>EOD Remarks</th>
                     </tr>
                 </thead>
                 <tbody id="performanceSummaryBody"></tbody>
@@ -1849,7 +1875,7 @@ function buildDailyTracker() {
     const rowHolidayClass = isClientHol ? "holiday-row client-holiday-row" : "holiday-row";
     const visibleEmployees = getFilteredEmployees();
     if (!visibleEmployees.length) {
-        tbody.innerHTML = `<tr><td colspan="19" style="padding:30px;color:#64748b">No employees found for the selected filter.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="20" style="padding:30px;color:#64748b">No employees found for the selected filter.</td></tr>`;
         return;
     }
     visibleEmployees.forEach(employee => {
@@ -1900,11 +1926,34 @@ function buildDailyTracker() {
                 </td>
             `;
         });
+
+        const achievedNow = computeAchievedFromRecord(record);
+        const targetNumber = (target === null || target === undefined) ? null : Number(target);
+        const belowTarget = !holiday && targetNumber !== null && targetNumber > 0 && achievedNow < targetNumber;
+        const shiftComplete = isShiftCompleteForDate(trackerDate);
+        const remarksText = (record && record.remarks) ? String(record.remarks).trim() : "";
+
+        let remarksCellHtml;
+
+        if (holiday) {
+            remarksCellHtml = `<td class="remarks-col"><span class="remarks-na">Holiday</span></td>`;
+        }
+        else if (remarksText) {
+            remarksCellHtml = `<td class="remarks-col"><span class="remarks-text">${escapeHtml(remarksText)}</span></td>`;
+        }
+        else if (belowTarget && shiftComplete) {
+            remarksCellHtml = `<td class="remarks-col"><span class="remarks-badge missing">REMARKS MISSING</span></td>`;
+        }
+        else {
+            remarksCellHtml = `<td class="remarks-col"><span class="remarks-na">&mdash;</span></td>`;
+        }
+
         html += `
             <td class="achieved">0</td>
             <td class="remaining">${target === null ? "N/A" : target}</td>
             <td class="achievement">${target === null ? "N/A" : "0%"}</td>
             <td><span class="row-save-status" data-state="idle">&mdash;</span></td>
+            ${remarksCellHtml}
         `;
         tr.innerHTML = html;
         tbody.appendChild(tr);
@@ -2222,6 +2271,15 @@ function renderPerformanceSummary() {
                 ${percentage === null ? (holiday ? "HOLIDAY" : "N/A") : percentage.toFixed(1) + "%"}
             </td>
             <td>${status}</td>
+            <td class="remarks-col">${
+                holiday
+                    ? `<span class="remarks-na">Holiday</span>`
+                    : (record && record.remarks && String(record.remarks).trim())
+                        ? `<span class="remarks-text">${escapeHtml(String(record.remarks).trim())}</span>`
+                        : (percentage !== null && percentage < 100 && isShiftCompleteForDate(trackerDate))
+                            ? `<span class="remarks-badge missing">REMARKS MISSING</span>`
+                            : `<span class="remarks-na">&mdash;</span>`
+            }</td>
         `;
         tbody.appendChild(tr);
     });
@@ -2405,7 +2463,7 @@ function renderManagerControlCenter() {
         totalTarget += target; totalAchieved += achieved;
         if (pct !== null) { if (pct >= 90) onTrack++; else attention++; }
         hourFields.forEach(field => { totalHours += Number(record?.[field] || 0); });
-        rows.push({ employee, project, attendance, target, achieved, remaining, pct, holiday, isClientHol });
+        rows.push({ employee, project, attendance, target, achieved, remaining, pct, holiday, isClientHol, record });
     });
     const teamPct = (!holiday && totalTarget > 0) ? totalAchieved / totalTarget * 100 : 0;
     const deficit = Math.max(totalTarget - totalAchieved, 0);
@@ -2420,6 +2478,16 @@ function renderManagerControlCenter() {
         <div class="manager-kpi ${deficit > 0 && !holiday ? "red" : "green"}"><div class="manager-kpi-label">Team Deficit</div><div class="manager-kpi-value">${holiday ? 'N/A' : deficit}</div><div class="manager-kpi-sub">Production remaining</div></div>
         <div class="manager-kpi"><div class="manager-kpi-label">Hourly Production</div><div class="manager-kpi-value">${totalHours}</div><div class="manager-kpi-sub">Total units entered</div></div>
     `;
+    const shiftDone = isShiftCompleteForDate(date);
+
+    const missingRemarks = rows.filter(r =>
+        !r.holiday &&
+        r.target > 0 &&
+        r.achieved < r.target &&
+        shiftDone &&
+        !(r.record && r.record.remarks && String(r.record.remarks).trim())
+    );
+
     const top = rows.filter(r => r.pct !== null).sort((a,b) => b.pct - a.pct)[0];
     const low = rows.filter(r => r.pct !== null).sort((a,b) => a.pct - b.pct)[0];
     document.getElementById("managerControlAlerts").innerHTML = `
@@ -2427,6 +2495,13 @@ function renderManagerControlCenter() {
         <div class="manager-alert"><strong>⚠️ Needs Attention</strong><span>${low && low.pct < 90 ? `${escapeHtml(low.employee.employee_name)} — ${low.pct.toFixed(1)}%` : (holiday ? holidayName : "No employee below 90%")}</span></div>
         <div class="manager-alert"><strong>🎯 On Track</strong><span>${holiday ? holidayName : `${onTrack} employees at or above 90% achievement`}</span></div>
         <div class="manager-alert"><strong>📌 Active Workforce</strong><span>${activeEmployees} employees available today</span></div>
+        <div class="manager-alert"><strong>📝 EOD Remarks Pending</strong><span>${
+            holiday
+                ? holidayName
+                : missingRemarks.length
+                    ? `${missingRemarks.length} employee(s) below target with no remark — ${missingRemarks.slice(0, 3).map(r => escapeHtml(r.employee.employee_name)).join(", ")}${missingRemarks.length > 3 ? "…" : ""}`
+                    : "All shortfalls explained ✓"
+        }</span></div>
     `;
     const tbody = document.getElementById("managerControlBody");
     tbody.innerHTML = "";
@@ -2549,6 +2624,16 @@ async function downloadDailyCSV() {
         row["Remaining"] = remaining === null ? "N/A" : remaining;
         row["Achievement %"] = percentage === null ? "N/A" : percentage.toFixed(1) + "%";
         row["Status"] = isClientHol ? "CLIENT HOLIDAY" : (holiday ? "HOLIDAY" : (percentage === null ? "N/A" : percentage >= 100 ? "ON TRACK" : "NEED ATTENTION"));
+
+        const remarksValue = record?.remarks ? String(record.remarks).trim() : "";
+        row["EOD Remarks"] = remarksValue
+            ? remarksValue
+            : (holiday
+                ? ""
+                : (target !== null && target > 0 && achieved < target && isShiftCompleteForDate(date)
+                    ? "MISSING"
+                    : ""));
+
         rows.push(row);
     });
     downloadCSV(rows, `Hourly_Production_Daily_${date}.csv`);
