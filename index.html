@@ -1498,6 +1498,24 @@ function getCurrentShiftDateString() {
 }
 function getTrackerDefaultDate() { return getCurrentShiftDateString(); }
 
+function isShiftCompleteForDate(dateStr) {
+
+    if (!dateStr) return false;
+
+    const activeShift = getCurrentShiftDateString();
+
+    if (dateStr < activeShift) return true;   // past shift date
+    if (dateStr > activeShift) return false;  // future shift date
+
+    const hour = new Date().getHours();
+
+    if (hour >= 18) return false;             // shift just started
+    if (hour < 3) return (hour + 6) >= hourFields.length - 1; // 2 AM or later
+
+    return false;                             // 3 AM – 6 PM, not started
+
+}
+
 function setTodayDate() {
     const calendarToday = getTodayString();
     const trackerDate = getTrackerDefaultDate();
