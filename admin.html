@@ -272,7 +272,6 @@ tbody tr:last-child td{border-bottom:none;}
      LIVE DARK PURPLE SMOKE WALLPAPER — STYLES
 ============================================================ -->
 <style>
-/* Page background: deep purple-black */
 body {
     background-color: #0b0616 !important;
     background-image:
@@ -283,7 +282,6 @@ body {
     min-height: 100vh;
 }
 
-/* Wallpaper canvas */
 #liveWallpaper {
     position: fixed;
     inset: 0;
@@ -296,11 +294,9 @@ body {
 }
 body.wp-off #liveWallpaper { opacity: 0; }
 
-/* Ensure header and tabs-bar stay on top */
 .header { z-index: 100; }
 .tabs-bar { z-index: 99; }
 
-/* Header: dark glass over purple smoke */
 .header {
     background: rgba(20,10,40,.78) !important;
     border-bottom: 1px solid rgba(255,255,255,.08) !important;
@@ -328,7 +324,6 @@ body.wp-off #liveWallpaper { opacity: 0; }
     color: #1e1b4b !important;
 }
 
-/* Buttons in header */
 .header .btn-ghost {
     background: rgba(255,255,255,.06) !important;
     color: #e9d5ff !important;
@@ -339,7 +334,6 @@ body.wp-off #liveWallpaper { opacity: 0; }
     color: #fff !important;
 }
 
-/* Tabs bar: dark glass over purple */
 .tabs-bar {
     background: rgba(20,10,40,.72) !important;
     border-bottom: 1px solid rgba(255,255,255,.08) !important;
@@ -353,14 +347,11 @@ body.wp-off #liveWallpaper { opacity: 0; }
 .tab-btn .tab-count { background: rgba(255,255,255,.08) !important; color: #d8b4fe !important; }
 .tab-btn.active .tab-count { background: #a855f7 !important; color: #1e1b4b !important; }
 
-/* Section titles readable on purple */
 .panel-title { color: #fff !important; }
 .panel-desc  { color: rgba(216,180,254,.75) !important; }
 
-/* Login page background adjusted for purple */
 .login-page { background: transparent !important; }
 
-/* Wallpaper toggle button */
 .wp-toggle {
     position: fixed;
     right: 22px;
@@ -396,7 +387,6 @@ body.wp-off #liveWallpaper { opacity: 0; }
 
 <body>
 
-<!-- LIVE WALLPAPER -->
 <canvas id="liveWallpaper"></canvas>
 <button id="wallpaperToggle" class="wp-toggle" type="button" title="Toggle live wallpaper" aria-label="Toggle live wallpaper">◐</button>
 
@@ -1013,6 +1003,43 @@ body.wp-off #liveWallpaper { opacity: 0; }
 </div>
 
 
+<!-- ========================= EDIT MANAGER MODAL (NEW) ========================= -->
+<div id="editManagerModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div>
+                <div class="modal-eyebrow">Edit Manager</div>
+                <div class="modal-title" id="editManagerTitle">Edit Manager</div>
+            </div>
+            <button class="modal-close" onclick="closeModal('editManagerModal')">✕</button>
+        </div>
+        <input type="hidden" id="editManagerUserId">
+        <div class="form-grid">
+            <div class="form-field full">
+                <label>Full Name *</label>
+                <input id="editManagerName" placeholder="Full name" maxlength="150">
+            </div>
+            <div class="form-field full">
+                <label>Email (read-only)</label>
+                <input id="editManagerEmail" type="email" disabled style="background:#f1f5f9;cursor:not-allowed;">
+                <div class="hint">Email cannot be changed. Delete and re-create the user if needed.</div>
+            </div>
+            <div class="form-field full">
+                <label>Role *</label>
+                <select id="editManagerRole">
+                    <option value="management">Management</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal('editManagerModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveEditManager()" id="saveEditManagerBtn">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+
 <div class="toast-stack" id="toastStack"></div>
 
 
@@ -1515,7 +1542,7 @@ function renderTrackersTable(){
 
 
 /* =========================================================
-   MANAGERS TABLE
+   MANAGERS TABLE — UPDATED with Edit & Delete
 ========================================================= */
 function renderManagersTable(){
     const body = document.getElementById("managersBody");
@@ -1532,13 +1559,93 @@ function renderManagersTable(){
                 ? '<span class="pill pill-red">Inactive</span>'
                 : '<span class="pill pill-green">Active</span>'}</td>
             <td style="text-align:right;">
+                <button class="btn-icon" onclick="openEditManagerModal('${m.user_id}')" title="Edit">✏️</button>
                 <button class="btn-icon" onclick="resetUserPassword('${m.user_id}', '${escapeHTML(m.email)}')" title="Reset password">🔑</button>
                 ${m.active === false
                     ? `<button class="btn-icon" onclick="reactivateUser('${m.user_id}', 'management')" title="Reactivate">♻️</button>`
                     : `<button class="btn-icon" onclick="deactivateUser('${m.user_id}', 'management')" title="Deactivate">🚫</button>`}
+                <button class="btn-icon" onclick="deleteManager('${m.user_id}', '${escapeHTML(m.full_name || m.email || "")}')" title="Delete" style="color:#b91c1c;">🗑️</button>
             </td>
         </tr>
     `).join("");
+}
+
+
+/* =========================================================
+   EDIT / DELETE MANAGER (NEW)
+========================================================= */
+function openEditManagerModal(userId){
+    const m = managers.find(x => String(x.user_id) === String(userId));
+    if(!m){
+        showToast("Manager not found", "error");
+        return;
+    }
+    document.getElementById("editManagerUserId").value = m.user_id;
+    document.getElementById("editManagerName").value = m.full_name || "";
+    document.getElementById("editManagerEmail").value = m.email || "";
+    document.getElementById("editManagerRole").value = m.role || "management";
+    document.getElementById("editManagerTitle").textContent = m.full_name || "Edit Manager";
+    document.getElementById("editManagerModal").classList.remove("hidden");
+    setTimeout(() => document.getElementById("editManagerName").focus(), 80);
+}
+
+async function saveEditManager(){
+    const userId = document.getElementById("editManagerUserId").value;
+    const fullName = document.getElementById("editManagerName").value.trim();
+    const role = document.getElementById("editManagerRole").value;
+
+    if(!userId){ showToast("Missing user ID", "error"); return; }
+    if(!fullName){ showToast("Full name is required", "error"); return; }
+
+    const btn = document.getElementById("saveEditManagerBtn");
+    btn.disabled = true; btn.textContent = "Saving...";
+
+    try{
+        const { data, error } = await sb.functions.invoke(EDGE_FUNCTION_NAME, {
+            body: {
+                action: "update",
+                user_id: userId,
+                full_name: fullName,
+                role: role,
+                project_id: null
+            }
+        });
+        if(error) throw error;
+        if(data && data.error) throw new Error(data.error);
+
+        showToast("Manager updated successfully", "success");
+        closeModal("editManagerModal");
+        await loadManagers();
+        renderManagersTable();
+        updateTabCounts();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Failed to update manager", "error");
+    }finally{
+        btn.disabled = false; btn.textContent = "Save Changes";
+    }
+}
+
+async function deleteManager(userId, displayName){
+    if(!userId){ showToast("Missing user ID", "error"); return; }
+    const confirmed = confirm(`Delete ${displayName || "this manager"}?\n\nThis will permanently remove their account and access. This cannot be undone.`);
+    if(!confirmed) return;
+
+    try{
+        const { data, error } = await sb.functions.invoke(EDGE_FUNCTION_NAME, {
+            body: { action: "delete", user_id: userId }
+        });
+        if(error) throw error;
+        if(data && data.error) throw new Error(data.error);
+
+        showToast("Manager deleted successfully", "success");
+        await loadManagers();
+        renderManagersTable();
+        updateTabCounts();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Failed to delete manager", "error");
+    }
 }
 
 
@@ -2347,31 +2454,23 @@ sb.auth.onAuthStateChange((event) => {
         { c:[147,51,234],  a:0.26, r:0.85, bx:0.60, by:0.10, ax:0.30, ay:0.26, sx:0.00044, sy:0.00040, p:11.2 }
     ];
 
-    /* ---------------- Layer 2: Golden shiny ambers ---------------- */
-    /* Big golden glowing orbs that drift and pulse, connected by
-       golden light-ray lines when they are close enough. */
     var AMBER_COUNT = 22;
     var AMBERS = [];
-    var CONNECT_DISTANCE = 340;   /* px — max distance to draw a ray */
+    var CONNECT_DISTANCE = 340;
 
     function initAmbers(){
         AMBERS = [];
         for (var i = 0; i < AMBER_COUNT; i++){
-            /* Each amber drifts on two sines so motion feels organic */
             AMBERS.push({
                 bx: Math.random(),
                 by: Math.random(),
-                /* Amplitude and speed of drift */
                 ax: 0.10 + Math.random() * 0.10,
                 ay: 0.08 + Math.random() * 0.10,
                 sx: 0.00018 + Math.random() * 0.00022,
                 sy: 0.00016 + Math.random() * 0.00022,
                 phase: Math.random() * Math.PI * 2,
-                /* Size in px */
                 size: 5 + Math.random() * 5,
-                /* Base alpha */
                 alpha: 0.85 + Math.random() * 0.15,
-                /* Twinkle speed */
                 twSpeed: 0.0015 + Math.random() * 0.002,
                 twPhase: Math.random() * Math.PI * 2
             });
@@ -2395,7 +2494,6 @@ sb.auth.onAuthStateChange((event) => {
         draw();
     }
 
-    /* ---------- Smoke render ---------- */
     function drawSmoke(){
         ctx.globalCompositeOperation = 'lighter';
         for (var i = 0; i < SMOKE.length; i++){
@@ -2426,7 +2524,6 @@ sb.auth.onAuthStateChange((event) => {
         ctx.globalCompositeOperation = 'source-over';
     }
 
-    /* Compute each amber's current screen position */
     function computeAmberPositions(){
         for (var i = 0; i < AMBERS.length; i++){
             var a = AMBERS[i];
@@ -2439,7 +2536,6 @@ sb.auth.onAuthStateChange((event) => {
         }
     }
 
-    /* ---------- Golden light rays between nearby ambers ---------- */
     function drawRays(){
         ctx.globalCompositeOperation = 'lighter';
         for (var i = 0; i < AMBERS.length; i++){
@@ -2452,16 +2548,13 @@ sb.auth.onAuthStateChange((event) => {
 
                 if (dist > CONNECT_DISTANCE) continue;
 
-                /* Fade ray based on distance — closer = brighter */
                 var proximity = 1 - (dist / CONNECT_DISTANCE);
                 var baseAlpha = proximity * proximity * 0.55;
 
-                /* Both endpoints pulse so the ray breathes too */
                 var twA = 0.65 + Math.sin(t * a1.twSpeed + a1.twPhase) * 0.35;
                 var twB = 0.65 + Math.sin(t * a2.twSpeed + a2.twPhase) * 0.35;
                 var alpha = baseAlpha * (twA * 0.5 + twB * 0.5);
 
-                /* Wide soft glow (outer halo of the ray) */
                 var grad = ctx.createLinearGradient(a1.cx, a1.cy, a2.cx, a2.cy);
                 grad.addColorStop(0,    'rgba(255,215,90,' + (alpha * 0.15).toFixed(3) + ')');
                 grad.addColorStop(0.5,  'rgba(255,200,50,' + (alpha * 0.55).toFixed(3) + ')');
@@ -2474,7 +2567,6 @@ sb.auth.onAuthStateChange((event) => {
                 ctx.lineTo(a2.cx, a2.cy);
                 ctx.stroke();
 
-                /* Bright thin core */
                 var coreGrad = ctx.createLinearGradient(a1.cx, a1.cy, a2.cx, a2.cy);
                 coreGrad.addColorStop(0,    'rgba(255,240,200,' + (alpha * 0.4).toFixed(3) + ')');
                 coreGrad.addColorStop(0.5,  'rgba(255,255,230,' + (alpha * 0.95).toFixed(3) + ')');
@@ -2491,7 +2583,6 @@ sb.auth.onAuthStateChange((event) => {
         ctx.globalCompositeOperation = 'source-over';
     }
 
-    /* ---------- Golden shiny ambers ---------- */
     function drawAmbers(){
         ctx.globalCompositeOperation = 'lighter';
         for (var i = 0; i < AMBERS.length; i++){
@@ -2500,7 +2591,6 @@ sb.auth.onAuthStateChange((event) => {
             var size = a.size * (0.9 + tw * 0.25);
             var alpha = a.alpha * tw;
 
-            /* ---- Outer glow halo ---- */
             var outerR = size * 8;
             var outerGrad = ctx.createRadialGradient(a.cx, a.cy, 0, a.cx, a.cy, outerR);
             outerGrad.addColorStop(0,    'rgba(255,215,90,' + (alpha * 0.35).toFixed(3) + ')');
@@ -2511,7 +2601,6 @@ sb.auth.onAuthStateChange((event) => {
             ctx.arc(a.cx, a.cy, outerR, 0, Math.PI * 2);
             ctx.fill();
 
-            /* ---- Mid glow ---- */
             var midR = size * 3;
             var midGrad = ctx.createRadialGradient(a.cx, a.cy, 0, a.cx, a.cy, midR);
             midGrad.addColorStop(0,   'rgba(255,235,150,' + (alpha * 0.85).toFixed(3) + ')');
@@ -2522,7 +2611,6 @@ sb.auth.onAuthStateChange((event) => {
             ctx.arc(a.cx, a.cy, midR, 0, Math.PI * 2);
             ctx.fill();
 
-            /* ---- Shiny bright core ---- */
             var coreGrad = ctx.createRadialGradient(a.cx, a.cy, 0, a.cx, a.cy, size);
             coreGrad.addColorStop(0,   'rgba(255,255,245,' + alpha.toFixed(3) + ')');
             coreGrad.addColorStop(0.5, 'rgba(255,225,130,' + alpha.toFixed(3) + ')');
@@ -2532,7 +2620,6 @@ sb.auth.onAuthStateChange((event) => {
             ctx.arc(a.cx, a.cy, size, 0, Math.PI * 2);
             ctx.fill();
 
-            /* ---- Tiny inner specular highlight for the "shiny" feel ---- */
             var specGrad = ctx.createRadialGradient(
                 a.cx - size * 0.3, a.cy - size * 0.3, 0,
                 a.cx - size * 0.3, a.cy - size * 0.3, size * 0.55
@@ -2552,11 +2639,7 @@ sb.auth.onAuthStateChange((event) => {
         P.y += (P.ty - P.y) * 0.06;
 
         ctx.clearRect(0, 0, W, H);
-
-        /* 1. Smoke behind everything */
         drawSmoke();
-
-        /* 2. Compute amber positions, then draw rays, then ambers on top */
         computeAmberPositions();
         drawRays();
         drawAmbers();
@@ -2564,7 +2647,7 @@ sb.auth.onAuthStateChange((event) => {
 
     function loop(now){
         rafId = requestAnimationFrame(loop);
-        if (now - lastFrame < 28) return;   /* ~35 FPS */
+        if (now - lastFrame < 28) return;
         lastFrame = now;
         t += 22;
         draw();
