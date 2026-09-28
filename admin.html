@@ -1003,7 +1003,7 @@ body.wp-off #liveWallpaper { opacity: 0; }
 </div>
 
 
-<!-- ========================= EDIT MANAGER MODAL (NEW) ========================= -->
+<!-- ========================= EDIT MANAGER MODAL ========================= -->
 <div id="editManagerModal" class="modal-overlay hidden">
     <div class="modal-card">
         <div class="modal-head">
@@ -1402,7 +1402,7 @@ function renderSubProjectsTable(){
 
 
 /* =========================================================
-   EMPLOYEES TABLE
+   EMPLOYEES TABLE — UPDATED with Delete button
 ========================================================= */
 function renderEmployeesTable(){
     const body = document.getElementById("employeesBody");
@@ -1458,6 +1458,9 @@ function renderEmployeesTable(){
         actionsHTML += e.active === false
             ? `<button class="btn-icon" onclick="toggleEmployee(${e.id}, true)" title="Activate">♻️</button>`
             : `<button class="btn-icon" onclick="toggleEmployee(${e.id}, false)" title="Deactivate">🚫</button>`;
+
+        // 🗑️ NEW — Delete employee permanently
+        actionsHTML += `<button class="btn-icon" onclick="deleteEmployee(${e.id}, '${escapeHTML(e.employee_name || e.employee_code || "")}', ${!!e.user_id})" title="Delete" style="color:#b91c1c;">🗑️</button>`;
 
         return `
             <tr>
@@ -1542,7 +1545,7 @@ function renderTrackersTable(){
 
 
 /* =========================================================
-   MANAGERS TABLE — UPDATED with Edit & Delete
+   MANAGERS TABLE
 ========================================================= */
 function renderManagersTable(){
     const body = document.getElementById("managersBody");
@@ -1572,7 +1575,7 @@ function renderManagersTable(){
 
 
 /* =========================================================
-   EDIT / DELETE MANAGER (NEW)
+   EDIT / DELETE MANAGER
 ========================================================= */
 function openEditManagerModal(userId){
     const m = managers.find(x => String(x.user_id) === String(userId));
@@ -1645,6 +1648,37 @@ async function deleteManager(userId, displayName){
     }catch(err){
         console.error(err);
         showToast(err.message || "Failed to delete manager", "error");
+    }
+}
+
+
+/* =========================================================
+   DELETE EMPLOYEE (NEW)
+========================================================= */
+async function deleteEmployee(employeeId, displayName, hasLogin){
+    if(!employeeId){ showToast("Missing employee ID", "error"); return; }
+
+    let msg = `Delete ${displayName || "this employee"}?\n\n`;
+    if(hasLogin){
+        msg += `⚠️ This employee has a LOGIN account — it will also be deleted.\n\n`;
+    }
+    msg += `This cannot be undone.`;
+
+    if(!confirm(msg)) return;
+
+    try{
+        const { data, error } = await sb.functions.invoke(EDGE_FUNCTION_NAME, {
+            body: { action: "delete_employee", employee_id: employeeId }
+        });
+        if(error) throw error;
+        if(data && data.error) throw new Error(data.error);
+
+        showToast("Employee deleted successfully", "success");
+        await loadEmployees();
+        renderAllTables();
+    }catch(err){
+        console.error(err);
+        showToast(err.message || "Failed to delete employee", "error");
     }
 }
 
@@ -2441,7 +2475,6 @@ sb.auth.onAuthStateChange((event) => {
 
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* ---------------- Layer 1: Purple smoke clouds ---------------- */
     var SMOKE = [
         { c:[88,28,135],   a:0.38, r:1.05, bx:0.15, by:0.25, ax:0.32, ay:0.26, sx:0.00042, sy:0.00038, p:0.0 },
         { c:[139,92,246],  a:0.32, r:0.95, bx:0.82, by:0.75, ax:0.30, ay:0.28, sx:0.00038, sy:0.00044, p:1.7 },
@@ -2689,7 +2722,6 @@ sb.auth.onAuthStateChange((event) => {
 })();
 
 
-/* Wallpaper toggle — persisted in localStorage */
 (function(){
     var btn = document.getElementById('wallpaperToggle');
     if (!btn) return;
