@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AMI | Admin Portal</title>
+<title>AMI | Portal Hub</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,6 +21,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;overflow:hidden;}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
 body{
     font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     color:#1e293b; font-size:14px; line-height:1.5;
@@ -30,517 +31,625 @@ body{
         radial-gradient(ellipse 900px 800px at 100% 100%,rgba(122,18,37,.5) 0%,transparent 60%),
         linear-gradient(135deg,#1a0508 0%,#3a0a13 55%,#57101e 100%);
     background-attachment:fixed;
+    position:relative;
     display:flex;
     align-items:center;
     justify-content:center;
     padding:20px;
 }
 
+/* AMI LOGO WATERMARK */
+.wallpaper{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+    z-index:1;
+    overflow:hidden;
+}
+.wallpaper-logo{
+    position:relative;
+    width:min(72vw,72vh);
+    height:min(72vw,72vh);
+    border-radius:24%;
+    background:linear-gradient(
+        135deg,
+        rgba(255,255,255,.09) 0%,
+        rgba(122,18,37,.15) 55%,
+        rgba(58,10,19,.20) 100%
+    );
+    border:2px solid rgba(255,255,255,.1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transform:rotate(-8deg);
+    box-shadow:
+        inset 0 0 120px rgba(255,255,255,.04),
+        0 0 80px rgba(0,0,0,.2);
+    animation:wallpaperFloat 20s ease-in-out infinite;
+    overflow:hidden;
+}
+.wallpaper-logo::after{
+    content:'';
+    position:absolute;
+    width:60%;
+    height:60%;
+    border-radius:50%;
+    background:radial-gradient(
+        circle,
+        rgba(201,162,39,.22) 0%,
+        rgba(201,162,39,.08) 40%,
+        transparent 70%
+    );
+    top:-20%;
+    right:-20%;
+}
+.wallpaper-text{
+    font-family:'Playfair Display',Georgia,serif;
+    font-weight:900;
+    font-size:min(24vw,24vh);
+    line-height:.85;
+    letter-spacing:-.05em;
+    color:transparent;
+    background:linear-gradient(
+        135deg,
+        rgba(255,255,255,.14) 0%,
+        rgba(255,255,255,.08) 45%,
+        rgba(201,162,39,.13) 100%
+    );
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    user-select:none;
+    position:relative;
+    z-index:2;
+    transform:translateY(-2%);
+}
+@keyframes wallpaperFloat{
+    0%,100%{transform:rotate(-8deg) scale(1);}
+    50%{transform:rotate(-8deg) scale(1.02);}
+}
+
 /* LIVE WALLPAPER CANVAS */
 #liveWallpaper{
-    position:fixed; inset:0; width:100%; height:100%;
-    pointer-events:none; z-index:1;
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:2;
+    opacity:1;
 }
 
-/* MAIN CONTAINER */
-.admin-container{
-    position:relative; z-index:3;
-    width:100%; max-width:1100px;
-    display:flex; flex-direction:column; gap:16px;
-    background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.13);
+/* MAIN */
+.hub{
+    position:relative;
+    z-index:3;
+    width:100%;
+    max-width:1100px;
+    max-height:calc(100vh - 40px);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.banner{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:14px 22px;
     border-radius:16px;
-    padding:20px;
+    background:linear-gradient(135deg,rgba(26,5,8,.9) 0%,rgba(58,10,19,.9) 55%,rgba(122,18,37,.9) 100%);
+    border:1px solid rgba(255,255,255,.18);
+    box-shadow:
+        0 12px 40px rgba(0,0,0,.5),
+        inset 0 1px 0 rgba(255,255,255,.12);
+    overflow:hidden;
     backdrop-filter:blur(16px);
     -webkit-backdrop-filter:blur(16px);
-    box-shadow:0 12px 40px rgba(0,0,0,.5);
-    max-height:calc(100vh - 40px);
-    overflow-y:auto;
 }
-
-/* HEADER */
-.admin-header{
-    display:flex; align-items:center; justify-content:space-between;
-    padding-bottom:16px;
-    border-bottom:1px solid rgba(255,255,255,.1);
-    position:sticky; top:0; background:transparent; z-index:10;
+.banner::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(circle at 92% 15%,rgba(201,162,39,.25) 0%,transparent 40%),
+        radial-gradient(circle at 8% 85%,rgba(255,255,255,.06) 0%,transparent 45%);
+    pointer-events:none;
 }
-.header-left{display:flex; align-items:center; gap:16px;}
-.back-btn{
-    display:flex; align-items:center; justify-content:center;
-    width:40px; height:40px; border-radius:10px;
-    background:rgba(255,255,255,.1); color:#fff;
-    text-decoration:none; font-size:18px; transition:all .2s;
+.banner::after{
+    content:'';
+    position:absolute;
+    left:0;right:0;bottom:0;
+    height:3px;
+    background:linear-gradient(90deg,transparent 0%,rgba(201,162,39,.75) 20%,rgba(201,162,39,1) 50%,rgba(201,162,39,.75) 80%,transparent 100%);
+}
+.banner-left{display:flex;align-items:center;gap:16px;position:relative;z-index:2;min-width:0;}
+.brand-mark{
+    display:flex;align-items:center;justify-content:center;
+    width:56px;height:56px;border-radius:14px;
+    background:linear-gradient(135deg,#ffffff,#e8eef5);
+    color:var(--navy-800);font-weight:800;font-size:20px;letter-spacing:.5px;
+    box-shadow:0 10px 32px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.9);
+    position:relative;overflow:hidden;flex-shrink:0;
+}
+.brand-mark::after{
+    content:'';position:absolute;width:70px;height:70px;border-radius:50%;
+    background:radial-gradient(circle,rgba(201,162,39,.5),transparent 70%);
+    top:-35px;right:-35px;
+}
+.brand-text{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.brand-eyebrow{
+    font-size:10px;font-weight:800;letter-spacing:2.6px;text-transform:uppercase;
+    color:var(--gold);
+}
+.brand-title{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:26px;font-weight:700;color:#ffffff;
+    letter-spacing:-.5px;line-height:1.05;white-space:nowrap;
+}
+.banner-right{
+    position:relative;z-index:2;
+    display:flex;align-items:center;gap:8px;
+    padding:8px 14px;border-radius:999px;
+    background:rgba(255,255,255,.1);
     border:1px solid rgba(255,255,255,.15);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 }
-.back-btn:hover{background:rgba(255,255,255,.2); transform:translateX(-3px);}
-.header-title{
+.banner-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:#6ee7b7;box-shadow:0 0 12px #6ee7b7;
+    animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.2);}}
+.banner-status{
+    font-size:10px;font-weight:800;color:rgba(255,255,255,.95);
+    letter-spacing:.8px;text-transform:uppercase;white-space:nowrap;
+}
+
+.hub-body{display:flex;flex-direction:column;gap:10px;}
+.section{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.13);
+    border-radius:14px;
+    padding:12px 16px;
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    display:flex;align-items:center;gap:16px;
+    box-shadow:0 4px 20px rgba(0,0,0,.25);
+}
+.section-badge{
+    width:48px;height:48px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 4px 16px rgba(0,0,0,.3);
+}
+.section-badge svg{width:26px;height:26px;stroke-width:2.4;}
+.section-badge.gold{background:linear-gradient(135deg,#fcd34d,#c9a227);color:#3d2b00;}
+.section-badge.green{background:linear-gradient(135deg,#34d399,#0d7a4a);color:#ffffff;}
+.section-badge.blue{background:linear-gradient(135deg,#ef4444,#991b1b);color:#ffffff;}
+.section-badge.violet{background:linear-gradient(135deg,#a78bfa,#6d28d9);color:#ffffff;}
+.section-content{flex:1;display:flex;align-items:center;gap:16px;min-width:0;}
+.section-label{
     font-family:'Playfair Display',Georgia,serif;
-    font-size:24px; font-weight:700; color:#ffffff;
-    letter-spacing:-.5px;
+    font-size:16px;font-weight:700;color:#ffffff;
+    letter-spacing:-.1px;white-space:nowrap;min-width:130px;
+    text-shadow:0 1px 4px rgba(0,0,0,.3);
 }
-.header-subtitle{
-    font-size:12px; color:rgba(255,255,255,.6); margin-top:2px;
+.tile-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:10px;flex:1;min-width:0;
 }
-.add-btn{
-    display:flex; align-items:center; gap:8px;
-    padding:10px 20px; border-radius:10px;
-    background:linear-gradient(135deg,#fcd34d,#c9a227);
-    color:#1a0508; font-weight:700; font-size:13px;
-    border:none; cursor:pointer; transition:all .2s;
-    box-shadow:0 4px 16px rgba(201,162,39,.3);
+.tile{
+    background:linear-gradient(180deg,#ffffff 0%,#fbfcfe 100%);
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:11px;
+    padding:12px 14px;
+    text-decoration:none;
+    color:inherit;
+    display:flex;align-items:center;gap:14px;
+    position:relative;overflow:hidden;
+    box-shadow:0 4px 16px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.9);
+    transition:all .2s cubic-bezier(.4,0,.2,1);
+    cursor:pointer;
 }
-.add-btn:hover{transform:translateY(-2px); box-shadow:0 8px 24px rgba(201,162,39,.4);}
+.tile::before{
+    content:'';position:absolute;top:0;left:0;width:4px;height:100%;
+    background:var(--navy-800);transition:width .2s;
+}
+.tile.gold::before{background:var(--gold);}
+.tile.green::before{background:var(--green);}
+.tile.blue::before{background:var(--blue);}
+.tile.violet::before{background:var(--violet);}
+.tile:hover{
+    transform:translateY(-3px);
+    box-shadow:0 12px 32px rgba(0,0,0,.4),0 4px 8px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.9);
+    border-color:rgba(255,255,255,.4);
+}
+.tile:hover::before{width:6px;}
+.tile-icon{
+    width:48px;height:48px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    transition:transform .2s;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 2px 8px rgba(0,0,0,.1);
+}
+.tile-icon svg{width:26px;height:26px;stroke-width:2.2;}
+.tile:hover .tile-icon{transform:scale(1.08) rotate(-4deg);}
+.tile.gold .tile-icon{background:linear-gradient(135deg,#fef3c7,#fcd34d);color:#78350f;border:1px solid #fbbf24;}
+.tile.green .tile-icon{background:linear-gradient(135deg,#d1fae5,#6ee7b7);color:#065f46;border:1px solid #34d399;}
+.tile.blue .tile-icon{background:linear-gradient(135deg,#fee2e2,#fca5a5);color:#7f1d1d;border:1px solid #ef4444;}
+.tile.violet .tile-icon{background:linear-gradient(135deg,#ede9fe,#c4b5fd);color:#4c1d95;border:1px solid #a78bfa;}
+.tile-text{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
+.tile-name{
+    font-size:14px;font-weight:800;color:#1a0508;
+    letter-spacing:-.1px;line-height:1.25;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tile-desc{
+    font-size:11px;color:#64748b;line-height:1.3;font-weight:500;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.hub-footer{
+    text-align:center;
+    font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.6px;
+}
+.hub-footer strong{color:rgba(255,255,255,.8);font-weight:700;}
 
-/* TABLE */
-.table-container{
-    background:rgba(255,255,255,.95);
-    border-radius:12px;
-    overflow:hidden;
-    box-shadow:0 4px 20px rgba(0,0,0,.2);
+@media (max-height:720px){
+    body{padding:14px;}
+    .hub{gap:8px;}
+    .banner{padding:11px 18px;}
+    .brand-mark{width:48px;height:48px;font-size:17px;border-radius:12px;}
+    .brand-title{font-size:22px;}
+    .hub-body{gap:7px;}
+    .section{padding:9px 13px;gap:13px;}
+    .section-badge{width:40px;height:40px;border-radius:10px;}
+    .section-badge svg{width:22px;height:22px;}
+    .section-label{font-size:15px;min-width:120px;}
+    .tile{padding:10px 12px;gap:12px;}
+    .tile-icon{width:42px;height:42px;border-radius:10px;}
+    .tile-icon svg{width:23px;height:23px;}
+    .tile-name{font-size:13px;}
+    .tile-desc{font-size:10.5px;}
 }
-table{width:100%; border-collapse:collapse;}
-thead{background:#f8fafc; border-bottom:2px solid #e2e8f0;}
-th{
-    text-align:left; padding:14px 18px;
-    font-size:11px; font-weight:800; color:#64748b;
-    text-transform:uppercase; letter-spacing:.8px;
+@media (max-width:900px){
+    html,body{overflow:auto;}
+    .section{flex-direction:column;align-items:flex-start;}
+    .section-content{flex-direction:column;align-items:flex-start;width:100%;}
+    .tile-grid{grid-template-columns:1fr 1fr;width:100%;}
+    .banner-right{display:none;}
+    .wallpaper-logo{width:min(110vw,110vh);height:min(110vw,110vh);}
+    .wallpaper-text{font-size:min(32vw,32vh);}
 }
-td{padding:14px 18px; border-bottom:1px solid #f1f5f9; font-size:13px; color:#1e293b;}
-tbody tr:last-child td{border-bottom:none;}
-tbody tr:hover{background:#f8fafc;}
-
-.status-badge{
-    display:inline-block; padding:4px 10px; border-radius:999px;
-    font-size:11px; font-weight:700; background:#d1fae5; color:#065f46;
+@media (max-width:600px){
+    body{padding:12px;align-items:flex-start;}
+    .tile-grid{grid-template-columns:1fr;}
+    .tile-name,.tile-desc{white-space:normal;}
+    .banner{flex-direction:column;align-items:flex-start;gap:12px;}
+    .banner-right{display:flex;align-self:flex-start;}
+    .brand-title{font-size:20px;white-space:normal;}
 }
-
-/* ACTION BUTTONS */
-.action-btn{
-    display:inline-flex; align-items:center; justify-content:center;
-    width:34px; height:34px; border-radius:8px;
-    border:1px solid #e2e8f0; background:#fff;
-    cursor:pointer; transition:all .2s; font-size:14px;
+@media (prefers-reduced-motion: reduce){
+    #liveWallpaper{display:none;}
+    .wallpaper-logo{animation:none;}
+    .banner-dot{animation:none;}
 }
-.action-btn.edit{color:#6d28d9;}
-.action-btn.edit:hover{background:#ede9fe; border-color:#a78bfa;}
-.action-btn.delete{color:#c21825;}
-.action-btn.delete:hover{background:#fee2e2; border-color:#ef4444;}
-
-/* MODAL */
-.modal-overlay{
-    position:fixed; inset:0; background:rgba(0,0,0,.6);
-    backdrop-filter:blur(8px); z-index:100;
-    display:none; align-items:center; justify-content:center;
-}
-.modal-overlay.active{display:flex;}
-.modal{
-    background:#ffffff; border-radius:16px; padding:28px;
-    width:100%; max-width:440px;
-    box-shadow:0 24px 64px rgba(0,0,0,.4);
-    animation:modalSlide .3s ease;
-}
-@keyframes modalSlide{
-    from{opacity:0; transform:translateY(20px);}
-    to{opacity:1; transform:translateY(0);}
-}
-.modal h3{
-    font-family:'Playfair Display',Georgia,serif;
-    font-size:20px; font-weight:700; color:#1a0508;
-    margin-bottom:20px;
-}
-.form-group{margin-bottom:16px;}
-.form-group label{
-    display:block; font-size:12px; font-weight:700;
-    color:#475569; margin-bottom:6px; text-transform:uppercase;
-    letter-spacing:.5px;
-}
-.form-group input, .form-group select{
-    width:100%; padding:10px 14px; border-radius:8px;
-    border:1px solid #e2e8f0; font-size:14px;
-    font-family:inherit; transition:all .2s;
-}
-.form-group input:focus, .form-group select:focus{
-    outline:none; border-color:#c9a227;
-    box-shadow:0 0 0 3px rgba(201,162,39,.15);
-}
-.modal-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:24px;}
-.btn{
-    padding:10px 20px; border-radius:8px; font-size:13px;
-    font-weight:700; cursor:pointer; transition:all .2s; border:none;
-}
-.btn-cancel{background:#f1f5f9; color:#475569;}
-.btn-cancel:hover{background:#e2e8f0;}
-.btn-save{background:linear-gradient(135deg,#fcd34d,#c9a227); color:#1a0508;}
-.btn-save:hover{transform:translateY(-2px); box-shadow:0 4px 12px rgba(201,162,39,.3);}
-.btn-save:disabled{opacity:.6; cursor:not-allowed; transform:none;}
-
-/* TOAST */
-.toast{
-    position:fixed; bottom:24px; right:24px; z-index:200;
-    padding:14px 20px; border-radius:10px;
-    color:#fff; font-weight:600; font-size:13px;
-    box-shadow:0 8px 32px rgba(0,0,0,.4);
-    transform:translateY(100px); opacity:0;
-    transition:all .3s ease;
-}
-.toast.show{transform:translateY(0); opacity:1;}
-.toast.success{background:#0d7a4a;}
-.toast.error{background:#c21825;}
-
-/* LOADING */
-.loading{text-align:center; padding:40px; color:#64748b; font-weight:600;}
 </style>
 </head>
+
 <body>
 
+<!-- AMI logo watermark -->
+<div class="wallpaper">
+    <div class="wallpaper-logo">
+        <div class="wallpaper-text">AMI</div>
+    </div>
+</div>
+
+<!-- Live wallpaper -->
 <canvas id="liveWallpaper"></canvas>
 
-<div class="admin-container">
-    <!-- HEADER -->
-    <div class="admin-header">
-        <div class="header-left">
-            <a href="index.html" class="back-btn">←</a>
-            <div>
-                <div class="header-title">Managers</div>
-                <div class="header-subtitle">Managers have full admin access.</div>
+<div class="hub">
+
+    <div class="banner">
+        <div class="banner-left">
+            <div class="brand-mark">AMI</div>
+            <div class="brand-text">
+                <div class="brand-eyebrow">Revenue Cycle Management</div>
+                <div class="brand-title">Portal Hub</div>
             </div>
         </div>
-        <button class="add-btn" onclick="openAddModal()">+ Add Manager</button>
+        <div class="banner-right">
+            <span class="banner-dot"></span>
+            <span class="banner-status">All Systems Operational</span>
+        </div>
     </div>
 
-    <!-- TABLE -->
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Status</th>
-                    <th style="text-align:right;">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="managers-tbody">
-                <tr><td colspan="5" class="loading">Loading managers...</td></tr>
-            </tbody>
-        </table>
+    <div class="hub-body">
+
+        <!-- MANAGEMENT -->
+        <section class="section">
+            <div class="section-badge gold">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="section-content">
+                <div class="section-label">Management</div>
+                <div class="tile-grid">
+                    <a class="tile gold" href="Management_Dashboard.html">
+                        <div class="tile-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-5"/><circle cx="19" cy="8" r="1.5" fill="currentColor" stroke="none"/></svg>
+                        </div>
+                        <div class="tile-text">
+                            <div class="tile-name">Executive Dashboard</div>
+                            <div class="tile-desc">Performance &amp; insights</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ADMIN TOOLS -->
+        <section class="section">
+            <div class="section-badge violet">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <div class="section-content">
+                <div class="section-label">Admin Tools</div>
+                <div class="tile-grid">
+                    <a class="tile violet" href="admin.html">
+                        <div class="tile-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m6.4 6.4 2.8 2.8"/><path d="M2 12h4"/><path d="m6.4 17.6 2.8-2.8"/><path d="M12 22v-4"/><path d="m17.6 17.6-2.8-2.8"/><path d="M22 12h-4"/><path d="m17.6 6.4-2.8 2.8"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
+                        </div>
+                        <div class="tile-text">
+                            <div class="tile-name">Admin Portal</div>
+                            <div class="tile-desc">Data &amp; user management</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- OPERATIONS -->
+        <section class="section">
+            <div class="section-badge blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor" stroke="none"/></svg>
+            </div>
+            <div class="section-content">
+                <div class="section-label">Operations</div>
+                <div class="tile-grid">
+                    <a class="tile blue" href="index.html">
+                        <div class="tile-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
+                        </div>
+                        <div class="tile-text">
+                            <div class="tile-name">Operational Dashboard</div>
+                            <div class="tile-desc">Team lead view</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- EMPLOYEE -->
+        <section class="section">
+            <div class="section-badge green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            </div>
+            <div class="section-content">
+                <div class="section-label">Employee</div>
+                <div class="tile-grid">
+                    <a class="tile green" href="Employee_Hourly_Entry.html">
+                        <div class="tile-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                        </div>
+                        <div class="tile-text">
+                            <div class="tile-name">Hourly Production Tracker</div>
+                            <div class="tile-desc">Log your production</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
     </div>
+
+    <div class="hub-footer">
+        <strong>AMI Revenue Cycle Management</strong> · Portal Hub · Confidential
+    </div>
+
 </div>
 
-<!-- ADD MODAL -->
-<div class="modal-overlay" id="addModal">
-    <div class="modal">
-        <h3>Add New Manager</h3>
-        <form id="addForm" onsubmit="submitAddManager(event)">
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" id="addName" placeholder="John Doe" required>
-            </div>
-            <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" id="addEmail" placeholder="john@aminfoweb.co.in" required>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="addPassword" placeholder="Minimum 6 characters" minlength="6" required>
-            </div>
-            <div class="form-group">
-                <label>Role</label>
-                <select id="addRole">
-                    <option value="management">Management</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-cancel" onclick="closeModal('addModal')">Cancel</button>
-                <button type="submit" class="btn btn-save" id="addSubmitBtn">Create Manager</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- EDIT MODAL -->
-<div class="modal-overlay" id="editModal">
-    <div class="modal">
-        <h3>Edit Manager</h3>
-        <form id="editForm" onsubmit="submitEditManager(event)">
-            <input type="hidden" id="editUserId">
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" id="editName" required>
-            </div>
-            <div class="form-group">
-                <label>Role</label>
-                <select id="editRole">
-                    <option value="management">Management</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-cancel" onclick="closeModal('editModal')">Cancel</button>
-                <button type="submit" class="btn btn-save" id="editSubmitBtn">Save Changes</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<!-- SUPABASE & APP LOGIC -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- ============================================
+     LIVE WALLPAPER — Boosted visibility
+============================================ -->
 <script>
-    // ============================================================
-    // ⚠️ REPLACE THESE WITH YOUR SUPABASE CREDENTIALS
-    // ============================================================
-    const SUPABASE_URL = 'YOUR_SUPABASE_URL';       // e.g. https://xyz.supabase.co
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Your public anon key
-    // ============================================================
+(function(){
+    const canvas = document.getElementById('liveWallpaper');
+    if(!canvas) return;
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    let managersData = [];
+    const ctx = canvas.getContext('2d');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // ==========================================
-    // TOAST NOTIFICATIONS
-    // ==========================================
-    function showToast(message, type = 'success') {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.className = `toast ${type} show`;
-        setTimeout(() => toast.classList.remove('show'), 3500);
+    let width, height, dpr;
+    let particles = [];
+    let animationId = null;
+    let mouse = { x: null, y: null };
+
+    const CONFIG = {
+        density: 12000,
+        maxParticles: 140,
+        minRadius: 1.2,
+        maxRadius: 2.8,
+        speed: 0.5,
+        connectionDist: 180,
+        goldRatio: 0.35,
+        whiteDotAlpha: 0.85,
+        goldDotAlpha: 1.0,
+        lineAlpha: 0.35,
+        glowBlur: 12
+    };
+
+    function resize(){
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        initParticles();
     }
 
-    // ==========================================
-    // MODAL CONTROLS
-    // ==========================================
-    function openAddModal() {
-        document.getElementById('addForm').reset();
-        document.getElementById('addModal').classList.add('active');
-    }
-
-    function openEditModal(userId, name, role) {
-        document.getElementById('editUserId').value = userId;
-        document.getElementById('editName').value = name;
-        document.getElementById('editRole').value = role;
-        document.getElementById('editModal').classList.add('active');
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.remove('active');
-    }
-
-    // ==========================================
-    // FETCH MANAGERS
-    // ==========================================
-    async function fetchManagers() {
-        const tbody = document.getElementById('managers-tbody');
-        try {
-            const { data, error } = await supabase
-                .from('user_project_access')
-                .select('*')
-                .order('full_name', { ascending: true });
-
-            if (error) throw error;
-
-            managersData = data || [];
-            renderTable();
-        } catch (error) {
-            console.error('Error fetching managers:', error);
-            tbody.innerHTML = `<tr><td colspan="5" class="loading" style="color:#c21825;">Failed to load managers: ${error.message}</td></tr>`;
-        }
-    }
-
-    // ==========================================
-    // RENDER TABLE
-    // ==========================================
-    function renderTable() {
-        const tbody = document.getElementById('managers-tbody');
-        if (managersData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="loading">No managers found. Click "+ Add Manager" to create one.</td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = managersData.map(m => `
-            <tr>
-                <td><strong>${m.full_name || '—'}</strong></td>
-                <td>${m.email || '—'}</td>
-                <td>${m.phone || '—'}</td>
-                <td><span class="status-badge">Active</span></td>
-                <td style="text-align:right;">
-                    <button class="action-btn edit" onclick="openEditModal('${m.user_id}', '${m.full_name || ''}', '${m.role || 'management'}')" title="Edit">✏️</button>
-                    <button class="action-btn delete" onclick="deleteManager('${m.user_id}', '${m.full_name || ''}')" title="Delete">🗑️</button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    // ==========================================
-    // ADD MANAGER
-    // ==========================================
-    async function submitAddManager(e) {
-        e.preventDefault();
-        const btn = document.getElementById('addSubmitBtn');
-        btn.disabled = true;
-        btn.textContent = 'Creating...';
-
-        const payload = {
-            action: 'create',
-            full_name: document.getElementById('addName').value.trim(),
-            email: document.getElementById('addEmail').value.trim(),
-            password: document.getElementById('addPassword').value,
-            role: document.getElementById('addRole').value,
-            project_id: null
-        };
-
-        try {
-            const { data, error } = await supabase.functions.invoke('admin-users', { body: payload });
-            if (error) throw error;
-            if (data.error) throw new Error(data.error);
-
-            showToast('Manager created successfully!', 'success');
-            closeModal('addModal');
-            fetchManagers();
-        } catch (error) {
-            console.error('Add error:', error);
-            showToast(error.message || 'Failed to create manager', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Create Manager';
-        }
-    }
-
-    // ==========================================
-    // EDIT MANAGER
-    // ==========================================
-    async function submitEditManager(e) {
-        e.preventDefault();
-        const btn = document.getElementById('editSubmitBtn');
-        btn.disabled = true;
-        btn.textContent = 'Saving...';
-
-        const payload = {
-            action: 'update',
-            user_id: document.getElementById('editUserId').value,
-            full_name: document.getElementById('editName').value.trim(),
-            role: document.getElementById('editRole').value,
-            project_id: null
-        };
-
-        try {
-            const { data, error } = await supabase.functions.invoke('admin-users', { body: payload });
-            if (error) throw error;
-            if (data.error) throw new Error(data.error);
-
-            showToast('Manager updated successfully!', 'success');
-            closeModal('editModal');
-            fetchManagers();
-        } catch (error) {
-            console.error('Update error:', error);
-            showToast(error.message || 'Failed to update manager', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Save Changes';
-        }
-    }
-
-    // ==========================================
-    // DELETE MANAGER
-    // ==========================================
-    async function deleteManager(userId, userName) {
-        const confirmed = confirm(`Are you sure you want to delete ${userName || 'this manager'}? This cannot be undone.`);
-        if (!confirmed) return;
-
-        try {
-            const { data, error } = await supabase.functions.invoke('admin-users', {
-                body: { action: 'delete', user_id: userId }
+    function initParticles(){
+        const count = Math.min(
+            CONFIG.maxParticles,
+            Math.floor((width * height) / CONFIG.density)
+        );
+        particles = [];
+        for(let i = 0; i < count; i++){
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * CONFIG.speed,
+                vy: (Math.random() - 0.5) * CONFIG.speed,
+                r: CONFIG.minRadius + Math.random() * (CONFIG.maxRadius - CONFIG.minRadius),
+                gold: Math.random() < CONFIG.goldRatio
             });
-            if (error) throw error;
-            if (data.error) throw new Error(data.error);
-
-            showToast('Manager deleted successfully!', 'success');
-            fetchManagers();
-        } catch (error) {
-            console.error('Delete error:', error);
-            showToast(error.message || 'Failed to delete manager', 'error');
         }
     }
 
-    // ==========================================
-    // INIT
-    // ==========================================
-    fetchManagers();
+    function update(){
+        for(const p of particles){
+            p.x += p.vx;
+            p.y += p.vy;
 
-    // ==========================================
-    // LIVE WALLPAPER (Particles)
-    // ==========================================
-    (function(){
-        const canvas = document.getElementById('liveWallpaper');
-        if(!canvas) return;
-        const ctx = canvas.getContext('2d');
-        let width, height, dpr;
-        let particles = [];
-        let animationId = null;
-        const CONFIG = { density: 12000, maxParticles: 140, minRadius: 1.2, maxRadius: 2.8, speed: 0.5, connectionDist: 180, goldRatio: 0.35, whiteDotAlpha: 0.85, goldDotAlpha: 1.0, lineAlpha: 0.35, glowBlur: 12 };
-
-        function resize(){
-            dpr = Math.min(window.devicePixelRatio || 1, 2);
-            width = window.innerWidth; height = window.innerHeight;
-            canvas.width = width * dpr; canvas.height = height * dpr;
-            canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            initParticles();
-        }
-        function initParticles(){
-            const count = Math.min(CONFIG.maxParticles, Math.floor((width * height) / CONFIG.density));
-            particles = [];
-            for(let i = 0; i < count; i++){
-                particles.push({
-                    x: Math.random() * width, y: Math.random() * height,
-                    vx: (Math.random() - 0.5) * CONFIG.speed, vy: (Math.random() - 0.5) * CONFIG.speed,
-                    r: CONFIG.minRadius + Math.random() * (CONFIG.maxRadius - CONFIG.minRadius),
-                    gold: Math.random() < CONFIG.goldRatio
-                });
-            }
-        }
-        function update(){
-            for(const p of particles){
-                p.x += p.vx; p.y += p.vy;
-                if(p.x < -10) p.x = width + 10; else if(p.x > width + 10) p.x = -10;
-                if(p.y < -10) p.y = height + 10; else if(p.y > height + 10) p.y = -10;
-            }
-        }
-        function draw(){
-            ctx.clearRect(0, 0, width, height);
-            for(let i = 0; i < particles.length; i++){
-                for(let j = i + 1; j < particles.length; j++){
-                    const a = particles[i], b = particles[j];
-                    const dx = a.x - b.x, dy = a.y - b.y;
-                    const distSq = dx*dx + dy*dy;
-                    const maxD = CONFIG.connectionDist;
-                    if(distSq < maxD * maxD){
-                        const dist = Math.sqrt(distSq);
-                        const alpha = (1 - dist / maxD) * CONFIG.lineAlpha;
-                        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
-                        ctx.strokeStyle = (a.gold && b.gold) ? `rgba(230,195,70,${alpha})` : `rgba(255,255,255,${alpha})`;
-                        ctx.lineWidth = 1.0; ctx.stroke();
-                    }
+            if(mouse.x !== null){
+                const dx = p.x - mouse.x;
+                const dy = p.y - mouse.y;
+                const distSq = dx*dx + dy*dy;
+                const radius = 160;
+                if(distSq < radius*radius && distSq > 1){
+                    const dist = Math.sqrt(distSq);
+                    const force = (1 - dist / radius) * 0.8;
+                    p.x += (dx / dist) * force;
+                    p.y += (dy / dist) * force;
                 }
             }
-            for(const p of particles){
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                if(p.gold){ ctx.fillStyle = `rgba(220,180,55,${CONFIG.goldDotAlpha})`; ctx.shadowColor = 'rgba(201,162,39,0.95)'; }
-                else { ctx.fillStyle = `rgba(255,255,255,${CONFIG.whiteDotAlpha})`; ctx.shadowColor = 'rgba(255,255,255,0.75)'; }
-                ctx.shadowBlur = CONFIG.glowBlur; ctx.fill(); ctx.shadowBlur = 0;
+
+            if(p.x < -10) p.x = width + 10;
+            else if(p.x > width + 10) p.x = -10;
+            if(p.y < -10) p.y = height + 10;
+            else if(p.y > height + 10) p.y = -10;
+        }
+    }
+
+    function draw(){
+        ctx.clearRect(0, 0, width, height);
+
+        // Connections
+        for(let i = 0; i < particles.length; i++){
+            for(let j = i + 1; j < particles.length; j++){
+                const a = particles[i];
+                const b = particles[j];
+                const dx = a.x - b.x;
+                const dy = a.y - b.y;
+                const distSq = dx*dx + dy*dy;
+                const maxD = CONFIG.connectionDist;
+                if(distSq < maxD * maxD){
+                    const dist = Math.sqrt(distSq);
+                    const alpha = (1 - dist / maxD) * CONFIG.lineAlpha;
+                    ctx.beginPath();
+                    ctx.moveTo(a.x, a.y);
+                    ctx.lineTo(b.x, b.y);
+
+                    if(a.gold && b.gold){
+                        ctx.strokeStyle = 'rgba(230, 195, 70, ' + alpha.toFixed(3) + ')';
+                    } else {
+                        ctx.strokeStyle = 'rgba(255, 255, 255, ' + alpha.toFixed(3) + ')';
+                    }
+
+                    ctx.lineWidth = 1.0;
+                    ctx.stroke();
+                }
             }
         }
-        function loop(){ update(); draw(); animationId = requestAnimationFrame(loop); }
-        function start(){ if(animationId) return; loop(); }
-        function stop(){ if(animationId){ cancelAnimationFrame(animationId); animationId = null; } }
-        window.addEventListener('resize', () => { resize(); });
-        document.addEventListener('visibilitychange', () => { document.hidden ? stop() : start(); });
-        resize(); start();
-    })();
+
+        // Dots
+        for(const p of particles){
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+
+            if(p.gold){
+                ctx.fillStyle = 'rgba(220, 180, 55, ' + CONFIG.goldDotAlpha + ')';
+                ctx.shadowColor = 'rgba(201, 162, 39, 0.95)';
+                ctx.shadowBlur = CONFIG.glowBlur;
+            } else {
+                ctx.fillStyle = 'rgba(255, 255, 255, ' + CONFIG.whiteDotAlpha + ')';
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.75)';
+                ctx.shadowBlur = CONFIG.glowBlur - 2;
+            }
+
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+    }
+
+    function loop(){
+        update();
+        draw();
+        animationId = requestAnimationFrame(loop);
+    }
+
+    function start(){
+        if(animationId) return;
+        if(prefersReducedMotion){
+            draw();
+            return;
+        }
+        loop();
+    }
+
+    function stop(){
+        if(animationId){
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
+    }
+
+    window.addEventListener('resize', () => {
+        resize();
+        if(prefersReducedMotion) draw();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+
+    window.addEventListener('mouseleave', () => {
+        mouse.x = null;
+        mouse.y = null;
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if(document.hidden){
+            stop();
+        } else {
+            start();
+        }
+    });
+
+    resize();
+    start();
+})();
 </script>
+
 </body>
 </html>
