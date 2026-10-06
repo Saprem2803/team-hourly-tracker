@@ -7310,8 +7310,19 @@ function renderCricketMatch(m) {
         m.status === "finished" ? "FT" :
         (m.status_text || "UPCOMING").toUpperCase().slice(0, 9);
 
-    const homeScore = m.home_score || "–";
-    const awayScore = m.away_score || "–";
+    // Prefer real scores; only show placeholder when truly unknown
+    let homeScore = m.home_score;
+    let awayScore = m.away_score;
+
+    const isBlank = (v) =>
+        !v || v === "-" || v === "–" || v === "null" || v === "undefined";
+
+    if (isBlank(homeScore)) {
+        homeScore = m.status === "live" ? "…" : "–";
+    }
+    if (isBlank(awayScore)) {
+        awayScore = m.status === "live" ? "…" : "–";
+    }
 
     return `
         <div class="cricket-match">
@@ -7331,29 +7342,113 @@ function renderCricketMatch(m) {
     `;
 }
 
+function isIndiaWestIndiesMatch(m) {
+    const h = (m.home || "").toLowerCase();
+    const a = (m.away || "").toLowerCase();
+    const isIndWi =
+        (h.includes("india") && a.includes("west")) ||
+        (h.includes("west") && a.includes("india"));
+    // Exclude A teams, legends, women
+    const isMain =
+        !h.includes("india a") && !a.includes("india a") &&
+        !h.includes("legend") && !a.includes("legend") &&
+        !h.includes("women") && !a.includes("women") &&
+        !h.includes("u19") && !a.includes("u19");
+    return isIndWi && isMain;
+}
+
+async function fetchLiveIndWiFromCricbuzz() {
+    // Match ID from Cricbuzz: IND vs WI 1st T20I Lucknow 2026
+    const matchId = "151565";
+    const proxies = [
+        `https://api.allorigins.win/raw?url=${encodeURIComponent("https://www.cricbuzz.com/live-cricket-scores/" + matchId)}`,
+        `https://corsproxy.io/?${encodeURIComponent("https://www.cricbuzz.com/live-cricket-scores/" + matchId)}`,
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent("https://www.cricbuzz.com/live-cricket-scores/" + matchId)}`
+    ];
+
+    for (const url of proxies) {
+        try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 6000);
+            const res = await fetch(url, { signal: controller.signal });
+            clearTimeout(timer);
+            if (!res.ok) continue;
+            const html = await res.text();
+
+            // Try several patterns used on Cricbuzz live pages
+            // e.g. "WI 55/3 (7.3)" or "West Indies 55-3 (7.3 Ov)"
+            let wiScore = null;
+            let indScore = null;
+
+            const wiPatterns = [
+                /(?:WI|West Indies)\s+(\d+\/\d+\s*\([^)]+\))/i,
+                /(?:WI|West Indies)\s+(\d+-\d+\s*\([^)]+\))/i,
+                /(?:WI|West Indies)[^0-9]{0,20}(\d+\/\d+)/i
+            ];
+            const indPatterns = [
+                /(?:IND|India)\s+(\d+\/\d+\s*\([^)]+\))/i,
+                /(?:IND|India)\s+(\d+-\d+\s*\([^)]+\))/i,
+                /(?:IND|India)[^0-9]{0,20}(\d+\/\d+)/i
+            ];
+
+            for (const p of wiPatterns) {
+                const m = html.match(p);
+                if (m) { wiScore = m[1].replace(/-/g, "/"); break; }
+            }
+            for (const p of indPatterns) {
+                const m = html.match(p);
+                if (m) { indScore = m[1].replace(/-/g, "/"); break; }
+            }
+
+            // Also catch "Yet to bat" style
+            if (!indScore && /India[^<]{0,40}Yet to bat/i.test(html)) {
+                indScore = "Yet to bat";
+            }
+            if (!wiScore && /West Indies[^<]{0,40}Yet to bat/i.test(html)) {
+                wiScore = "Yet to bat";
+            }
+
+            if (wiScore || indScore) {
+                return {
+                    home: "India",
+                    away: "West Indies",
+                    home_score: indScore || "Yet to bat",
+                    away_score: wiScore || "…",
+                    status: "live",
+                    status_text: "LIVE",
+                    competition: "1st T20I • Lucknow"
+                };
+            }
+        } catch (e) {
+            console.warn("Cricbuzz proxy failed:", url, e.message || e);
+        }
+    }
+    return null;
+}
+
 async function fetchCricketScores() {
     const content = document.getElementById("cricketContent");
     if (!content) return;
 
-    // Featured match: India vs West Indies 1st T20I (today 7 PM IST)
+    // Featured match: India vs West Indies 1st T20I (6 Oct 2026, 7 PM IST)
     const now = new Date();
     const istOffset = 5.5 * 60 * 60 * 1000;
     const istNow = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + istOffset);
-    const isMatchDay = istNow.getFullYear() === 2026 && istNow.getMonth() === 9 && istNow.getDate() === 6;
+    const isMatchDay =
+        istNow.getFullYear() === 2026 &&
+        istNow.getMonth() === 9 &&
+        istNow.getDate() === 6;
     const hour = istNow.getHours();
 
     let featured = null;
+
     if (isMatchDay) {
         let status = "upcoming";
         let statusText = "7:00 PM IST";
-        let homeScore = "–";
-        let awayScore = "–";
 
         if (hour >= 19 && hour < 23) {
             status = "live";
             statusText = "LIVE";
-            homeScore = "Yet to bat";
-            awayScore = "Yet to bat";
         } else if (hour >= 23 || hour < 5) {
             status = "finished";
             statusText = "FT";
@@ -7362,8 +7457,8 @@ async function fetchCricketScores() {
         featured = {
             home: "India",
             away: "West Indies",
-            home_score: homeScore,
-            away_score: awayScore,
+            home_score: null,   // filled from live sources — never hardcoded "Yet to bat" while live
+            away_score: null,
             status: status,
             status_text: statusText,
             competition: "1st T20I • Lucknow"
@@ -7371,42 +7466,72 @@ async function fetchCricketScores() {
     }
 
     try {
+        // 1) Try Cricbuzz (via CORS proxies) for accurate live score while match is on
+        if (featured && featured.status === "live") {
+            const live = await fetchLiveIndWiFromCricbuzz();
+            if (live) {
+                featured = live;
+            }
+        }
+
+        // 2) Sportscore API for other matches + fallback scores
         const res = await fetch(
-            "https://sportscore.com/api/widget/matches/?sport=cricket&limit=8"
+            "https://sportscore.com/api/widget/matches/?sport=cricket&limit=30"
         );
+
         let apiMatches = [];
 
         if (res.ok) {
             const data = await res.json();
-            apiMatches = (data.matches || []).filter(m => {
-                const h = (m.home || "").toLowerCase();
-                const a = (m.away || "").toLowerCase();
-                // Prefer India / major teams, skip pure minor domestic
-                return h.includes("india") || a.includes("india") ||
-                       h.includes("west ind") || a.includes("west ind") ||
-                       h.includes("australia") || a.includes("australia") ||
-                       h.includes("england") || a.includes("england") ||
-                       h.includes("pakistan") || a.includes("pakistan") ||
-                       h.includes("south africa") || a.includes("south africa");
-            }).slice(0, 2);
+            apiMatches = data.matches || [];
         }
+
+        // Merge real IND vs WI scores from sportscore if we still don't have them
+        if (featured) {
+            const indWi = apiMatches.find(isIndiaWestIndiesMatch);
+            if (indWi) {
+                const blank = (v) => !v || v === "-" || v === "–" || v === "null";
+                if (blank(featured.home_score) && !blank(indWi.home_score)) {
+                    // sportscore may swap home/away — map carefully
+                    const h = (indWi.home || "").toLowerCase();
+                    if (h.includes("india")) {
+                        featured.home_score = indWi.home_score;
+                        featured.away_score = indWi.away_score;
+                    } else {
+                        featured.home_score = indWi.away_score;
+                        featured.away_score = indWi.home_score;
+                    }
+                }
+                if (indWi.status === "live" || indWi.status === "finished") {
+                    featured.status = indWi.status;
+                }
+                if (indWi.status_text) {
+                    featured.status_text = indWi.status_text;
+                }
+            }
+        }
+
+        // Other interesting matches (exclude duplicate IND-WI)
+        const interesting = apiMatches.filter(m => {
+            if (isIndiaWestIndiesMatch(m)) return false;
+            const h = (m.home || "").toLowerCase();
+            const a = (m.away || "").toLowerCase();
+            return h.includes("india") || a.includes("india") ||
+                   h.includes("west ind") || a.includes("west ind") ||
+                   h.includes("australia") || a.includes("australia") ||
+                   h.includes("england") || a.includes("england") ||
+                   h.includes("pakistan") || a.includes("pakistan") ||
+                   h.includes("south africa") || a.includes("south africa");
+        }).slice(0, 2);
 
         let html = "";
 
-        // Always show featured IND vs WI first if available
         if (featured) {
             html += renderCricketMatch(featured);
         }
 
-        // Add other matches from API (avoid duplicate)
-        apiMatches.forEach(m => {
-            const isIndWi = (
-                ((m.home || "").toLowerCase().includes("india") && (m.away || "").toLowerCase().includes("west")) ||
-                ((m.home || "").toLowerCase().includes("west") && (m.away || "").toLowerCase().includes("india"))
-            );
-            if (!isIndWi) {
-                html += renderCricketMatch(m);
-            }
+        interesting.forEach(m => {
+            html += renderCricketMatch(m);
         });
 
         if (!html) {
@@ -7417,7 +7542,6 @@ async function fetchCricketScores() {
 
     } catch (err) {
         console.warn("Cricket widget error:", err);
-        // Still show featured match even if API fails
         if (featured) {
             content.innerHTML = renderCricketMatch(featured);
         } else {
@@ -7428,7 +7552,8 @@ async function fetchCricketScores() {
 
 function startCricketWidget() {
     fetchCricketScores();
-    setInterval(fetchCricketScores, 45000);
+    // Refresh every 30 seconds for live updates
+    setInterval(fetchCricketScores, 30000);
 
     const btn = document.getElementById("cricketRefresh");
     if (btn) {
