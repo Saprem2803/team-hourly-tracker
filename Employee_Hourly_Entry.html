@@ -160,6 +160,176 @@
             .clock-greeting { font-size: 10px; max-width: 170px; }
         }
 
+        /* =====================================================
+           CRICKET SCORE WIDGET — LIQUID GLASS
+        ===================================================== */
+
+        #cricketWidget {
+            position: fixed;
+            bottom: 18px;
+            left: 18px;
+            z-index: 200;
+            width: 260px;
+            padding: 12px 14px 10px;
+            border-radius: 18px;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.22),
+                rgba(255, 255, 255, 0.08)
+            );
+            backdrop-filter: blur(50px) saturate(200%);
+            -webkit-backdrop-filter: blur(50px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.55),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.10);
+            color: #ffffff;
+            font-size: 12px;
+            pointer-events: auto;
+            transition: opacity 0.3s ease;
+        }
+
+        #cricketWidget.hidden {
+            display: none !important;
+        }
+
+        .cricket-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 800;
+            font-size: 11px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .cricket-header span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .cricket-match {
+            padding: 8px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .cricket-match:first-of-type {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .cricket-teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 3px;
+        }
+
+        .cricket-team {
+            font-weight: 700;
+            font-size: 12.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 95px;
+        }
+
+        .cricket-score {
+            font-weight: 800;
+            font-size: 13px;
+            letter-spacing: -0.2px;
+            text-align: right;
+            min-width: 55px;
+        }
+
+        .cricket-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .cricket-status {
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 9px;
+        }
+
+        .cricket-status.live {
+            background: rgba(239, 68, 68, 0.85);
+            color: #fff;
+            animation: cricketPulse 1.5s ease-in-out infinite;
+        }
+
+        .cricket-status.finished {
+            background: rgba(255, 255, 255, 0.18);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .cricket-status.upcoming {
+            background: rgba(59, 130, 246, 0.7);
+            color: #fff;
+        }
+
+        @keyframes cricketPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.65; }
+        }
+
+        .cricket-comp {
+            max-width: 140px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cricket-footer {
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            font-size: 9px;
+            opacity: 0.65;
+            text-align: center;
+        }
+
+        .cricket-footer a {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+        }
+
+        .cricket-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .cricket-loading,
+        .cricket-empty {
+            text-align: center;
+            padding: 12px 0;
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            #cricketWidget {
+                bottom: 10px;
+                left: 10px;
+                width: 220px;
+                padding: 10px 12px 8px;
+                border-radius: 16px;
+            }
+            .cricket-team { font-size: 11.5px; max-width: 80px; }
+            .cricket-score { font-size: 12px; min-width: 48px; }
+        }
+
         button,
         input,
         select {
@@ -2129,6 +2299,21 @@
         Welcome
     </div>
 
+</div>
+
+
+<!-- Cricket Score Widget -->
+<div id="cricketWidget">
+    <div class="cricket-header">
+        <span>🏏 Cricket</span>
+        <span id="cricketRefresh" style="font-size:10px;opacity:0.7;cursor:pointer;" title="Refresh">↻</span>
+    </div>
+    <div id="cricketContent">
+        <div class="cricket-loading">Loading scores...</div>
+    </div>
+    <div class="cricket-footer">
+        <a href="https://sportscore.com/" target="_blank" rel="noopener">Powered by SportScore</a>
+    </div>
 </div>
 
 
@@ -7124,6 +7309,90 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
     }
 
 });
+
+
+/* =========================================================
+   CRICKET SCORE WIDGET
+========================================================= */
+
+async function fetchCricketScores() {
+    const content = document.getElementById("cricketContent");
+    if (!content) return;
+
+    try {
+        const res = await fetch(
+            "https://sportscore.com/api/widget/matches/?sport=cricket&limit=4"
+        );
+        if (!res.ok) throw new Error("Network error");
+
+        const data = await res.json();
+        const matches = (data.matches || []).slice(0, 2);
+
+        if (!matches.length) {
+            content.innerHTML = `<div class="cricket-empty">No matches right now</div>`;
+            return;
+        }
+
+        content.innerHTML = matches.map(m => {
+            const statusClass =
+                m.status === "live" ? "live" :
+                m.status === "finished" ? "finished" : "upcoming";
+
+            const statusLabel =
+                m.status === "live" ? "LIVE" :
+                m.status === "finished" ? "FT" :
+                (m.status_text || "UPCOMING").toUpperCase().slice(0, 8);
+
+            const homeScore = m.home_score || "–";
+            const awayScore = m.away_score || "–";
+
+            return `
+                <div class="cricket-match">
+                    <div class="cricket-teams">
+                        <div class="cricket-team" title="${m.home || ""}">${m.home || "TBD"}</div>
+                        <div class="cricket-score">${homeScore}</div>
+                    </div>
+                    <div class="cricket-teams">
+                        <div class="cricket-team" title="${m.away || ""}">${m.away || "TBD"}</div>
+                        <div class="cricket-score">${awayScore}</div>
+                    </div>
+                    <div class="cricket-meta">
+                        <span class="cricket-comp" title="${m.competition || ""}">${m.competition || ""}</span>
+                        <span class="cricket-status ${statusClass}">${statusLabel}</span>
+                    </div>
+                </div>
+            `;
+        }).join("");
+
+    } catch (err) {
+        console.warn("Cricket widget error:", err);
+        content.innerHTML = `<div class="cricket-empty">Unable to load scores</div>`;
+    }
+}
+
+function startCricketWidget() {
+    fetchCricketScores();
+
+    // Refresh every 60 seconds
+    setInterval(fetchCricketScores, 60000);
+
+    // Manual refresh
+    const btn = document.getElementById("cricketRefresh");
+    if (btn) {
+        btn.addEventListener("click", () => {
+            btn.style.transform = "rotate(360deg)";
+            btn.style.transition = "transform 0.5s ease";
+            fetchCricketScores().finally(() => {
+                setTimeout(() => {
+                    btn.style.transform = "";
+                }, 500);
+            });
+        });
+    }
+}
+
+// Start the cricket widget early (independent of login)
+startCricketWidget();
 
 
 /* =========================================================
