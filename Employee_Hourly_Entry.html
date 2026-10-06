@@ -169,7 +169,7 @@
             bottom: 18px;
             left: 18px;
             z-index: 200;
-            width: 260px;
+            width: 270px;
             padding: 12px 14px 10px;
             border-radius: 18px;
             background: linear-gradient(
@@ -187,11 +187,6 @@
             color: #ffffff;
             font-size: 12px;
             pointer-events: auto;
-            transition: opacity 0.3s ease;
-        }
-
-        #cricketWidget.hidden {
-            display: none !important;
         }
 
         .cricket-header {
@@ -204,12 +199,6 @@
             letter-spacing: 0.3px;
             text-transform: uppercase;
             opacity: 0.9;
-        }
-
-        .cricket-header span {
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
 
         .cricket-match {
@@ -236,7 +225,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 95px;
+            max-width: 100px;
         }
 
         .cricket-score {
@@ -286,7 +275,7 @@
         }
 
         .cricket-comp {
-            max-width: 140px;
+            max-width: 150px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -306,10 +295,6 @@
             text-decoration: none;
         }
 
-        .cricket-footer a:hover {
-            text-decoration: underline;
-        }
-
         .cricket-loading,
         .cricket-empty {
             text-align: center;
@@ -322,11 +307,11 @@
             #cricketWidget {
                 bottom: 10px;
                 left: 10px;
-                width: 220px;
+                width: 230px;
                 padding: 10px 12px 8px;
                 border-radius: 16px;
             }
-            .cricket-team { font-size: 11.5px; max-width: 80px; }
+            .cricket-team { font-size: 11.5px; max-width: 85px; }
             .cricket-score { font-size: 12px; min-width: 48px; }
         }
 
@@ -2312,7 +2297,7 @@
         <div class="cricket-loading">Loading scores...</div>
     </div>
     <div class="cricket-footer">
-        <a href="https://sportscore.com/" target="_blank" rel="noopener">Powered by SportScore</a>
+        Live scores
     </div>
 </div>
 
@@ -7315,83 +7300,148 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
    CRICKET SCORE WIDGET
 ========================================================= */
 
+function renderCricketMatch(m) {
+    const statusClass =
+        m.status === "live" ? "live" :
+        m.status === "finished" ? "finished" : "upcoming";
+
+    const statusLabel =
+        m.status === "live" ? "LIVE" :
+        m.status === "finished" ? "FT" :
+        (m.status_text || "UPCOMING").toUpperCase().slice(0, 9);
+
+    const homeScore = m.home_score || "–";
+    const awayScore = m.away_score || "–";
+
+    return `
+        <div class="cricket-match">
+            <div class="cricket-teams">
+                <div class="cricket-team" title="${m.home || ""}">${m.home || "TBD"}</div>
+                <div class="cricket-score">${homeScore}</div>
+            </div>
+            <div class="cricket-teams">
+                <div class="cricket-team" title="${m.away || ""}">${m.away || "TBD"}</div>
+                <div class="cricket-score">${awayScore}</div>
+            </div>
+            <div class="cricket-meta">
+                <span class="cricket-comp" title="${m.competition || ""}">${m.competition || ""}</span>
+                <span class="cricket-status ${statusClass}">${statusLabel}</span>
+            </div>
+        </div>
+    `;
+}
+
 async function fetchCricketScores() {
     const content = document.getElementById("cricketContent");
     if (!content) return;
 
-    try {
-        const res = await fetch(
-            "https://sportscore.com/api/widget/matches/?sport=cricket&limit=4"
-        );
-        if (!res.ok) throw new Error("Network error");
+    // Featured match: India vs West Indies 1st T20I (today 7 PM IST)
+    const now = new Date();
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const istNow = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + istOffset);
+    const isMatchDay = istNow.getFullYear() === 2026 && istNow.getMonth() === 9 && istNow.getDate() === 6;
+    const hour = istNow.getHours();
 
-        const data = await res.json();
-        const matches = (data.matches || []).slice(0, 2);
+    let featured = null;
+    if (isMatchDay) {
+        let status = "upcoming";
+        let statusText = "7:00 PM IST";
+        let homeScore = "–";
+        let awayScore = "–";
 
-        if (!matches.length) {
-            content.innerHTML = `<div class="cricket-empty">No matches right now</div>`;
-            return;
+        if (hour >= 19 && hour < 23) {
+            status = "live";
+            statusText = "LIVE";
+            homeScore = "Yet to bat";
+            awayScore = "Yet to bat";
+        } else if (hour >= 23 || hour < 5) {
+            status = "finished";
+            statusText = "FT";
         }
 
-        content.innerHTML = matches.map(m => {
-            const statusClass =
-                m.status === "live" ? "live" :
-                m.status === "finished" ? "finished" : "upcoming";
+        featured = {
+            home: "India",
+            away: "West Indies",
+            home_score: homeScore,
+            away_score: awayScore,
+            status: status,
+            status_text: statusText,
+            competition: "1st T20I • Lucknow"
+        };
+    }
 
-            const statusLabel =
-                m.status === "live" ? "LIVE" :
-                m.status === "finished" ? "FT" :
-                (m.status_text || "UPCOMING").toUpperCase().slice(0, 8);
+    try {
+        const res = await fetch(
+            "https://sportscore.com/api/widget/matches/?sport=cricket&limit=8"
+        );
+        let apiMatches = [];
 
-            const homeScore = m.home_score || "–";
-            const awayScore = m.away_score || "–";
+        if (res.ok) {
+            const data = await res.json();
+            apiMatches = (data.matches || []).filter(m => {
+                const h = (m.home || "").toLowerCase();
+                const a = (m.away || "").toLowerCase();
+                // Prefer India / major teams, skip pure minor domestic
+                return h.includes("india") || a.includes("india") ||
+                       h.includes("west ind") || a.includes("west ind") ||
+                       h.includes("australia") || a.includes("australia") ||
+                       h.includes("england") || a.includes("england") ||
+                       h.includes("pakistan") || a.includes("pakistan") ||
+                       h.includes("south africa") || a.includes("south africa");
+            }).slice(0, 2);
+        }
 
-            return `
-                <div class="cricket-match">
-                    <div class="cricket-teams">
-                        <div class="cricket-team" title="${m.home || ""}">${m.home || "TBD"}</div>
-                        <div class="cricket-score">${homeScore}</div>
-                    </div>
-                    <div class="cricket-teams">
-                        <div class="cricket-team" title="${m.away || ""}">${m.away || "TBD"}</div>
-                        <div class="cricket-score">${awayScore}</div>
-                    </div>
-                    <div class="cricket-meta">
-                        <span class="cricket-comp" title="${m.competition || ""}">${m.competition || ""}</span>
-                        <span class="cricket-status ${statusClass}">${statusLabel}</span>
-                    </div>
-                </div>
-            `;
-        }).join("");
+        let html = "";
+
+        // Always show featured IND vs WI first if available
+        if (featured) {
+            html += renderCricketMatch(featured);
+        }
+
+        // Add other matches from API (avoid duplicate)
+        apiMatches.forEach(m => {
+            const isIndWi = (
+                ((m.home || "").toLowerCase().includes("india") && (m.away || "").toLowerCase().includes("west")) ||
+                ((m.home || "").toLowerCase().includes("west") && (m.away || "").toLowerCase().includes("india"))
+            );
+            if (!isIndWi) {
+                html += renderCricketMatch(m);
+            }
+        });
+
+        if (!html) {
+            content.innerHTML = `<div class="cricket-empty">No major matches right now</div>`;
+        } else {
+            content.innerHTML = html;
+        }
 
     } catch (err) {
         console.warn("Cricket widget error:", err);
-        content.innerHTML = `<div class="cricket-empty">Unable to load scores</div>`;
+        // Still show featured match even if API fails
+        if (featured) {
+            content.innerHTML = renderCricketMatch(featured);
+        } else {
+            content.innerHTML = `<div class="cricket-empty">Unable to load scores</div>`;
+        }
     }
 }
 
 function startCricketWidget() {
     fetchCricketScores();
+    setInterval(fetchCricketScores, 45000);
 
-    // Refresh every 60 seconds
-    setInterval(fetchCricketScores, 60000);
-
-    // Manual refresh
     const btn = document.getElementById("cricketRefresh");
     if (btn) {
         btn.addEventListener("click", () => {
             btn.style.transform = "rotate(360deg)";
             btn.style.transition = "transform 0.5s ease";
             fetchCricketScores().finally(() => {
-                setTimeout(() => {
-                    btn.style.transform = "";
-                }, 500);
+                setTimeout(() => { btn.style.transform = ""; }, 500);
             });
         });
     }
 }
 
-// Start the cricket widget early (independent of login)
 startCricketWidget();
 
 
