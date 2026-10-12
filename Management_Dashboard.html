@@ -3365,7 +3365,7 @@ sb.auth.onAuthStateChange(async (event) => {
 
 
 <!-- ============================================================
-     LIVE WALLPAPER — Golden + Silver Dots with Bright Light Rays
+     LIVE WALLPAPER — Executive Aurora with Flowing Waves
 ============================================================ -->
 <script>
 (function(){
@@ -3376,15 +3376,29 @@ sb.auth.onAuthStateChange(async (event) => {
     if(!ctx) return;
 
     var W = 0, H = 0, DPR = 1;
-    var particles = [];
-    var COUNT = 90;
-    var LINK_DISTANCE = 200;
     var rafId = null;
     var lastFrame = 0;
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    var GOLD   = { r: 255, g: 215, b: 90  };
-    var SILVER = { r: 215, g: 230, b: 255 };
+    /* Soft drifting light orbs (aurora glow) */
+    var orbs = [
+        { x:.12, y:.18, r:.60, c:[26,77,122],   a:.34, sx:.00011, sy:.00008, ph:0.0 },
+        { x:.88, y:.78, r:.65, c:[45,110,168],  a:.28, sx:.00009, sy:.00012, ph:1.7 },
+        { x:.55, y:.45, r:.42, c:[201,162,39],  a:.07, sx:.00013, sy:.00010, ph:3.1 },
+        { x:.82, y:.12, r:.38, c:[70,140,210],  a:.16, sx:.00010, sy:.00009, ph:4.6 }
+    ];
+
+    /* Layered flowing wave ribbons */
+    var waves = [
+        { base:.30, amp:46, freq:.0021, speed:.00028, ph:0.0, c:[120,170,225], a:.20, w:1.6 },
+        { base:.42, amp:58, freq:.0017, speed:.00022, ph:1.3, c:[201,162,39],  a:.16, w:1.4 },
+        { base:.54, amp:52, freq:.0024, speed:.00031, ph:2.6, c:[150,195,240], a:.18, w:1.6 },
+        { base:.66, amp:64, freq:.0015, speed:.00020, ph:3.9, c:[201,162,39],  a:.12, w:1.2 },
+        { base:.76, amp:48, freq:.0022, speed:.00026, ph:5.2, c:[100,155,215], a:.18, w:1.5 },
+        { base:.86, amp:40, freq:.0019, speed:.00018, ph:0.8, c:[180,210,245], a:.12, w:1.2 }
+    ];
+
+    function rgba(c, a){ return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
 
     function resize(){
         DPR = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -3397,136 +3411,62 @@ sb.auth.onAuthStateChange(async (event) => {
         canvas.style.height = H + 'px';
 
         ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
-        if(!particles.length) initParticles();
-    }
-
-    function initParticles(){
-        particles = [];
-
-        for(var i = 0; i < COUNT; i++){
-            var isGolden = Math.random() < 0.55;
-            particles.push({
-                x: Math.random() * W,
-                y: Math.random() * H,
-                vx: (Math.random() - 0.5) * 0.28,
-                vy: (Math.random() - 0.5) * 0.28,
-                r: Math.random() * 1.6 + 0.9,
-                phase: Math.random() * Math.PI * 2,
-                speed: Math.random() * 0.018 + 0.008,
-                drift: Math.random() * 0.18 + 0.05,
-                color: isGolden ? GOLD : SILVER
-            });
-        }
-    }
-
-    function colorStr(c, a){
-        return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + a + ')';
     }
 
     function draw(now){
         ctx.clearRect(0, 0, W, H);
 
+        /* Orbs */
         ctx.globalCompositeOperation = 'lighter';
+        var size = Math.max(W, H);
 
-        for(var i = 0; i < particles.length; i++){
-            var p1 = particles[i];
-            for(var j = i + 1; j < particles.length; j++){
-                var p2 = particles[j];
+        for(var i = 0; i < orbs.length; i++){
+            var o = orbs[i];
+            var cx = (o.x + Math.sin(now * o.sx + o.ph) * 0.12) * W;
+            var cy = (o.y + Math.cos(now * o.sy + o.ph) * 0.12) * H;
+            var rad = o.r * size;
 
-                var dx = p2.x - p1.x;
-                var dy = p2.y - p1.y;
-                var distSq = dx * dx + dy * dy;
-
-                if(distSq > LINK_DISTANCE * LINK_DISTANCE) continue;
-
-                var dist = Math.sqrt(distSq);
-                var proximity = 1 - (dist / LINK_DISTANCE);
-
-                var pulse1 = 0.58 + Math.sin(p1.phase) * 0.42;
-                var pulse2 = 0.58 + Math.sin(p2.phase) * 0.42;
-                var pulseAvg = (pulse1 + pulse2) * 0.5;
-
-                var rc = Math.round((p1.color.r + p2.color.r) * 0.5);
-                var gc = Math.round((p1.color.g + p2.color.g) * 0.5);
-                var bc = Math.round((p1.color.b + p2.color.b) * 0.5);
-
-                var lineAlpha = proximity * proximity * 0.55 * pulseAvg;
-
-                ctx.strokeStyle = 'rgba(' + rc + ',' + gc + ',' + bc + ',' + lineAlpha.toFixed(3) + ')';
-                ctx.lineWidth = 1.3;
-                ctx.beginPath();
-                ctx.moveTo(p1.x, p1.y);
-                ctx.lineTo(p2.x, p2.y);
-                ctx.stroke();
-            }
+            var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+            g.addColorStop(0,   rgba(o.c, o.a));
+            g.addColorStop(0.5, rgba(o.c, o.a * 0.35));
+            g.addColorStop(1,   rgba(o.c, 0));
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, W, H);
         }
 
+        /* Waves */
         ctx.globalCompositeOperation = 'source-over';
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
 
-        for(var k = 0; k < particles.length; k++){
-            var p = particles[k];
-            var c = p.color;
+        for(var k = 0; k < waves.length; k++){
+            var wv = waves[k];
+            var yBase = wv.base * H;
 
-            p.x += p.vx;
-            p.y += p.vy;
-            p.phase += p.speed;
-
-            p.x += Math.sin(p.phase * 0.7) * p.drift * 0.08;
-            p.y += Math.cos(p.phase * 0.55) * p.drift * 0.08;
-
-            if(p.x < -10) p.x = W + 10;
-            if(p.x > W + 10) p.x = -10;
-            if(p.y < -10) p.y = H + 10;
-            if(p.y > H + 10) p.y = -10;
-
-            var pulse = 0.58 + Math.sin(p.phase) * 0.32;
-            var radius = p.r * (0.9 + pulse * 0.22);
-
-            var glow = ctx.createRadialGradient(
-                p.x, p.y, 0,
-                p.x, p.y, radius * 5
-            );
-            glow.addColorStop(0,   colorStr(c, 0.55 * pulse));
-            glow.addColorStop(0.4, colorStr(c, 0.22 * pulse));
-            glow.addColorStop(1,   colorStr(c, 0));
-
-            ctx.globalCompositeOperation = 'lighter';
-            ctx.fillStyle = glow;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, radius * 5, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.shadowColor = colorStr(c, 0.95);
-            ctx.shadowBlur  = 10 + pulse * 6;
-            ctx.fillStyle   = colorStr(c, 0.85 + pulse * 0.15);
+            var lg = ctx.createLinearGradient(0, 0, W, 0);
+            lg.addColorStop(0,    rgba(wv.c, 0));
+            lg.addColorStop(0.25, rgba(wv.c, wv.a));
+            lg.addColorStop(0.75, rgba(wv.c, wv.a));
+            lg.addColorStop(1,    rgba(wv.c, 0));
 
             ctx.beginPath();
-            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.shadowBlur = 0;
-            var spec = ctx.createRadialGradient(
-                p.x - radius * 0.3, p.y - radius * 0.3, 0,
-                p.x - radius * 0.3, p.y - radius * 0.3, radius * 0.5
-            );
-            spec.addColorStop(0, 'rgba(255,255,255,' + (0.9 * pulse).toFixed(3) + ')');
-            spec.addColorStop(1, 'rgba(255,255,255,0)');
-            ctx.fillStyle = spec;
-            ctx.beginPath();
-            ctx.arc(p.x - radius * 0.3, p.y - radius * 0.3, radius * 0.5, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.globalCompositeOperation = 'source-over';
+            for(var x = 0; x <= W + 8; x += 8){
+                var y = yBase
+                    + Math.sin(x * wv.freq + now * wv.speed + wv.ph) * wv.amp
+                    + Math.sin(x * wv.freq * 0.5 - now * wv.speed * 0.7 + wv.ph) * wv.amp * 0.6;
+                if(x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = lg;
+            ctx.lineWidth = wv.w;
+            ctx.stroke();
         }
-
-        ctx.shadowBlur = 0;
     }
 
     function loop(now){
         rafId = requestAnimationFrame(loop);
 
-        if(now - lastFrame < 32) return;
+        if(now - lastFrame < 33) return;
         lastFrame = now;
 
         draw(now);
