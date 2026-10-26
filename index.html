@@ -45,7 +45,6 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 .report-date-fields { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
 
 .section { margin-bottom: 28px; }
-/* Section titles now sit on a bright sky — dark text for contrast */
 .section-title { font-size: 18px; font-weight: bold; margin-bottom: 14px; color: #0c2b47 !important; text-shadow: 0 1px 0 rgba(255,255,255,0.7); }
 
 .holiday-banner {
@@ -235,7 +234,7 @@ td.left { text-align: left; }
 .message.success { background: #198754; }
 .message.error { background: #dc3545; }
 
-.auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #fdf2f4; padding: 20px; }
+.auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: transparent; padding: 20px; }
 .auth-card { width: 100%; max-width: 420px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 20px; padding: 30px; box-shadow: 0 8px 30px rgba(0,0,0,.10); border: 1px solid rgba(255,255,255,0.8); }
 .auth-card h2 { margin: 0 0 8px; color: #4a0a18; }
 .auth-card p { color: #64748b; font-size: 13px; margin: 0 0 20px; }
@@ -298,92 +297,9 @@ td.left { text-align: left; }
     .report-date-group input { width: 100%; }
 }
 </style>
-
-<!-- ============================================================
-     LIVE SKY WALLPAPER — STYLES
-============================================================ -->
-<style>
-body {
-    background-color: #7fb6e8 !important;
-    background-image: linear-gradient(180deg,
-        #0f4a8f 0%,
-        #1f66b4 12%,
-        #3c86cf 26%,
-        #5da3de 42%,
-        #85beea 58%,
-        #aed6f4 72%,
-        #d0e8fa 84%,
-        #ecf6fd 94%,
-        #fbf3e4 100%) !important;
-    background-repeat: no-repeat !important;
-    background-size: 100% 100% !important;
-    background-attachment: fixed !important;
-    min-height: 100vh;
-}
-
-#liveWallpaper {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 1;
-    transition: opacity .4s ease;
-}
-body.wp-off #liveWallpaper { opacity: 0; }
-
-#appHeader, #appContainer, #authScreen { position: relative; z-index: 1; }
-#appHeader { z-index: 10; }
-
-/* let the sky show through the sign-in screen */
-.auth-screen { background: transparent !important; }
-
-.header {
-    background: linear-gradient(135deg, rgba(58,10,19,.88), rgba(194,24,37,.74)) !important;
-    backdrop-filter: blur(14px) saturate(160%);
-    -webkit-backdrop-filter: blur(14px) saturate(160%);
-    border-bottom: 1px solid rgba(255,255,255,.18);
-    box-shadow: 0 8px 28px rgba(6,30,60,.28);
-}
-
-.wp-toggle {
-    position: fixed;
-    right: 22px;
-    bottom: 22px;
-    z-index: 500;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(11,40,72,.30);
-    border: 1px solid rgba(255,255,255,.50);
-    color: #ffffff;
-    font-size: 16px;
-    line-height: 1;
-    cursor: pointer;
-    font-family: inherit;
-    backdrop-filter: blur(12px) saturate(160%);
-    -webkit-backdrop-filter: blur(12px) saturate(160%);
-    box-shadow: 0 6px 20px rgba(6,30,60,.30);
-    transition: all .18s ease;
-}
-.wp-toggle:hover {
-    background: rgba(11,40,72,.48);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 26px rgba(6,30,60,.40);
-}
-.wp-toggle.off { color: rgba(255,255,255,.6); opacity: .65; }
-</style>
 </head>
 
 <body>
-
-<!-- LIVE SKY WALLPAPER -->
-<canvas id="liveWallpaper"></canvas>
-<button id="wallpaperToggle" class="wp-toggle" type="button" title="Toggle live sky wallpaper" aria-label="Toggle live sky wallpaper">◐</button>
 
 <!-- LOGIN -->
 <div id="authScreen" class="auth-screen">
@@ -2894,285 +2810,216 @@ startApplication();
 </script>
 
 <!-- ============================================================
-     LIVE SKY WALLPAPER — realistic sky + drifting clouds
+     PRO WALLPAPER — gradient + drifting blobs + waves + network
 ============================================================ -->
 <script>
 (function () {
-    var canvas = document.getElementById('liveWallpaper');
-    if (!canvas) return;
+    /* ---- switch off + remove the old sky wallpaper ---- */
+    try { window.dispatchEvent(new CustomEvent('wallpaper:toggle', { detail: { on: false } })); } catch (e) {}
+    ['liveWallpaper', 'wallpaperToggle'].forEach(function (id) {
+        var el = document.getElementById(id); if (el) el.remove();
+    });
+
+    /* ---- styles ---- */
+    var css = document.createElement('style');
+    css.textContent = [
+        'body{background-color:#e9f1fb!important;',
+        ' background-image:linear-gradient(135deg,#dfeafa 0%,#eef3fb 38%,#fbeef2 72%,#f6e3e8 100%)!important;',
+        ' background-attachment:fixed!important;background-size:100% 100%!important;}',
+        '#proBg{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;transition:opacity .5s ease;}',
+        'body.pro-wp-off #proBg,body.pro-wp-off #proGrid{opacity:0;}',
+        '#proGrid{position:fixed;inset:0;pointer-events:none;z-index:0;transition:opacity .5s ease;',
+        ' background-image:linear-gradient(rgba(30,64,120,.055) 1px,transparent 1px),',
+        ' linear-gradient(90deg,rgba(30,64,120,.055) 1px,transparent 1px);background-size:46px 46px;',
+        ' -webkit-mask-image:radial-gradient(ellipse at 50% 35%,#000 0%,transparent 78%);',
+        ' mask-image:radial-gradient(ellipse at 50% 35%,#000 0%,transparent 78%);}',
+        '#proWpToggle{position:fixed;right:22px;bottom:22px;z-index:500;width:44px;height:44px;border-radius:50%;',
+        ' display:flex;align-items:center;justify-content:center;background:rgba(74,10,24,.72);color:#fff;',
+        ' border:1px solid rgba(255,255,255,.55);font-size:16px;cursor:pointer;font-family:inherit;padding:0;',
+        ' backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 6px 20px rgba(74,10,24,.35);transition:all .18s ease;}',
+        '#proWpToggle:hover{transform:translateY(-2px);background:rgba(194,24,37,.9);}',
+        '#proWpToggle.off{opacity:.6;}'
+    ].join('');
+    document.head.appendChild(css);
+
+    /* ---- elements ---- */
+    var grid = document.createElement('div'); grid.id = 'proGrid';
+    var canvas = document.createElement('canvas'); canvas.id = 'proBg';
+    document.body.insertBefore(canvas, document.body.firstChild);
+    document.body.insertBefore(grid, document.body.firstChild);
+    var btn = document.createElement('button');
+    btn.id = 'proWpToggle'; btn.type = 'button'; btn.textContent = '◐';
+    btn.title = 'Toggle live wallpaper'; btn.setAttribute('aria-label', 'Toggle live wallpaper');
+    document.body.appendChild(btn);
+
     var ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    var W = 0, H = 0, DPR = 1, SF = 1;
-    var clouds = [], sprites = [];
-    var rafId = null, lastFrame = 0;
+    var W = 0, H = 0, DPR = 1, rafId = null, last = 0, T = 0;
     var P = { x: 0, y: 0, tx: 0, ty: 0 };
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    var SPRITE_W = 320, SPRITE_H = 190, SS = 2;  // SS = supersampling factor
+    /* soft colour blobs that drift slowly */
+    var blobs = [
+        { c: '37,99,235',  a: .30, r: .46, fx: .00021, fy: .00017, px: .0, py: .5, cx: .22, cy: .28 },
+        { c: '194,24,37',  a: .22, r: .42, fx: .00016, fy: .00023, px: 1.7, py: .9, cx: .82, cy: .30 },
+        { c: '14,165,164', a: .24, r: .40, fx: .00019, fy: .00014, px: 3.1, py: 2.0, cx: .55, cy: .78 },
+        { c: '245,158,11', a: .17, r: .34, fx: .00013, fy: .00020, px: 4.4, py: 1.2, cx: .12, cy: .82 },
+        { c: '124,58,237', a: .15, r: .36, fx: .00018, fy: .00012, px: 5.2, py: 3.3, cx: .90, cy: .75 }
+    ];
 
-    /* ---------- deterministic RNG so the cloud shapes are stable ---------- */
-    function mulberry32(a) {
-        return function () {
-            a |= 0; a = a + 0x6D2B79F5 | 0;
-            var t = Math.imul(a ^ a >>> 15, 1 | a);
-            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-            return ((t ^ t >>> 14) >>> 0) / 4294967296;
-        };
-    }
+    /* layered waves along the bottom */
+    var waves = [
+        { c: '37,99,235',  a: .20, base: .80, amp: 38, len: .0042, sp: .00055, ph: 0 },
+        { c: '194,24,37',  a: .15, base: .86, amp: 30, len: .0056, sp: -.00045, ph: 2 },
+        { c: '14,165,164', a: .16, base: .92, amp: 24, len: .0070, sp: .00070, ph: 4 }
+    ];
 
-    /* ---------- pre-render one soft, volumetric cloud sprite ---------- */
-    function makeCloudSprite(seed) {
-        var rnd = mulberry32(seed);
-        var cv = document.createElement('canvas');
-        cv.width  = SPRITE_W * SS;
-        cv.height = SPRITE_H * SS;
-        var g = cv.getContext('2d');
-        g.scale(SS, SS);
-
-        var baseY = SPRITE_H * 0.66;
-        var puffs = 16 + Math.floor(rnd() * 12);
-
-        // build the cloud body from many overlapping soft puffs
-        g.globalCompositeOperation = 'lighter';
-        for (var i = 0; i < puffs; i++) {
-            var t   = puffs === 1 ? 0.5 : i / (puffs - 1);
-            var arc = Math.sin(Math.PI * (0.08 + t * 0.84));
-            var cx  = SPRITE_W * (0.10 + t * 0.80) + (rnd() - 0.5) * SPRITE_W * 0.10;
-            var r   = SPRITE_H * (0.10 + rnd() * 0.12) * (0.55 + arc * 1.05);
-            var cy  = baseY - arc * SPRITE_H * 0.30 - rnd() * SPRITE_H * 0.08;
-
-            var grad = g.createRadialGradient(cx, cy, 0, cx, cy, r);
-            grad.addColorStop(0,    'rgba(255,255,255,0.85)');
-            grad.addColorStop(0.45, 'rgba(255,255,255,0.55)');
-            grad.addColorStop(0.78, 'rgba(255,255,255,0.18)');
-            grad.addColorStop(1,    'rgba(255,255,255,0)');
-            g.fillStyle = grad;
-            g.beginPath();
-            g.arc(cx, cy, r, 0, Math.PI * 2);
-            g.fill();
+    /* floating data-network particles */
+    var dots = [];
+    function initDots() {
+        var n = Math.max(28, Math.min(80, Math.round(W * H / 22000)));
+        dots = [];
+        for (var i = 0; i < n; i++) {
+            dots.push({
+                x: Math.random() * W, y: Math.random() * H,
+                vx: (Math.random() - .5) * .28, vy: (Math.random() - .5) * .28,
+                r: 1.2 + Math.random() * 1.6, z: .4 + Math.random() * .9
+            });
         }
-        g.globalCompositeOperation = 'source-over';
-
-        // cool shading on the underside → gives the cloud volume
-        g.globalCompositeOperation = 'source-atop';
-        var shade = g.createLinearGradient(0, SPRITE_H * 0.35, 0, SPRITE_H);
-        shade.addColorStop(0,    'rgba(146,168,196,0)');
-        shade.addColorStop(0.55, 'rgba(146,168,196,0.16)');
-        shade.addColorStop(1,    'rgba(120,146,180,0.42)');
-        g.fillStyle = shade;
-        g.fillRect(0, 0, SPRITE_W, SPRITE_H);
-
-        // warm sunlit highlight on top
-        var light = g.createLinearGradient(0, 0, 0, SPRITE_H * 0.55);
-        light.addColorStop(0, 'rgba(255,253,245,0.30)');
-        light.addColorStop(1, 'rgba(255,253,245,0)');
-        g.fillStyle = light;
-        g.fillRect(0, 0, SPRITE_W, SPRITE_H);
-        g.globalCompositeOperation = 'source-over';
-
-        return cv;
     }
 
-    /* ---------- cloud field: three depth layers ---------- */
-    function initClouds() {
-        sprites = [];
-        for (var s = 0; s < 6; s++) sprites.push(makeCloudSprite(1000 + s * 137));
-
-        var layers = [
-            // far / small / slow / faint
-            { n: 5, sMin: 0.55, sMax: 0.95, vMin: 5,  vMax: 11, aMin: 0.35, aMax: 0.60, yMin: 0.02, yMax: 0.26 },
-            // mid
-            { n: 4, sMin: 1.00, sMax: 1.60, vMin: 11, vMax: 20, aMin: 0.60, aMax: 0.85, yMin: 0.10, yMax: 0.38 },
-            // near / large / fast
-            { n: 3, sMin: 1.90, sMax: 2.80, vMin: 20, vMax: 34, aMin: 0.80, aMax: 1.00, yMin: 0.18, yMax: 0.48 }
-        ];
-
-        clouds = [];
-        layers.forEach(function (d, layer) {
-            for (var i = 0; i < d.n; i++) {
-                var scale = d.sMin + Math.random() * (d.sMax - d.sMin);
-                var w = SPRITE_W * scale;
-                clouds.push({
-                    sprite: sprites[Math.floor(Math.random() * sprites.length)],
-                    scale: scale,
-                    x: Math.random() * (W + w) - w,
-                    y: d.yMin + Math.random() * (d.yMax - d.yMin),
-                    speed: d.vMin + Math.random() * (d.vMax - d.vMin),
-                    alpha: d.aMin + Math.random() * (d.aMax - d.aMin),
-                    flip: Math.random() < 0.5,
-                    depth: layer
-                });
-            }
-        });
-
-        clouds.sort(function (a, b) { return a.depth - b.depth; });
-    }
-
-    /* ---------- sun glow ---------- */
-    function drawSun() {
-        var sx = W * 0.76, sy = H * 0.12;
-        var r  = Math.max(W, H) * 0.45;
-        var g  = ctx.createRadialGradient(sx, sy, 0, sx, sy, r);
-        g.addColorStop(0,    'rgba(255,251,236,0.55)');
-        g.addColorStop(0.12, 'rgba(255,247,222,0.26)');
-        g.addColorStop(0.35, 'rgba(255,240,205,0.10)');
-        g.addColorStop(1,    'rgba(255,240,205,0)');
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(sx, sy, r, 0, Math.PI * 2);
-        ctx.fill();
+    function drawBlobs() {
+        var m = Math.max(W, H);
         ctx.globalCompositeOperation = 'source-over';
+        for (var i = 0; i < blobs.length; i++) {
+            var b = blobs[i];
+            var x = (b.cx + Math.sin(T * b.fx + b.px) * .16) * W + P.x * 24;
+            var y = (b.cy + Math.cos(T * b.fy + b.py) * .14) * H + P.y * 18;
+            var r = b.r * m;
+            var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+            g.addColorStop(0,   'rgba(' + b.c + ',' + b.a + ')');
+            g.addColorStop(.55, 'rgba(' + b.c + ',' + (b.a * .38) + ')');
+            g.addColorStop(1,   'rgba(' + b.c + ',0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, W, H);
+        }
     }
 
-    /* ---------- warm haze near the horizon ---------- */
-    function drawHaze() {
-        var top = H * 0.72;
-        var g = ctx.createLinearGradient(0, top, 0, H);
-        g.addColorStop(0, 'rgba(255,252,246,0)');
-        g.addColorStop(1, 'rgba(255,252,246,0.22)');
-        ctx.fillStyle = g;
-        ctx.fillRect(0, top, W, H - top);
-    }
-
-    /* ---------- draw the clouds ---------- */
-    function drawClouds() {
-        for (var i = 0; i < clouds.length; i++) {
-            var c = clouds[i];
-            var w = SPRITE_W * c.scale * SF;
-            var h = SPRITE_H * c.scale * SF;
-
-            var px = c.x + P.x * (8 + c.depth * 12);
-            var py = c.y * H + P.y * (5 + c.depth * 8);
-
-            ctx.globalAlpha = c.alpha;
-            if (c.flip) {
-                ctx.save();
-                ctx.translate(px + w, py);
-                ctx.scale(-1, 1);
-                ctx.drawImage(c.sprite, 0, 0, w, h);
-                ctx.restore();
-            } else {
-                ctx.drawImage(c.sprite, px, py, w, h);
+    function drawWaves() {
+        for (var i = 0; i < waves.length; i++) {
+            var w = waves[i];
+            var by = w.base * H + P.y * (6 + i * 4);
+            ctx.beginPath();
+            ctx.moveTo(0, H);
+            for (var x = 0; x <= W; x += 8) {
+                var y = by
+                    + Math.sin(x * w.len + T * w.sp + w.ph) * w.amp
+                    + Math.sin(x * w.len * 2.1 + T * w.sp * 1.4 + w.ph * 2) * (w.amp * .35);
+                ctx.lineTo(x, y);
             }
+            ctx.lineTo(W, H); ctx.closePath();
+            var g = ctx.createLinearGradient(0, by - w.amp, 0, H);
+            g.addColorStop(0, 'rgba(' + w.c + ',' + w.a + ')');
+            g.addColorStop(1, 'rgba(' + w.c + ',0.02)');
+            ctx.fillStyle = g; ctx.fill();
+            /* bright crest line */
+            ctx.beginPath();
+            for (var x2 = 0; x2 <= W; x2 += 8) {
+                var y2 = by + Math.sin(x2 * w.len + T * w.sp + w.ph) * w.amp
+                           + Math.sin(x2 * w.len * 2.1 + T * w.sp * 1.4 + w.ph * 2) * (w.amp * .35);
+                if (x2 === 0) ctx.moveTo(x2, y2); else ctx.lineTo(x2, y2);
+            }
+            ctx.strokeStyle = 'rgba(' + w.c + ',' + (w.a + .12) + ')';
+            ctx.lineWidth = 1.4; ctx.stroke();
         }
-        ctx.globalAlpha = 1;
     }
 
-    function draw() {
+    function drawDots(dt) {
+        var LINK = 150, i, j, a, b, dx, dy, d;
+        for (i = 0; i < dots.length; i++) {
+            a = dots[i];
+            a.x += a.vx * dt * 60; a.y += a.vy * dt * 60;
+            if (a.x < -10) a.x = W + 10; else if (a.x > W + 10) a.x = -10;
+            if (a.y < -10) a.y = H + 10; else if (a.y > H + 10) a.y = -10;
+        }
+        ctx.lineWidth = 1;
+        for (i = 0; i < dots.length; i++) {
+            a = dots[i];
+            var ax = a.x + P.x * 14 * a.z, ay = a.y + P.y * 10 * a.z;
+            for (j = i + 1; j < dots.length; j++) {
+                b = dots[j];
+                var bx = b.x + P.x * 14 * b.z, by = b.y + P.y * 10 * b.z;
+                dx = ax - bx; dy = ay - by; d = Math.sqrt(dx * dx + dy * dy);
+                if (d < LINK) {
+                    ctx.strokeStyle = 'rgba(37,80,160,' + ((1 - d / LINK) * .26).toFixed(3) + ')';
+                    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+                }
+            }
+            ctx.fillStyle = 'rgba(37,80,160,' + (.38 * a.z).toFixed(3) + ')';
+            ctx.beginPath(); ctx.arc(ax, ay, a.r, 0, 6.2832); ctx.fill();
+        }
+    }
+
+    /* slow diagonal light sweep for a premium "shine" */
+    function drawSweep() {
+        var p = ((T * .00005) % 1.6) - .3;
+        var x = p * (W + H);
+        var g = ctx.createLinearGradient(x - 220, 0, x + 220, H);
+        g.addColorStop(0,  'rgba(255,255,255,0)');
+        g.addColorStop(.5, 'rgba(255,255,255,.16)');
+        g.addColorStop(1,  'rgba(255,255,255,0)');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+
+    function draw(dt) {
         ctx.clearRect(0, 0, W, H);
-        drawSun();
-        drawHaze();
-        drawClouds();
+        drawBlobs(); drawSweep(); drawWaves(); drawDots(dt);
     }
 
-    /* ---------- physics ---------- */
-    function update(dt) {
-        for (var i = 0; i < clouds.length; i++) {
-            var c = clouds[i];
-            var w = SPRITE_W * c.scale * SF;
-            c.x += c.speed * SF * dt;
-            if (c.x > W + 10) c.x = -w - 10;
-        }
-        P.x += (P.tx - P.x) * 0.045;
-        P.y += (P.ty - P.y) * 0.045;
-    }
-
-    /* ---------- sizing ---------- */
     function resize() {
-        var oldW = W;
         DPR = Math.min(window.devicePixelRatio || 1, 1.5);
-        W = window.innerWidth;
-        H = window.innerHeight;
-        SF = Math.max(0.55, Math.min(W / 1500, 1.7));
-
-        canvas.width  = Math.round(W * DPR);
-        canvas.height = Math.round(H * DPR);
-        canvas.style.width  = W + 'px';
-        canvas.style.height = H + 'px';
+        W = window.innerWidth; H = window.innerHeight;
+        canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+        canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
         ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
-        if (!clouds.length) {
-            initClouds();
-        } else if (oldW) {
-            var f = W / oldW;
-            clouds.forEach(function (c) { c.x *= f; });
-        }
-        draw();
+        initDots(); draw(0);
     }
 
-    /* ---------- animation loop (capped at ~30 fps) ---------- */
     function loop(now) {
         rafId = requestAnimationFrame(loop);
-        if (!lastFrame) lastFrame = now;
-        var dtMs = now - lastFrame;
-        if (dtMs < 32) return;
-        lastFrame = now;
-        update(Math.min(dtMs, 120) / 1000);
-        draw();
+        if (!last) last = now;
+        var ms = now - last;
+        if (ms < 32) return;               /* ~30 fps cap keeps the dashboard fast */
+        last = now; T += Math.min(ms, 120);
+        P.x += (P.tx - P.x) * .05; P.y += (P.ty - P.y) * .05;
+        draw(Math.min(ms, 120) / 1000);
     }
+    function start() { if (rafId) return; if (reduce) { draw(0); return; } last = 0; rafId = requestAnimationFrame(loop); }
+    function stop()  { if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
 
-    function start() {
-        if (rafId) return;
-        if (reduceMotion) { draw(); return; }
-        lastFrame = 0;
-        rafId = requestAnimationFrame(loop);
-    }
-
-    function stop() {
-        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-    }
-
-    /* ---------- events ---------- */
     window.addEventListener('resize', resize, { passive: true });
-
     window.addEventListener('pointermove', function (e) {
-        P.tx = (e.clientX / W) * 2 - 1;
-        P.ty = (e.clientY / H) * 2 - 1;
+        P.tx = (e.clientX / W) * 2 - 1; P.ty = (e.clientY / H) * 2 - 1;
     }, { passive: true });
-
-    window.addEventListener('pointerleave', function () {
-        P.tx = 0; P.ty = 0;
-    }, { passive: true });
-
     document.addEventListener('visibilitychange', function () {
-        if (document.hidden) stop(); else start();
+        if (document.hidden) stop(); else if (!document.body.classList.contains('pro-wp-off')) start();
     });
 
-    window.addEventListener('wallpaper:toggle', function (e) {
-        if (e.detail && e.detail.on) start(); else stop();
-    });
-
-    resize();
-    start();
-})();
-
-
-/* Wallpaper toggle — persisted in localStorage */
-(function () {
-    var btn = document.getElementById('wallpaperToggle');
-    if (!btn) return;
-    var KEY = 'wrmc.wallpaper';
-
-    function apply(on) {
-        document.body.classList.toggle('wp-off', !on);
+    /* toggle (remembered) */
+    var KEY = 'wrmc.wallpaper.pro', on = true;
+    try { on = localStorage.getItem(KEY) !== 'off'; } catch (e) {}
+    function apply() {
+        document.body.classList.toggle('pro-wp-off', !on);
         btn.classList.toggle('off', !on);
         btn.textContent = on ? '◐' : '○';
-        btn.setAttribute('aria-pressed', String(on));
-        window.dispatchEvent(new CustomEvent('wallpaper:toggle', { detail: { on: on } }));
+        if (on) start(); else stop();
     }
-
-    var on = true;
-    try { on = localStorage.getItem(KEY) !== 'off'; } catch (e) {}
-    apply(on);
-
     btn.addEventListener('click', function () {
         on = !on;
         try { localStorage.setItem(KEY, on ? 'on' : 'off'); } catch (e) {}
-        apply(on);
+        apply();
     });
+
+    resize(); apply();
 })();
 </script>
 
