@@ -16,7 +16,6 @@ body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #fdf2f4
 
 .container { padding: 24px; max-width: 1800px; margin: auto; }
 
-/* iOS Glassmorphism Cards */
 .controls { background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border-radius: 16px; padding: 18px; margin-bottom: 22px; box-shadow: 0 8px 32px 0 rgba(122, 18, 37, 0.1); display: flex; flex-wrap: wrap; gap: 16px; align-items: end; border: 1px solid rgba(255, 255, 255, 0.8); }
 .control-group { display: flex; flex-direction: column; min-width: 200px; }
 .control-group label { font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 6px; }
@@ -260,7 +259,6 @@ td.left { text-align: left; }
 .reminder-enable-btn { border:0; border-radius:10px; padding:9px 13px; cursor:pointer; font-weight:700; font-size:12px; background:#4a0a18; color:white; transition: all 0.2s; }
 .reminder-enable-btn:hover { opacity:.9; }
 
-/* EOD REMARKS */
 .remarks-col { white-space: normal !important; text-align: left; vertical-align: top; }
 .remarks-text {
     display: block;
@@ -344,6 +342,14 @@ td.left { text-align: left; }
                 <option value="">All Sub-Projects</option>
             </select>
         </div>
+        <div class="control-group">
+            <label>Shift</label>
+            <select id="shiftSelect" onchange="onShiftSelectChange(this.value)" title="Changing the shift relabels the hourly columns and updates hour locks. Existing data columns stay the same.">
+                <option value="19-04">7 PM – 4 AM</option>
+                <option value="18-03">6 PM – 3 AM</option>
+                <option value="12-21">12 PM – 9 PM</option>
+            </select>
+        </div>
         <button class="btn-secondary" onclick="openHolidayModal()">📅 Client Holidays</button>
         <button class="btn-primary" onclick="refreshDashboard()">Refresh</button>
         <div class="autosave-indicator" id="autosaveIndicator" data-state="idle">
@@ -364,7 +370,7 @@ td.left { text-align: left; }
             <div>
                 <div class="download-title">Production Reports</div>
                 <div class="download-note">
-                    Daily Report uses the selected Tracker Date. MTD Report uses the From Date and To Date. Reports follow the selected filters. Weekends (Sat / Sun) and Client Holidays are treated as fixed holidays. Employees are counted only within their Production Start / End window.
+                    Daily Report uses the selected Tracker Date. MTD Report uses the From Date and To Date. Reports follow the selected filters. Weekends (Sat / Sun) and Client Holidays are treated as fixed holidays. Employees are counted only within their Production Start / End window. Column headers in the CSVs reflect the currently selected shift.
                 </div>
             </div>
             <div class="download-buttons">
@@ -476,15 +482,15 @@ td.left { text-align: left; }
                         <th>Sub-Project</th>
                         <th>Attendance</th>
                         <th>Daily Target</th>
-                        <th>6–7 PM</th>
-                        <th>7–8 PM</th>
-                        <th>8–9 PM</th>
-                        <th>9–10 PM</th>
-                        <th>10–11 PM</th>
-                        <th>11 PM–12 AM</th>
-                        <th>12–1 AM</th>
-                        <th>1–2 AM</th>
-                        <th>2–3 AM</th>
+                        <th class="hour-header" data-hour-index="0">6–7 PM</th>
+                        <th class="hour-header" data-hour-index="1">7–8 PM</th>
+                        <th class="hour-header" data-hour-index="2">8–9 PM</th>
+                        <th class="hour-header" data-hour-index="3">9–10 PM</th>
+                        <th class="hour-header" data-hour-index="4">10–11 PM</th>
+                        <th class="hour-header" data-hour-index="5">11 PM–12 AM</th>
+                        <th class="hour-header" data-hour-index="6">12–1 AM</th>
+                        <th class="hour-header" data-hour-index="7">1–2 AM</th>
+                        <th class="hour-header" data-hour-index="8">2–3 AM</th>
                         <th>Achieved</th>
                         <th>Remaining</th>
                         <th>Achievement %</th>
@@ -651,7 +657,102 @@ let accessibleProjectIds = [];
 let accessReady = false;
 
 const hourFields = ["hour_6_7","hour_7_8","hour_8_9","hour_9_10","hour_10_11","hour_11_12","hour_12_1","hour_1_2","hour_2_3"];
-const hourLabels = ["6–7 PM","7–8 PM","8–9 PM","9–10 PM","10–11 PM","11 PM–12 AM","12–1 AM","1–2 AM","2–3 AM"];
+
+
+/* =========================================================
+   SHIFT CONFIGURATION  (7 PM – 4 AM default)
+========================================================= */
+const SHIFT_CONFIGS = {
+    "19-04": {
+        key: "19-04",
+        label: "7 PM – 4 AM",
+        startHour: 19,
+        endHour: 4,
+        hourLabels: ["7–8 PM","8–9 PM","9–10 PM","10–11 PM","11 PM–12 AM","12–1 AM","1–2 AM","2–3 AM","3–4 AM"]
+    },
+    "18-03": {
+        key: "18-03",
+        label: "6 PM – 3 AM",
+        startHour: 18,
+        endHour: 3,
+        hourLabels: ["6–7 PM","7–8 PM","8–9 PM","9–10 PM","10–11 PM","11 PM–12 AM","12–1 AM","1–2 AM","2–3 AM"]
+    },
+    "12-21": {
+        key: "12-21",
+        label: "12 PM – 9 PM",
+        startHour: 12,
+        endHour: 21,
+        hourLabels: ["12–1 PM","1–2 PM","2–3 PM","3–4 PM","4–5 PM","5–6 PM","6–7 PM","7–8 PM","8–9 PM"]
+    }
+};
+
+const DEFAULT_SHIFT_KEY = "19-04";
+const SHIFT_STORAGE_KEY = "dashboard_active_shift";
+let activeShiftKey = DEFAULT_SHIFT_KEY;
+
+let hourLabels = SHIFT_CONFIGS[DEFAULT_SHIFT_KEY].hourLabels.slice();
+
+function getActiveShift() {
+    return SHIFT_CONFIGS[activeShiftKey] || SHIFT_CONFIGS[DEFAULT_SHIFT_KEY];
+}
+
+function loadShiftPreference() {
+    try {
+        const saved = localStorage.getItem(SHIFT_STORAGE_KEY);
+        if (saved && SHIFT_CONFIGS[saved]) activeShiftKey = saved;
+    } catch (e) { /* ignore */ }
+    hourLabels = getActiveShift().hourLabels.slice();
+    const sel = document.getElementById("shiftSelect");
+    if (sel) sel.value = activeShiftKey;
+    updateHourHeaders();
+}
+
+function setActiveShift(key) {
+    if (!SHIFT_CONFIGS[key]) return;
+    activeShiftKey = key;
+    try { localStorage.setItem(SHIFT_STORAGE_KEY, key); } catch (e) {}
+    hourLabels = getActiveShift().hourLabels.slice();
+}
+
+function updateHourHeaders() {
+    document.querySelectorAll("th.hour-header").forEach((th, i) => {
+        if (hourLabels[i]) th.textContent = hourLabels[i];
+    });
+}
+
+async function onShiftSelectChange(newKey) {
+    if (!SHIFT_CONFIGS[newKey] || newKey === activeShiftKey) return;
+    try { await flushAllAutosaves(); } catch (e) { /* keep going */ }
+
+    const trackerDateInput = document.getElementById("trackerDate");
+    const oldShiftDate = getCurrentShiftDateString();
+    const wasOnCurrentShiftDate = trackerDateInput && trackerDateInput.value === oldShiftDate;
+
+    setActiveShift(newKey);
+    updateHourHeaders();
+
+    /* If the user was viewing the "current" shift date for the OLD shift,
+       jump them to the current shift date for the NEW shift so they don't
+       end up staring at a fully-locked historical date. */
+    if (wasOnCurrentShiftDate) {
+        const newShiftDate = getCurrentShiftDateString();
+        if (newShiftDate !== oldShiftDate) {
+            trackerDateInput.value = newShiftDate;
+            trackerDateInput.max = getTodayString();
+            const firstOfMonth = newShiftDate.substring(0, 8) + "01";
+            document.getElementById("mtdFromDate").value = firstOfMonth;
+            document.getElementById("mtdToDate").value = newShiftDate;
+            await loadDailyTracker();
+            return;
+        }
+    }
+
+    buildDailyTracker();
+    applyHourlyLocks();
+    updateHourlyReminder();
+    await updateDashboard();
+}
+
 
 /* =========================================================
    WEEKEND / HOLIDAY HELPERS
@@ -694,6 +795,7 @@ function isHolidayDate(dateStr) {
 function isWeekendDayOfWeek(dow) {
     return dow === 0 || dow === 6;
 }
+
 
 /* =========================================================
    PRODUCTION / TRACKER START + END + RAMP-UP
@@ -745,6 +847,7 @@ function getRampupTarget(employee, dateStr) {
     const idx       = Math.min(weekIdx, ramp.length - 1);
     return ramp[idx];
 }
+
 
 /* =========================================================
    RAMP-UP MODAL
@@ -908,6 +1011,7 @@ async function saveRampup() {
     await updateDashboard();
 }
 
+
 /* =========================================================
    CLIENT HOLIDAYS MODAL
 ========================================================= */
@@ -1019,6 +1123,7 @@ async function deleteClientHoliday(date) {
         await updateDashboard();
     }
 }
+
 
 /* =========================================================
    AUTOSAVE ENGINE
@@ -1167,19 +1272,26 @@ function computeAchievementPercent(achieved, target) {
     return (Number(achieved) || 0) / t * 100;
 }
 
+
 /* =========================================================
    HOURLY LOCKING
 ========================================================= */
 function getShiftHourIndexForDate(trackerDate) {
     if (!trackerDate) return -1;
+
+    const shift = getActiveShift();
+    const parts = String(trackerDate).split("-");
+    if (parts.length !== 3) return -1;
+
+    const base = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0, 0);
+    const shiftStart = new Date(base.getTime() + shift.startHour * 3600000);
+    const shiftEnd   = new Date(base.getTime() + (shift.startHour + hourFields.length) * 3600000);
     const now = new Date();
-    const activeShiftDate = getCurrentShiftDateString();
-    if (trackerDate < activeShiftDate) return hourFields.length;
-    if (trackerDate > activeShiftDate) return -1;
-    const hour = now.getHours();
-    if (hour >= 18) return Math.min(hour - 18, hourFields.length);
-    if (hour < 3) return Math.min(hour + 6, hourFields.length);
-    return -1;
+
+    if (now < shiftStart) return -1;
+    if (now >= shiftEnd) return hourFields.length;
+
+    return Math.floor((now - shiftStart) / 3600000);
 }
 
 let dateLockOverride = null;
@@ -1301,6 +1413,7 @@ function applyHourlyLocks() {
     document.querySelectorAll("#trackerBody tr[data-employee-id]").forEach(applyHourlyLocksToRow);
 }
 
+
 /* =========================================================
    MESSAGE
 ========================================================= */
@@ -1312,16 +1425,18 @@ function showMessage(text, type = "success") {
     setTimeout(() => { box.style.display = "none"; }, 3500);
 }
 
+
 /* =========================================================
    HOURLY REMINDERS
 ========================================================= */
 function isTeamLeadUser() { return currentRole === "team_lead"; }
 
 function getCurrentShiftHourIndex() {
-    const now = new Date();
-    const hour = now.getHours();
-    if (hour >= 18 && hour <= 23) return hour - 18;
-    if (hour >= 0 && hour < 3) return hour + 6;
+    const hour = new Date().getHours();
+    const shift = getActiveShift();
+    let offset = hour - shift.startHour;
+    if (offset < 0) offset += 24;
+    if (offset < hourFields.length) return offset;
     return -1;
 }
 
@@ -1351,19 +1466,22 @@ function updateHourlyReminder() {
     section.style.display = "block";
     const trackerDate = document.getElementById("trackerDate")?.value;
     const currentIndex = getCurrentShiftHourIndex();
+
     if (!trackerDate || currentIndex < 0 || trackerDate !== getCurrentShiftDateString()) {
         card.classList.remove("reminder-active");
         title.textContent = "Hourly update reminder";
-        text.textContent = "Reminders will appear 10 minutes before each hour closes during the 6 PM–3 AM shift.";
+        text.textContent = `Reminders will appear 10 minutes before each hour closes during the ${getActiveShift().label} shift.`;
         badge.className = "hourly-reminder-badge"; badge.textContent = "Waiting";
         return;
     }
+
     const now = new Date();
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
     const minutesRemaining = 59 - minutes + (60 - seconds) / 60;
     const label = hourLabels[currentIndex];
     const updated = isHourlySlotUpdated(currentIndex);
+
     if (updated) {
         card.classList.remove("reminder-active");
         title.textContent = `Hourly update completed: ${label}`;
@@ -1371,7 +1489,9 @@ function updateHourlyReminder() {
         badge.className = "hourly-reminder-badge updated"; badge.textContent = "Updated ✓";
         return;
     }
+
     card.classList.remove("reminder-active");
+
     if (minutesRemaining <= 10 && minutesRemaining > 0) {
         card.classList.add("reminder-active");
         title.textContent = `🔔 Update due: ${label}`;
@@ -1382,6 +1502,7 @@ function updateHourlyReminder() {
         if (!alreadyNotified) { reminderStateSet(key, "sent"); sendHourlyBrowserNotification(label, trackerDate); }
         return;
     }
+
     title.textContent = `Current hour: ${label}`;
     text.textContent = `Please keep the hourly count updated. A reminder will appear 10 minutes before ${label} closes.`;
     badge.className = "hourly-reminder-badge"; badge.textContent = "Monitoring";
@@ -1408,6 +1529,7 @@ async function enableHourlyNotifications() {
     } catch (error) { console.error("Notification permission:", error); showMessage("Unable to enable browser reminders.", "error"); }
 }
 
+
 /* =========================================================
    DATE HELPERS
 ========================================================= */
@@ -1415,30 +1537,26 @@ function formatLocalDate(date) {
     return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
 }
 function getTodayString() { return formatLocalDate(new Date()); }
+
 function getCurrentShiftDateString() {
     const now = new Date();
+    const shift = getActiveShift();
+    const cutoff = shift.startHour - 3;
     const shiftDate = new Date(now);
-    if (now.getHours() < 3) shiftDate.setDate(shiftDate.getDate() - 1);
+    if (now.getHours() < cutoff) shiftDate.setDate(shiftDate.getDate() - 1);
     return formatLocalDate(shiftDate);
 }
+
 function getTrackerDefaultDate() { return getCurrentShiftDateString(); }
 
 function isShiftCompleteForDate(dateStr) {
-
     if (!dateStr) return false;
-
-    const activeShift = getCurrentShiftDateString();
-
-    if (dateStr < activeShift) return true;   // past shift date
-    if (dateStr > activeShift) return false;  // future shift date
-
-    const hour = new Date().getHours();
-
-    if (hour >= 18) return false;             // shift just started
-    if (hour < 3) return (hour + 6) >= hourFields.length - 1; // 2 AM or later
-
-    return false;                             // 3 AM – 6 PM, not started
-
+    const shift = getActiveShift();
+    const parts = String(dateStr).split("-");
+    if (parts.length !== 3) return false;
+    const base = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0, 0);
+    const shiftEnd = new Date(base.getTime() + (shift.startHour + hourFields.length) * 3600000);
+    return new Date() >= shiftEnd;
 }
 
 function setTodayDate() {
@@ -1452,6 +1570,7 @@ function setTodayDate() {
     document.getElementById("mtdFromDate").value = firstDay;
     document.getElementById("mtdToDate").value = trackerDate;
 }
+
 
 /* =========================================================
    HOLIDAY BANNER
@@ -1482,6 +1601,7 @@ function updateHolidayBanner() {
         banner.classList.remove("active");
     }
 }
+
 
 /* =========================================================
    AUTH
@@ -1601,6 +1721,7 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
     }
 });
 
+
 /* =========================================================
    LOADERS
 ========================================================= */
@@ -1647,6 +1768,7 @@ async function loadDailyTracker() {
     updateHourlyReminder();
     updateDashboard();
 }
+
 
 /* =========================================================
    HELPERS
@@ -1729,8 +1851,6 @@ function getFilteredEmployees(mode) {
         const visibleFrom = getEffectiveTrackerStart(employee);
         if (visibleFrom && trackerDate && trackerDate < visibleFrom) return false;
 
-        // In daily mode, hide employees whose production has ended.
-        // In MTD mode, keep them so their partial-month data is included.
         if (!isMtd) {
             const prodEnd = getEffectiveProductionEnd(employee);
             if (prodEnd && trackerDate && trackerDate > prodEnd) return false;
@@ -1744,6 +1864,7 @@ function getFilteredEmployees(mode) {
         return true;
     });
 }
+
 
 /* =========================================================
    FILTER DROPDOWNS
@@ -1804,6 +1925,7 @@ function displayEmployees() {
         container.appendChild(item);
     });
 }
+
 
 /* =========================================================
    BUILD DAILY TRACKER
@@ -1905,6 +2027,7 @@ function buildDailyTracker() {
     });
 }
 
+
 /* =========================================================
    RECALCULATE ROW
 ========================================================= */
@@ -1953,7 +2076,7 @@ function recalculateRow(element) {
             statusContainer.innerHTML = `<span class="status na">N/A</span>`;
             return;
         }
-        const hourlyTarget = target / 9;
+        const hourlyTarget = target / hourFields.length;
         if (value >= hourlyTarget) statusContainer.innerHTML = `<span class="status ontrack">ON TRACK</span>`;
         else statusContainer.innerHTML = `<span class="status attention">NEED ATTENTION</span>`;
     });
@@ -1970,6 +2093,7 @@ function recalculateRow(element) {
     row.querySelector(".achievement").textContent = percentage.toFixed(1) + "%";
     row.querySelector(".achievement").className = percentage >= 100 ? "achievement achievement-good" : "achievement achievement-low";
 }
+
 
 /* =========================================================
    GET ROW DATA
@@ -2018,6 +2142,7 @@ function getRowData(row) {
     return record;
 }
 
+
 /* =========================================================
    FLUSH AUTOSAVES
 ========================================================= */
@@ -2034,6 +2159,7 @@ async function flushAllAutosaves() {
         guard++;
     }
 }
+
 
 /* =========================================================
    PROJECT METRICS
@@ -2094,6 +2220,7 @@ function getSubProjectMetrics(subProjectId) {
     return { employees: list.length, target, achieved, targetAchieved, remaining, percentage };
 }
 
+
 /* =========================================================
    PROJECT DASHBOARD
 ========================================================= */
@@ -2135,6 +2262,7 @@ function createProjectCard(title, metrics) {
     return card;
 }
 
+
 /* =========================================================
    SUB-PROJECT DASHBOARD
 ========================================================= */
@@ -2166,6 +2294,7 @@ function renderSubProjectDashboard() {
         container.appendChild(card);
     });
 }
+
 
 /* =========================================================
    PERFORMANCE SUMMARY
@@ -2228,6 +2357,7 @@ function renderPerformanceSummary() {
     });
 }
 
+
 /* =========================================================
    SHRINKAGE
 ========================================================= */
@@ -2275,6 +2405,7 @@ async function calculateCurrentMonthShrinkage() {
     const shrinkagePercentage = scheduledDays > 0 ? (shrinkageDays / scheduledDays * 100) : 0;
     return { shrinkageDays, scheduledDays, shrinkagePercentage, absentDays, halfDays, presentDays };
 }
+
 
 /* =========================================================
    KPI
@@ -2373,6 +2504,7 @@ async function updateKPI() {
         </div>
     `;
 }
+
 
 /* =========================================================
    MANAGER CONTROL CENTER
@@ -2475,6 +2607,7 @@ function renderManagerControlCenter() {
     });
 }
 
+
 /* =========================================================
    UPDATE DASHBOARD
 ========================================================= */
@@ -2502,6 +2635,7 @@ async function refreshDashboard() {
     await updateDashboard();
     showMessage("Dashboard refreshed successfully");
 }
+
 
 /* =========================================================
    CSV EXPORT
@@ -2554,6 +2688,7 @@ async function downloadDailyCSV() {
         else if (holiday) dayType = "Fixed Holiday (Weekend)";
         const row = {
             "Tracker Date": date,
+            "Shift": getActiveShift().label,
             "Day Type": dayType,
             "Employee": employee.employee_name,
             "EMP ID": employee.employee_code,
@@ -2608,15 +2743,14 @@ async function downloadMTDCSV() {
 
     const allDates = getDateRange(fromDate, toDate);
     const workingDates = allDates.filter(d => !isHolidayDate(d));
-    
-    // Fetch data day-by-day to avoid Supabase's 1000-row limit truncation
+
     const records = [];
     for (const date of workingDates) {
         const { data, error } = await supabaseClient
             .from("daily_productivity")
             .select("*")
             .eq("tracker_date", date);
-            
+
         if (error) {
             console.error(error);
             showMessage(`Unable to load MTD data for ${date}`, "error");
@@ -2662,6 +2796,7 @@ async function downloadMTDCSV() {
 
             const row = {
                 "Date": date,
+                "Shift": getActiveShift().label,
                 "Day Type": "Working Day",
                 "Employee": employee.employee_name,
                 "EMP ID": employee.employee_code,
@@ -2715,6 +2850,7 @@ async function downloadMTDCSV() {
         const pct = mtdTarget > 0 ? (mtdAchieved / mtdTarget * 100) : null;
         const row = {
             "Date": "— MTD TOTAL —",
+            "Shift": getActiveShift().label,
             "Day Type": `${effectiveDates.length} working days`,
             "Employee": employee.employee_name,
             "EMP ID": employee.employee_code,
@@ -2740,6 +2876,7 @@ function escapeHtml(value) {
         .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
+
 
 /* =========================================================
    LISTENERS
@@ -2775,10 +2912,12 @@ document.getElementById("rampupProductionStartDate")?.addEventListener("input", 
 setInterval(() => { applyHourlyLocks(); updateHourlyReminder(); }, 30 * 1000);
 setTimeout(() => { updateHourlyReminder(); }, 1000);
 
+
 /* =========================================================
    BOOTSTRAP
 ========================================================= */
 async function bootstrapApplicationData() {
+    loadShiftPreference();
     setTodayDate();
     await loadClientHolidays();
     await loadProjects();
@@ -2788,7 +2927,6 @@ async function bootstrapApplicationData() {
     loadProjectFilter();
     loadSubProjectFilter();
     displayEmployees();
-    buildDailyTracker();
     await loadDailyTracker();
     await updateDashboard();
     console.log("Hourly Production Management Dashboard loaded successfully");
@@ -2814,13 +2952,11 @@ startApplication();
 ============================================================ -->
 <script>
 (function () {
-    /* ---- switch off + remove the old sky wallpaper ---- */
     try { window.dispatchEvent(new CustomEvent('wallpaper:toggle', { detail: { on: false } })); } catch (e) {}
     ['liveWallpaper', 'wallpaperToggle'].forEach(function (id) {
         var el = document.getElementById(id); if (el) el.remove();
     });
 
-    /* ---- styles ---- */
     var css = document.createElement('style');
     css.textContent = [
         'body{background-color:#e9f1fb!important;',
@@ -2842,7 +2978,6 @@ startApplication();
     ].join('');
     document.head.appendChild(css);
 
-    /* ---- elements ---- */
     var grid = document.createElement('div'); grid.id = 'proGrid';
     var canvas = document.createElement('canvas'); canvas.id = 'proBg';
     document.body.insertBefore(canvas, document.body.firstChild);
@@ -2857,7 +2992,6 @@ startApplication();
     var P = { x: 0, y: 0, tx: 0, ty: 0 };
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* soft colour blobs that drift slowly */
     var blobs = [
         { c: '37,99,235',  a: .30, r: .46, fx: .00021, fy: .00017, px: .0, py: .5, cx: .22, cy: .28 },
         { c: '194,24,37',  a: .22, r: .42, fx: .00016, fy: .00023, px: 1.7, py: .9, cx: .82, cy: .30 },
@@ -2866,14 +3000,12 @@ startApplication();
         { c: '124,58,237', a: .15, r: .36, fx: .00018, fy: .00012, px: 5.2, py: 3.3, cx: .90, cy: .75 }
     ];
 
-    /* layered waves along the bottom */
     var waves = [
         { c: '37,99,235',  a: .20, base: .80, amp: 38, len: .0042, sp: .00055, ph: 0 },
         { c: '194,24,37',  a: .15, base: .86, amp: 30, len: .0056, sp: -.00045, ph: 2 },
         { c: '14,165,164', a: .16, base: .92, amp: 24, len: .0070, sp: .00070, ph: 4 }
     ];
 
-    /* floating data-network particles */
     var dots = [];
     function initDots() {
         var n = Math.max(28, Math.min(80, Math.round(W * H / 22000)));
@@ -2921,7 +3053,6 @@ startApplication();
             g.addColorStop(0, 'rgba(' + w.c + ',' + w.a + ')');
             g.addColorStop(1, 'rgba(' + w.c + ',0.02)');
             ctx.fillStyle = g; ctx.fill();
-            /* bright crest line */
             ctx.beginPath();
             for (var x2 = 0; x2 <= W; x2 += 8) {
                 var y2 = by + Math.sin(x2 * w.len + T * w.sp + w.ph) * w.amp
@@ -2959,7 +3090,6 @@ startApplication();
         }
     }
 
-    /* slow diagonal light sweep for a premium "shine" */
     function drawSweep() {
         var p = ((T * .00005) % 1.6) - .3;
         var x = p * (W + H);
@@ -2988,7 +3118,7 @@ startApplication();
         rafId = requestAnimationFrame(loop);
         if (!last) last = now;
         var ms = now - last;
-        if (ms < 32) return;               /* ~30 fps cap keeps the dashboard fast */
+        if (ms < 32) return;
         last = now; T += Math.min(ms, 120);
         P.x += (P.tx - P.x) * .05; P.y += (P.ty - P.y) * .05;
         draw(Math.min(ms, 120) / 1000);
@@ -3004,7 +3134,6 @@ startApplication();
         if (document.hidden) stop(); else if (!document.body.classList.contains('pro-wp-off')) start();
     });
 
-    /* toggle (remembered) */
     var KEY = 'wrmc.wallpaper.pro', on = true;
     try { on = localStorage.getItem(KEY) !== 'off'; } catch (e) {}
     function apply() {
