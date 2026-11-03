@@ -131,7 +131,6 @@
         .identity-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(30,55,90,0.68); font-weight: 800; margin-bottom: 6px; }
         .identity-value { font-size: 15px; font-weight: 800; color: #0a1f3d; word-break: break-word; letter-spacing: -0.2px; }
 
-        /* Shift Selector */
         .shift-select { width: 100%; padding: 5px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.55); background: linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.38)); color: #0a1f3d; font-size: 13.5px; font-weight: 800; cursor: pointer; font-family: inherit; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.75); }
         .shift-select:focus { outline: none; border-color: rgba(61,127,197,0.85); box-shadow: 0 0 0 4px rgba(61,127,197,0.15), inset 0 1px 0 rgba(255,255,255,0.85); }
 
@@ -577,327 +576,258 @@ const MAX_REMARKS_LENGTH = 500;
 
 
 /* =========================================================
-   LIVE SKY WALLPAPER
+   COLD WINTER FOG WALLPAPER
+   Realistic drifting fog · distant pine silhouettes · snow
 ========================================================= */
 const skyCanvas = document.getElementById("skyCanvas");
 const skyCtx    = skyCanvas.getContext("2d");
-let skyStars = [];
-let skyShootingStars = [];
-let skyPole = { x: 0, y: 0 };
-let skyMaxRadius = 900;
-let lastSkyFrame = performance.now();
-let nextShootingStarAt = 0;
 
-const SKY_KEYFRAMES = [
-    { h: 0.0,  top: [4,   8, 24],   mid: [10, 18, 44],   bot: [18, 28, 60]  },
-    { h: 3.5,  top: [4,   8, 24],   mid: [10, 18, 44],   bot: [18, 28, 60]  },
-    { h: 4.5,  top: [16, 22, 54],   mid: [38, 36, 80],   bot: [74, 54, 96]  },
-    { h: 5.3,  top: [64, 62, 122],  mid: [130, 84, 138], bot: [214, 118, 130] },
-    { h: 6.0,  top: [130, 158, 210], mid: [222, 152, 148], bot: [255, 178, 118] },
-    { h: 6.8,  top: [118, 168, 226], mid: [186, 200, 232], bot: [255, 210, 158] },
-    { h: 8.0,  top: [90, 158, 222],  mid: [152, 198, 240], bot: [200, 224, 244] },
-    { h: 12.0, top: [54, 136, 224],  mid: [110, 176, 236], bot: [164, 210, 244] },
-    { h: 15.0, top: [68, 150, 220],  mid: [128, 188, 232], bot: [180, 214, 244] },
-    { h: 17.2, top: [96, 152, 210],  mid: [186, 190, 216], bot: [255, 210, 156] },
-    { h: 18.3, top: [190, 110, 116], mid: [246, 138, 108], bot: [255, 168, 110] },
-    { h: 19.2, top: [110, 62, 108],  mid: [178, 76, 96],   bot: [232, 108, 92]  },
-    { h: 20.0, top: [44, 40, 92],    mid: [90, 56, 104],   bot: [148, 76, 100]  },
-    { h: 21.0, top: [14, 20, 52],    mid: [30, 34, 76],    bot: [58, 50, 92]    },
-    { h: 22.5, top: [6,   10, 30],   mid: [12, 20, 48],    bot: [24, 32, 66]    },
-    { h: 24.0, top: [4,   8, 24],    mid: [10, 18, 44],    bot: [18, 28, 60]    }
-];
+let W = 0, H = 0;
+let snowflakes = [];
+let fogBlobs   = [];
+let treeLayers = [];
+let lastSkyFrame = performance.now();
+let frameTime    = 0;
+
+/* Cold winter palette */
+const WINTER_TOP     = [22, 30, 46];
+const WINTER_MID     = [56, 68, 88];
+const WINTER_HORIZON = [116, 126, 142];
+const WINTER_GROUND  = [82, 92, 108];
+const FOG_COLOR      = [206, 216, 230];
+
 
 function resizeSkyCanvas() {
     skyCanvas.width  = window.innerWidth;
     skyCanvas.height = window.innerHeight;
-    skyPole.x = skyCanvas.width  * 0.50;
-    skyPole.y = skyCanvas.height * 0.08;
-    skyMaxRadius = Math.hypot(
-        Math.max(skyPole.x, skyCanvas.width  - skyPole.x),
-        Math.max(skyPole.y, skyCanvas.height - skyPole.y)
-    ) * 1.10;
-    generateStars();
+    W = skyCanvas.width;
+    H = skyCanvas.height;
+    generateSnow();
+    generateFog();
+    generateTrees();
 }
 window.addEventListener("resize", resizeSkyCanvas);
 
-function pickStarTint() {
-    const roll = Math.random();
-    if (roll < 0.10) return "170, 200, 255";
-    if (roll < 0.22) return "255, 226, 190";
-    if (roll < 0.30) return "255, 246, 222";
-    return "255, 255, 255";
-}
 
-function generateStars() {
-    skyStars = [];
-    const area  = skyCanvas.width * skyCanvas.height;
-    const count = Math.max(180, Math.floor(area / 4200));
+function generateSnow() {
+    snowflakes = [];
+    const count = Math.min(300, Math.floor(W * H / 5200));
     for (let i = 0; i < count; i++) {
-        const bright = Math.random() < 0.06;
-        skyStars.push({
-            radius: skyMaxRadius * Math.sqrt(Math.random()),
-            angle0: Math.random() * Math.PI * 2,
-            size:   bright ? 1.4 + Math.random() * 1.4 : 0.4 + Math.random() * 1.05,
-            base:   bright ? 0.85 + Math.random() * 0.15 : 0.30 + Math.random() * 0.65,
-            phase:  Math.random() * Math.PI * 2,
-            speed:  0.45 + Math.random() * 1.90,
-            bright,
-            tint:   pickStarTint()
+        const depth = Math.random();
+        snowflakes.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            depth,
+            size:      0.6 + depth * 2.4 + Math.random() * 0.7,
+            speedY:    0.25 + depth * 0.85 + Math.random() * 0.35,
+            driftX:    (Math.random() - 0.5) * 0.35,
+            swayPhase: Math.random() * Math.PI * 2,
+            swayAmp:   0.30 + Math.random() * 1.10,
+            swaySpeed: 0.40 + Math.random() * 0.90,
+            opacity:   0.30 + depth * 0.55
         });
     }
 }
 
-function lerp(a, b, t) { return a + (b - a) * t; }
-function lerpRGB(a, b, t) { return [Math.round(lerp(a[0],b[0],t)), Math.round(lerp(a[1],b[1],t)), Math.round(lerp(a[2],b[2],t))]; }
-
-function getSkyPalette(hours) {
-    for (let i = 0; i < SKY_KEYFRAMES.length - 1; i++) {
-        const a = SKY_KEYFRAMES[i];
-        const b = SKY_KEYFRAMES[i + 1];
-        if (hours >= a.h && hours <= b.h) {
-            const t = (hours - a.h) / (b.h - a.h);
-            return { top: lerpRGB(a.top,b.top,t), mid: lerpRGB(a.mid,b.mid,t), bot: lerpRGB(a.bot,b.bot,t) };
+function generateFog() {
+    fogBlobs = [];
+    const layerConfigs = [
+        { yRel: 0.50, count: 5, radius: 340, opacity: 0.09, speed: 0.35 },
+        { yRel: 0.64, count: 5, radius: 400, opacity: 0.11, speed: 0.55 },
+        { yRel: 0.78, count: 4, radius: 440, opacity: 0.13, speed: 0.80 },
+        { yRel: 0.92, count: 3, radius: 500, opacity: 0.15, speed: 1.05 }
+    ];
+    layerConfigs.forEach((cfg, layerIdx) => {
+        for (let i = 0; i < cfg.count; i++) {
+            fogBlobs.push({
+                x: Math.random() * W,
+                y: H * cfg.yRel + (Math.random() - 0.5) * H * 0.08,
+                radius: cfg.radius * (0.75 + Math.random() * 0.5),
+                vx: (Math.random() - 0.5) * cfg.speed,
+                opacity: cfg.opacity * (0.7 + Math.random() * 0.6),
+                layer: layerIdx
+            });
         }
-    }
-    return { top: SKY_KEYFRAMES[0].top, mid: SKY_KEYFRAMES[0].mid, bot: SKY_KEYFRAMES[0].bot };
-}
-
-function getDarkness(hours) {
-    if (hours >= 21.5 || hours < 4.0) return 1;
-    if (hours >= 19.0 && hours < 21.5) return (hours - 19) / 2.5;
-    if (hours >= 4.0  && hours < 6.2)  return 1 - (hours - 4.0) / 2.2;
-    return 0;
-}
-
-function drawSkyGradient(hours) {
-    const palette = getSkyPalette(hours);
-    const grad = skyCtx.createLinearGradient(0, 0, 0, skyCanvas.height);
-    grad.addColorStop(0, `rgb(${palette.top[0]},${palette.top[1]},${palette.top[2]})`);
-    grad.addColorStop(0.55, `rgb(${palette.mid[0]},${palette.mid[1]},${palette.mid[2]})`);
-    grad.addColorStop(1, `rgb(${palette.bot[0]},${palette.bot[1]},${palette.bot[2]})`);
-    skyCtx.fillStyle = grad;
-    skyCtx.fillRect(0, 0, skyCanvas.width, skyCanvas.height);
-    const haze = skyCtx.createLinearGradient(0, skyCanvas.height * 0.65, 0, skyCanvas.height);
-    haze.addColorStop(0, "rgba(255,255,255,0)");
-    haze.addColorStop(1, `rgba(${palette.bot[0]}, ${palette.bot[1]}, ${palette.bot[2]}, 0.35)`);
-    skyCtx.fillStyle = haze;
-    skyCtx.fillRect(0, 0, skyCanvas.width, skyCanvas.height);
-}
-
-function drawStars(hours, darkness) {
-    if (darkness <= 0.12 || !skyStars.length) return;
-    const rot = (hours / 24) * Math.PI * 2;
-    const t   = performance.now() / 1000;
-    const horizonY = skyCanvas.height * 0.95;
-    const fadeBand = skyCanvas.height * 0.18;
-    skyCtx.save();
-    skyCtx.globalCompositeOperation = "screen";
-    skyCtx.translate(skyPole.x, skyPole.y);
-    for (let i = 0; i < skyStars.length; i++) {
-        const s = skyStars[i];
-        const a = s.angle0 + rot;
-        const x = Math.cos(a) * s.radius;
-        const y = Math.sin(a) * s.radius;
-        const screenY = skyPole.y + y;
-        if (screenY > horizonY) continue;
-        let horizonFade = 1;
-        if (screenY > horizonY - fadeBand) horizonFade = (horizonY - screenY) / fadeBand;
-        const twinkle = 0.55 + 0.45 * Math.sin(t * s.speed + s.phase);
-        const alpha = s.base * twinkle * darkness * horizonFade;
-        if (alpha <= 0.02) continue;
-        skyCtx.fillStyle = `rgba(${s.tint}, ${alpha})`;
-        skyCtx.beginPath(); skyCtx.arc(x, y, s.size, 0, Math.PI * 2); skyCtx.fill();
-        if (s.bright) {
-            skyCtx.fillStyle = `rgba(${s.tint}, ${alpha * 0.22})`;
-            skyCtx.beginPath(); skyCtx.arc(x, y, s.size * 4.5, 0, Math.PI * 2); skyCtx.fill();
-        }
-    }
-    skyCtx.restore();
-}
-
-function drawSun3D(hours) {
-    const w = skyCanvas.width;
-    const h = skyCanvas.height;
-    const progress = (hours - 6) / 12;
-    const x = w * (0.06 + progress * 0.88);
-    const horizonY = h * 0.86;
-    const y = horizonY - Math.sin(progress * Math.PI) * (h * 0.72);
-    const radius = Math.min(w, h) * 0.055;
-    const lowSun = 1 - Math.sin(progress * Math.PI);
-    if (lowSun > 0.35) {
-        const haze = skyCtx.createRadialGradient(x, horizonY, 0, x, horizonY, w * 0.45);
-        haze.addColorStop(0, `rgba(255, 176, 96, ${0.32 * lowSun})`);
-        haze.addColorStop(0.5, `rgba(255, 150, 80, ${0.14 * lowSun})`);
-        haze.addColorStop(1, "rgba(255, 140, 70, 0)");
-        skyCtx.fillStyle = haze;
-        skyCtx.beginPath(); skyCtx.arc(x, horizonY, w * 0.45, 0, Math.PI * 2); skyCtx.fill();
-    }
-    skyCtx.save();
-    const glow = skyCtx.createRadialGradient(x, y, 0, x, y, radius * 8);
-    glow.addColorStop(0, "rgba(255, 245, 200, 0.95)");
-    glow.addColorStop(0.15, "rgba(255, 220, 130, 0.55)");
-    glow.addColorStop(0.40, "rgba(255, 180, 80, 0.22)");
-    glow.addColorStop(1, "rgba(255, 150, 60, 0)");
-    skyCtx.fillStyle = glow;
-    skyCtx.beginPath(); skyCtx.arc(x, y, radius * 8, 0, Math.PI * 2); skyCtx.fill();
-    skyCtx.save();
-    skyCtx.globalCompositeOperation = "screen";
-    const base = skyCtx.createRadialGradient(x - radius * 0.35, y - radius * 0.35, 0, x, y, radius);
-    base.addColorStop(0, "#ffffff");
-    base.addColorStop(0.20, "#fff7c0");
-    base.addColorStop(0.50, "#ffd54a");
-    base.addColorStop(0.85, "#ff9c1a");
-    base.addColorStop(1, "#e67300");
-    skyCtx.fillStyle = base;
-    skyCtx.beginPath(); skyCtx.arc(x, y, radius, 0, Math.PI * 2); skyCtx.fill();
-    skyCtx.restore();
-    skyCtx.restore();
-}
-
-function drawMoon3D(hours, darkness) {
-    let moonHours = hours;
-    if (moonHours < 6) moonHours += 24;
-    if (moonHours < 18 || moonHours > 30) return;
-    const w = skyCanvas.width;
-    const h = skyCanvas.height;
-    const progress = (moonHours - 18) / 12;
-    const x = w * (0.10 + progress * 0.80);
-    const horizonY = h * 0.86;
-    const y = horizonY - Math.sin(progress * Math.PI) * (h * 0.76);
-    const radius = Math.min(w, h) * 0.068;
-    const SYNODIC = 29.530588853;
-    const known = Date.UTC(2000, 0, 6, 18, 14, 0);
-    const days = (Date.now() - known) / 86400000;
-    let phase = (days % SYNODIC) / SYNODIC;
-    if (phase < 0) phase += 1;
-    const illumination = (1 - Math.cos(phase * Math.PI * 2)) / 2;
-    if (illumination < 0.01) return;
-    skyCtx.save();
-    skyCtx.globalCompositeOperation = "screen";
-    const glowAlpha = (0.18 + 0.82 * illumination) * (0.50 + darkness * 0.45);
-    const glow = skyCtx.createRadialGradient(x, y, 0, x, y, radius * 7);
-    glow.addColorStop(0, `rgba(226, 236, 255, ${glowAlpha})`);
-    glow.addColorStop(0.30, `rgba(196, 214, 255, ${glowAlpha * 0.32})`);
-    glow.addColorStop(1, "rgba(170, 195, 255, 0)");
-    skyCtx.fillStyle = glow;
-    skyCtx.beginPath(); skyCtx.arc(x, y, radius * 7, 0, Math.PI * 2); skyCtx.fill();
-    skyCtx.restore();
-}
-
-function spawnShootingStar3D() {
-    const w = skyCanvas.width;
-    const h = skyCanvas.height;
-    const cx = w * 0.5;
-    const cy = h * 0.42;
-    const focalLength = 620;
-    const zStart = 1500 + Math.random() * 1100;
-    const screenX = (Math.random() - 0.25) * w * 1.1;
-    const screenY = -h * 0.25 + Math.random() * h * 0.55;
-    const projScale = focalLength / zStart;
-    const x3d = (screenX - cx) / projScale;
-    const y3d = (screenY - cy) / projScale;
-    const angleDeg = 200 + Math.random() * 30;
-    const angleRad = angleDeg * Math.PI / 180;
-    const speed = 900 + Math.random() * 500;
-    const isGolden = Math.random() < 0.45;
-    skyShootingStars.push({
-        x: x3d, y: y3d, z: zStart,
-        vx: Math.cos(angleRad) * speed,
-        vy: -Math.sin(angleRad) * speed,
-        vz: -speed * 1.20,
-        focalLength, cx, cy,
-        history: [], maxHistory: 36,
-        life: 0, maxLife: 2.4 + Math.random() * 1.2,
-        color: isGolden ? { r: 255, g: 214, b: 120 } : { r: 240, g: 248, b: 255 },
-        baseWidth: 1.2 + Math.random() * 1.2
     });
 }
 
-function updateShootingStars3D(deltaSec, darkness) {
-    if (darkness < 0.15) { if (skyShootingStars.length) skyShootingStars.length = 0; nextShootingStarAt = 0; return; }
-    const now = performance.now();
-    if (nextShootingStarAt === 0) nextShootingStarAt = now + 700 + Math.random() * 1200;
-    if (now >= nextShootingStarAt) {
-        spawnShootingStar3D();
-        if (Math.random() < 0.30) setTimeout(spawnShootingStar3D, 180 + Math.random() * 260);
-        const baseGap = 2400 - darkness * 1300;
-        nextShootingStarAt = now + baseGap + Math.random() * 2000;
+function generateTrees() {
+    treeLayers = [];
+
+    const farCount = Math.max(8, Math.floor(W / 90));
+    for (let i = 0; i < farCount; i++) {
+        treeLayers.push({
+            x: Math.random() * W,
+            baseY: H * 0.70 + Math.random() * H * 0.03,
+            height: 55 + Math.random() * 80,
+            width:  18 + Math.random() * 22,
+            layer: 0
+        });
     }
-    for (let i = skyShootingStars.length - 1; i >= 0; i--) {
-        const s = skyShootingStars[i];
-        s.x += s.vx * deltaSec; s.y += s.vy * deltaSec; s.z += s.vz * deltaSec; s.life += deltaSec;
-        if (s.z > 8) {
-            const scale = s.focalLength / s.z;
-            s.history.push({ x: s.cx + s.x * scale, y: s.cy + s.y * scale, scale, z: s.z });
-            if (s.history.length > s.maxHistory) s.history.shift();
-        }
-        const tooClose = s.z < 60;
-        const offScreen = s.history.length > 0 && (
-            s.history[s.history.length - 1].x < -400 ||
-            s.history[s.history.length - 1].x > skyCanvas.width + 400 ||
-            s.history[s.history.length - 1].y > skyCanvas.height + 400
-        );
-        if (tooClose || offScreen || s.life >= s.maxLife) skyShootingStars.splice(i, 1);
+
+    const midCount = Math.max(5, Math.floor(W / 140));
+    for (let i = 0; i < midCount; i++) {
+        treeLayers.push({
+            x: Math.random() * W,
+            baseY: H * 0.79 + Math.random() * H * 0.03,
+            height: 90 + Math.random() * 110,
+            width:  28 + Math.random() * 28,
+            layer: 1
+        });
+    }
+
+    treeLayers.sort((a, b) => a.layer - b.layer);
+}
+
+
+function drawWinterSky() {
+    const grad = skyCtx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0,    `rgb(${WINTER_TOP[0]},${WINTER_TOP[1]},${WINTER_TOP[2]})`);
+    grad.addColorStop(0.45, `rgb(${WINTER_MID[0]},${WINTER_MID[1]},${WINTER_MID[2]})`);
+    grad.addColorStop(0.80, `rgb(${WINTER_HORIZON[0]},${WINTER_HORIZON[1]},${WINTER_HORIZON[2]})`);
+    grad.addColorStop(1,    `rgb(${WINTER_GROUND[0]},${WINTER_GROUND[1]},${WINTER_GROUND[2]})`);
+    skyCtx.fillStyle = grad;
+    skyCtx.fillRect(0, 0, W, H);
+
+    const moonX = W * 0.72;
+    const moonY = H * 0.14;
+    const glow = skyCtx.createRadialGradient(moonX, moonY, 0, moonX, moonY, W * 0.28);
+    glow.addColorStop(0,    "rgba(215, 225, 240, 0.16)");
+    glow.addColorStop(0.40, "rgba(180, 200, 225, 0.06)");
+    glow.addColorStop(1,    "rgba(180, 200, 225, 0)");
+    skyCtx.fillStyle = glow;
+    skyCtx.fillRect(0, 0, W, H);
+}
+
+
+function drawTreesByLayer(layer) {
+    for (const tree of treeLayers) {
+        if (tree.layer !== layer) continue;
+
+        const cx    = tree.x;
+        const baseY = tree.baseY;
+        const h     = tree.height;
+        const w     = tree.width;
+
+        const tint  = layer === 0 ? 78 : 46;
+        const alpha = layer === 0 ? 0.42 : 0.62;
+        skyCtx.fillStyle = `rgba(${tint}, ${tint + 6}, ${tint + 16}, ${alpha})`;
+
+        skyCtx.beginPath();
+        skyCtx.moveTo(cx - w * 0.50, baseY);
+        skyCtx.lineTo(cx - w * 0.15, baseY - h * 0.40);
+        skyCtx.lineTo(cx + w * 0.15, baseY - h * 0.40);
+        skyCtx.lineTo(cx + w * 0.50, baseY);
+        skyCtx.closePath();
+        skyCtx.fill();
+
+        skyCtx.beginPath();
+        skyCtx.moveTo(cx - w * 0.38, baseY - h * 0.35);
+        skyCtx.lineTo(cx - w * 0.10, baseY - h * 0.68);
+        skyCtx.lineTo(cx + w * 0.10, baseY - h * 0.68);
+        skyCtx.lineTo(cx + w * 0.38, baseY - h * 0.35);
+        skyCtx.closePath();
+        skyCtx.fill();
+
+        skyCtx.beginPath();
+        skyCtx.moveTo(cx - w * 0.26, baseY - h * 0.62);
+        skyCtx.lineTo(cx,            baseY - h);
+        skyCtx.lineTo(cx + w * 0.26, baseY - h * 0.62);
+        skyCtx.closePath();
+        skyCtx.fill();
     }
 }
 
-function drawShootingStars3D(darkness) {
-    if (darkness < 0.15) return;
-    skyCtx.save();
-    skyCtx.globalCompositeOperation = "screen";
-    skyCtx.lineCap = "round";
-    for (let k = 0; k < skyShootingStars.length; k++) {
-        const s = skyShootingStars[k];
-        if (s.history.length < 2) continue;
-        const lt = s.life / s.maxLife;
-        let globalAlpha;
-        if (lt < 0.12) globalAlpha = lt / 0.12;
-        else if (lt > 0.75) globalAlpha = Math.max(0, (1 - lt) / 0.25);
-        else globalAlpha = 1;
-        globalAlpha *= Math.min(1, 0.35 + darkness * 1.10);
-        if (globalAlpha <= 0.01) continue;
-        const r = s.color.r, g = s.color.g, b = s.color.b;
-        for (let i = 1; i < s.history.length; i++) {
-            const prev = s.history[i - 1];
-            const curr = s.history[i];
-            const t = i / (s.history.length - 1);
-            const segAlpha = globalAlpha * (t * t * 0.85 + 0.05);
-            const segWidth = Math.max(0.4, s.baseWidth * t * (0.5 + curr.scale * 1.4));
-            skyCtx.strokeStyle = `rgba(${r},${g},${b},${segAlpha * 0.40})`;
-            skyCtx.lineWidth = segWidth * 3.4;
-            skyCtx.beginPath(); skyCtx.moveTo(prev.x, prev.y); skyCtx.lineTo(curr.x, curr.y); skyCtx.stroke();
-            skyCtx.strokeStyle = `rgba(255,255,255,${segAlpha * 0.95})`;
-            skyCtx.lineWidth = segWidth;
-            skyCtx.beginPath(); skyCtx.moveTo(prev.x, prev.y); skyCtx.lineTo(curr.x, curr.y); skyCtx.stroke();
+
+function drawFogByLayer(layer) {
+    for (const blob of fogBlobs) {
+        if (blob.layer !== layer) continue;
+
+        const g = skyCtx.createRadialGradient(
+            blob.x, blob.y, 0,
+            blob.x, blob.y, blob.radius
+        );
+        g.addColorStop(0,    `rgba(${FOG_COLOR[0]},${FOG_COLOR[1]},${FOG_COLOR[2]},${blob.opacity})`);
+        g.addColorStop(0.45, `rgba(${FOG_COLOR[0]},${FOG_COLOR[1]},${FOG_COLOR[2]},${blob.opacity * 0.45})`);
+        g.addColorStop(1,    `rgba(${FOG_COLOR[0]},${FOG_COLOR[1]},${FOG_COLOR[2]},0)`);
+        skyCtx.fillStyle = g;
+        skyCtx.beginPath();
+        skyCtx.arc(blob.x, blob.y, blob.radius, 0, Math.PI * 2);
+        skyCtx.fill();
+    }
+}
+
+
+function drawGroundMist() {
+    const mistGrad = skyCtx.createLinearGradient(0, H * 0.75, 0, H);
+    mistGrad.addColorStop(0,   "rgba(206, 216, 230, 0)");
+    mistGrad.addColorStop(0.6, "rgba(206, 216, 230, 0.22)");
+    mistGrad.addColorStop(1,   "rgba(206, 216, 230, 0.42)");
+    skyCtx.fillStyle = mistGrad;
+    skyCtx.fillRect(0, H * 0.75, W, H * 0.25);
+}
+
+
+function drawSnow(dt, timeSec) {
+    for (const flake of snowflakes) {
+        flake.y += flake.speedY * dt * 60;
+        flake.x += flake.driftX * dt * 60
+                 + Math.sin(timeSec * flake.swaySpeed + flake.swayPhase) * flake.swayAmp * dt;
+
+        if (flake.y > H + 6) { flake.y = -6; flake.x = Math.random() * W; }
+        if (flake.x > W + 6) flake.x = -6;
+        if (flake.x < -6)    flake.x = W + 6;
+
+        skyCtx.beginPath();
+        skyCtx.arc(flake.x, flake.y, flake.size, 0, Math.PI * 2);
+        skyCtx.fillStyle = `rgba(232, 240, 250, ${flake.opacity})`;
+        skyCtx.fill();
+
+        if (flake.depth > 0.72) {
+            skyCtx.beginPath();
+            skyCtx.arc(flake.x, flake.y, flake.size * 2.4, 0, Math.PI * 2);
+            skyCtx.fillStyle = `rgba(232, 240, 250, ${flake.opacity * 0.14})`;
+            skyCtx.fill();
         }
     }
-    skyCtx.restore();
 }
+
 
 function drawReadabilityVeil() {
-    const grad = skyCtx.createLinearGradient(0, 0, 0, skyCanvas.height);
-    grad.addColorStop(0, "rgba(4, 10, 30, 0.18)");
-    grad.addColorStop(0.45, "rgba(4, 10, 30, 0.04)");
-    grad.addColorStop(1, "rgba(4, 10, 30, 0.15)");
+    const grad = skyCtx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0,   "rgba(8, 14, 26, 0.30)");
+    grad.addColorStop(0.5, "rgba(8, 14, 26, 0.06)");
+    grad.addColorStop(1,   "rgba(8, 14, 26, 0.22)");
     skyCtx.fillStyle = grad;
-    skyCtx.fillRect(0, 0, skyCanvas.width, skyCanvas.height);
+    skyCtx.fillRect(0, 0, W, H);
 }
+
 
 function drawSkyFrame(nowMs) {
     const deltaSec = Math.min((nowMs - lastSkyFrame) / 1000, 0.1);
     lastSkyFrame = nowMs;
-    const now = new Date();
-    const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
-    drawSkyGradient(hours);
-    const darkness = getDarkness(hours);
-    drawStars(hours, darkness);
-    if (hours >= 6 && hours <= 18) drawSun3D(hours);
-    drawMoon3D(hours, darkness);
-    updateShootingStars3D(deltaSec, darkness);
-    drawShootingStars3D(darkness);
+    frameTime += deltaSec;
+
+    for (const blob of fogBlobs) {
+        blob.x += blob.vx * deltaSec * 6;
+        if (blob.x - blob.radius > W) blob.x = -blob.radius;
+        if (blob.x + blob.radius < 0) blob.x = W + blob.radius;
+    }
+
+    drawWinterSky();
+    drawTreesByLayer(0);
+    drawFogByLayer(0);
+    drawTreesByLayer(1);
+    drawFogByLayer(1);
+    drawFogByLayer(2);
+    drawFogByLayer(3);
+    drawGroundMist();
+    drawSnow(deltaSec, frameTime);
     drawReadabilityVeil();
+
     requestAnimationFrame(drawSkyFrame);
 }
+
 
 /* ---------------------------------------------------------
    CLOCK WIDGET
